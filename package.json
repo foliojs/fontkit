@@ -1,0 +1,15 @@
+{
+  "name": "fontkit",
+  "version": "0.1.0",
+  "description": "Advanced OpenType font engine",
+  "main": "ttf.coffee",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Devon Govett <devongovett@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "restructure": "^0.1.3",
+    "browserify-zlib": "^0.1.4"
+  }
+}
