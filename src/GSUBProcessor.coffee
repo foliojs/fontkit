@@ -36,7 +36,7 @@ class GSUBProcessor extends OpenTypeProcessor
           for glyph in @glyphs[@glyphIndex...@glyphIndex + ligature.compCount]
             characters.push glyph.codePoints...
             
-          glyph = new Glyph ligature.glyph, characters
+          glyph = @font.getGlyph ligature.glyph, characters
           @glyphs.splice @glyphIndex, ligature.compCount, glyph
           break # correct?
           

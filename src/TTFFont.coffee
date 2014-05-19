@@ -6,7 +6,7 @@ WOFFDirectory = require './WOFFDirectory'
 tables = require './tables'
 GSUBProcessor = require './GSUBProcessor'
 GPOSProcessor = require './GPOSProcessor'
-Glyph = require './Glyph'
+TTFGlyph = require './TTFGlyph'
 
 class TTFFont    
   @open: (filename, name) ->
@@ -40,9 +40,11 @@ class TTFFont
           @stream.pos = offset
           @decode()
           return
+          
     else if sig is 'wOFF'
       @isWOFF = true
       @decode()
+      
     else
       @stream.pos = 0
       @decode()
@@ -211,7 +213,7 @@ class TTFFont
     if not @_charMap
       @_charMap = findUnicodeCmap this
       
-    return new Glyph cmapLookup(@_charMap, codePoint) or 0, [codePoint]
+    return @getGlyph cmapLookup(@_charMap, codePoint) or 0, [codePoint]
         
   codePointAt = (str, idx = 0) ->
     code = str.charCodeAt(idx)
@@ -238,7 +240,7 @@ class TTFFont
     # apply glyph substitutions
     @_GSUBProcessor ?= new GSUBProcessor(this, @GSUB)
     @_GSUBProcessor.applyFeatures(userFeatures, glyphs)
-      
+    
     return glyphs
     
   get 'availableFeatures', ->
@@ -307,10 +309,7 @@ class TTFFont
         
     return advances
     
-  getGlyph: (glyph) ->
-    
-  boundingBoxForGlyph: (glyph) ->
-    
-  ligatureCaretsForGlyph: (glyph) ->
-    
+  getGlyph: (glyph, characters = []) ->
+    return new TTFGlyph glyph, characters, this
+        
 module.exports = TTFFont

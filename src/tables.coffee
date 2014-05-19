@@ -11,7 +11,6 @@ exports.post    = require './ttf/post'
 # TrueType Outlines
 exports['cvt '] = require './ttf/cvt'
 exports.fpgm    = require './ttf/fpgm'
-exports.glyf    = require './ttf/glyf'
 exports.loca    = require './ttf/loca'
 exports.prep    = require './ttf/prep'
 
