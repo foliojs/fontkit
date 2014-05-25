@@ -11,4 +11,11 @@ class Path
           
         return this
         
+  toFunction: ->
+    cmds = []
+    for c in @commands
+      cmds.push "  ctx.#{c.command}(#{c.args.join(', ')});"
+      
+    return new Function 'ctx', cmds.join('\n')
+        
 module.exports = Path
