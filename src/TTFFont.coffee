@@ -7,6 +7,7 @@ tables = require './tables'
 GSUBProcessor = require './GSUBProcessor'
 GPOSProcessor = require './GPOSProcessor'
 TTFGlyph = require './TTFGlyph'
+CFFGlyph = require './cff/CFFGlyph'
 
 class TTFFont    
   @open: (filename, name) ->
@@ -310,6 +311,12 @@ class TTFFont
     return advances
     
   getGlyph: (glyph, characters = []) ->
-    return new TTFGlyph glyph, characters, this
+    if @directory.tables.glyf?
+      return new TTFGlyph glyph, characters, this
+      
+    else if @directory.tables['CFF ']?
+      return new CFFGlyph glyph, characters, this
+    
+    return null
         
 module.exports = TTFFont
