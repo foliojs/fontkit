@@ -129,20 +129,23 @@ class TTFGlyph extends Glyph
           dy = stream.readInt8()
         
         component = new Component glyphID, dx, dy
+        component.scaleX = component.scaleY = 1
+        component.scale01 = component.scale10 = 0
           
         if flags & WE_HAVE_A_SCALE
-          # TODO parse scale values as fixed number with 14 bits of fraction
-          component.scale = stream.readInt16BE()
+          # fixed number with 14 bits of fraction
+          component.scaleX = 
+          component.scaleY = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
         
         else if flags & WE_HAVE_AN_X_AND_Y_SCALE
-          component.xScale = stream.readInt16BE()
-          component.yScale = stream.readInt16BE()
+          component.scaleX = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
+          component.scaleY = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
         
         else if flags & WE_HAVE_A_TWO_BY_TWO
-          component.xScale  = stream.readInt16BE()
-          component.scale01 = stream.readInt16BE()
-          component.scale10 = stream.readInt16BE()
-          component.yScale  = stream.readInt16BE()
+          component.scaleX  = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
+          component.scale01 = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
+          component.scale10 = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
+          component.scaleY  = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
         
         glyph.components.push component
         break unless flags & MORE_COMPONENTS
@@ -158,6 +161,7 @@ class TTFGlyph extends Glyph
       points = []
       for component in glyph.components
         glyph = @_font.getGlyph(component.glyphID)._decode()
+        # TODO transform
         for point in glyph.points
           points.push new Point point.flags, point.endContour, point.x + component.dx, point.y + component.dy
     else

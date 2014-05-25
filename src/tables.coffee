@@ -16,7 +16,7 @@ exports.prep    = require './ttf/prep'
 
 # PostScript Outlines
 exports['CFF '] = require './CFFFont'
-exports.VORG = require './ttf/VORG'
+exports.VORG    = require './ttf/VORG'
 
 # Bitmap Glyphs
 #exports.EBDT = require './ttf/EBDT'
