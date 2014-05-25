@@ -30,6 +30,9 @@ class CFFFont
       @stream.pos = start + privateDict[1]
       @privateDict = CFFPrivateDict.decode(@stream, length: privateDict[0])
       
+      @stream.pos = start + privateDict[1] + @privateDict.Subrs
+      @subrs = new CFFIndex().decode(@stream)
+      
     # charset?
     switch @topDictIndex[0].Encoding
       when 0 # standard encoding
