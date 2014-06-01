@@ -38,7 +38,7 @@ class TTFGlyph extends Glyph
       @scale = @xScale = @yScale = @scale01 = @scale10 = null
           
   # Parses just the glyph header and returns the bounding box
-  _getBBox: ->
+  _getCBox: ->
     glyfOffset = @_font.directory.tables.glyf.offset
     curOffset = @_font.loca.offsets[@id]
     nextOffset = @_font.loca.offsets[@id + 1]
@@ -50,7 +50,7 @@ class TTFGlyph extends Glyph
     glyph = GlyfHeader.decode(stream)
     
     stream.pos = pos
-    return [glyph.xMin, glyph.yMin, glyph.xMax, glyph.yMax]
+    return [glyph.xMin, glyph.yMin, glyph.xMax, -glyph.yMax]
     
   # Parses a single glyph coordinate
   parseGlyphCoord = (stream, prev, short, same) ->
