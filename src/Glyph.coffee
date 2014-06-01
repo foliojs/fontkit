@@ -6,6 +6,15 @@ class Glyph
       get: fn
       enumerable: true
       
+  _getCBox: ->
+    @path.cbox
+    
+  _getBBox: ->
+    @path.bbox
+      
+  get 'cbox', ->
+    @_cbox ?= @_getCBox()
+      
   get 'bbox', ->
     @_bbox ?= @_getBBox()
     

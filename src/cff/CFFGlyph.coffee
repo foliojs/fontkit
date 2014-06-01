@@ -2,8 +2,6 @@ Glyph = require '../Glyph'
 Path = require '../Path'
 
 class CFFGlyph extends Glyph
-  _getBBox: ->
-    
   _getPath: ->
     stream = @_font.stream
     pos = stream.pos
@@ -53,7 +51,7 @@ class CFFGlyph extends Glyph
               if stack.length > 1
                 width ?= stack.shift() + cff.privateDict.nominalWidthX
               
-              y += stack.pop()
+              y += stack.shift()
               path.moveTo x, -y
           
             when 5 # rlineto
