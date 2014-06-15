@@ -1,53 +1,53 @@
+_ = require 'lodash'
+r = require 'restructure'
+CFFOperand = require './CFFOperand'
+
 class CFFDict
   constructor: (fields = []) ->
-    @fields = {}    
+    @fields = {}
     for field in fields
       key = if Array.isArray(field[0]) then field[0][0] << 8 | field[0][1] else field[0]
       @fields[key] = field
-  
-  FLOAT_EOF = 0xf  
-  FLOAT_LOOKUP = [
-    '0', '1', '2', '3', '4', '5', '6', '7', 
-    '8', '9', '.', 'E', 'E-', null, '-'
-  ]
-  
-  parseOperand = (value, stream) ->
-    if 32 <= value <= 246
-      return value - 139
       
-    if 247 <= value <= 250
-      return (value - 247) * 256 + stream.readUInt8() + 108
-      
-    if 251 <= value <= 254
-      return -(value - 251) * 256 - stream.readUInt8() - 108
-      
-    if value is 28
-      return stream.readInt16BE()
-      
-    if value is 29
-      return stream.readInt32BE()
-      
-    if value is 30
-      str = ''
-      loop
-        b = stream.readUInt8()
-        
-        n1 = b >> 4
-        break if n1 is FLOAT_EOF
-        str += FLOAT_LOOKUP[n1]
-        
-        n2 = b & 15
-        break if n2 is FLOAT_EOF
-        str += FLOAT_LOOKUP[n2]
-        
-      return parseFloat(str)
-      
-    return -1
-    
+  decodeOperands = (type, stream, ret, operands) ->
+    if Array.isArray(type)
+      for op, i in operands
+        decodeOperands type[i], stream, ret, [op]
+    else if type.decode?
+      type.decode(stream, ret, operands)
+    else
+      switch type
+        when 'number', 'offset', 'delta', 'sid'
+          operands[0]
+        when 'boolean'
+          !!operands[0]
+        else
+          operands
+          
+  encodeOperands = (type, stream, ctx, operands) ->
+    if Array.isArray(type)
+      for op, i in operands
+        encodeOperands(type[i], stream, ctx, op)[0]
+    else if type.encode?
+      type.encode(stream, operands, ctx)
+    else if typeof operands is 'number'
+      [operands]
+    else if typeof operands is 'boolean'
+      [+operands]
+    else if Array.isArray(operands)
+      operands
+    else
+      [operands]
+              
   decode: (stream, parent) ->
     end = stream.pos + parent.length
     ret = {}
     operands = []
+    
+    # define hidden properties    
+    Object.defineProperties ret,
+      parent:         { value: parent }
+      _startOffset:   { value: stream.pos }
     
     while stream.pos < end
       b = stream.readUInt8()
@@ -56,17 +56,71 @@ class CFFDict
           b = (b << 8) | stream.readUInt8()
           
         field = @fields[b]
-        value = if field[2] in ['number', 'boolean', 'sid', 'offset'] then operands[0] else operands
+        throw new Error "Unknown operator " + b unless field
         
-        ret[field[1]] = value
+        ret[field[1]] = decodeOperands field[2], stream, ret, operands
         operands = []
       else
-        operands.push parseOperand(b, stream)
+        operands.push CFFOperand.decode(stream, b)
         
     # fill in defaults
     for key, field of @fields
       ret[field[1]] ?= field[3]
         
     return ret
+    
+  size: (dict, parent, includePointers = true) ->
+    ctx = 
+      parent: parent
+      val: dict
+      pointerSize: 0
+      startOffset: parent.startOffset or 0
+    
+    len = 0
+        
+    for k, field of @fields
+      val = dict[field[1]]
+      continue if not val? or _.isEqual val, field[3]
+      
+      operands = encodeOperands field[2], null, ctx, val
+      for op in operands
+        len += CFFOperand.size op
+        
+      key = if Array.isArray(field[0]) then field[0] else [field[0]]
+      len += key.length
+      
+    if includePointers
+      len += ctx.pointerSize
+        
+    return len
+    
+  encode: (stream, dict, parent) ->
+    ctx = 
+      pointers: []
+      startOffset: stream.pos
+      parent: parent
+      val: dict
+      pointerSize: 0
+      
+    ctx.pointerOffset = stream.pos + @size(dict, ctx, false)
+    
+    for k, field of @fields
+      val = dict[field[1]]
+      continue if not val? or _.isEqual val, field[3]
+              
+      operands = encodeOperands field[2], stream, ctx, val
+      for op in operands
+        CFFOperand.encode stream, op
+        
+      key = if Array.isArray(field[0]) then field[0] else [field[0]]
+      for op in key
+        stream.writeUInt8 op
+        
+    i = 0
+    while i < ctx.pointers.length
+      ptr = ctx.pointers[i++]
+      ptr.type.encode(stream, ptr.val, ptr.parent)
+        
+    return
     
 module.exports = CFFDict
