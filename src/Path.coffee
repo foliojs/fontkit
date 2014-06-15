@@ -67,7 +67,6 @@ class Path
   # Gets the exact bounding box of the path by evaluating curve segments.
   # Slower to compute than the control box, but more accurate.
   get 'bbox', ->
-    console.log 'bbox'
     if @_bbox
       return @_bbox
     

@@ -15,6 +15,8 @@ class TTFFont
     return new TTFFont(contents, name)
   
   constructor: (data, name) ->
+    @_glyphs = {}
+    
     @stream = new r.DecodeStream(data)
     
     # Check if this is a TrueType collection
@@ -311,12 +313,13 @@ class TTFFont
     return advances
     
   getGlyph: (glyph, characters = []) ->
-    if @directory.tables.glyf?
-      return new TTFGlyph glyph, characters, this
+    unless @_glyphs[glyph]    
+      if @directory.tables.glyf?
+        @_glyphs[glyph] = new TTFGlyph glyph, characters, this
       
-    else if @directory.tables['CFF ']?
-      return new CFFGlyph glyph, characters, this
+      else if @directory.tables['CFF ']?
+        @_glyphs[glyph] = new CFFGlyph glyph, characters, this
     
-    return null
+    return @_glyphs[glyph] or null
         
 module.exports = TTFFont
