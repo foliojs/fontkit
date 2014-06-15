@@ -21,16 +21,13 @@ class CFFGlyph extends Glyph
     
     gsubrs = cff.globalSubrIndex
     subrs = cff.subrs
-    bias = (s) ->
-      if s.length < 1240
-        return 107
-      else if s.length < 33900
-        return 1131
-      else
-        return 32768
-        
-    gsubrsBias = bias gsubrs
-    subrsBias = bias subrs
+    gsubrsBias = cff.globalSubrsBias
+    subrsBias = cff.subrsBias
+    
+    usedGsubrs = []
+    usedSubrs = []
+    @_usedGsubrs = usedGsubrs
+    @_usedSubrs = usedSubrs
     
     parseStems = ->
       if stack.length % 2 isnt 0
@@ -82,7 +79,9 @@ class CFFGlyph extends Glyph
                 path.bezierCurveTo c1x, -c1y, c2x, -c2y, x, -y
             
             when 10 # callsubr
-              subr = subrs[stack.pop() + subrsBias]
+              index = stack.pop() + subrsBias
+              usedSubrs.push index
+              subr = subrs[index]
               if subr
                 p = stream.pos
                 e = end
@@ -179,7 +178,9 @@ class CFFGlyph extends Glyph
               stack.push stream.readInt16BE()
           
             when 29 # callgsubr
-              subr = gsubrs[stack.pop() + gsubrsBias]
+              index = stack.pop() + gsubrsBias
+              usedGsubrs.push index
+              subr = gsubrs[index]
               if subr
                 p = stream.pos
                 e = end
