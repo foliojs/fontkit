@@ -2,6 +2,14 @@ Glyph = require '../Glyph'
 Path = require '../Path'
 
 class CFFGlyph extends Glyph
+  bias = (s) ->
+    if s.length < 1240
+      return 107
+    else if s.length < 33900
+      return 1131
+    else
+      return 32768
+    
   _getPath: ->
     stream = @_font.stream
     pos = stream.pos
@@ -20,18 +28,20 @@ class CFFGlyph extends Glyph
     x = y = 0
     
     gsubrs = cff.globalSubrIndex
-    subrs = cff.subrs
-    gsubrsBias = cff.globalSubrsBias
-    subrsBias = cff.subrsBias
+    gsubrsBias = bias gsubrs
     
     usedGsubrs = []
     usedSubrs = []
     @_usedGsubrs = usedGsubrs
     @_usedSubrs = usedSubrs
     
+    privateDict = cff.privateDictForGlyph @id
+    subrs = privateDict.Subrs
+    subrsBias = bias subrs
+    
     parseStems = ->
       if stack.length % 2 isnt 0
-        width ?= stack.shift() + cff.privateDict.nominalWidthX
+        width ?= stack.shift() + privateDict.nominalWidthX
         
       nStems += stack.length >> 1
       stack.length = 0
@@ -46,7 +56,7 @@ class CFFGlyph extends Glyph
           
             when 4 # vmoveto
               if stack.length > 1
-                width ?= stack.shift() + cff.privateDict.nominalWidthX
+                width ?= stack.shift() + privateDict.nominalWidthX
               
               y += stack.shift()
               path.moveTo x, -y
@@ -96,7 +106,7 @@ class CFFGlyph extends Glyph
           
             when 14 # endchar
               if stack.length > 0
-                width ?= stack.shift() + cff.privateDict.nominalWidthX
+                width ?= stack.shift() + privateDict.nominalWidthX
             
               path.closePath()
           
@@ -106,7 +116,7 @@ class CFFGlyph extends Glyph
           
             when 21 # rmoveto
               if stack.length > 2
-                width ?= stack.shift() + cff.privateDict.nominalWidthX
+                width ?= stack.shift() + privateDict.nominalWidthX
                 haveWidth = true
             
               x += stack.shift()
@@ -115,7 +125,7 @@ class CFFGlyph extends Glyph
           
             when 22 # hmoveto
               if stack.length > 1
-                width ?= stack.shift() + cff.privateDict.nominalWidthX
+                width ?= stack.shift() + privateDict.nominalWidthX
             
               x += stack.shift()
               path.moveTo x, -y

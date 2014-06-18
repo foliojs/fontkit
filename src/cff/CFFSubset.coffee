@@ -31,7 +31,7 @@ class CFFSubset extends Subset
         gsubrs[subr] = true
       
     @subrs = []
-    for subr, i in @cff.subrs
+    for subr, i in @cff.topDict.Private.Subrs
       if subrs[i]
         @cff.stream.pos = subr.offset
         @subrs.push @cff.stream.readBuffer subr.length
@@ -62,7 +62,7 @@ class CFFSubset extends Subset
   encode: (stream) ->
     @subsetCharstrings()
     
-    privateDict = _.cloneDeep @cff.privateDict
+    privateDict = _.cloneDeep @cff.topDict.Private
     privateDict.Subrs = @subrs
     
     charset = 

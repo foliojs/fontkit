@@ -9,15 +9,7 @@ class CFFFont
   
   @decode: (stream) ->
     return new CFFFont(stream)
-    
-  bias = (s) ->
-    if s.length < 1240
-      return 107
-    else if s.length < 33900
-      return 1131
-    else
-      return 32768
-  
+      
   decode: ->
     start = @stream.pos
     top = CFFTop.decode(@stream)
@@ -33,14 +25,7 @@ class CFFFont
     # if @topDict.CharstringType isnt 2
     #   throw new Error "Only CharstringType 2 is supported"
       
-    @globalSubrsBias = bias @globalSubrIndex
-      
     @charStrings = @topDict.CharStrings
-    
-    # Private DICT Data
-    if @privateDict = @topDict.Private      
-      @subrs = @privateDict.Subrs
-      @subrsBias = bias @subrs
       
     # charset?
     switch @topDictIndex[0].Encoding
@@ -76,5 +61,29 @@ class CFFFont
   getCharString: (glyph) ->
     @stream.pos = @charStrings[glyph].offset
     return @stream.readBuffer @charStrings[glyph].length
+    
+  privateDictForGlyph: (gid) ->
+    if @topDict.FDSelect
+      switch @topDict.FDSelect.version
+        when 0
+          return @topDict.FDArray[@topDict.FDSelect[gid]]?.Private
+        when 3
+          ranges = @topDict.FDSelect.ranges
+          low = 0
+          high = ranges.length - 1
+          
+          while low <= high
+            mid = (low + high) >> 1
+            
+            if gid < ranges[mid].first
+              high = mid - 1
+            else if gid > ranges[mid + 1]?.first
+              low = mid + 1
+            else
+              return @topDict.FDArray[ranges[mid].fd]?.Private
+        else
+          throw new Error "Unknown FDSelect version: #{@topDict.FDSelect.version}"
+      
+    return @topDict.Private
 
 module.exports = CFFFont
