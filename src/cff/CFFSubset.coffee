@@ -13,7 +13,6 @@ class CFFSubset extends Subset
   
   subsetCharstrings: ->
     @charstrings = []
-    subrs = {}
     gsubrs = {}
     
     @charstrings.push @cff.getCharString 0
@@ -23,34 +22,71 @@ class CFFSubset extends Subset
       
       glyph = @font.getGlyph gid
       path = glyph.path # this causes the glyph to be parsed
-      
-      for subr in glyph._usedSubrs
-        subrs[subr] = true
         
       for subr in glyph._usedGsubrs
         gsubrs[subr] = true
-      
-    @subrs = []
-    for subr, i in @cff.topDict.Private.Subrs
-      if subrs[i]
-        @cff.stream.pos = subr.offset
-        @subrs.push @cff.stream.readBuffer subr.length
-      else
-        @subrs.push new Buffer([11]) # return
         
-    @gsubrs = []
-    for subr, i in @cff.globalSubrIndex
-      if gsubrs[i]
+    @gsubrs = @subsetSubrs @cff.globalSubrIndex, gsubrs      
+    
+  subsetSubrs: (subrs, used) ->
+    res = []
+    for subr, i in subrs
+      if used[i]
         @cff.stream.pos = subr.offset
-        @gsubrs.push @cff.stream.readBuffer subr.length
+        res.push @cff.stream.readBuffer subr.length
       else
-        @gsubrs.push new Buffer([11]) # return
+        res.push new Buffer([11]) # return
+        
+    return res
+    
+  subsetFontdict: (topDict) ->
+    topDict.FDArray = []
+    topDict.FDSelect =
+      version: 1
+      fds: []
+    
+    used_fds = {}
+    used_subrs = []
+    for gid of @glyphs
+      fd = @cff.fdForGlyph gid
+      continue unless fd?
       
+      unless used_fds[fd]
+        topDict.FDArray.push _.cloneDeep @cff.FDArray[fd]
+        used_subrs.push {}
+        
+      used_fds[fd] = true
+      topDict.FDSelect.fds.push topDict.FDArray.length - 1
+      
+      glyph = @font.getGlyph gid
+      path = glyph.path
+      for subr in glyph._usedSubrs
+        used_subrs[used_subrs.length - 1][subr] = true
+      
+    for dict, i in topDict.FDArray
+      if dict.Private?.Subrs
+        dict.Private.Subrs = @subsetSubrs dict.Private.Subrs, used_subrs[i]
+        
     return
     
-  subsetFontdict: ->
+  createCIDFontdict: (topDict) ->
+    used_subrs = {}
+    for gid of @glyphs
+      glyph = @font.getGlyph gid
+      path = glyph.path # this causes the glyph to be parsed
+        
+      for subr in glyph._usedSubrs
+        used_subrs[subr] = true
     
-  createCIDFontdict: ->
+    privateDict = _.cloneDeep @cff.topDict.Private
+    privateDict.Subrs = @subsetSubrs privateDict.Subrs, used_subrs
+    
+    topDict.FDArray = [{ Private: privateDict }]
+    topDict.FDSelect = 
+      version: 3
+      nRanges: 1
+      ranges: [{ first: 0, fd: 0 }]
+      sentinel: @charstrings.length
       
   addString: (string) ->
     return null unless string
@@ -61,9 +97,6 @@ class CFFSubset extends Subset
     
   encode: (stream) ->
     @subsetCharstrings()
-    
-    privateDict = _.cloneDeep @cff.topDict.Private
-    privateDict.Subrs = @subrs
     
     charset = 
       version: if @charstrings.length > 255 then 2 else 1
@@ -80,12 +113,11 @@ class CFFSubset extends Subset
       
     topDict.ROS = [@addString('Adobe'), @addString('Identity'), 0]
     topDict.CIDCount = @charstrings.length
-    topDict.FDArray = [{ Private: privateDict }]
-    topDict.FDSelect = 
-      version: 3
-      nRanges: 1
-      ranges: [{ first: 0, fd: 0 }]
-      sentinel: @charstrings.length
+    
+    if @cff.isCIDFont
+      @subsetFontdict topDict
+    else
+      @createCIDFontdict topDict
     
     top =
       header: @cff.header
@@ -94,7 +126,6 @@ class CFFSubset extends Subset
       stringIndex: @strings
       globalSubrIndex: @gsubrs
       
-    # console.log require('util').inspect top, false, 50
     CFFTop.encode stream, top
     
 module.exports = CFFSubset
