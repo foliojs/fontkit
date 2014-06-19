@@ -62,27 +62,33 @@ class CFFFont
     @stream.pos = @charStrings[glyph].offset
     return @stream.readBuffer @charStrings[glyph].length
     
+  fdForGlyph: (gid) ->
+    return null unless @topDict.FDSelect
+    
+    switch @topDict.FDSelect.version
+      when 0
+        return @topDict.FDSelect[gid]
+      when 3
+        ranges = @topDict.FDSelect.ranges
+        low = 0
+        high = ranges.length - 1
+      
+        while low <= high
+          mid = (low + high) >> 1
+        
+          if gid < ranges[mid].first
+            high = mid - 1
+          else if gid > ranges[mid + 1]?.first
+            low = mid + 1
+          else
+            return ranges[mid].fd
+      else
+        throw new Error "Unknown FDSelect version: #{@topDict.FDSelect.version}"
+    
   privateDictForGlyph: (gid) ->
     if @topDict.FDSelect
-      switch @topDict.FDSelect.version
-        when 0
-          return @topDict.FDArray[@topDict.FDSelect[gid]]?.Private
-        when 3
-          ranges = @topDict.FDSelect.ranges
-          low = 0
-          high = ranges.length - 1
-          
-          while low <= high
-            mid = (low + high) >> 1
-            
-            if gid < ranges[mid].first
-              high = mid - 1
-            else if gid > ranges[mid + 1]?.first
-              low = mid + 1
-            else
-              return @topDict.FDArray[ranges[mid].fd]?.Private
-        else
-          throw new Error "Unknown FDSelect version: #{@topDict.FDSelect.version}"
+      fd = @fdForGlyph gid
+      return if fd? then @topDict.FDArray[fd]?.Private else null
       
     return @topDict.Private
 
