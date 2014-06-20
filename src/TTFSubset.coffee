@@ -1,109 +1,76 @@
+_ = require 'lodash'
 Glyph = require './Glyph'
+Subset = require './Subset'
+Directory = require './Directory'
+Tables = require './tables'
 
-class TTFSubset
-  constructor: (@font) ->
-    @subset = {}
-    @numGlyphs = 0
-    @unicodes = {}
-    @gids = {}
-    @map = []
+class TTFSubset extends Subset
+  _addGlyph: (gid) ->
+    glyf = @font.getGlyph(gid)._decode()
     
-    # always include the missing glyph
-    @includeGlyph new Glyph 0
-    
-  includeGlyph: (glyph) ->
-    glyph = glyph.id
-    if glyph of @subset
-      return @gids[glyph]
-        
     # get the offset to the glyph from the loca table
     stream = @font.stream
     pos = stream.pos
-    
+  
     glyfOffset = @font.directory.tables.glyf.offset
-    curOffset = @font.loca.offsets[glyph]
-    nextOffset = @font.loca.offsets[glyph + 1]
-    stream.pos = glyfOffset + curOffset
-    
+    curOffset = @font.loca.offsets[gid]
+    nextOffset = @font.loca.offsets[gid + 1]
+  
     # parse the glyph from the glyf table
-    glyf = GlyfTable.decode(stream)
-    
     stream.pos = glyfOffset + curOffset
-    glyf.buffer = stream.readBuffer(nextOffset - curOffset)
-    
-    @subset[glyph] = glyf
-    @gids[glyph] = @numGlyphs++
-    @map.push glyph
-    
+    buffer = stream.readBuffer(nextOffset - curOffset)
+    stream.pos = pos
+  
     # if it is a compound glyph, include its components
     if glyf.numberOfContours < 0
-      for glyphID, index in glyf.glyphIDs
-        gid = @includeGlyph glyphID
-        glyf.buffer.writer.uint16BE gid, glyf.offsets[index]
-      
-    stream.pos = pos
-    return @gids[glyph]
-    
-  clone = (obj) ->
-    if Array.isArray(obj)
-      ret = []
-      for item in obj
-        ret.push clone(item)
+      for component in glyf.components
+        gid = @_addGlyph component.glyphID
+        buffer.writeUInt16BE gid, component.pos
         
-      return ret
+    @glyf.push buffer
+    @loca.offsets.push @offset
     
-    else if typeof obj is 'object'
-      ret = {}
-      for key, val of obj
-        ret[key] = clone(val)
-        
-      return ret
+    if gid < @font.hmtx.metrics.length
+      @hmtx.metrics.push @font.hmtx.metrics[gid]
+    else
+      @hmtx.metrics.push
+        advanceWidth: @font.hmtx.metrics[@font.hmtx.metrics.length - 1].advanceWidth
+        leftSideBearing: @font.hmtx.leftSideBearings[gid - @font.hmtx.metrics.length]
       
-    return obj
+    @offset += buffer.length
+    return @glyf.length - 1
           
-  encode: (stream) ->
-    stream = new WritableStream stream
-    
+  encode: (stream) ->    
     # tables required by PDF spec: 
     #   head, hhea, loca, maxp, cvt , prep, glyf, hmtx, fpgm
     #
     # additional tables required for standalone fonts: 
     #   name, cmap, OS/2, post
-    
-    maxp = clone @font.maxp
-    maxp.numGlyphs = @numGlyphs
-    
-    loca = 
+              
+    @glyf = []
+    @offset = 0
+    @loca = 
       offsets: []
-      
-    glyfs = []
-    hmtx =
+    
+    @hmtx =
       metrics: []
       leftSideBearings: []
-    
-    offset = 0
-    for id in @map
-      glyph = @subset[id]
-      loca.offsets.push offset
-      glyfs.push glyph.buffer
       
-      if id < @font.hmtx.metrics.length
-        hmtx.metrics.push @font.hmtx.metrics[id]
-      else
-        hmtx.metrics.push
-          advanceWidth: @font.hmtx.metrics[@font.hmtx.metrics.length - 1].advanceWidth
-          leftSideBearing: @font.hmtx.leftSideBearings[id - @font.hmtx.metrics.length]
-        
-      offset += glyph.buffer.length
+    @_addGlyph 0 # always include the missing glyph
+    for gid of @glyphs
+      @_addGlyph gid
       
-    loca.offsets.push offset
-    tables.loca.preEncode.call(loca)
+    maxp = _.cloneDeep @font.maxp
+    maxp.numGlyphs = @glyf.length
+      
+    @loca.offsets.push @offset
+    Tables.loca.preEncode.call @loca
     
-    head = clone @font.head
-    head.indexToLocFormat = loca.version
+    head = _.cloneDeep @font.head
+    head.indexToLocFormat = @loca.version
     
-    hhea = clone @font.hhea
-    hhea.numberOfMetrics = hmtx.metrics.length
+    hhea = _.cloneDeep @font.hhea
+    hhea.numberOfMetrics = @hmtx.metrics.length
         
     # map = []
     # for index in [0...256]
@@ -126,20 +93,22 @@ class TTFSubset
     #         encodingID: 0
     #         table: cmapTable
     #     ]
-    
+        
     # TODO: subset prep, cvt, fpgm?
     Directory.encode stream,
       tables:
         head: head
         hhea: hhea
-        loca: loca
+        loca: @loca
         maxp: maxp
         'cvt ': @font['cvt ']
         prep: @font.prep
-        glyf: glyfs
-        hmtx: hmtx
+        glyf: @glyf
+        hmtx: @hmtx
         fpgm: @font.fpgm
         # name: clone @font.name
         # 'OS/2': clone @font['OS/2']
         # post: clone @font.post
         # cmap: cmap
+        
+module.exports = TTFSubset

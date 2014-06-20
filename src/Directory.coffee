@@ -1,5 +1,5 @@
 r = require 'restructure'
-tables = require './tables'
+Tables = require './tables'
 
 TableEntry = new r.Struct
   tag:        new r.String(4)
@@ -23,20 +23,19 @@ Directory.process = ->
   @tables = tables
   
 Directory.preEncode = (stream) ->
-  _tables = []
+  tables = []
   for tag, table of @tables when table?
-    tables[tag].preEncode?.call(table)
-    _tables.push
+    tables.push
       tag: tag
       checkSum: 0
-      offset: new r.VoidPointer(tables[tag], table)
-      length: tables[tag].size(table)
+      offset: new r.VoidPointer(Tables[tag], table)
+      length: Tables[tag].size(table)
   
   @version = 0x00010000
-  @numTables = _tables.length
+  @numTables = tables.length
   @searchRange = 0
   @entrySelector = 0
   @rangeShift = 0
-  @tables = _tables
+  @tables = tables
   
 module.exports = Directory
