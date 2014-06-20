@@ -195,9 +195,9 @@ class TTFFont
           group = cmap.groups[mid]
           
           if codepoint < group.startCharCode
-            max = group.startCharCode - 1
+            max = mid - 1
           else if codepoint > group.endCharCode
-            min = group.endCharCode + 1
+            min = mid + 1
           else
             if cmap.version is 12
               return group.glyphID + (codepoint - group.startCharCode)
