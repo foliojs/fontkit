@@ -25,4 +25,14 @@ class Glyph
     
   get 'ligatureCaretPositions', ->
     
+  render: (ctx, size) ->
+    ctx.save()
+    ctx.scale 1 / @_font.head.unitsPerEm * size
+
+    fn = @path.toFunction()
+    fn(ctx)
+    ctx.fill()
+    
+    ctx.restore()
+    
 module.exports = Glyph
