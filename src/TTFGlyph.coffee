@@ -35,6 +35,7 @@ class TTFGlyph extends Glyph
   # Represents a component in a composite glyph
   class Component
     constructor: (@glyphID, @dx, @dy) ->
+      @pos = 0
       @scale = @xScale = @yScale = @scale01 = @scale10 = null
           
   # Parses just the glyph header and returns the bounding box
@@ -119,6 +120,7 @@ class TTFGlyph extends Glyph
     
       loop
         flags = stream.readUInt16BE()
+        gPos = stream.pos - pos
         glyphID = stream.readUInt16BE()
         
         if flags & ARG_1_AND_2_ARE_WORDS
@@ -129,6 +131,7 @@ class TTFGlyph extends Glyph
           dy = stream.readInt8()
         
         component = new Component glyphID, dx, dy
+        component.pos = gPos
         component.scaleX = component.scaleY = 1
         component.scale01 = component.scale10 = 0
           
