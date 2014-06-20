@@ -13,6 +13,7 @@ exports['cvt '] = require './ttf/cvt'
 exports.fpgm    = require './ttf/fpgm'
 exports.loca    = require './ttf/loca'
 exports.prep    = require './ttf/prep'
+exports.glyf    = require './ttf/glyf'
 
 # PostScript Outlines
 exports['CFF '] = require './CFFFont'
