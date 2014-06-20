@@ -8,6 +8,7 @@ GSUBProcessor = require './GSUBProcessor'
 GPOSProcessor = require './GPOSProcessor'
 TTFGlyph = require './TTFGlyph'
 CFFGlyph = require './cff/CFFGlyph'
+SBIXGlyph = require './SBIXGlyph'
 
 class TTFFont    
   @open: (filename, name) ->
@@ -313,8 +314,11 @@ class TTFFont
     return advances
     
   getGlyph: (glyph, characters = []) ->
-    unless @_glyphs[glyph]    
-      if @directory.tables.glyf?
+    unless @_glyphs[glyph]
+      if @directory.tables.sbix?
+        @_glyphs[glyph] = new SBIXGlyph glyph, characters, this
+        
+      else if @directory.tables.glyf?
         @_glyphs[glyph] = new TTFGlyph glyph, characters, this
       
       else if @directory.tables['CFF ']?

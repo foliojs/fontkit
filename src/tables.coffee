@@ -23,6 +23,7 @@ exports.VORG    = require './ttf/VORG'
 #exports.EBDT = require './ttf/EBDT'
 #exports.EBLC = require './ttf/EBLC'
 #exports.EBSC = require './ttf/EBSC'
+exports.sbix = require './ttf/sbix'
 
 # Advanced OpenType Tables
 exports.BASE = require './ttf/BASE'
