@@ -25,6 +25,9 @@ exports.VORG    = require './ttf/VORG'
 #exports.EBSC = require './ttf/EBSC'
 exports.sbix = require './ttf/sbix'
 
+exports.COLR = require './ttf/COLR'
+exports.CPAL = require './ttf/CPAL'
+
 # Advanced OpenType Tables
 exports.BASE = require './ttf/BASE'
 exports.GDEF = require './ttf/GDEF'
