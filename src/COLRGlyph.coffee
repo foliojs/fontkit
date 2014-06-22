@@ -30,7 +30,20 @@ class COLRGlyph extends Glyph
       else
         baseLayer = rec
         break
-
+        
+    # if base glyph not found in COLR table, 
+    # default to normal glyph from glyf or CFF
+    unless baseLayer?
+      g = @_font._getBaseGlyph(@id)
+      color = 
+        red: 0
+        green: 0
+        blue: 0
+        alpha: 255
+        
+      return [new COLRLayer g, color]
+    
+    # otherwise, return an array of all the layers
     for i in [baseLayer.firstLayerIndex...baseLayer.firstLayerIndex + baseLayer.numLayers] by 1
       rec = colr.layerRecords[i]
       color = cpal.colorRecords[rec.paletteIndex]
