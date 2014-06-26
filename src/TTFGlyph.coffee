@@ -120,7 +120,7 @@ class TTFGlyph extends Glyph
     
       loop
         flags = stream.readUInt16BE()
-        gPos = stream.pos - pos
+        gPos = stream.pos - (glyfOffset + curOffset)
         glyphID = stream.readUInt16BE()
         
         if flags & ARG_1_AND_2_ARE_WORDS
