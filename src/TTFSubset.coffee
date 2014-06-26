@@ -24,7 +24,7 @@ class TTFSubset extends Subset
     # if it is a compound glyph, include its components
     if glyf.numberOfContours < 0
       for component in glyf.components
-        gid = @_addGlyph component.glyphID
+        gid = @includeGlyph component.glyphID
         buffer.writeUInt16BE gid, component.pos
         
     @glyf.push buffer
@@ -40,7 +40,7 @@ class TTFSubset extends Subset
     @offset += buffer.length
     return @glyf.length - 1
           
-  encode: (stream) ->    
+  encode: (stream) ->      
     # tables required by PDF spec: 
     #   head, hhea, loca, maxp, cvt , prep, glyf, hmtx, fpgm
     #
@@ -56,9 +56,12 @@ class TTFSubset extends Subset
       metrics: []
       leftSideBearings: []
       
-    @_addGlyph 0 # always include the missing glyph
-    for gid of @glyphs
-      @_addGlyph gid
+    # include all the glyphs
+    # not using a for loop because we need to support adding more
+    # glyphs to the array as we go, and CoffeeScript caches the length.
+    i = 0
+    while i < @glyphs.length
+      @_addGlyph @glyphs[i++]
       
     maxp = _.cloneDeep @font.maxp
     maxp.numGlyphs = @glyf.length
