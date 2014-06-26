@@ -31,7 +31,7 @@ class TTFFont
       
       for offset in @ttcHeader.offsets
         @stream.pos = offset
-        directory = Directory.decode(@stream)
+        directory = Directory.decode(@stream, _startOffset: 0)
         nameTable = directory.tables.name
         unless nameTable
           throw new Error "Font must have a name table."
@@ -78,9 +78,9 @@ class TTFFont
     
   decode: ->
     if @isWOFF
-      @directory = WOFFDirectory.decode(@stream)
+      @directory = WOFFDirectory.decode(@stream, _startOffset: 0)
     else
-      @directory = Directory.decode(@stream)
+      @directory = Directory.decode(@stream, _startOffset: 0)
     
     # define properties for each table to lazily parse
     for tag, table of @directory.tables
