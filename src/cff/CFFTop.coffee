@@ -49,7 +49,7 @@ FDSelect = new r.VersionedStruct r.uint8,
     fds: new r.Array(r.uint8, 'nGlyphs')
     
   3:
-    nRanges: r.uint8
+    nRanges: r.uint16
     ranges: new r.Array(Range3, 'nRanges')
     sentinel: r.uint16
     
