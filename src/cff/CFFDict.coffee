@@ -3,9 +3,9 @@ r = require 'restructure'
 CFFOperand = require './CFFOperand'
 
 class CFFDict
-  constructor: (fields = []) ->
+  constructor: (@ops = []) ->
     @fields = {}
-    for field in fields
+    for field in ops
       key = if Array.isArray(field[0]) then field[0][0] << 8 | field[0][1] else field[0]
       @fields[key] = field
       
@@ -104,7 +104,7 @@ class CFFDict
       
     ctx.pointerOffset = stream.pos + @size(dict, ctx, false)
     
-    for k, field of @fields
+    for field in @ops
       val = dict[field[1]]
       continue if not val? or _.isEqual val, field[3]
               
