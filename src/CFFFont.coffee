@@ -1,3 +1,4 @@
+r = require 'restructure'
 CFFIndex = require './cff/CFFIndex'
 CFFTop = require './cff/CFFTop'
 CFFPrivateDict = require './cff/CFFPrivateDict'
@@ -9,6 +10,10 @@ class CFFFont
   
   @decode: (stream) ->
     return new CFFFont(stream)
+    
+  @open: (filename, name) ->
+    contents = require?('fs').readFileSync filename
+    return new CFFFont new r.DecodeStream(contents)  
       
   decode: ->
     start = @stream.pos
