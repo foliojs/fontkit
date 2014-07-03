@@ -26,14 +26,12 @@ class CFFGlyph extends Glyph
     width = null
     nStems = 0
     x = y = 0
+        
+    @_usedGsubrs = usedGsubrs = {}
+    @_usedSubrs = usedSubrs = {}
     
     gsubrs = cff.globalSubrIndex
     gsubrsBias = bias gsubrs
-    
-    usedGsubrs = []
-    usedSubrs = []
-    @_usedGsubrs = usedGsubrs
-    @_usedSubrs = usedSubrs
     
     privateDict = cff.privateDictForGlyph @id
     subrs = privateDict.Subrs
@@ -90,9 +88,9 @@ class CFFGlyph extends Glyph
             
             when 10 # callsubr
               index = stack.pop() + subrsBias
-              usedSubrs.push index
               subr = subrs[index]
               if subr
+                usedSubrs[index] = true
                 p = stream.pos
                 e = end
                 stream.pos = subr.offset
@@ -189,9 +187,9 @@ class CFFGlyph extends Glyph
           
             when 29 # callgsubr
               index = stack.pop() + gsubrsBias
-              usedGsubrs.push index
               subr = gsubrs[index]
               if subr
+                usedGsubrs[index] = true
                 p = stream.pos
                 e = end
                 stream.pos = subr.offset
