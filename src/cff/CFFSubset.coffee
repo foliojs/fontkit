@@ -100,7 +100,7 @@ class CFFSubset extends Subset
     
     charset = 
       version: if @charstrings.length > 255 then 2 else 1
-      ranges: [{ first: 1, nLeft: @charstrings.length - 1 }]
+      ranges: [{ first: 1, nLeft: @charstrings.length - 2 }]
     
     topDict = _.cloneDeep @cff.topDict
     topDict.Private = null
