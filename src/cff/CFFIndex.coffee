@@ -83,7 +83,6 @@ class CFFIndex
     else throw new Error "Bad offset in CFFIndex"
       
     # write offset size
-    # console.log offsetType.size(), stream.pos
     stream.writeUInt8(offsetType.size())
     
     # write elements

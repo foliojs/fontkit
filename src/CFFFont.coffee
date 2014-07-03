@@ -19,13 +19,10 @@ class CFFFont
     if @topDictIndex.length isnt 1
       throw new Error "Only a single font is allowed in CFF"
       
-    @topDict = @topDictIndex[0]
     @isCIDFont = @topDict.ROS?
       
     # if @topDict.CharstringType isnt 2
     #   throw new Error "Only CharstringType 2 is supported"
-      
-    @charStrings = @topDict.CharStrings
       
     # charset?
     switch @topDictIndex[0].Encoding
@@ -48,6 +45,9 @@ class CFFFont
       return standardStrings[sid]
     
     return @stringIndex[sid - standardStrings.length]
+    
+  get 'topDict', ->
+    return @topDictIndex[0]
       
   get 'postscriptName', ->
     return @nameIndex[0]
@@ -59,8 +59,8 @@ class CFFFont
     return @string @topDict.FamilyName
     
   getCharString: (glyph) ->
-    @stream.pos = @charStrings[glyph].offset
-    return @stream.readBuffer @charStrings[glyph].length
+    @stream.pos = @topDict.CharStrings[glyph].offset
+    return @stream.readBuffer @topDict.CharStrings[glyph].length
     
   fdForGlyph: (gid) ->
     return null unless @topDict.FDSelect

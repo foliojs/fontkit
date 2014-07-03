@@ -15,7 +15,7 @@ class CFFGlyph extends Glyph
     pos = stream.pos
     
     cff = @_font['CFF ']
-    str = cff.charStrings[@id]
+    str = cff.topDict.CharStrings[@id]
     end = str.offset + str.length
     stream.pos = str.offset
     
