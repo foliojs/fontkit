@@ -19,7 +19,7 @@ module.exports = new CFFDict [
     [[12, 17],  'LanguageGroup',        'number',                                    0]
     [[12, 18],  'ExpansionFactor',      'number',                                    0.06]
     [[12, 19],  'initialRandomSeed',    'number',                                    0]
-    [19,        'Subrs',                new CFFPointer(new CFFIndex, type: 'local'), null]
     [20,        'defaultWidthX',        'number',                                    0]
     [21,        'nominalWidthX',        'number',                                    0]
+    [19,        'Subrs',                new CFFPointer(new CFFIndex, type: 'local'), null]
 ]

@@ -72,6 +72,8 @@ FontDict = new CFFDict [
     
 CFFTopDict = new CFFDict [
   # key       name                    type(s)                                 default
+  [[12, 30],  'ROS',                  ['sid', 'sid', 'number'],               null]
+  
   [0,         'version',              'sid',                                  null]
   [1,         'Notice',               'sid',                                  null]
   [[12, 0],   'Copyright',            'sid',                                  null]
@@ -99,14 +101,13 @@ CFFTopDict = new CFFDict [
   [[12, 23],  'BaseFontBlend',        'delta',                                null]
   
   # CID font specific
-  [[12, 30],  'ROS',                  ['sid', 'sid', 'number'],               null]
   [[12, 31],  'CIDFontVersion',       'number',                               0]
   [[12, 32],  'CIDFontRevision',      'number',                               0]
   [[12, 33],  'CIDFontType',          'number',                               0]
   [[12, 34],  'CIDCount',             'number',                               8720]
   [[12, 35],  'UIDBase',              'number',                               null]
-  [[12, 36],  'FDArray',              new CFFPointer(new CFFIndex(FontDict)), null]
   [[12, 37],  'FDSelect',             new CFFPointer(FDSelect),               null]
+  [[12, 36],  'FDArray',              new CFFPointer(new CFFIndex(FontDict)), null]
   [[12, 38],  'FontName',             'sid',                                  null]
 ]
 
