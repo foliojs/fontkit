@@ -14,19 +14,17 @@ class CFFSubset extends Subset
   subsetCharstrings: ->
     @charstrings = []
     gsubrs = {}
-    
-    @charstrings.push @cff.getCharString 0
-    
-    for gid of @glyphs
+
+    for gid in @glyphs
       @charstrings.push @cff.getCharString gid
-      
+
       glyph = @font.getGlyph gid
       path = glyph.path # this causes the glyph to be parsed
-        
-      for subr in glyph._usedGsubrs
+
+      for subr of glyph._usedGsubrs
         gsubrs[subr] = true
         
-    @gsubrs = @subsetSubrs @cff.globalSubrIndex, gsubrs      
+    @gsubrs = @subsetSubrs @cff.globalSubrIndex, gsubrs
     
   subsetSubrs: (subrs, used) ->
     res = []
@@ -60,7 +58,7 @@ class CFFSubset extends Subset
       
       glyph = @font.getGlyph gid
       path = glyph.path
-      for subr in glyph._usedSubrs
+      for subr of glyph._usedSubrs
         used_subrs[used_subrs.length - 1][subr] = true
       
     for dict, i in topDict.FDArray
@@ -71,18 +69,18 @@ class CFFSubset extends Subset
     
   createCIDFontdict: (topDict) ->
     used_subrs = {}
-    for gid of @glyphs
+    for gid in @glyphs
       glyph = @font.getGlyph gid
       path = glyph.path # this causes the glyph to be parsed
         
-      for subr in glyph._usedSubrs
+      for subr of glyph._usedSubrs
         used_subrs[subr] = true
     
     privateDict = _.cloneDeep @cff.topDict.Private
-    privateDict.Subrs = @subsetSubrs privateDict.Subrs, used_subrs
+    privateDict.Subrs = @subsetSubrs @cff.topDict.Private.Subrs, used_subrs
     
     topDict.FDArray = [{ Private: privateDict }]
-    topDict.FDSelect = 
+    topDict.FDSelect =
       version: 3
       nRanges: 1
       ranges: [{ first: 0, fd: 0 }]
@@ -121,7 +119,7 @@ class CFFSubset extends Subset
     
     top =
       header: @cff.header
-      nameIndex: @cff.nameIndex
+      nameIndex: [@cff.postscriptName]
       topDictIndex: [topDict]
       stringIndex: @strings
       globalSubrIndex: @gsubrs
