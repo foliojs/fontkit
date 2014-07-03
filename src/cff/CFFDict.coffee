@@ -17,7 +17,7 @@ class CFFDict
       type.decode(stream, ret, operands)
     else
       switch type
-        when 'number', 'offset', 'delta', 'sid'
+        when 'number', 'offset', 'sid'
           operands[0]
         when 'boolean'
           !!operands[0]
