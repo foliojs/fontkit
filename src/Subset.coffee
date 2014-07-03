@@ -1,3 +1,5 @@
+r = require 'restructure'
+
 class Subset
   constructor: (@font) ->
     @glyphs = []
@@ -12,5 +14,11 @@ class Subset
       @mapping[glyph] = @glyphs.length - 1
       
     return @mapping[glyph]
+    
+  encodeStream: (stream) ->
+    s = new r.EncodeStream
+    s.pipe stream
+    @encode s
+    s.end()
     
 module.exports = Subset
