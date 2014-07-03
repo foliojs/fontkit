@@ -56,10 +56,10 @@ class CFFOperand
       
     else if -107 <= value <= 107
       return 1
-      
+
     else if 108 <= value <= 1131 or -1131 <= value <= -108
       return 2
-      
+
     else if -32768 <= value <= 32767
       return 3
       
@@ -70,13 +70,15 @@ class CFFOperand
     # if the value needs to be forced to the largest size (32 bit)
     # e.g. for unknown pointers, save the old value and set to 32768
     val = Number(value)
-    if value.forceLarge
-      value = 32768
     
-    if (value | 0) isnt value # floating point
+    if value.forceLarge
+      stream.writeUInt8 29
+      stream.writeInt32BE val
+    
+    else if (val | 0) isnt val # floating point
       stream.writeUInt8 30
       
-      str = '' + value
+      str = '' + val
       for c1, i in str by 2
         n1 = FLOAT_ENCODE_LOOKUP[c1] or +c1
         
@@ -91,22 +93,22 @@ class CFFOperand
       if n2 isnt FLOAT_EOF
         stream.writeUInt8 (FLOAT_EOF << 4)
         
-    else if -107 <= value <= 107
-      stream.writeUInt8 value + 139
-      
-    else if 108 <= value <= 1131
-      value -= 108
-      stream.writeUInt8 (value >> 8) + 247
-      stream.writeUInt8 value & 0xff
-      
-    else if -1131 <= value <= -108
-      value = -value - 108
-      stream.writeUInt8 (value >> 8) + 251
-      stream.writeUInt8 value & 0xff
-      
-    else if -32768 <= value <= 32767
+    else if -107 <= val <= 107
+      stream.writeUInt8 val + 139
+
+    else if 108 <= val <= 1131
+      val -= 108
+      stream.writeUInt8 (val >> 8) + 247
+      stream.writeUInt8 val & 0xff
+
+    else if -1131 <= val <= -108
+      val = -val - 108
+      stream.writeUInt8 (val >> 8) + 251
+      stream.writeUInt8 val & 0xff
+
+    else if -32768 <= val <= 32767
       stream.writeUInt8 28
-      stream.writeInt16BE value
+      stream.writeInt16BE val
       
     else
       stream.writeUInt8 29
