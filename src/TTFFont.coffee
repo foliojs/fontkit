@@ -10,6 +10,8 @@ TTFGlyph = require './TTFGlyph'
 CFFGlyph = require './cff/CFFGlyph'
 SBIXGlyph = require './SBIXGlyph'
 COLRGlyph = require './COLRGlyph'
+TTFSubset = require './TTFSubset'
+CFFSubset = require './cff/CFFSubset'
 
 class TTFFont    
   @open: (filename, name) ->
@@ -336,5 +338,11 @@ class TTFFont
         @_getBaseGlyph glyph, characters
     
     return @_glyphs[glyph] or null
+    
+  createSubset: ->
+    if @directory.tables['CFF ']?
+      return new CFFSubset this
+      
+    return new TTFSubset this
         
 module.exports = TTFFont
