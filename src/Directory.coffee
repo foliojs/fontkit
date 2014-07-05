@@ -33,9 +33,11 @@ Directory.preEncode = (stream) ->
   
   @version = 0x00010000
   @numTables = tables.length
-  @searchRange = 0
-  @entrySelector = 0
-  @rangeShift = 0
   @tables = tables
   
+  log2 = Math.log(2)
+  @searchRange = Math.floor(Math.log(@numTables) / log2) * 16
+  @entrySelector = Math.floor @searchRange / log2
+  @rangeShift = @numTables * 16 - @searchRange
+    
 module.exports = Directory
