@@ -32,9 +32,8 @@ class OpenTypeProcessor
       entry ?= @findScript 'dflt'
       entry ?= @findScript 'latn'
       
-      unless entry?
-        throw new Error "Could not find a suitable script in font"
-      
+      return unless entry?
+            
       @scriptTag = entry.tag
       @script = entry.script
     
