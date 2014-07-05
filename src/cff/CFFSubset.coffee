@@ -45,7 +45,7 @@ class CFFSubset extends Subset
     
     used_fds = {}
     used_subrs = []
-    for gid of @glyphs
+    for gid in @glyphs
       fd = @cff.fdForGlyph gid
       continue unless fd?
       
