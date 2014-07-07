@@ -1,3 +1,5 @@
+Path = require './Path'
+
 class Glyph
   constructor: (@id, @codePoints, @_font) ->
     
@@ -5,6 +7,9 @@ class Glyph
     Object.defineProperty @prototype, key,
       get: fn
       enumerable: true
+      
+  _getPath: ->
+    return new Path
       
   _getCBox: ->
     @path.cbox
