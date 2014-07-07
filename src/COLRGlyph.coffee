@@ -1,5 +1,4 @@
 Glyph = require './Glyph'
-Path = require './Path'
 
 class COLRGlyph extends Glyph
   class COLRLayer
@@ -9,9 +8,24 @@ class COLRGlyph extends Glyph
     Object.defineProperty @prototype, key,
       get: fn
       enumerable: true
-      
-  _getPath: ->
-    return new Path
+    
+  _getBBox: ->
+    bbox = [Infinity, Infinity, -Infinity, -Infinity]
+    for layer in @layers
+      b = layer.glyph.bbox
+      if b[0] < bbox[0]
+        b[0] = bbox[0]
+        
+      if b[1] < bbox[1]
+        b[1] = bbox[1]
+        
+      if b[2] > bbox[2]
+        b[2] = bbox[2]
+        
+      if b[3] > bbox[3]
+        b[3] = bbox[3]
+          
+    return bbox
       
   get 'layers', ->
     cpal = @_font.CPAL
