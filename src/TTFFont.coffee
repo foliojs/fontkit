@@ -316,6 +316,16 @@ class TTFFont
         
     return advances
     
+  widthOfString: (string, features) ->
+    glyphs = @glyphsForString '' + string, features
+    advances = @advancesForGlyphs glyphs, features
+    
+    width = 0
+    for advance in advances
+      width += advance
+    
+    return width
+    
   _getBaseGlyph: (glyph, characters = []) ->
     unless @_glyphs[glyph]
       if @directory.tables.glyf?
