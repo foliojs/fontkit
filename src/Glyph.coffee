@@ -28,6 +28,9 @@ class Glyph
     # Decoding is actually performed by subclasses
     @_path ?= @_getPath()
     
+  get 'advanceWidth', ->
+    return @_font.widthOfGlyph @id
+    
   get 'ligatureCaretPositions', ->
     
   render: (ctx, size) ->
