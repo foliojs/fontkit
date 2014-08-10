@@ -106,7 +106,7 @@ class Path
           p2 = [cp2x, cp2y]
           p3 = [p3x, p3y]
                     
-          for i in [0..1] by 1            
+          for i in [0..1]
             b = 6 * p0[i] - 12 * p1[i] + 6 * p2[i]
             a = -3 * p0[i] + 9 * p1[i] - 9 * p2[i] + 3 * p3[i]
             c = 3 * p1[i] - 3 * p0[i]

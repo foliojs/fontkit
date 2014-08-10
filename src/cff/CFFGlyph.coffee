@@ -355,7 +355,7 @@ class CFFGlyph extends Glyph
               
                 when 35 # flex
                   pts = []
-                  for i in [0...6] by 1
+                  for i in [0...6]
                     x += stack.shift()
                     y += stack.shift()
                     pts.push x, y
@@ -388,7 +388,7 @@ class CFFGlyph extends Glyph
                   starty = y
             
                   pts = []
-                  for i in [0...5] by 1
+                  for i in [0...5]
                     x += stack.shift()
                     y += stack.shift()
                     pts.push x, y
