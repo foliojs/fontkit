@@ -21,11 +21,15 @@ class KernProcessor
         else
           throw new Error "Unsupported kerning table version #{table.version}"
           
+      s = table.subtable
       switch table.format
         when 0
-          for pair in table.subtable.pairs
+          for pair in s.pairs
             if pair.left is left and pair.right is right
               return pair.value
+              
+        when 3
+          return s.kernValue[s.kernIndex[s.leftClass[left] * s.rightClassCount + s.rightClass[right]]]
               
         else
           throw new Error "Unsupported kerning sub-table format #{table.format}"

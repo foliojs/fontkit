@@ -235,7 +235,7 @@ class TTFFont
       return advances if 'kern' of @_GPOSProcessor.features
       
     if 'kern' in userFeatures and @kern?
-      @_kernProcessor ?= new KernProcessor(@kern)
+      @_kernProcessor ?= new KernProcessor this
       @_kernProcessor.process glyphs, advances
         
     return advances
