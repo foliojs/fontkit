@@ -298,18 +298,23 @@ class TTFFont
     
   get 'availableFeatures', ->
     features = []
+    t = @directory.tables
     
-    if @GSUB?
+    if t.GSUB?
       @_GSUBProcessor ?= new GSUBProcessor(this, @GSUB)
       features.push Object.keys(@_GSUBProcessor.features)...
     
-    if @GPOS?
+    if t.GPOS?
       @_GPOSProcessor ?= new GPOSProcessor(this, @GPOS)
       features.push Object.keys(@_GPOSProcessor.features)...
       
-    if @morx?
+    if t.morx?
       @_morxProcessor ?= new AATMorxProcessor(this)
-      features.push AATFeatureMap.mapAATToOT @_morxProcessor.getSupportedFeatures()
+      aatFeatures = AATFeatureMap.mapAATToOT @_morxProcessor.getSupportedFeatures()
+      features.push aatFeatures...
+      
+    if t.kern? and (not t.GPOS or 'kern' not of @GPOS.features)
+      features.push 'kern'
     
     return features
             
