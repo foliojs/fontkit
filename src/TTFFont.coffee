@@ -306,6 +306,10 @@ class TTFFont
     if @GPOS?
       @_GPOSProcessor ?= new GPOSProcessor(this, @GPOS)
       features.push Object.keys(@_GPOSProcessor.features)...
+      
+    if @morx?
+      @_morxProcessor ?= new AATMorxProcessor(this)
+      features.push AATFeatureMap.mapAATToOT @_morxProcessor.getSupportedFeatures()
     
     return features
             
