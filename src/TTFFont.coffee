@@ -8,6 +8,7 @@ GSUBProcessor = require './GSUBProcessor'
 GPOSProcessor = require './GPOSProcessor'
 AATFeatureMap = require './AATFeatureMap'
 AATMorxProcessor = require './AATMorxProcessor'
+KernProcessor = require './KernProcessor'
 TTFGlyph = require './TTFGlyph'
 CFFGlyph = require './cff/CFFGlyph'
 SBIXGlyph = require './SBIXGlyph'
@@ -317,29 +318,6 @@ class TTFFont
       features.push 'kern'
     
     return features
-            
-  # gets kerning info using the old 'kern' table
-  # this has been largely superseded by the OpenType GPOS table
-  getKerning = (kern, left, right) ->
-    for table in kern.tables
-      switch table.version
-        when 0
-          continue unless table.coverage.horizontal
-        when 1
-          continue if table.coverage.vertical
-        else
-          throw new Error "Unsupported kerning table version #{table.version}"
-          
-      switch table.format
-        when 0
-          for pair in table.subtable.pairs
-            if pair.left is left and pair.right is right
-              return pair.value
-              
-        else
-          throw new Error "Unsupported kerning sub-table format #{table.format}"
-          
-    return 0
     
   widthOfGlyph: (glyph) ->
     if glyph < @hmtx.metrics.length
@@ -361,13 +339,9 @@ class TTFFont
       
       return advances if 'kern' of @_GPOSProcessor.features
       
-    if @kern? and 'kern' in userFeatures
-      for glyph, glyphIndex in glyphs
-        break if glyphIndex + 1 >= glyphs.length
-        
-        left = glyphs[glyphIndex]
-        right = glyphs[glyphIndex + 1]
-        advances[glyphIndex] += getKerning(@kern, left, right) * @scale
+    if 'kern' in userFeatures and @kern?
+      @_kernProcessor ?= new KernProcessor(@kern)
+      @_kernProcessor.process glyphs, advances
         
     return advances
     
