@@ -253,6 +253,9 @@ class TTFFont
         
       else
         throw new Error 'Unknown cmap format ' + cmap.version
+        
+  hasGlyphForCodePoint: (codePoint) ->
+    return !!cmapLookup(findUnicodeCmap(this), codePoint)
             
   glyphForCodePoint: (codePoint) ->
     return @getGlyph cmapLookup(findUnicodeCmap(this), codePoint) or 0, [codePoint]
