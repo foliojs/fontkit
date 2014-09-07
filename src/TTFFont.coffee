@@ -142,18 +142,23 @@ class TTFFont
   get 'bbox', ->
     return [@head.xMin * @scale, @head.yMin * @scale, @head.xMax * @scale, @head.yMax * @scale]
     
-  findUnicodeCmap = (font) ->
+  findUnicodeCmap = (font) ->    
+    if font._charMap
+      return font._charMap
+    
     # check for a 32-bit cmap first
     for cmap in font.cmap.tables
       # unicode or windows platform
       if (cmap.platformID is 0 and cmap.encodingID in [4, 6]) or (cmap.platformID is 3 and cmap.encodingID is 10)
-         return cmap.table
-         
+         return font._charMap = cmap.table
+         break
+       
     # try "old" 16-bit cmap
     for cmap in font.cmap.tables
       if cmap.platformID is 0 or (cmap.platformID is 3 and cmap.encodingID is 1)
-        return cmap.table
-        
+        return font._charMap = cmap.table
+        break
+      
     throw new Error "Could not find a unicode cmap"
         
   cmapLookup = (cmap, codepoint) ->
@@ -217,10 +222,7 @@ class TTFFont
         throw new Error 'Unknown cmap format ' + cmap.version
             
   glyphForCodePoint: (codePoint) ->
-    if not @_charMap
-      @_charMap = findUnicodeCmap this
-      
-    return @getGlyph cmapLookup(@_charMap, codePoint) or 0, [codePoint]
+    return @getGlyph cmapLookup(findUnicodeCmap(this), codePoint) or 0, [codePoint]
         
   codePointAt = (str, idx = 0) ->
     code = str.charCodeAt(idx)
