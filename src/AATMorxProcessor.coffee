@@ -249,5 +249,13 @@ class AATMorxProcessor
       @_insertGlyphs index, entry.currentInsertIndex, count, isBefore
     
     return
+    
+  getSupportedFeatures: ->
+    features = []
+    for chain in @morx.chains
+      for feature in chain.features
+        features.push [feature.featureType, feature.featureSetting]
+        
+    return features
   
 module.exports = AATMorxProcessor
