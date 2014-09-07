@@ -430,9 +430,7 @@ class AATFeatureMap
   for ot, aat of OTMapping
     AATMapping[aat[0]] ?= {}
     AATMapping[aat[0]][aat[1]] = ot
-    
-  console.log AATMapping
-      
+          
   # Maps an array of OpenType features to AAT features 
   # in the form of {featureType:{featureSetting:true}}
   @mapOTToAAT: (features) ->

@@ -6,6 +6,8 @@ WOFFDirectory = require './WOFFDirectory'
 tables = require './tables'
 GSUBProcessor = require './GSUBProcessor'
 GPOSProcessor = require './GPOSProcessor'
+AATFeatureMap = require './AATFeatureMap'
+AATMorxProcessor = require './AATMorxProcessor'
 TTFGlyph = require './TTFGlyph'
 CFFGlyph = require './cff/CFFGlyph'
 SBIXGlyph = require './SBIXGlyph'
@@ -279,12 +281,18 @@ class TTFFont
       
       # get the glyph
       glyphs.push @glyphForCodePoint codePointAt(str, i)
-      
-    return glyphs if not @GSUB? or userFeatures.length is 0
-    
+          
     # apply glyph substitutions
-    @_GSUBProcessor ?= new GSUBProcessor(this, @GSUB)
-    @_GSUBProcessor.applyFeatures(userFeatures, glyphs)
+    # first, try the OpenType GSUB table
+    # TODO: OT feature defaults for GSUB. AAT has defaults for each font built in
+    if @GSUB and userFeatures.length > 0
+      @_GSUBProcessor ?= new GSUBProcessor(this, @GSUB)
+      @_GSUBProcessor.applyFeatures(userFeatures, glyphs)
+      
+    # if not found, try AAT morx table
+    else if @morx
+      @_morxProcessor ?= new AATMorxProcessor(this)
+      @_morxProcessor.process(glyphs, AATFeatureMap.mapOTToAAT(userFeatures))
     
     return glyphs
     
