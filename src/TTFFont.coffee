@@ -160,6 +160,39 @@ class TTFFont
         break
       
     throw new Error "Could not find a unicode cmap"
+    
+  get 'characterSet', ->
+    cmap = findUnicodeCmap(this)
+    switch cmap.version
+      when 0
+        return [0...cmap.codeMap.length]
+          
+      when 4
+        res = []
+        for tail, i in endCode
+          start = startCode[i]
+          res.push [start..tail]...
+          
+        return res
+      
+      when 8
+        throw new Error 'TODO: cmap format 8'
+        
+      when 6, 10
+        return [cmap.firstCode...cmap.firstCode + cmap.glyphIndices.length]
+        
+      when 12, 13
+        res = []
+        for group in cmap.groups
+          res.push [group.startCharCode..group.endCharCode]...
+          
+        return res
+        
+      when 14
+        throw new Error 'TODO: cmap format 14'
+        
+      else
+        throw new Error 'Unknown cmap format ' + cmap.version
         
   cmapLookup = (cmap, codepoint) ->
     switch cmap.version
