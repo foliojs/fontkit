@@ -34,15 +34,15 @@ class AATMorxProcessor
   constructor: (@font) ->
     @morx = @font.morx
     
-  process: (glyphs) ->
-    # features = 
-    
+  # Processes an array of glyphs and applies the specified features
+  # Features should be in the form of {featureType:{featureSetting:true}}
+  process: (glyphs, features = {}) ->    
     for chain in @morx.chains
       flags = chain.defaultFlags
       
+      # enable/disable the requested features
       for feature in chain.features
-        if feature.featureType is 1 and feature.featureSetting in [0, 2, 4]
-        # if feature.featureType is 11 and feature.featureSetting is 2
+        if (f = features[feature.featureType]) and f[feature.featureSetting]
           flags &= feature.disableFlags
           flags |= feature.enableFlags
                 
