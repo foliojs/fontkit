@@ -4,6 +4,7 @@ TTCHeader = require './TTCHeader'
 Directory = require './Directory'
 WOFFDirectory = require './WOFFDirectory'
 tables = require './tables'
+CmapProcessor = require './CmapProcessor'
 GSUBProcessor = require './GSUBProcessor'
 GPOSProcessor = require './GPOSProcessor'
 AATFeatureMap = require './AATFeatureMap'
@@ -145,123 +146,17 @@ class TTFFont
   get 'bbox', ->
     return [@head.xMin * @scale, @head.yMin * @scale, @head.xMax * @scale, @head.yMax * @scale]
     
-  findUnicodeCmap = (font) ->    
-    if font._charMap
-      return font._charMap
-    
-    # check for a 32-bit cmap first
-    for cmap in font.cmap.tables
-      # unicode or windows platform
-      if (cmap.platformID is 0 and cmap.encodingID in [4, 6]) or (cmap.platformID is 3 and cmap.encodingID is 10)
-         return font._charMap = cmap.table
-         break
-       
-    # try "old" 16-bit cmap
-    for cmap in font.cmap.tables
-      if cmap.platformID is 0 or (cmap.platformID is 3 and cmap.encodingID is 1)
-        return font._charMap = cmap.table
-        break
-      
-    throw new Error "Could not find a unicode cmap"
-    
   get 'characterSet', ->
-    cmap = findUnicodeCmap(this)
-    switch cmap.version
-      when 0
-        return [0...cmap.codeMap.length]
-          
-      when 4
-        res = []
-        for tail, i in endCode
-          start = startCode[i]
-          res.push [start..tail]...
-          
-        return res
-      
-      when 8
-        throw new Error 'TODO: cmap format 8'
-        
-      when 6, 10
-        return [cmap.firstCode...cmap.firstCode + cmap.glyphIndices.length]
-        
-      when 12, 13
-        res = []
-        for group in cmap.groups
-          res.push [group.startCharCode..group.endCharCode]...
-          
-        return res
-        
-      when 14
-        throw new Error 'TODO: cmap format 14'
-        
-      else
-        throw new Error 'Unknown cmap format ' + cmap.version
-        
-  cmapLookup = (cmap, codepoint) ->
-    switch cmap.version
-      when 0
-        return cmap.codeMap[codepoint]
-        
-      when 4
-        min = 0
-        max = cmap.segCount - 1
-        while min <= max
-          mid = (min + max) >> 1
-          
-          if codepoint < cmap.startCode[mid]
-            max = mid - 1
-          else if codepoint > cmap.endCode[mid]
-            min = mid + 1
-          else
-            rangeOffset = cmap.idRangeOffset[mid]
-            if rangeOffset is 0
-              gid = codepoint + cmap.idDelta[mid]
-            else
-              index = rangeOffset / 2 + (codepoint - cmap.startCode[mid]) - (cmap.segCount - mid)
-              gid = cmap.glyphIndexArray[index] or 0
-              unless gid is 0
-                gid += cmap.idDelta[mid]
-                
-            return gid & 0xffff
-        
-        return 0
-        
-      when 8
-        throw new Error 'TODO: cmap format 8'
-            
-      when 6, 10
-        return cmap.glyphIndices[codepoint - cmap.firstCode]
-        
-      when 12, 13
-        min = 0
-        max = cmap.nGroups - 1
-        while min <= max
-          mid = (min + max) >> 1
-          group = cmap.groups[mid]
-          
-          if codepoint < group.startCharCode
-            max = mid - 1
-          else if codepoint > group.endCharCode
-            min = mid + 1
-          else
-            if cmap.version is 12
-              return group.glyphID + (codepoint - group.startCharCode)
-            else
-              return group.glyphID
-              
-        return 0
-        
-      when 14
-        throw new Error 'TODO: cmap format 14'
-        
-      else
-        throw new Error 'Unknown cmap format ' + cmap.version
+    @_cmapProcessor ?= new CmapProcessor @cmap
+    return @_cmapProcessor.getCharacterSet()
         
   hasGlyphForCodePoint: (codePoint) ->
-    return !!cmapLookup(findUnicodeCmap(this), codePoint)
+    @_cmapProcessor ?= new CmapProcessor @cmap
+    return !!@_cmapProcessor.lookup codePoint
             
   glyphForCodePoint: (codePoint) ->
-    return @getGlyph cmapLookup(findUnicodeCmap(this), codePoint) or 0, [codePoint]
+    @_cmapProcessor ?= new CmapProcessor @cmap
+    return @getGlyph @_cmapProcessor.lookup(codePoint), [codePoint]
         
   codePointAt = (str, idx = 0) ->
     code = str.charCodeAt(idx)
@@ -286,7 +181,7 @@ class TTFFont
     # apply glyph substitutions
     # first, try the OpenType GSUB table
     # TODO: OT feature defaults for GSUB. AAT has defaults for each font built in
-    if @GSUB and userFeatures.length > 0
+    if userFeatures.length > 0 and @GSUB
       @_GSUBProcessor ?= new GSUBProcessor(this, @GSUB)
       @_GSUBProcessor.applyFeatures(userFeatures, glyphs)
       
