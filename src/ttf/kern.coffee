@@ -13,7 +13,16 @@ KernSubtable = new r.VersionedStruct 'format',
     rangeShift:     r.uint16
     pairs:          new r.Array(KernPair, 'nPairs')
     
-  # TODO: other formats
+  3:
+    glyphCount: r.uint16
+    kernValueCount: r.uint8
+    leftClassCount: r.uint8
+    rightClassCount: r.uint8
+    flags: r.uint8
+    kernValue: new r.Array(r.int16, 'kernValueCount')
+    leftClass: new r.Array(r.uint8, 'glyphCount')
+    rightClass: new r.Array(r.uint8, 'glyphCount')
+    kernIndex: new r.Array(r.uint8, -> @leftClassCount * @rightClassCount)
 
 KernTable = new r.VersionedStruct 'version',
   0: # Microsoft uses this format
@@ -27,6 +36,7 @@ KernTable = new r.VersionedStruct 'version',
       'override'      # If set to 1 the value in this table replaces the accumulated value
     ]
     subtable:   KernSubtable
+    padding: new r.Reserved r.uint8, -> @length - @_currentOffset
   1: # Apple uses this format
     length:     r.uint32
     coverage:   new r.Bitfield r.uint8, [
@@ -38,6 +48,7 @@ KernTable = new r.VersionedStruct 'version',
     format:     r.uint8
     tupleIndex: r.uint16
     subtable:   KernSubtable
+    padding: new r.Reserved r.uint8, -> @length - @_currentOffset
 
 # The kern table has been largely superseded by the GPOS table
 module.exports = new r.VersionedStruct r.uint16,
