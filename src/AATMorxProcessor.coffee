@@ -192,9 +192,12 @@ class AATMorxProcessor
       actionIndex = entry.action
       last = false
       ligatureIndex = 0
+      codePoints = []
       
       until last
         componentGlyph = @ligatureStack.pop()
+        codePoints.push @glyphs[componentGlyph].codePoints...
+        
         action = actions.getItem actionIndex++
         last = !!(action & LAST_MASK)
         store = !!(action & STORE_MASK)
@@ -206,8 +209,9 @@ class AATMorxProcessor
                           
         if last or store
           ligatureEntry = ligatureList.getItem ligatureIndex
-          @glyphs[componentGlyph] = @font.getGlyph ligatureEntry
+          @glyphs[componentGlyph] = @font.getGlyph ligatureEntry, codePoints
           ligatureIndex = 0
+          codePoints = []
         else
           @glyphs[componentGlyph] = @font.getGlyph 0xffff
               
