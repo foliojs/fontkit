@@ -196,7 +196,7 @@ class AATMorxProcessor
       
       until last
         componentGlyph = @ligatureStack.pop()
-        codePoints.push @glyphs[componentGlyph].codePoints...
+        codePoints.unshift @glyphs[componentGlyph].codePoints...
         
         action = actions.getItem actionIndex++
         last = !!(action & LAST_MASK)
