@@ -13,11 +13,12 @@ class KernProcessor
       
   getKerning: (left, right) ->
     for table in @kern.tables
+      continue if table.coverage.crossStream
       switch table.version
         when 0
           continue unless table.coverage.horizontal
         when 1
-          continue if table.coverage.vertical
+          continue if table.coverage.vertical or table.coverage.variation
         else
           throw new Error "Unsupported kerning table version #{table.version}"
           
