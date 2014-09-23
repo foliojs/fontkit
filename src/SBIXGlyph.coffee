@@ -1,9 +1,16 @@
 TTFGlyph = require './TTFGlyph'
+r = require 'restructure'
 
 class SBIXGlyph extends TTFGlyph
+  SBIXImage = new r.Struct
+    originX: r.uint16
+    originY: r.uint16
+    type: new r.String(4)
+    data: new r.Buffer -> @parent.buflen - @_currentOffset
+  
   getImageForSize: (size) ->
     for table in @_font.sbix.imageTables
-      break if table.height >= size
+      break if table.ppem >= size
     
     offsets = table.imageOffsets
     start = offsets[@id]
@@ -11,18 +18,15 @@ class SBIXGlyph extends TTFGlyph
     
     if start is end
       return null
-    
-    pos = @_font.stream.pos 
-    @_font.stream.pos = start + 8
-    buf = @_font.stream.readBuffer end - start - 8
-    @_font.stream.pos = pos
-    
-    return buf
+      
+    @_font.stream.pos = start
+    return SBIXImage.decode @_font.stream, buflen: end - start
     
   render: (ctx, size) ->
     img = @getImageForSize size
     if img?
-      ctx.image img, height: size, x: 0, y: @bbox[1] * 1 / @_font.head.unitsPerEm * size
+      scale = 1 / @_font.head.unitsPerEm * size
+      ctx.image img.data, height: size, x: img.originX, y: (@bbox[1] - img.originY) * scale
       
     if @_font.sbix.flags.renderOutlines
       super
