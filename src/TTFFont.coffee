@@ -131,10 +131,10 @@ class TTFFont
     return @post.italicAngle / 65536 # convert from fixed point to decimal
     
   get 'capHeight', ->
-    return this['OS/2'].capHeight * @scale
+    return this['OS/2']?.capHeight * @scale or @ascent
     
   get 'xHeight', ->
-    return this['OS/2'].xHeight * @scale
+    return this['OS/2']?.xHeight * @scale or 0
     
   get 'numGlyphs', ->
     return @maxp.numGlyphs
