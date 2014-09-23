@@ -17,7 +17,7 @@ COLRGlyph = require './COLRGlyph'
 TTFSubset = require './TTFSubset'
 CFFSubset = require './cff/CFFSubset'
 
-class TTFFont    
+class TTFFont
   @open: (filename, name) ->
     contents = require?('fs').readFileSync filename
     return new TTFFont(contents, name)
@@ -66,7 +66,7 @@ class TTFFont
       enumerable: true
     
   getTable = (table) ->
-    key = '_' + table.tag        
+    key = '_' + table.tag
     unless key of this
       pos = @stream.pos
       @stream.pos = table.offset
