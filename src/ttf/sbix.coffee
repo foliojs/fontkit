@@ -15,6 +15,7 @@ ImageTable = new r.Struct
 # It includes several image tables with images for each bitmap glyph
 # of several different sizes.
 module.exports = new r.Struct
-  version: r.uint32
+  version: r.uint16
+  flags: new r.Bitfield(r.uint16, ['renderOutlines'])
   numImgTables: r.uint32
   imageTables: new r.Array(new r.Pointer(r.uint32, ImageTable), 'numImgTables')

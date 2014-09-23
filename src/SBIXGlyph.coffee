@@ -24,6 +24,7 @@ class SBIXGlyph extends TTFGlyph
     if img?
       ctx.image img, height: size, x: 0, y: @bbox[1] * 1 / @_font.head.unitsPerEm * size
       
-    super
+    if @_font.sbix.flags.renderOutlines
+      super
     
 module.exports = SBIXGlyph
