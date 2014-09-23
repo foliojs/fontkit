@@ -2,7 +2,6 @@ TTFGlyph = require './TTFGlyph'
 
 class SBIXGlyph extends TTFGlyph
   getImageForSize: (size) ->
-    size *= @_font.scale * 2
     for table in @_font.sbix.imageTables
       break if table.height >= size
     
