@@ -90,9 +90,6 @@ class TTFFont
     
     # define properties for each table to lazily parse
     for tag, table of @directory.tables
-      if not tables[tag]
-        console.warn('Unsupported table ' + tag)
-      
       Object.defineProperty this, tag,
         get: getTable.bind(this, table)
         
