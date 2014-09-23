@@ -112,15 +112,14 @@ class TTFFont
   get 'scale', ->
     return 1000 / @head.unitsPerEm
     
-  # TODO: what about the hhea versions?
   get 'ascent', ->
-    return this['OS/2'].ascent * @scale
+    return @hhea.ascent * @scale
     
   get 'descent', ->
-    return this['OS/2'].descent * @scale
+    return @hhea.descent * @scale
     
   get 'lineGap', ->
-    return this['OS/2'].lineGap * @scale
+    return @hhea.lineGap * @scale
     
   get 'underlinePosition', ->
     return @post.underlinePosition * @scale
