@@ -47,7 +47,6 @@ class AATMorxProcessor
           flags |= feature.enableFlags
                 
       for subtable, index in chain.subtables
-        # console.log 'subtable index = %d, type = %d, features = %d', index, subtable.type, subtable.subFeatureFlags & flags
         if subtable.subFeatureFlags & flags
           @processSubtable subtable, glyphs
         
