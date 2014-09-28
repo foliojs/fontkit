@@ -89,7 +89,7 @@ class TTFFont
       @directory = Directory.decode(@stream, _startOffset: 0)
     
     # define properties for each table to lazily parse
-    for tag, table of @directory.tables
+    for tag, table of @directory.tables when tables[tag]
       Object.defineProperty this, tag,
         get: getTable.bind(this, table)
         
