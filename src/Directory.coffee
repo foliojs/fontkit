@@ -8,7 +8,7 @@ TableEntry = new r.Struct
   length:     r.uint32
 
 Directory = new r.Struct
-  version:        r.uint32
+  tag:            new r.String(4)
   numTables:      r.uint16
   searchRange:    r.uint16
   entrySelector:  r.uint16

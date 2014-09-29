@@ -1,17 +1,7 @@
 r = require 'restructure'
 TTFFont = require './TTFFont'
   
-class DFont
-  constructor: (@stream) ->
-    @decode()
-  
-  @decode: (stream) ->
-    return new DFont(stream)
-    
-  @open: (filename, name) ->
-    contents = require?('fs').readFileSync filename
-    return new DFont new r.DecodeStream(contents)
-    
+class DFont    
   DFontName = new r.String(r.uint8)
   DFontData = new r.Struct
     len: r.uint32
@@ -44,7 +34,23 @@ class DFont
     dataLength: r.uint32
     mapLength: r.uint32
     
-  decode: ->
+  @isDFont: (stream) ->
+    pos = stream.pos
+    
+    try
+      header = DFontHeader.decode stream
+    catch e
+      return false
+    finally
+      stream.pos = pos
+      
+    for type in header.map.typeList.types
+      if type.name is 'sfnt'
+        return true
+      
+    return false
+    
+  constructor: (@stream) ->
     @header = DFontHeader.decode @stream
     
     for type in @header.map.typeList.types
@@ -65,9 +71,9 @@ class DFont
     
     for ref in @sfnt.refList
       if ref.name is name
-        @stream.pos = ref.dataOffset + @header.dataOffset
-        data = DFontData.decode @stream
-        return new TTFFont data.buf
+        substream = new r.DecodeStream @stream.buffer
+        substream.pos = @header.dataOffset + ref.dataOffset + 4
+        return new TTFFont substream
         
     return null
 

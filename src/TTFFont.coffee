@@ -1,8 +1,5 @@
 r = require 'restructure'
-zlib = require 'browserify-zlib'
-TTCHeader = require './TTCHeader'
 Directory = require './Directory'
-WOFFDirectory = require './WOFFDirectory'
 tables = require './tables'
 CmapProcessor = require './CmapProcessor'
 GSUBProcessor = require './GSUBProcessor'
@@ -18,47 +15,16 @@ TTFSubset = require './TTFSubset'
 CFFSubset = require './cff/CFFSubset'
 
 class TTFFont
-  @open: (filename, name) ->
-    contents = require?('fs').readFileSync filename
-    return new TTFFont(contents, name)
-  
-  constructor: (data, name) ->
+  constructor: (@stream) ->
     @_glyphs = {}
+    @_decodeDirectory()
     
-    @stream = new r.DecodeStream(data)
-    
-    # Check if this is a TrueType collection
-    sig = @stream.readString(4)
-    if sig is 'ttcf'
-      unless name
-        throw new Error "Must specify a font name for TTC files."
+    # define properties for each table to lazily parse
+    for tag, table of @directory.tables when tables[tag]
+      Object.defineProperty this, tag,
+        get: getTable.bind(this, table)
         
-      @ttcHeader = TTCHeader.decode(@stream)
-      
-      for offset in @ttcHeader.offsets
-        @stream.pos = offset
-        directory = Directory.decode(@stream, _startOffset: 0)
-        nameTable = directory.tables.name
-        unless nameTable
-          throw new Error "Font must have a name table."
-          
-        @stream.pos = nameTable.offset
-        nameTable = tables.name.decode(@stream)
-        unless nameTable.records.postscriptName
-          throw new Error "Font must have a postscript name"
-          
-        for lang, val of nameTable.records.postscriptName when val is name
-          @stream.pos = offset
-          @decode()
-          return
-          
-    else if sig is 'wOFF'
-      @isWOFF = true
-      @decode()
-      
-    else
-      @stream.pos = 0
-      @decode()
+    return
     
   get = (key, fn) =>
     Object.defineProperty @prototype, key,
@@ -70,31 +36,17 @@ class TTFFont
     unless key of this
       pos = @stream.pos
       @stream.pos = table.offset
-      
-      if @isWOFF and table.compLength < table.origLength
-        buf = zlib.inflateSync @stream.readBuffer(table.compLength)
-        stream = new r.DecodeStream(buf)
-        this[key] = tables[table.tag].decode(stream, this, table.origLength)
-      else
-        this[key] = tables[table.tag].decode(@stream, this, table.length)
-      
+      this[key] = @_decodeTable table
       @stream.pos = pos
       
     return this[key]
     
-  decode: ->
-    if @isWOFF
-      @directory = WOFFDirectory.decode(@stream, _startOffset: 0)
-    else
-      @directory = Directory.decode(@stream, _startOffset: 0)
+  _decodeDirectory: ->
+    @directory = Directory.decode(@stream, _startOffset: 0)
     
-    # define properties for each table to lazily parse
-    for tag, table of @directory.tables when tables[tag]
-      Object.defineProperty this, tag,
-        get: getTable.bind(this, table)
+  _decodeTable: (length) ->
+    return tables[table.tag].decode(@stream, this, table.length)
         
-    return
-    
   get 'postscriptName', ->
     name = @name.records.postscriptName
     lang = Object.keys(name)[0]

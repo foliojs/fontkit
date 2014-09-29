@@ -9,6 +9,7 @@ WOFFDirectoryEntry = new r.Struct
   origChecksum: r.uint32
 
 WOFFDirectory = new r.Struct
+  tag:          new r.String(4) # should be 'wOFF'
   flavor:         r.uint32
   length:         r.uint32
   numTables:      r.uint16
