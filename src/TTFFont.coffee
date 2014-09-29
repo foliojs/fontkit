@@ -44,7 +44,7 @@ class TTFFont
   _decodeDirectory: ->
     @directory = Directory.decode(@stream, _startOffset: 0)
     
-  _decodeTable: (length) ->
+  _decodeTable: (table) ->
     return tables[table.tag].decode(@stream, this, table.length)
         
   get 'postscriptName', ->

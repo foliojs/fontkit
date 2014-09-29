@@ -9,8 +9,9 @@
   "author": "Devon Govett <devongovett@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "restructure": "^0.1.5",
+    "brotli": "^1.0.0",
     "browserify-zlib": "^0.1.4",
-    "lodash": "^2.4.1"
+    "lodash": "^2.4.1",
+    "restructure": "^0.1.5"
   }
 }

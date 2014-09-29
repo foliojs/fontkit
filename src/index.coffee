@@ -2,11 +2,13 @@ r = require 'restructure'
 fs = require 'fs'
 TTFFont = require './TTFFont'
 WOFFFont = require './WOFFFont'
+WOFF2Font = require './WOFF2Font'
 TrueTypeCollection = require './TrueTypeCollection'
 DFont = require './DFont'
 
 exports.TTFFont = TTFFont
 exports.WOFFFont = WOFFFont
+exports.WOFF2Font = WOFF2Font
 exports.TrueTypeCollection = TrueTypeCollection
 exports.DFont = DFont
 
@@ -46,6 +48,9 @@ exports.create = (buffer, postscriptName) ->
       
     when 'wOFF'
       return new WOFFFont(stream)
+      
+    when 'wOF2'
+      return new WOFF2Font(stream)
       
     when 'true', 'OTTO', String.fromCharCode(0, 1, 0, 0)
       return new TTFFont(stream)
