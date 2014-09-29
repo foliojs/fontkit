@@ -78,19 +78,14 @@ class WOFF2Font extends TTFFont
       
       decompressedSize = 0
       for tag, entry of @directory.tables
+        entry.offset = decompressedSize
         decompressedSize += entry.transformLength or entry.length
         
       decompressed = brotli.decompress buffer, decompressedSize
       unless decompressed
         throw new Error 'Error decoding compressed data in WOFF2'
         
-      @stream = new r.DecodeStream new Buffer decompressed
-      
-      offset = 0
-      for tag, entry of @directory.tables
-        entry.offset = offset
-        offset += entry.length
-      
+      @stream = new r.DecodeStream new Buffer decompressed      
       @_decompressed = true
       
     @stream.pos = table.offset
