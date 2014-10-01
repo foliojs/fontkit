@@ -29,8 +29,7 @@ class TTFGlyph extends Glyph
   
   # Represents a point in a simple glyph
   class Point
-    constructor: (@flags, @endContour, @x = 0, @y = 0) ->
-      @onCurve = !!(@flags & ON_CURVE)
+    constructor: (@onCurve, @endContour, @x = 0, @y = 0) ->
     
   # Represents a component in a composite glyph
   class Component
@@ -83,78 +82,88 @@ class TTFGlyph extends Glyph
     glyph = GlyfHeader.decode(stream)
     
     if glyph.numberOfContours > 0
-      # this is a simple glyph
-      glyph.points = []
-    
-      endPtsOfContours = new r.Array(r.uint16, glyph.numberOfContours).decode(stream)
-      instructions = new r.Array(r.uint8, r.uint16).decode(stream)
-    
-      flags = []
-      numCoords = endPtsOfContours[endPtsOfContours.length - 1] + 1
-      
-      while flags.length < numCoords
-        flag = stream.readUInt8()
-        flags.push flag
-      
-        # check for repeat flag
-        if flag & REPEAT
-          count = stream.readUInt8()
-          for j in [0...count] by 1
-            flags.push flag
-          
-      for flag, i in flags
-        point = new Point flag, endPtsOfContours.indexOf(i) >= 0, 0, 0
-        glyph.points.push point
-      
-      px = 0
-      for flag, i in flags
-        glyph.points[i].x = px = parseGlyphCoord stream, px, flag & X_SHORT_VECTOR, flag & SAME_X
-      
-      py = 0
-      for flag, i in flags
-        glyph.points[i].y = py = parseGlyphCoord stream, py, flag & Y_SHORT_VECTOR, flag & SAME_Y
+      @_decodeSimple glyph, stream
       
     else if glyph.numberOfContours < 0
-      # this is a composite glyph
-      glyph.components = []
-    
-      loop
-        flags = stream.readUInt16BE()
-        gPos = stream.pos - (glyfOffset + curOffset)
-        glyphID = stream.readUInt16BE()
-        
-        if flags & ARG_1_AND_2_ARE_WORDS
-          dx = stream.readInt16BE()
-          dy = stream.readInt16BE()
-        else 
-          dx = stream.readInt8()
-          dy = stream.readInt8()
-        
-        component = new Component glyphID, dx, dy
-        component.pos = gPos
-        component.scaleX = component.scaleY = 1
-        component.scale01 = component.scale10 = 0
-          
-        if flags & WE_HAVE_A_SCALE
-          # fixed number with 14 bits of fraction
-          component.scaleX = 
-          component.scaleY = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
-        
-        else if flags & WE_HAVE_AN_X_AND_Y_SCALE
-          component.scaleX = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
-          component.scaleY = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
-        
-        else if flags & WE_HAVE_A_TWO_BY_TWO
-          component.scaleX  = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
-          component.scale01 = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
-          component.scale10 = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
-          component.scaleY  = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
-        
-        glyph.components.push component
-        break unless flags & MORE_COMPONENTS
+      @_decodeComposite glyph, stream, glyfOffset + curOffset
         
     stream.pos = pos
     return glyph
+    
+  _decodeSimple: (glyph, stream) ->
+    # this is a simple glyph
+    glyph.points = []
+  
+    endPtsOfContours = new r.Array(r.uint16, glyph.numberOfContours).decode(stream)
+    instructions = new r.Array(r.uint8, r.uint16).decode(stream)
+  
+    flags = []
+    numCoords = endPtsOfContours[endPtsOfContours.length - 1] + 1
+    
+    while flags.length < numCoords
+      flag = stream.readUInt8()
+      flags.push flag
+    
+      # check for repeat flag
+      if flag & REPEAT
+        count = stream.readUInt8()
+        for j in [0...count] by 1
+          flags.push flag
+        
+    for flag, i in flags
+      point = new Point !!(flag & ON_CURVE), endPtsOfContours.indexOf(i) >= 0, 0, 0
+      glyph.points.push point
+    
+    px = 0
+    for flag, i in flags
+      glyph.points[i].x = px = parseGlyphCoord stream, px, flag & X_SHORT_VECTOR, flag & SAME_X
+    
+    py = 0
+    for flag, i in flags
+      glyph.points[i].y = py = parseGlyphCoord stream, py, flag & Y_SHORT_VECTOR, flag & SAME_Y
+      
+    return
+    
+  _decodeComposite: (glyph, stream, offset = 0) ->
+    # this is a composite glyph
+    glyph.components = []
+    haveInstructions = false
+    flags = MORE_COMPONENTS
+    
+    while flags & MORE_COMPONENTS
+      flags = stream.readUInt16BE()
+      gPos = stream.pos - offset
+      glyphID = stream.readUInt16BE()
+      haveInstructions ||= (flags & WE_HAVE_INSTRUCTIONS) isnt 0
+      
+      if flags & ARG_1_AND_2_ARE_WORDS
+        dx = stream.readInt16BE()
+        dy = stream.readInt16BE()
+      else 
+        dx = stream.readInt8()
+        dy = stream.readInt8()
+      
+      component = new Component glyphID, dx, dy
+      component.pos = gPos
+      component.scaleX = component.scaleY = 1
+      component.scale01 = component.scale10 = 0
+        
+      if flags & WE_HAVE_A_SCALE
+        # fixed number with 14 bits of fraction
+        component.scaleX = 
+        component.scaleY = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
+      
+      else if flags & WE_HAVE_AN_X_AND_Y_SCALE
+        component.scaleX = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
+        component.scaleY = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
+      
+      else if flags & WE_HAVE_A_TWO_BY_TWO
+        component.scaleX  = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
+        component.scale01 = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
+        component.scale10 = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
+        component.scaleY  = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
+        
+    return haveInstructions
   
   # Decodes font data, resolves composite glyphs, and returns an array of contours
   _getContours: ->
@@ -166,10 +175,10 @@ class TTFGlyph extends Glyph
         glyph = @_font.getGlyph(component.glyphID)._decode()
         # TODO transform
         for point in glyph.points
-          points.push new Point point.flags, point.endContour, point.x + component.dx, point.y + component.dy
+          points.push new Point point.onCurve, point.endContour, point.x + component.dx, point.y + component.dy
     else
       points = glyph.points
-    
+          
     contours = []
     cur = []
     for point in points
@@ -200,7 +209,7 @@ class TTFGlyph extends Glyph
           firstPt = lastPt
         else
           # Start at the middle if both the first and last points are off curve
-          firstPt = new Point 0, no, (firstPt.x + lastPt.x) / 2, (firstPt.y + lastPt.y) / 2
+          firstPt = new Point no, no, (firstPt.x + lastPt.x) / 2, (firstPt.y + lastPt.y) / 2
           
         curvePt = firstPt
         
