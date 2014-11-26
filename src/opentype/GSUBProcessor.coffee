@@ -1,5 +1,4 @@
 OpenTypeProcessor = require './OpenTypeProcessor'
-Glyph = require './Glyph'
 
 class GSUBProcessor extends OpenTypeProcessor
   applyLookup: (lookupType, table) ->

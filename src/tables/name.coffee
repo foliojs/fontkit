@@ -55,10 +55,17 @@ ENCODINGS = [
   ['utf16be', 'utf16be', 'utf16be', 'utf16be', 'utf16be', 'utf16be']
   
   # macintosh
-  ['macintosh', 'shift_jis??', 'big5??', 'euc-kr or korean', 'iso-8859-6?? or arabic', 'iso-8859-8 or hebrew', 
-   'iso-8859-7 or greek', 'Russian', 'symbol??', 'Devanagari', 'Gurmukhi', 'Gujarati',
+  # euc-kr or koren
+  # gb_2312-80 or chinese
+  # iso-8859-6 or arabic
+  # iso-8859-8 or hebrew
+  # iso-8859-7 or greek
+  # iso-8859-5 or cyrillic WRONG I THINK
+  # https://github.com/ashtuchkin/iconv-lite
+  ['macintosh', 'shift_jis', 'big5', 'euc-kr', 'iso-8859-6', 'iso-8859-8', 
+   'iso-8859-7', 'iso-8859-5', 'symbol??', 'Devanagari', 'Gurmukhi', 'Gujarati',
    'Oriya', 'Bengali', 'Tamil', 'Telugu', 'Kannada', 'Malayalam', 'Sinhalese',
-   'Burmese', 'Khmer', 'tis-620??', 'Laotian', 'Georgian', 'Armenian', 'gb_2312-80 or chinese', 
+   'Burmese', 'Khmer', 'tis-620??', 'Laotian', 'Georgian', 'Armenian', 'gb_2312-80', 
    'Tibetan', 'Mongolian', 'Geez', 'Slavic', 'Vietnamese', 'Sindhi']
   
   # ISO (deprecated)

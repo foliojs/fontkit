@@ -1,6 +1,6 @@
 r = require 'restructure'
 TTFFont = require './TTFFont'
-Directory = require './Directory'
+Directory = require './tables/directory'
 tables = require './tables'
 
 class TrueTypeCollection

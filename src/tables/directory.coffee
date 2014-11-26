@@ -1,5 +1,5 @@
 r = require 'restructure'
-Tables = require './tables'
+Tables = require './'
 
 TableEntry = new r.Struct
   tag:        new r.String(4)

@@ -1,8 +1,7 @@
 _ = require 'lodash'
-Glyph = require './Glyph'
 Subset = require './Subset'
-Directory = require './Directory'
-Tables = require './tables'
+Directory = require '../tables/Directory'
+Tables = require '../tables'
 
 class TTFSubset extends Subset
   _addGlyph: (gid) ->

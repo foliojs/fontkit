@@ -1,10 +1,10 @@
 r = require 'restructure'
 fs = require 'fs'
-TTFFont = require './TTFFont'
-WOFFFont = require './WOFFFont'
-WOFF2Font = require './WOFF2Font'
-TrueTypeCollection = require './TrueTypeCollection'
-DFont = require './DFont'
+TTFFont = require './src/TTFFont'
+WOFFFont = require './src/WOFFFont'
+WOFF2Font = require './src/WOFF2Font'
+TrueTypeCollection = require './src/TrueTypeCollection'
+DFont = require './src/DFont'
 
 exports.TTFFont = TTFFont
 exports.WOFFFont = WOFFFont

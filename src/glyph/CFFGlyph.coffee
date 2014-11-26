@@ -1,5 +1,5 @@
-Glyph = require '../Glyph'
-Path = require '../Path'
+Glyph = require './Glyph'
+Path = require './Path'
 
 class CFFGlyph extends Glyph
   bias = (s) ->

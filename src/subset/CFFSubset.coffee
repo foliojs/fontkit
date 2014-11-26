@@ -1,8 +1,8 @@
 _ = require 'lodash'
-Subset = require '../Subset'
-CFFTop = require './CFFTop'
-CFFPrivateDict = require './CFFPrivateDict'
-standardStrings = require './CFFStandardStrings'
+Subset = require './Subset'
+CFFTop = require '../cff/CFFTop'
+CFFPrivateDict = require '../cff/CFFPrivateDict'
+standardStrings = require '../cff/CFFStandardStrings'
 
 class CFFSubset extends Subset
   constructor: ->

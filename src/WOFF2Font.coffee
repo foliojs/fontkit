@@ -1,8 +1,8 @@
 r = require 'restructure'
 brotli = require 'brotli'
 TTFFont = require './TTFFont'
-TTFGlyph = require './TTFGlyph'
-WOFF2Glyph = require './WOFF2Glyph'
+TTFGlyph = require './glyph/TTFGlyph'
+WOFF2Glyph = require './glyph/WOFF2Glyph'
 
 # Subclass of TTFFont that represents a TTF/OTF font compressed by WOFF2
 # See spec here: http://www.w3.org/TR/WOFF2/

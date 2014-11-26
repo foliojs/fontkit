@@ -1,5 +1,5 @@
 TTFFont = require './TTFFont'
-WOFFDirectory = require './WOFFDirectory'
+WOFFDirectory = require './tables/WOFFDirectory'
 tables = require './tables'
 zlib = require 'browserify-zlib'
 

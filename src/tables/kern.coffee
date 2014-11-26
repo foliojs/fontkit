@@ -13,6 +13,15 @@ KernSubtable = new r.VersionedStruct 'format',
     rangeShift:     r.uint16
     pairs:          new r.Array(KernPair, 'nPairs')
     
+  # 1:
+  #   stateHeader: StateHeader
+  #   valueTable: new r.Pointer(r.uint16, new UnboundedArray(r.uint16))
+  # 2:
+  #   rowWidth: r.uint16
+  #   leftTable: new r.Pointer(r.uint16, 'void')
+  #   rightTable: new r.Pointer(r.uint16, 'void')
+  #   array: new r.Pointer(r.uint16, 'void')
+  #
   3:
     glyphCount: r.uint16
     kernValueCount: r.uint8

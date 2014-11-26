@@ -1,5 +1,5 @@
 r = require 'restructure'
-tables = require './tables'
+tables = require './'
 
 WOFFDirectoryEntry = new r.Struct
   tag:          new r.String(4)
