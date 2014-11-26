@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Advanced OpenType font engine",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "author": "Devon Govett <devongovett@gmail.com>",
   "license": "MIT",
@@ -12,5 +12,10 @@
     "browserify-zlib": "^0.1.4",
     "lodash": "^2.4.1",
     "restructure": "^0.1.5"
+  },
+  "devDependencies": {
+    "coffee-coverage": "^0.4.2",
+    "coffee-script": "^1.8.0",
+    "mocha": "^2.0.1"
   }
 }
