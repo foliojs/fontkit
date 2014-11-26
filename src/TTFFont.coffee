@@ -53,10 +53,19 @@ class TTFFont
     return name[lang]
     
   get 'fullName', ->
-    @name.records.fullName.English
+    @name.records.fullName?.English
     
   get 'familyName', ->
-    @name.records.fontFamily.English
+    @name.records.fontFamily?.English
+    
+  get 'subfamilyName', ->
+    @name.records.fontSubfamily?.English
+    
+  get 'copyright', ->
+    @name.records.copyright?.English
+    
+  get 'version', ->
+    @name.records.version?.English
     
   get 'scale', ->
     return 1000 / @head.unitsPerEm
