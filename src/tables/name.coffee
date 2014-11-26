@@ -6,7 +6,7 @@ NameRecord = new r.Struct
   languageID: r.uint16
   nameID:     r.uint16
   length:     r.uint16
-  string:     new r.Pointer(r.uint16, new r.String('length', -> ENCODINGS[@platformID][@encodingID]), type: 'parent', relativeTo: 'stringOffset')
+  string:     new r.Pointer(r.uint16, new r.String('length', -> ENCODINGS[@platformID][@encodingID]), type: 'parent', relativeTo: 'stringOffset', allowNull: false)
   
 LangTagRecord = new r.Struct
   length:  r.uint16
@@ -55,24 +55,36 @@ ENCODINGS = [
   ['utf16be', 'utf16be', 'utf16be', 'utf16be', 'utf16be', 'utf16be']
   
   # macintosh
-  # euc-kr or koren
-  # gb_2312-80 or chinese
-  # iso-8859-6 or arabic
-  # iso-8859-8 or hebrew
-  # iso-8859-7 or greek
-  # iso-8859-5 or cyrillic WRONG I THINK
-  # https://github.com/ashtuchkin/iconv-lite
-  ['macintosh', 'shift_jis', 'big5', 'euc-kr', 'iso-8859-6', 'iso-8859-8', 
-   'iso-8859-7', 'iso-8859-5', 'symbol??', 'Devanagari', 'Gurmukhi', 'Gujarati',
+  # Mappings available at http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/
+  # 0	  Roman                 17	Malayalam
+  # 1	  Japanese	            18	Sinhalese
+  # 2	  Traditional Chinese	  19	Burmese
+  # 3	  Korean	              20	Khmer
+  # 4	  Arabic	              21	Thai
+  # 5	  Hebrew	              22	Laotian
+  # 6	  Greek	                23	Georgian
+  # 7	  Russian	              24	Armenian
+  # 8	  RSymbol	              25	Simplified Chinese
+  # 9	  Devanagari	          26	Tibetan
+  # 10	Gurmukhi	            27	Mongolian
+  # 11	Gujarati	            28	Geez
+  # 12	Oriya	                29	Slavic
+  # 13	Bengali	              30	Vietnamese
+  # 14	Tamil	                31	Sindhi
+  # 15	Telugu	              32	(Uninterpreted)
+  # 16	Kannada
+  ['macroman', 'shift-jis', 'big5', 'euc-kr', 'iso-8859-6', 'iso-8859-8', 
+   'macgreek', 'maccyrillic', 'symbol', 'Devanagari', 'Gurmukhi', 'Gujarati',
    'Oriya', 'Bengali', 'Tamil', 'Telugu', 'Kannada', 'Malayalam', 'Sinhalese',
-   'Burmese', 'Khmer', 'tis-620??', 'Laotian', 'Georgian', 'Armenian', 'gb_2312-80', 
-   'Tibetan', 'Mongolian', 'Geez', 'Slavic', 'Vietnamese', 'Sindhi']
+   'Burmese', 'Khmer', 'macthai', 'Laotian', 'Georgian', 'Armenian', 'gb-2312-80', 
+   'Tibetan', 'Mongolian', 'Geez', 'maccyrillic', 'Vietnamese', 'Sindhi']
   
   # ISO (deprecated)
   ['ascii']
   
   # windows
-  ['symbol???', 'utf16be', 'shift_jis', 'gb18030', 'big5', 'euc-kr', 'johab???', null, null, null, 'ucs-4??']
+  # Docs here: http://msdn.microsoft.com/en-us/library/system.text.encoding(v=vs.110).aspx
+  ['symbol', 'utf16be', 'shift-jis', 'gb18030', 'big5', 'wansung', 'johab', null, null, null, 'ucs-4']
 ]
 
 LANGUAGES = [
@@ -251,7 +263,7 @@ LANGUAGES = [
   }
 ]
   
-module.exports.process = (stream) ->
+module.exports.process = (stream) ->  
   records = {}
   for record in @records
     # find out what language this is for
