@@ -14,16 +14,16 @@ class COLRGlyph extends Glyph
     for layer in @layers
       b = layer.glyph.bbox
       if b[0] < bbox[0]
-        b[0] = bbox[0]
+        bbox[0] = b[0]
         
       if b[1] < bbox[1]
-        b[1] = bbox[1]
+        bbox[1] = b[1]
         
       if b[2] > bbox[2]
-        b[2] = bbox[2]
+        bbox[2] = b[2]
         
       if b[3] > bbox[3]
-        b[3] = bbox[3]
+        bbox[3] = b[3]
           
     return bbox
       
