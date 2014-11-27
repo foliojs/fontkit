@@ -46,7 +46,7 @@ Range3 = new r.Struct
 
 FDSelect = new r.VersionedStruct r.uint8,
   0:
-    fds: new r.Array(r.uint8, 'nGlyphs')
+    fds: new r.Array(r.uint8, -> @parent.CharStrings.length)
     
   3:
     nRanges: r.uint16
