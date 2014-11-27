@@ -22,6 +22,7 @@ class TTFSubset extends Subset
   
     # if it is a compound glyph, include its components
     if glyf.numberOfContours < 0
+      buffer = new Buffer(buffer)
       for component in glyf.components
         gid = @includeGlyph component.glyphID
         buffer.writeUInt16BE gid, component.pos
