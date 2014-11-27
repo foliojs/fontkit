@@ -8,7 +8,10 @@ class Subset
     # always include the missing glyph
     @includeGlyph 0
     
-  includeGlyph: (glyph) ->
+  includeGlyph: (glyph) ->    
+    if typeof glyph is 'object'
+      glyph = glyph.id
+    
     unless @mapping[glyph]?
       @glyphs.push glyph
       @mapping[glyph] = @glyphs.length - 1
