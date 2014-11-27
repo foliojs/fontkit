@@ -22,6 +22,21 @@ class Path
       
     return new Function 'ctx', cmds.join('\n')
     
+  SVG_COMMANDS =
+    moveTo: 'M'
+    lineTo: 'L'
+    quadraticCurveTo: 'Q'
+    bezierCurveTo: 'C'
+    closePath: 'Z'
+    
+  # Converts the path to an SVG path data string
+  toSVG: ->
+    cmds = []
+    for c in @commands
+      cmds.push "#{SVG_COMMANDS[c.command]}#{c.args.join(' ')}"
+      
+    return cmds.join('')
+    
   get = (key, fn) =>
     Object.defineProperty @prototype, key,
       get: fn
