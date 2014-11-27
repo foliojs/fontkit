@@ -18,7 +18,7 @@ describe 'font subsetting', ->
       for glyph in font.glyphsForString 'hello'
         subset.includeGlyph glyph
         
-      subset.encodeStream concat (buf) ->
+      subset.encodeStream().pipe concat (buf) ->
         f = fontkit.create buf
         assert.equal f.numGlyphs, 5
         assert.equal f.getGlyph(1).path.toSVG(), font.glyphsForString('h')[0].path.toSVG()
@@ -28,7 +28,7 @@ describe 'font subsetting', ->
       subset = font.createSubset()
       subset.includeGlyph font.glyphsForString('é')[0]
       
-      subset.encodeStream concat (buf) ->
+      subset.encodeStream().pipe concat (buf) ->
         f = fontkit.create buf
         assert.equal f.numGlyphs, 4
         assert.equal f.getGlyph(1).path.toSVG(), font.glyphsForString('é')[0].path.toSVG()
@@ -46,7 +46,7 @@ describe 'font subsetting', ->
       for glyph in font.glyphsForString 'hello'
         subset.includeGlyph glyph
         
-      subset.encodeStream concat (buf) ->
+      subset.encodeStream().pipe concat (buf) ->
         stream = new r.DecodeStream buf
         cff = new CFFFont stream
         glyph = new CFFGlyph 1, [], { stream: stream, 'CFF ': cff }
@@ -59,7 +59,7 @@ describe 'font subsetting', ->
       for glyph in f.glyphsForString '갈휸'
         subset.includeGlyph glyph
         
-      subset.encodeStream concat (buf) ->
+      subset.encodeStream().pipe concat (buf) ->
         stream = new r.DecodeStream buf
         cff = new CFFFont stream
         glyph = new CFFGlyph 1, [], { stream: stream, 'CFF ': cff }
