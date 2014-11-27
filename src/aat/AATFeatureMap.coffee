@@ -324,7 +324,7 @@ class AATFeatureMap
     frac: feature 'fractions', 'diagonalFractions'
     dnom: feature 'fractions', 'diagonalFractions' # ??
     numr: feature 'fractions', 'diagonalFractions' # ??
-    # afrc: feature 'fractions', 'verticalFractions'
+    afrc: feature 'fractions', 'verticalFractions'
     # aalt
     # abvf, abvm, abvs, akhn, blwf, blwm, blws, cfar, cjct, cpsp, falt, isol, jalt, ljmo, mset?
     # ltra, ltrm, nukt, pref, pres, pstf, psts, rand, rkrf, rphf, rtla, rtlm, size, tjmo, tnum?
