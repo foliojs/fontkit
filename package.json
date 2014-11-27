@@ -16,6 +16,7 @@
   "devDependencies": {
     "coffee-coverage": "^0.4.2",
     "coffee-script": "^1.8.0",
+    "concat-stream": "^1.4.6",
     "mocha": "^2.0.1"
   }
 }
