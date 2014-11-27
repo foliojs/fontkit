@@ -167,12 +167,14 @@ class AATMorxProcessor
     if entry.markIndex isnt 0xffff
       lookup = subsitutions.getItem entry.markIndex
       lookupTable = new AATLookupTable lookup
-      @glyphs[@markedGlyph] = @font.getGlyph lookupTable.lookup @glyphs[@markedGlyph].id
+      glyph = @glyphs[@markedGlyph]
+      @glyphs[@markedGlyph] = @font.getGlyph lookupTable.lookup(glyph.id), glyph.codePoints
       
     if entry.currentIndex isnt 0xffff
       lookup = subsitutions.getItem entry.currentIndex
       lookupTable = new AATLookupTable lookup
-      @glyphs[index] = @font.getGlyph lookupTable.lookup @glyphs[index].id
+      glyph = @glyphs[index]
+      @glyphs[index] = @font.getGlyph lookupTable.lookup(glyph.id), glyph.codePoints
       
     if entry.flags & SET_MARK
       @markedGlyph = index
@@ -222,7 +224,7 @@ class AATMorxProcessor
     for glyph, index in glyphs when glyph.id isnt 0xffff
       gid = lookupTable.lookup glyph.id
       if gid # 0 means do nothing
-        glyphs[index] = @font.getGlyph gid
+        glyphs[index] = @font.getGlyph gid, glyph.codePoints
       
     return
     
