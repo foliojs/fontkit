@@ -125,7 +125,7 @@ class TTFFont
       
     return code
                 
-  glyphsForString: (str, userFeatures = []) ->
+  glyphsForString: (str, userFeatures) ->
     # Map character codes to glyph ids
     glyphs = []
     for i in [0...str.length]
@@ -134,6 +134,9 @@ class TTFFont
       
       # get the glyph
       glyphs.push @glyphForCodePoint codePointAt(str, i)
+      
+    return glyphs if userFeatures?.length is 0
+    userFeatures ?= []
           
     # apply glyph substitutions
     # first, try the OpenType GSUB table
@@ -177,13 +180,14 @@ class TTFFont
       
     return @hmtx.metrics[@hmtx.metrics.length - 1].advanceWidth * @scale
     
-  advancesForGlyphs: (glyphs, userFeatures = []) ->
+  advancesForGlyphs: (glyphs, userFeatures) ->
     x = 0
     advances = []
     for glyph in glyphs
       advances.push @widthOfGlyph glyph.id
       
-    return advances if userFeatures.length is 0
+    return advances if userFeatures?.length is 0
+    userFeatures ?= []
     
     if @GPOS?
       @_GPOSProcessor ?= new GPOSProcessor(this, @GPOS)
