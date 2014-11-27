@@ -74,7 +74,7 @@ class WOFF2Font extends TTFFont
       
     @_dataPos = @stream.pos
     
-  _decodeTable: (table) ->
+  _decompress: ->
     # decompress data and setup table offsets if we haven't already
     unless @_decompressed
       @stream.pos = @_dataPos
@@ -91,7 +91,9 @@ class WOFF2Font extends TTFFont
         
       @stream = new r.DecodeStream new Buffer decompressed      
       @_decompressed = true
-      
+    
+  _decodeTable: (table) ->
+    @_decompress()
     @stream.pos = table.offset
     super
     
@@ -135,6 +137,7 @@ class WOFF2Font extends TTFFont
     instructions: new Substream 'instructionStreamSize'
       
   _transformGlyfTable: ->
+    @_decompress()
     @stream.pos = @directory.tables.glyf.offset
     table = GlyfTable.decode @stream
     glyphs = []
