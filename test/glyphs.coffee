@@ -47,3 +47,24 @@ describe 'glyphs', ->
     it 'should get the glyph bbox', ->
       glyph = font.getGlyph 4
       assert.deepEqual glyph.bbox, [ 29, -714, 771, 3 ]
+
+  describe 'SBIX glyphs', ->
+    font = fontkit.openSync __dirname + '/data/Apple Color Emoji.ttf'
+    
+    it 'should get an SBIXGlyph', ->
+      glyph = font.glyphsForString('😜')[0]
+      assert.equal glyph.constructor.name, 'SBIXGlyph'
+      
+    it 'should have an empty path', ->
+      glyph = font.glyphsForString('😜')[0]
+      assert.equal glyph.path.toSVG(), 'M0 0M800 -800Z'
+      
+    it 'should get an image', ->
+      glyph = font.glyphsForString('😜')[0]
+      image = glyph.getImageForSize 32
+      assert.deepEqual image,
+        originX: 0
+        originY: 0
+        type: 'png '
+        data: image.data
+        
