@@ -93,7 +93,7 @@ The following properties describe the general metrics of the font. See [here](ht
 
 * `numGlyphs` - the number of glyphs in the font
 * `characterSet` - an array of all of the unicode code points supported by the font
-* `availableFeatures` - an array of all OpenType feature tags (or mapped AAT tags) supported by the font (see below for a description of this)
+* `availableFeatures` - an array of all [OpenType feature tags](https://www.microsoft.com/typography/otspec/featuretags.htm) (or mapped AAT tags) supported by the font (see below for a description of this)
 
 ### Character to glyph mapping
 
@@ -103,7 +103,7 @@ Fontkit includes several methods for character to glyph mapping, including suppo
 
 This method returns an array of Glyph objects for the given string. This may not be a one to one mapping if OpenType or AAT substitutions are applied.
 
-The `features` parameter is an array of OpenType feature tags to be applied. If this is an AAT font, the OpenType feature tags are mapped to AAT features. If nothing is passed to the `features` parameter, a set of default features are applied. To disable features entirely, explicitly pass an empty array to the `features` parameter.
+The `features` parameter is an array of [OpenType feature tags](https://www.microsoft.com/typography/otspec/featuretags.htm) to be applied. If this is an AAT font, the OpenType feature tags are mapped to AAT features. If nothing is passed to the `features` parameter, a set of default features are applied. To disable features entirely, explicitly pass an empty array to the `features` parameter.
 
 #### `font.glyphForCodePoint(codePoint)`
 
@@ -121,7 +121,7 @@ Fontkit includes several methods for accessing glyph metrics and performing layo
 
 Returns an array of advances for the given array of Glyph objects. Conceptually, an advance is the distance to move the “pen” after a glyph has been rendered, before the next glyph is rendered.
 
-The `features` parameter is an array of OpenType features tags to be applied. If this is an AAT font, only the ‘kern’ feature is supported. If nothing is passed to the `features` parameter, a set of default features are applied. To disable features entirely, explicitly pass an empty array to the `features` parameter.
+The `features` parameter is an array of [OpenType feature tags](https://www.microsoft.com/typography/otspec/featuretags.htm) to be applied. If this is an AAT font, only the ‘kern’ feature is supported. If nothing is passed to the `features` parameter, a set of default features are applied. To disable features entirely, explicitly pass an empty array to the `features` parameter.
 
 #### `font.widthOfString(string, features = null)`
 
