@@ -20,6 +20,11 @@ class CFFPointer extends r.Pointer
   
   encode: (stream, value, ctx) ->
     unless stream
+      # compute the size (so ctx.pointerSize is correct)
+      @offsetType =
+        size: -> 0
+        
+      @size(value, ctx)
       return [new Ptr 0]
     
     ptr = null
@@ -27,7 +32,7 @@ class CFFPointer extends r.Pointer
       encode: (stream, val) ->
         ptr = val
       
-    super
+    super    
     return [new Ptr ptr]
 
 module.exports = CFFPointer

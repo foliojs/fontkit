@@ -48,8 +48,7 @@ class CFFIndex
     # find maximum offset to detminine offset type
     offset = 1
     for item in arr
-      s = type.size(item, parent)
-      offset += s
+      offset += type.size(item, parent)
     
     offsetType = if offset <= 0xff  then r.uint8
     else if offset <= 0xffff        then r.uint16
