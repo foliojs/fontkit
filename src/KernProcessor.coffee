@@ -27,6 +27,7 @@ class KernProcessor
       s = table.subtable
       switch table.format
         when 0
+          # TODO: binary search
           for pair in s.pairs
             if pair.left is left and pair.right is right
               val = pair.value

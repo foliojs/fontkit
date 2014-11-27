@@ -19,7 +19,7 @@ describe 'character to glyph mapping', ->
       assert.deepEqual glyph.codePoints, [97]
       
     it 'should map a string to glyphs', ->
-      glyphs = font.glyphsForString 'hello'
+      glyphs = font.glyphsForString 'hello', []
       assert Array.isArray glyphs
       assert.equal glyphs.length, 5
       assert.deepEqual glyphs.map((g) -> g.id), [75, 72, 79, 79, 82]
@@ -75,4 +75,3 @@ describe 'character to glyph mapping', ->
       assert.equal glyphs.length, 2
       assert.deepEqual glyphs.map((g) -> g.id), [101, 86]
       assert.deepEqual glyphs.map((g) -> g.codePoints), [[2367], [2346]]
-      
