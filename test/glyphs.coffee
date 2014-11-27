@@ -91,3 +91,21 @@ describe 'glyphs', ->
       glyph = font.glyphsForString('😜')[0]
       assert.deepEqual glyph.bbox, [ 0, -2048, 2048, 0 ]
       
+  describe 'WOFF2 glyph', ->
+    font = fontkit.openSync __dirname + '/data/BigCaslon.woff2'
+    
+    it 'should get a WOFF2Glyph', ->
+      glyph = font.glyphsForString('T')[0]
+      assert.equal glyph.constructor.name, 'WOFF2Glyph'
+
+    it 'should get a path for the glyph', ->
+      glyph = font.glyphsForString('T')[0]
+      assert.equal glyph.path.toSVG(), 'M750 -535L718 -730Q695 -723 673.5 -718.5Q652 -714 619 -713Q581 -713 551 -712.5Q521 -712 493 -711.5Q465 -711 435 -711Q406 -711 369 -711Q332 -711 302 -711Q273 -711 245 -711Q217 -711 187 -711.5Q157 -712 119 -713Q82 -714 62.5 -717Q43 -720 20 -725L-10 -535L-1 -532Q5 -550 15.5 -569Q26 -588 37.5 -604.5Q49 -621 59.5 -635Q70 -649 78 -656Q99 -676 123.5 -684Q148 -692 186 -693Q205 -693 219.5 -693.5Q234 -694 247 -694Q261 -694 276 -694Q292 -694 313 -694L313 -363Q313 -336 313 -306Q313 -276 312.5 -248Q312 -220 311.5 -197Q311 -174 311 -160Q311 -144 310.5 -127Q310 -110 308.5 -95.5Q307 -81 304.5 -69.5Q302 -58 297 -53Q274 -27 250 -20Q226 -13 200 -10L200 0L525 0L525 -10Q503 -14 475.5 -22Q448 -30 433 -52Q425 -63 423.5 -89.5Q422 -116 422 -145L422 -367Q422 -398 422 -443Q422 -489 422 -536Q422 -583 422.5 -626Q423 -669 423 -694Q445 -694 460 -694Q476 -694 489 -694Q503 -694 517 -693.5Q531 -693 550 -693Q588 -692 612.5 -685.5Q637 -679 658 -659Q666 -652 677 -637.5Q688 -623 699.5 -606Q711 -589 722 -569.5Q733 -550 741 -532L750 -535Z'
+
+    it 'should get the glyph cbox', ->
+      glyph = font.glyphsForString('T')[0]
+      assert.deepEqual glyph.cbox, [ -10, -730, 750, 0 ]
+
+    it 'should get the glyph bbox', ->
+      glyph = font.glyphsForString('T')[0]
+      assert.deepEqual glyph.bbox, [ -10, -730, 750, 0 ]
