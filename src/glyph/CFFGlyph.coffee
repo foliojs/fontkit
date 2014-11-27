@@ -33,7 +33,6 @@ class CFFGlyph extends Glyph
     gsubrs = cff.globalSubrIndex or []
     gsubrsBias = bias gsubrs
     
-    # console.log cff.topDict.FDArray
     privateDict = cff.privateDictForGlyph @id
     subrs = privateDict.Subrs or []
     subrsBias = bias subrs
