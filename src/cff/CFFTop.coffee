@@ -68,6 +68,7 @@ class CFFPrivateOp
 FontDict = new CFFDict [
   # key       name                    type(s)                                 default
   [18,        'Private',              new CFFPrivateOp,                       null]
+  [[12, 38],  'FontName',             'sid',                                  null]
 ]
     
 CFFTopDict = new CFFDict [
