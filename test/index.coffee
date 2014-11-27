@@ -30,7 +30,7 @@ describe 'fontkit', ->
     font = fontkit.openSync __dirname + '/data/Helvetica.dfont', 'Helvetica'
     assert font instanceof fontkit.TTFFont
 
-    font = fontkit.openSync __dirname + '/data/MuseoSans_500-webfont.woff'
+    font = fontkit.openSync __dirname + '/data/MuseoSans.woff'
     assert font instanceof fontkit.WOFFFont
     assert font instanceof fontkit.TTFFont
 
