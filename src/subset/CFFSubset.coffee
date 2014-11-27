@@ -40,7 +40,7 @@ class CFFSubset extends Subset
   subsetFontdict: (topDict) ->
     topDict.FDArray = []
     topDict.FDSelect =
-      version: 1
+      version: 0
       fds: []
     
     used_fds = {}
@@ -50,18 +50,19 @@ class CFFSubset extends Subset
       continue unless fd?
       
       unless used_fds[fd]
-        topDict.FDArray.push _.cloneDeep @cff.FDArray[fd]
+        topDict.FDArray.push _.cloneDeep @cff.topDict.FDArray[fd]
         used_subrs.push {}
         
       used_fds[fd] = true
       topDict.FDSelect.fds.push topDict.FDArray.length - 1
       
       glyph = @font.getGlyph gid
-      path = glyph.path
+      path = glyph.path # this causes the glyph to be parsed
       for subr of glyph._usedSubrs
         used_subrs[used_subrs.length - 1][subr] = true
       
     for dict, i in topDict.FDArray
+      delete dict.FontName
       if dict.Private?.Subrs
         dict.Private.Subrs = @subsetSubrs dict.Private.Subrs, used_subrs[i]
         
