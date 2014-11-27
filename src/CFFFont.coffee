@@ -72,7 +72,7 @@ class CFFFont
     
     switch @topDict.FDSelect.version
       when 0
-        return @topDict.FDSelect[gid]
+        return @topDict.FDSelect.fds[gid]
       when 3
         ranges = @topDict.FDSelect.ranges
         low = 0
