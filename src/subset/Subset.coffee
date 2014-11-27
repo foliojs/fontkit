@@ -18,10 +18,13 @@ class Subset
       
     return @mapping[glyph]
     
-  encodeStream: (stream) ->
+  encodeStream: ->
     s = new r.EncodeStream
-    s.pipe stream
-    @encode s
-    s.end()
+    
+    process.nextTick =>
+      @encode s
+      s.end()
+      
+    return s
     
 module.exports = Subset
