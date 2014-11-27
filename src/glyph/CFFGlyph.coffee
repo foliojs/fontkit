@@ -30,11 +30,12 @@ class CFFGlyph extends Glyph
     @_usedGsubrs = usedGsubrs = {}
     @_usedSubrs = usedSubrs = {}
     
-    gsubrs = cff.globalSubrIndex
+    gsubrs = cff.globalSubrIndex or []
     gsubrsBias = bias gsubrs
     
+    # console.log cff.topDict.FDArray
     privateDict = cff.privateDictForGlyph @id
-    subrs = privateDict.Subrs
+    subrs = privateDict.Subrs or []
     subrsBias = bias subrs
     
     parseStems = ->
