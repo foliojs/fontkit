@@ -163,6 +163,8 @@ class TTFGlyph extends Glyph
         component.scale10 = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
         component.scaleY  = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
         
+      glyph.components.push component
+        
     return haveInstructions
   
   # Decodes font data, resolves composite glyphs, and returns an array of contours
