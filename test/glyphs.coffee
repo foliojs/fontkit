@@ -68,3 +68,26 @@ describe 'glyphs', ->
         type: 'png '
         data: image.data
         
+  describe 'COLR glyphs', ->
+    font = fontkit.openSync __dirname + '/data/ss-emoji-microsoft.ttf'
+    
+    it 'should get an SBIXGlyph', ->
+      glyph = font.glyphsForString('😜')[0]
+      assert.equal glyph.constructor.name, 'COLRGlyph'
+      
+    it 'should get layers', ->
+      glyph = font.glyphsForString('😜')[0]
+      assert.deepEqual glyph.layers, [
+        { glyph: font.getGlyph(247), color: { red: 252, green: 194, blue: 0, alpha: 255 }},
+        { glyph: font.getGlyph(248), color: { red: 159, green: 79, blue: 0, alpha: 255 }},
+        { glyph: font.getGlyph(249), color: { red: 229, green: 65, blue: 65, alpha: 255 }}
+      ]
+      
+    it 'should get empty path', ->
+      glyph = font.glyphsForString('😜')[0]
+      assert.equal glyph.path.toSVG(), ''
+      
+    it 'should get bbox', ->
+      glyph = font.glyphsForString('😜')[0]
+      assert.deepEqual glyph.bbox, [ 0, -2048, 2048, 0 ]
+      
