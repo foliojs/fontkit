@@ -31,7 +31,7 @@ Directory.preEncode = (stream) ->
       offset: new r.VoidPointer(Tables[tag], table)
       length: Tables[tag].size(table)
   
-  @version = 0x00010000
+  @tag = 'true'
   @numTables = tables.length
   @tables = tables
   
