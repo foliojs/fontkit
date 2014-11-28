@@ -91,6 +91,17 @@ describe 'glyphs', ->
       glyph = font.glyphsForString('😜')[0]
       assert.deepEqual glyph.bbox, [ 0, -2048, 2048, 0 ]
       
+  describe 'WOFF glyphs', ->
+    font = fontkit.openSync __dirname + '/data/MuseoSans.woff'
+    
+    it 'should get a TTFGlyph', ->
+      glyph = font.glyphsForString('T')[0]
+      assert.equal glyph.constructor.name, 'TTFGlyph'
+      
+    it 'should get a path for the glyph', ->
+      glyph = font.glyphsForString('T')[0]
+      assert.equal glyph.path.toSVG(), 'M5 -620L5 -706L588 -706L588 -620L346 -620L346 0L247 0L247 -620L5 -620Z'
+      
   describe 'WOFF2 glyph', ->
     font = fontkit.openSync __dirname + '/data/BigCaslon.woff2'
     

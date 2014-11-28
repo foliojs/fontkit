@@ -41,6 +41,14 @@ class TTFFont
       
     return this[key]
     
+  _getTableStream: (tag) ->
+    table = @directory.tables[tag]
+    if table
+      @stream.pos = table.offset
+      return @stream
+      
+    return null
+    
   _decodeDirectory: ->
     @directory = Directory.decode(@stream, _startOffset: 0)
     
