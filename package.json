@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "Advanced OpenType font engine",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "coverage": "mocha --require coverage.js --reporter html-cov > coverage.html"
   },
   "author": "Devon Govett <devongovett@gmail.com>",
   "license": "MIT",
