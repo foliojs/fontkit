@@ -8,17 +8,13 @@ class TTFSubset extends Subset
     glyf = @font.getGlyph(gid)._decode()
     
     # get the offset to the glyph from the loca table
-    stream = @font.stream
-    pos = stream.pos
-  
-    glyfOffset = @font.directory.tables.glyf.offset
     curOffset = @font.loca.offsets[gid]
     nextOffset = @font.loca.offsets[gid + 1]
-  
-    # parse the glyph from the glyf table
-    stream.pos = glyfOffset + curOffset
+    
+    stream = @font._getTableStream 'glyf'
+    stream.pos += curOffset
+    
     buffer = stream.readBuffer(nextOffset - curOffset)
-    stream.pos = pos
   
     # if it is a compound glyph, include its components
     if glyf.numberOfContours < 0

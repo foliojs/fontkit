@@ -39,17 +39,10 @@ class TTFGlyph extends Glyph
           
   # Parses just the glyph header and returns the bounding box
   _getCBox: ->
-    glyfOffset = @_font.directory.tables.glyf.offset
-    curOffset = @_font.loca.offsets[@id]
-    nextOffset = @_font.loca.offsets[@id + 1]
-    
-    stream = @_font.stream
-    pos = stream.pos
-    stream.pos = glyfOffset + curOffset
-    
+    stream = @_font._getTableStream 'glyf'
+    stream.pos += @_font.loca.offsets[@id]
     glyph = GlyfHeader.decode(stream)
     
-    stream.pos = pos
     return [glyph.xMin, glyph.yMin, glyph.xMax, -glyph.yMax]
     
   # Parses a single glyph coordinate
@@ -71,13 +64,9 @@ class TTFGlyph extends Glyph
   # Decodes the glyph data into points for simple glyphs, 
   # or components for composite glyphs
   _decode: ->
-    glyfOffset = @_font.directory.tables.glyf.offset
-    curOffset = @_font.loca.offsets[@id]
-    nextOffset = @_font.loca.offsets[@id + 1]
-    
-    stream = @_font.stream
-    pos = stream.pos
-    stream.pos = glyfOffset + curOffset
+    stream = @_font._getTableStream 'glyf'
+    stream.pos += @_font.loca.offsets[@id]
+    startPos = stream.pos
     
     glyph = GlyfHeader.decode(stream)
     
@@ -85,9 +74,8 @@ class TTFGlyph extends Glyph
       @_decodeSimple glyph, stream
       
     else if glyph.numberOfContours < 0
-      @_decodeComposite glyph, stream, glyfOffset + curOffset
+      @_decodeComposite glyph, stream, startPos
         
-    stream.pos = pos
     return glyph
     
   _decodeSimple: (glyph, stream) ->
