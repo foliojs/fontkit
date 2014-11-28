@@ -1,7 +1,8 @@
 TTFFont = require './TTFFont'
 WOFFDirectory = require './tables/WOFFDirectory'
 tables = require './tables'
-zlib = require 'browserify-zlib'
+pako = require 'pako'
+toBuffer = require 'typedarray-to-buffer'
 r = require 'restructure'
 
 class WOFFFont extends TTFFont
@@ -14,7 +15,7 @@ class WOFFFont extends TTFFont
       @stream.pos = table.offset
     
       if table.compLength < table.origLength
-        buf = zlib.inflateSync @stream.readBuffer(table.compLength)
+        buf = toBuffer pako.inflate @stream.readBuffer(table.compLength)
         return new r.DecodeStream(buf)
       else
         return @stream
