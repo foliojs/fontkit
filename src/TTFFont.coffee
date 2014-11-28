@@ -136,7 +136,7 @@ class TTFFont
       glyphs.push @glyphForCodePoint codePointAt(str, i)
       
     return glyphs if userFeatures?.length is 0
-    userFeatures ?= []
+    userFeatures ?= ['ccmp', 'liga', 'rlig', 'clig', 'calt']
           
     # apply glyph substitutions
     # first, try the OpenType GSUB table
@@ -187,7 +187,7 @@ class TTFFont
       advances.push @widthOfGlyph glyph.id
       
     return advances if userFeatures?.length is 0
-    userFeatures ?= []
+    userFeatures ?= ['kern'] # TODO 'mark', 'mkmk'
     
     if @GPOS?
       @_GPOSProcessor ?= new GPOSProcessor(this, @GPOS)
