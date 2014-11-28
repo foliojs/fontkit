@@ -10,6 +10,7 @@ Fontkit is an advanced font engine for Node and the browser, used by [PDFKit](ht
 * Advanced OpenType features including glyph substitution (GSUB) and positioning (GPOS)
 * Apple Advanced Typography (AAT) glyph substitution features (morx table)
 * Support for getting glyph vector paths and converting them to SVG paths, or rendering them to a graphics context
+* Supports TrueType (glyf) and PostScript (CFF) outlines
 * Support for color glyphs (e.g. emoji), including Apple’s SBIX table, and Microsoft’s COLR table
 * Font subsetting support - create a new font including only the specified glyphs
 
