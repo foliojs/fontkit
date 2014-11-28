@@ -11,7 +11,7 @@
     "brotli": "^1.0.0",
     "browserify-zlib": "^0.1.4",
     "lodash": "^2.4.1",
-    "restructure": "^0.1.5"
+    "restructure": "^0.1.6"
   },
   "devDependencies": {
     "coffee-coverage": "^0.4.2",
