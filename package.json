@@ -1,8 +1,16 @@
 {
   "name": "fontkit",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "An advanced font engine for Node and the browser",
-  "keywords": [ "opentype", "font", "typography", "subset", "emoji", "glyph", "layout" ],
+  "keywords": [
+    "opentype",
+    "font",
+    "typography",
+    "subset",
+    "emoji",
+    "glyph",
+    "layout"
+  ],
   "scripts": {
     "test": "mocha",
     "coverage": "mocha --require coverage.js --reporter html-cov > coverage.html",
