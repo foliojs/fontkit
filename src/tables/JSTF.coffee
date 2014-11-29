@@ -2,7 +2,6 @@ r = require 'restructure'
 {ScriptList, FeatureList, LookupList, Coverage, ClassDef, Device} = require './opentype'
 {GPOSLookup} = require './GPOS'
 
-JstfMax = new r.Array(new r.Pointer(r.uint16, GPOSLookup))
 JstfGSUBModList = new r.Array(r.uint16, r.uint16)
 
 JstfPriority = new r.Struct
@@ -10,12 +9,12 @@ JstfPriority = new r.Struct
   shrinkageDisableGSUB:   new r.Pointer(r.uint16, JstfGSUBModList)
   shrinkageEnableGPOS:    new r.Pointer(r.uint16, JstfGSUBModList)
   shrinkageDisableGPOS:   new r.Pointer(r.uint16, JstfGSUBModList)
-  shrinkageJstfMax:       new r.Pointer(r.uint16, JstfMax)
+  shrinkageJstfMax:       new r.Pointer(r.uint16, new LookupList(GPOSLookup))
   extensionEnableGSUB:    new r.Pointer(r.uint16, JstfGSUBModList)
   extensionDisableGSUB:   new r.Pointer(r.uint16, JstfGSUBModList)
   extensionEnableGPOS:    new r.Pointer(r.uint16, JstfGSUBModList)
   extensionDisableGPOS:   new r.Pointer(r.uint16, JstfGSUBModList)
-  extensionJstfMax:       new r.Pointer(r.uint16, JstfMax)
+  extensionJstfMax:       new r.Pointer(r.uint16, new LookupList(GPOSLookup))
 
 JstfLangSys = new r.Array(new r.Pointer(r.uint16, JstfPriority), r.uint16)
 
