@@ -9,10 +9,10 @@ class GSUBProcessor extends OpenTypeProcessor
         
         switch table.version
           when 1
-            @glyphs[@glyphIndex].id += table.deltaGlyphID
+            @glyphs[@glyphIndex] = @font.getGlyph @glyphs[@glyphIndex].id + table.deltaGlyphID
             
           when 2
-            @glyphs[@glyphIndex].id = table.substitute[index]
+            @glyphs[@glyphIndex] = @font.getGlyph table.substitute[index]
             
       when 2 # Multiple Substitution
         index = @coverageIndex table.coverage
@@ -22,7 +22,7 @@ class GSUBProcessor extends OpenTypeProcessor
       when 3 # Alternate Substitution
         index = @coverageIndex table.coverage
         unless index is -1
-          @glyphs[@glyphIndex].id = table.alternateSet[USER_INDEX] # TODO
+          @glyphs[@glyphIndex] = @font.getGlyph table.alternateSet[USER_INDEX] # TODO
     
       when 4 # Ligature Substitution
         index = @coverageIndex table.coverage
