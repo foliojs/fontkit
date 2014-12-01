@@ -71,10 +71,24 @@ class DFont
     
     for ref in @sfnt.refList
       if ref.name is name
-        substream = new r.DecodeStream @stream.buffer
-        substream.pos = @header.dataOffset + ref.dataOffset + 4
-        return new TTFFont substream
+        pos = @header.dataOffset + ref.dataOffset + 4
+        stream = new r.DecodeStream @stream.buffer.slice(pos)
+        return new TTFFont stream
         
     return null
+    
+  get = (key, fn) =>
+    Object.defineProperty @prototype, key,
+      get: fn
+      enumerable: true
+  
+  get 'fonts', ->
+    fonts = []
+    for ref in @sfnt.refList
+      pos = @header.dataOffset + ref.dataOffset + 4
+      stream = new r.DecodeStream @stream.buffer.slice(pos)
+      fonts.push new TTFFont stream
+      
+    return fonts
 
 module.exports = DFont

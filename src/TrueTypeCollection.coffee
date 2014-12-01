@@ -23,22 +23,26 @@ class TrueTypeCollection
     
   getFont: (name) ->
     for offset in @header.offsets
-      @stream.pos = offset
-      directory = Directory.decode(@stream, _startOffset: 0)
-      nameTable = directory.tables.name
-      unless nameTable
-        throw new Error "Font must have a name table."
-
-      @stream.pos = nameTable.offset
-      nameTable = tables.name.decode(@stream)
-      unless nameTable.records.postscriptName
-        throw new Error "Font must have a postscript name"
-
-      for lang, val of nameTable.records.postscriptName when val is name
-        substream = new r.DecodeStream @stream.buffer
-        substream.pos = offset
-        return new TTFFont substream
+      stream = new r.DecodeStream @stream.buffer
+      stream.pos = offset
+      font = new TTFFont stream
+      if font.postscriptName is name
+        return font
         
     return null
+    
+  get = (key, fn) =>
+    Object.defineProperty @prototype, key,
+      get: fn
+      enumerable: true
+  
+  get 'fonts', ->
+    fonts = []
+    for offset in @header.offsets
+      stream = new r.DecodeStream @stream.buffer
+      stream.pos = offset
+      fonts.push new TTFFont stream
+      
+    return fonts
     
 module.exports = TrueTypeCollection

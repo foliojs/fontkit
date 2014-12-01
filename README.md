@@ -150,6 +150,10 @@ For font collection files that contain multiple fonts in a single file, such as 
 
 Gets a font from the collection by its postscript name. Returns a Font object, described above.
 
+### `collection.fonts`
+
+This property is a lazily-loaded array of all of the fonts in the collection.
+
 ## Glyph objects
 
 Glyph objects represent a glyph in the font. They have various properties for accessing metrics and the actual vector path the glyph represents, and methods for rendering the glyph to a graphics context.
