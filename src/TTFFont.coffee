@@ -94,7 +94,7 @@ class TTFFont
     return @post.underlineThickness * @scale
     
   get 'italicAngle', ->
-    return @post.italicAngle / 65536 # convert from fixed point to decimal
+    return @post.italicAngle
     
   get 'capHeight', ->
     return this['OS/2']?.capHeight * @scale or @ascent
