@@ -3,7 +3,7 @@ r = require 'restructure'
 # PostScript information
 module.exports = new r.VersionedStruct r.int32,
   header: # these fields exist at the top of all versions
-    italicAngle:        r.int32   # Italic angle in counter-clockwise degrees from the vertical.
+    italicAngle:        r.fixed32 # Italic angle in counter-clockwise degrees from the vertical.
     underlinePosition:  r.int16   # Suggested distance of the top of the underline from the baseline 
     underlineThickness: r.int16   # Suggested values for the underline thickness
     isFixedPitch:       r.uint32  # Whether the font is monospaced
