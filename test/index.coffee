@@ -47,3 +47,23 @@ describe 'fontkit', ->
     assert.throws ->
       fontkit.openSync __filename
     , /Unknown font format/
+    
+  it 'should get collection objects for ttc fonts', ->
+    collection = fontkit.openSync __dirname + '/data/Chalkboard.ttc'
+    assert collection instanceof fontkit.TrueTypeCollection
+    
+    names = collection.fonts.map (f) -> f.postscriptName
+    assert.deepEqual names, ['Chalkboard', 'Chalkboard-Bold']
+    
+    font = collection.getFont 'Chalkboard-Bold'
+    assert.equal font.postscriptName, 'Chalkboard-Bold'
+    
+  it 'should get collection objects for dfonts', ->
+    collection = fontkit.openSync '/System/Library/Fonts/Helvetica.dfont'
+    assert collection instanceof fontkit.DFont
+        
+    names = collection.fonts.map (f) -> f.postscriptName
+    assert.deepEqual names, ['Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 'Helvetica-BoldOblique', 'Helvetica-Light', 'Helvetica-LightOblique']
+    
+    font = collection.getFont 'Helvetica-Bold'
+    assert.equal font.postscriptName, 'Helvetica-Bold'
