@@ -26,7 +26,7 @@ class UnboundedArray extends r.Array
 
 exports.UnboundedArray = UnboundedArray
 
-exports.LookupTable = (ValueType = r.uint16) ->  
+exports.LookupTable = LookupTable = (ValueType = r.uint16) ->  
   BinarySearchHeader = new r.Struct
     unitSize: r.uint16
     nUnits: r.uint16
@@ -64,3 +64,22 @@ exports.LookupTable = (ValueType = r.uint16) ->
       firstGlyph: r.uint16
       count: r.uint16
       values: new r.Array(ValueType, 'count')
+
+exports.StateTable = (entryData = {}, lookupType = r.uint16) ->  
+  entry = 
+    newState: r.uint16
+    flags: r.uint16
+    
+  for key, val of entryData
+    entry[key] = val
+    
+  Entry = new r.Struct entry
+  StateArray = new UnboundedArray(new r.Array(r.uint16, -> @nClasses))
+
+  StateHeader = new r.Struct
+    nClasses: r.uint32
+    classTable: new r.Pointer(r.uint32, new LookupTable(lookupType))
+    stateArray: new r.Pointer(r.uint32, StateArray)
+    entryTable: new r.Pointer(r.uint32, new UnboundedArray(Entry))
+    
+  return StateHeader

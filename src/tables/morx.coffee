@@ -1,66 +1,30 @@
 r = require 'restructure'
-{UnboundedArray, LookupTable} = require './aat'
-            
-StateArray = new UnboundedArray(new r.Array(r.uint16, -> @nClasses))
-    
-Entry = new r.Struct
-  newState: r.uint16
-  flags: r.uint16
+{UnboundedArray, LookupTable, StateTable} = require './aat'
+
+LigatureData =
   action: r.uint16
   
-ContextualEntry = new r.Struct
-  newState: r.uint16
-  flags: r.uint16
+ContextualData =
   markIndex: r.uint16
   currentIndex: r.uint16
   
-IndicEntry = new r.Struct
-  newState: r.uint16
-  flags: r.uint16
-  
-InsertionStateEntry = new r.Struct
-  newState: r.uint16
-  flags: r.uint16
+InsertionData =
   currentInsertIndex: r.uint16
   markedInsertIndex: r.uint16
-
-StateHeader = new r.Struct
-  nClasses: r.uint32
-  classTable: new r.Pointer(r.uint32, new LookupTable)
-  stateArray: new r.Pointer(r.uint32, StateArray)
-  entryTable: new r.Pointer(r.uint32, new UnboundedArray(Entry))
-  
-IndicStateHeader = new r.Struct
-  nClasses: r.uint32
-  classTable: new r.Pointer(r.uint32, new LookupTable)
-  stateArray: new r.Pointer(r.uint32, StateArray)
-  entryTable: new r.Pointer(r.uint32, new UnboundedArray(IndicEntry))
-
-ContextualStateHeader = new r.Struct
-  nClasses: r.uint32
-  classTable: new r.Pointer(r.uint32, new LookupTable)
-  stateArray: new r.Pointer(r.uint32, StateArray)
-  entryTable: new r.Pointer(r.uint32, new UnboundedArray(ContextualEntry))
-  
-InsertionStateHeader = new r.Struct
-  nClasses: r.uint32
-  classTable: new r.Pointer(r.uint32, new LookupTable)
-  stateArray: new r.Pointer(r.uint32, StateArray)
-  entryTable: new r.Pointer(r.uint32, new UnboundedArray(InsertionStateEntry))
   
 SubstitutionTable = new r.Struct
   items: new UnboundedArray(new r.Pointer(r.uint32, new LookupTable))
   
 SubtableData = new r.VersionedStruct 'type',
   0: # Indic Rearrangement Subtable
-    stateTable: IndicStateHeader
+    stateTable: new StateTable
 
   1: # Contextual Glyph Substitution Subtable
-    stateTable: ContextualStateHeader
+    stateTable: new StateTable ContextualData
     substitutionTable: new r.Pointer(r.uint32, SubstitutionTable)
 
   2: # Ligature subtable
-    stateTable: StateHeader
+    stateTable: new StateTable LigatureData
     ligatureActions: new r.Pointer(r.uint32, new UnboundedArray(r.uint32))
     components: new r.Pointer(r.uint32, new UnboundedArray(r.uint16))
     ligatureList: new r.Pointer(r.uint32, new UnboundedArray(r.uint16))
@@ -69,7 +33,7 @@ SubtableData = new r.VersionedStruct 'type',
     lookupTable: new LookupTable
 
   5: # Glyph Insertion Subtable
-    stateTable: InsertionStateHeader
+    stateTable: new StateTable InsertionData
     insertionActions: new r.Pointer(r.uint32, new UnboundedArray(r.uint16))
     
 Subtable = new r.Struct
