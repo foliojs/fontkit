@@ -70,10 +70,11 @@ class DFont
     return null unless @sfnt
     
     for ref in @sfnt.refList
-      if ref.name is name
-        pos = @header.dataOffset + ref.dataOffset + 4
-        stream = new r.DecodeStream @stream.buffer.slice(pos)
-        return new TTFFont stream
+      pos = @header.dataOffset + ref.dataOffset + 4
+      stream = new r.DecodeStream @stream.buffer.slice(pos)
+      font = new TTFFont stream
+      if font.postscriptName is name
+        return font
         
     return null
     
