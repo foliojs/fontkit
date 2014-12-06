@@ -6,7 +6,7 @@ NameRecord = new r.Struct
   languageID: r.uint16
   nameID:     r.uint16
   length:     r.uint16
-  string:     new r.Pointer(r.uint16, new r.String('length', -> ENCODINGS[@platformID][@encodingID]), type: 'parent', relativeTo: 'stringOffset', allowNull: false)
+  string:     new r.Pointer(r.uint16, new r.String('length', -> ENCODINGS[@platformID][@encodingID]), type: 'parent', relativeTo: 'parent.stringOffset', allowNull: false)
   
 LangTagRecord = new r.Struct
   length:  r.uint16
