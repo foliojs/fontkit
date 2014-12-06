@@ -26,7 +26,24 @@ class UnboundedArray extends r.Array
 
 exports.UnboundedArray = UnboundedArray
 
-exports.LookupTable = LookupTable = (ValueType = r.uint16) ->  
+exports.LookupTable = LookupTable = (ValueType = r.uint16) ->
+  # Helper class that makes internal structures invisible to pointers
+  class Shadow
+    constructor: (@type) ->
+    decode: (stream, ctx) ->
+      ctx = ctx.parent.parent
+      return @type.decode stream, ctx
+    
+    size: (val, ctx) ->
+      ctx = ctx.parent.parent
+      return @type.size val, ctx
+    
+    encode: (stream, val, ctx) ->
+      ctx = ctx.parent.parent
+      @type.encode stream, val, ctx
+  
+  ValueType = new Shadow ValueType
+  
   BinarySearchHeader = new r.Struct
     unitSize: r.uint16
     nUnits: r.uint16
