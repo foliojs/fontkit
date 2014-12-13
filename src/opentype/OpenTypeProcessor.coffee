@@ -12,6 +12,12 @@ class OpenTypeProcessor
     # initialize to default script + language
     @selectScript()
     
+    # Build a feature lookup table
+    @features = {}    
+    for featureIndex in @language.featureIndexes
+      record = @table.featureList[featureIndex]
+      @features[record.tag] = record.feature
+    
     # current context (set by applyFeatures)
     @glyphIndex = 0
     @glyphs = []
@@ -44,33 +50,32 @@ class OpenTypeProcessor
         
     @language ?= @script.defaultLangSys
     
-    # TODO: maybe do this lazily as needed for only the features/lookups needed?
-    @features = {}
-    @lookups = {}
-    
-    for featureIndex in @language.featureIndexes
-      record = @table.featureList[featureIndex]
-      @features[record.tag] = record.feature
+  lookupsForFeatures: (userFeatures = [], exclude) ->
+    lookups = []
+    for tag in userFeatures
+      feature = @features[tag]
+      continue unless feature
       
-      lookups = []
-      for lookupIndex in record.feature.lookupListIndexes
+      for lookupIndex in feature.lookupListIndexes
+        continue if exclude and lookupIndex in exclude
         lookups.push @table.lookupList[lookupIndex]
         
-      @lookups[record.tag] = lookups
+    return lookups
     
-    return
+  applyFeatures: (userFeatures, glyphs, advances) ->    
+    lookups = @lookupsForFeatures userFeatures
+    @applyLookups lookups, glyphs, advances
     
-  applyFeatures: (userFeatures, @glyphs, @advances) ->
+  applyLookups: (lookups, @glyphs, @advances) ->
     @glyphIndex = 0
     
     while @glyphIndex < @glyphs.length
-      for feature in userFeatures when feature of @lookups
-        for lookup in @lookups[feature]
-          for table in lookup.subTables
-            @applyLookup lookup.lookupType, table
-            
+      for lookup in lookups
+        for table in lookup.subTables
+          @applyLookup lookup.lookupType, table
+          
       @glyphIndex++
-    
+        
     return
     
   applyLookup: (lookup, table) ->
