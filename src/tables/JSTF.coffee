@@ -23,16 +23,16 @@ JstfLangSysRecord = new r.Struct
   jstfLangSys: new r.Pointer(r.uint16, JstfLangSys)
 
 JstfScript = new r.Struct
-  extenderGlyphs:     new r.Pointer(r.uint16, new r.Array(r.uint16, r.uint16)) # array of glyphs to extend line length
-  defaultJstfLangSys: new r.Pointer(r.uint16, JstfLangSys)
-  jstfLangSysCount:   r.uint16
-  jstfLangSysRecords: new r.Array(JstfLangSysRecord, 'jstfLangSysCount')
+  extenderGlyphs: new r.Pointer(r.uint16, new r.Array(r.uint16, r.uint16)) # array of glyphs to extend line length
+  defaultLangSys: new r.Pointer(r.uint16, JstfLangSys)
+  langSysCount:   r.uint16
+  langSysRecords: new r.Array(JstfLangSysRecord, 'langSysCount')
 
 JstfScriptRecord = new r.Struct
-  tag:        new r.String(4)
-  jstfScript: new r.Pointer(r.uint16, JstfScript, type: 'parent')
+  tag:    new r.String(4)
+  script: new r.Pointer(r.uint16, JstfScript, type: 'parent')
 
 module.exports = new r.Struct
-  version:            r.uint32  # should be 0x00010000
-  jstfScriptCount:    r.uint16
-  jstfScriptRecords:  new r.Array(JstfScriptRecord, 'jstfScriptCount')
+  version:     r.uint32  # should be 0x00010000
+  scriptCount: r.uint16
+  scriptList:  new r.Array(JstfScriptRecord, 'scriptCount')
