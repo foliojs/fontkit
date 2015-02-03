@@ -35,10 +35,10 @@ CFFCharset = new r.VersionedStruct r.uint8,
     glyphs: new r.Array(r.uint16, 'nGlyphs')
     
   1:
-    ranges: new r.Array(Range1, '')
+    ranges: new r.Array(Range1, 0)
     
   2:
-    ranges: new r.Array(Range2, '')
+    ranges: new r.Array(Range2, 0)
     
 Range3 = new r.Struct
   first: r.uint16
