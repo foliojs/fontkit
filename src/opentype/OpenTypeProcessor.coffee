@@ -14,9 +14,10 @@ class OpenTypeProcessor
     
     # Build a feature lookup table
     @features = {}    
-    for featureIndex in @language.featureIndexes
-      record = @table.featureList[featureIndex]
-      @features[record.tag] = record.feature
+    if @language?
+      for featureIndex in @language.featureIndexes
+        record = @table.featureList[featureIndex]
+        @features[record.tag] = record.feature
     
     # current context (set by applyFeatures)
     @glyphIndex = 0
