@@ -61,8 +61,8 @@ class AATMorxProcessor
     return glyphs
         
   processSubtable: (@subtable, @glyphs) ->
-    if subtable.type is 4
-      @processNoncontextualSubstitutions subtable, glyphs
+    if @subtable.type is 4
+      @processNoncontextualSubstitutions @subtable, @glyphs
       return
     
     @ligatureStack = []
@@ -71,16 +71,16 @@ class AATMorxProcessor
     @lastGlyph = null
     @markedIndex = null
     
-    stateMachine = new AATStateMachine subtable.table.stateTable
-    process = switch subtable.type
+    stateMachine = new AATStateMachine @subtable.table.stateTable
+    process = switch @subtable.type
       when 0 then @processIndicRearragement
       when 1 then @processContextualSubstitution
       when 2 then @processLigature
       when 5 then @processGlyphInsertion
-      else throw new Error "Invalid morx subtable type: #{subtable.type}"
+      else throw new Error "Invalid morx subtable type: #{@subtable.type}"
     
-    reverse = !!(subtable.coverage & REVERSE_DIRECTION)
-    stateMachine.process glyphs, reverse, process
+    reverse = !!(@subtable.coverage & REVERSE_DIRECTION)
+    stateMachine.process @glyphs, reverse, process
         
   processIndicRearragement: (glyph, entry, index) =>
     if entry.flags & MARK_FIRST
