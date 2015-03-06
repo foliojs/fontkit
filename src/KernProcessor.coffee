@@ -1,6 +1,6 @@
 class KernProcessor
   constructor: (@font) ->
-    @kern = font.kern
+    @kern = @font.kern
     
   process: (glyphs, advances) ->
     for glyph, glyphIndex in glyphs
