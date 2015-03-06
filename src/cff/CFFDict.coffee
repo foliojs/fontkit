@@ -5,7 +5,7 @@ CFFOperand = require './CFFOperand'
 class CFFDict
   constructor: (@ops = []) ->
     @fields = {}
-    for field in ops
+    for field in @ops
       key = if Array.isArray(field[0]) then field[0][0] << 8 | field[0][1] else field[0]
       @fields[key] = field
       
