@@ -111,7 +111,7 @@ class WOFF2Font extends TTFFont
   # Special class that accepts a length and returns a sub-stream for that data
   class Substream
     constructor: (@length) ->
-      @_buf = new r.Buffer length
+      @_buf = new r.Buffer @length
       
     decode: (stream, parent) ->
       return new r.DecodeStream @_buf.decode(stream, parent)
