@@ -1,4 +1,4 @@
-_ = require 'lodash'
+isEqual = require 'deep-equal'
 r = require 'restructure'
 CFFOperand = require './CFFOperand'
 
@@ -80,7 +80,7 @@ class CFFDict
         
     for k, field of @fields
       val = dict[field[1]]
-      continue if not val? or _.isEqual val, field[3]
+      continue if not val? or isEqual val, field[3]
       
       operands = encodeOperands field[2], null, ctx, val
       for op in operands
@@ -106,7 +106,7 @@ class CFFDict
     
     for field in @ops
       val = dict[field[1]]
-      continue if not val? or _.isEqual val, field[3]
+      continue if not val? or isEqual val, field[3]
               
       operands = encodeOperands field[2], stream, ctx, val
       for op in operands
