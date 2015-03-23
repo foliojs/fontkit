@@ -1,4 +1,4 @@
-_ = require 'lodash'
+cloneDeep = require 'clone'
 Subset = require './Subset'
 Directory = require '../tables/Directory'
 Tables = require '../tables'
@@ -59,16 +59,16 @@ class TTFSubset extends Subset
     while i < @glyphs.length
       @_addGlyph @glyphs[i++]
       
-    maxp = _.cloneDeep @font.maxp
+    maxp = cloneDeep @font.maxp
     maxp.numGlyphs = @glyf.length
       
     @loca.offsets.push @offset
     Tables.loca.preEncode.call @loca
     
-    head = _.cloneDeep @font.head
+    head = cloneDeep @font.head
     head.indexToLocFormat = @loca.version
     
-    hhea = _.cloneDeep @font.hhea
+    hhea = cloneDeep @font.hhea
     hhea.numberOfMetrics = @hmtx.metrics.length
         
     # map = []

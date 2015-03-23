@@ -1,5 +1,4 @@
 r = require 'restructure'
-_ = require 'lodash'
 
 class CFFIndex
   constructor: (@type) ->
