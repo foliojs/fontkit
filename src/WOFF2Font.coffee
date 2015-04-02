@@ -1,5 +1,5 @@
 r = require 'restructure'
-brotli = require 'brotli'
+brotli = require 'brotli/decompress'
 TTFFont = require './TTFFont'
 TTFGlyph = require './glyph/TTFGlyph'
 WOFF2Glyph = require './glyph/WOFF2Glyph'
@@ -85,11 +85,11 @@ class WOFF2Font extends TTFFont
         entry.offset = decompressedSize
         decompressedSize += entry.transformLength or entry.length
         
-      decompressed = brotli.decompress buffer, decompressedSize
+      decompressed = brotli buffer, decompressedSize
       unless decompressed
         throw new Error 'Error decoding compressed data in WOFF2'
         
-      @stream = new r.DecodeStream new Buffer decompressed      
+      @stream = new r.DecodeStream new Buffer decompressed
       @_decompressed = true
     
   _decodeTable: (table) ->
