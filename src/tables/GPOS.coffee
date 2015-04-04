@@ -17,10 +17,10 @@ class ValueRecord
     yPlacement: r.int16
     xAdvance:   r.int16
     yAdvance:   r.int16
-    xPlaDevice: new r.Pointer(r.uint16, Device)
-    yPlaDevice: new r.Pointer(r.uint16, Device)
-    xAdvDevice: new r.Pointer(r.uint16, Device)
-    yAdvDevice: new r.Pointer(r.uint16, Device)
+    xPlaDevice: new r.Pointer(r.uint16, Device, type: 'global', relativeTo: 'rel')
+    yPlaDevice: new r.Pointer(r.uint16, Device, type: 'global', relativeTo: 'rel')
+    xAdvDevice: new r.Pointer(r.uint16, Device, type: 'global', relativeTo: 'rel')
+    yAdvDevice: new r.Pointer(r.uint16, Device, type: 'global', relativeTo: 'rel')
     
   decode: (stream, parent) ->
     struct = parent
@@ -28,16 +28,17 @@ class ValueRecord
       struct = struct.parent
       
     return unless struct[@key]
-    
-    fields = {}
-    for key, included of struct[@key] when included
-      type = types[key]
-      if type instanceof r.Pointer
-        type.relativeTo = -> struct._startOffset
         
+    fields = {}
+    fields.rel = -> struct._startOffset
+        
+    for key, included of struct[@key] when included
+      type = types[key]        
       fields[key] = type
       
-    return new r.Struct(fields).decode(stream, parent)
+    res = new r.Struct(fields).decode(stream, parent)
+    delete res.rel
+    return res
   
 PairValueRecord = new r.Struct
   secondGlyph:    r.uint16
