@@ -177,7 +177,7 @@ class TTFFont
       aatFeatures = AATFeatureMap.mapAATToOT @_morxProcessor.getSupportedFeatures()
       features.push aatFeatures...
       
-    if t.kern? and (not t.GPOS or 'kern' not of @GPOS.features)
+    if t.kern? and (not t.GPOS or 'kern' not of @_GPOSProcessor.features)
       features.push 'kern'
     
     return features
