@@ -205,14 +205,14 @@ class TTFGlyph extends Glyph
           
         curvePt = firstPt
         
-      path.moveTo firstPt.x, -firstPt.y
+      path.moveTo firstPt.x, firstPt.y
       
       for j in [start...contour.length] by 1
         pt = contour[j]
         prevPt = if j is 0 then firstPt else contour[j - 1]
         
         if prevPt.onCurve and pt.onCurve
-          path.lineTo pt.x, -pt.y
+          path.lineTo pt.x, pt.y
         
         else if prevPt.onCurve and not pt.onCurve
           curvePt = pt
@@ -220,11 +220,11 @@ class TTFGlyph extends Glyph
         else if not prevPt.onCurve and not pt.onCurve
           midX = (prevPt.x + pt.x) / 2
           midY = (prevPt.y + pt.y) / 2
-          path.quadraticCurveTo prevPt.x, -prevPt.y, midX, -midY
+          path.quadraticCurveTo prevPt.x, prevPt.y, midX, midY
           curvePt = pt
           
         else if not prevPt.onCurve and pt.onCurve
-          path.quadraticCurveTo curvePt.x, -curvePt.y, pt.x, -pt.y
+          path.quadraticCurveTo curvePt.x, curvePt.y, pt.x, pt.y
           curvePt = null
           
         else
@@ -233,9 +233,9 @@ class TTFGlyph extends Glyph
       # Connect the first and last points
       if firstPt isnt lastPt
         if curvePt
-          path.quadraticCurveTo curvePt.x, -curvePt.y, firstPt.x, -firstPt.y
+          path.quadraticCurveTo curvePt.x, curvePt.y, firstPt.x, firstPt.y
         else
-          path.lineTo firstPt.x, -firstPt.y
+          path.lineTo firstPt.x, firstPt.y
           
     path.closePath()
     return path
