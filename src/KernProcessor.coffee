@@ -34,6 +34,7 @@ class KernProcessor
               break
               
         when 3
+          return 0 if left >= s.glyphCount or right >= s.glyphCount
           val = s.kernValue[s.kernIndex[s.leftClass[left] * s.rightClassCount + s.rightClass[right]]]
               
         else
