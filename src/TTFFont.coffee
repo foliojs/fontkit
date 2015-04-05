@@ -75,32 +75,29 @@ class TTFFont
   get 'version', ->
     @name.records.version?.English
     
-  get 'scale', ->
-    return 1000 / @head.unitsPerEm
-    
   get 'ascent', ->
-    return @hhea.ascent * @scale
+    return @hhea.ascent
     
   get 'descent', ->
-    return @hhea.descent * @scale
+    return @hhea.descent
     
   get 'lineGap', ->
-    return @hhea.lineGap * @scale
+    return @hhea.lineGap
     
   get 'underlinePosition', ->
-    return @post.underlinePosition * @scale
+    return @post.underlinePosition
     
   get 'underlineThickness', ->
-    return @post.underlineThickness * @scale
+    return @post.underlineThickness
     
   get 'italicAngle', ->
     return @post.italicAngle
     
   get 'capHeight', ->
-    return this['OS/2']?.capHeight * @scale or @ascent
+    return this['OS/2']?.capHeight or @ascent
     
   get 'xHeight', ->
-    return this['OS/2']?.xHeight * @scale or 0
+    return this['OS/2']?.xHeight or 0
     
   get 'numGlyphs', ->
     return @maxp.numGlyphs
@@ -109,7 +106,7 @@ class TTFFont
     return @head.unitsPerEm
     
   get 'bbox', ->
-    return [@head.xMin * @scale, @head.yMin * @scale, @head.xMax * @scale, @head.yMax * @scale]
+    return [@head.xMin, @head.yMin, @head.xMax, @head.yMax]
     
   get 'characterSet', ->
     @_cmapProcessor ?= new CmapProcessor @cmap
@@ -182,9 +179,14 @@ class TTFFont
     
     return features
     
+  _getMetrics: (table, glyph) ->
+    if glyph < table.metrics.length
+      return table.metrics[glyph]
+      
+    return table.metrics[table.metrics.length - 1]
+    
   widthOfGlyph: (glyph) ->
-    if glyph < @hmtx.metrics.length
-      return @hmtx.metrics[glyph].advanceWidth * @scale
+    return @_getMetrics(@hmtx, glyph).advanceWidth
       
     return @hmtx.metrics[@hmtx.metrics.length - 1].advanceWidth * @scale
     
