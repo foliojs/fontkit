@@ -13,6 +13,7 @@ SBIXGlyph = require './glyph/SBIXGlyph'
 COLRGlyph = require './glyph/COLRGlyph'
 TTFSubset = require './subset/TTFSubset'
 CFFSubset = require './subset/CFFSubset'
+BBox = require './glyph/BBox'
 
 class TTFFont
   constructor: (@stream) ->
@@ -106,7 +107,7 @@ class TTFFont
     return @head.unitsPerEm
     
   get 'bbox', ->
-    return [@head.xMin, @head.yMin, @head.xMax, @head.yMax]
+    @_bbox ?= Object.freeze new BBox @head.xMin, @head.yMin, @head.xMax, @head.yMax
     
   get 'characterSet', ->
     @_cmapProcessor ?= new CmapProcessor @cmap
