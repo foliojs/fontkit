@@ -1,5 +1,6 @@
 Glyph = require './Glyph'
 Path = require './Path'
+BBox = require './BBox'
 r = require 'restructure'
 
 class TTFGlyph extends Glyph
@@ -43,7 +44,8 @@ class TTFGlyph extends Glyph
     stream.pos += @_font.loca.offsets[@id]
     glyph = GlyfHeader.decode(stream)
     
-    return [glyph.xMin, glyph.yMin, glyph.xMax, -glyph.yMax]
+    cbox = new BBox glyph.xMin, glyph.yMin, glyph.xMax, glyph.yMax
+    return Object.freeze cbox
     
   # Parses a single glyph coordinate
   parseGlyphCoord = (stream, prev, short, same) ->
