@@ -68,8 +68,8 @@ Anchor = new r.VersionedStruct r.uint16,
     yDeviceTable:   new r.Pointer(r.uint16, Device)
   
 EntryExitRecord = new r.Struct
-  entryAnchor:    new r.Pointer(r.uint16, Anchor)
-  exitAnchor:     new r.Pointer(r.uint16, Anchor)
+  entryAnchor:    new r.Pointer(r.uint16, Anchor, type: 'parent')
+  exitAnchor:     new r.Pointer(r.uint16, Anchor, type: 'parent')
   
 MarkRecord = new r.Struct
   class:      r.uint16
