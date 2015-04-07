@@ -23,7 +23,8 @@ class GSUBProcessor extends OpenTypeProcessor
       when 3 # Alternate Substitution
         index = @coverageIndex table.coverage
         unless index is -1
-          @glyphs[@glyphIndex] = @font.getGlyph table.alternateSet[USER_INDEX], @glyphs[@glyphIndex].codePoints # TODO
+          USER_INDEX = 0
+          @glyphs[@glyphIndex] = @font.getGlyph table.alternateSet[index][USER_INDEX], @glyphs[@glyphIndex].codePoints # TODO
     
       when 4 # Ligature Substitution
         index = @coverageIndex table.coverage
@@ -83,7 +84,7 @@ class GSUBProcessor extends OpenTypeProcessor
           when 2
             return if @coverageIndex(table.coverage) is -1
             
-            index = getClassID glyphs[glyphIndex], table.inputClassDef
+            index = getClassID @glyphs[@glyphIndex], table.inputClassDef
             return if index is -1
             
             rules = table.chainSubClassSet[index]
