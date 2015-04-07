@@ -8,7 +8,7 @@ class KernProcessor
       
       left = glyphs[glyphIndex].id
       right = glyphs[glyphIndex + 1].id
-      advances[glyphIndex] += @getKerning(left, right) * @font.scale
+      advances[glyphIndex].xAdvance += @getKerning(left, right)
       
   getKerning: (left, right) ->
     res = 0
