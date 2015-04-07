@@ -54,7 +54,81 @@ class GPOSProcessor extends OpenTypeProcessor
             @applyPositionValue 0, pair.value1
             @applyPositionValue 1, pair.value2
       
+      when 4 # Mark to base positioning
+        markIndex = @coverageIndex table.markCoverage
+        return if markIndex is -1
+        
+        # search backward for a base glyph
+        baseGlyphIndex = @glyphIndex
+        while --baseGlyphIndex >= 0
+          break unless @glyphs[baseGlyphIndex].isMark
+        
+        return if baseGlyphIndex < 0
+        
+        baseIndex = @coverageIndex table.baseCoverage, @glyphs[baseGlyphIndex].id
+        return if baseIndex is -1
+        
+        markRecord = table.markArray[markIndex]
+        baseAnchor = table.baseArray[baseIndex][markRecord.class]
+        @applyAnchor markRecord, baseAnchor, baseGlyphIndex
+        
+      when 5 # Mark to ligature positioning
+        markIndex = @coverageIndex table.markCoverage
+        return if markIndex is -1
+        
+        # search backward for a base glyph
+        baseGlyphIndex = @glyphIndex
+        while --baseGlyphIndex >= 0
+          break unless @glyphs[baseGlyphIndex].isMark
+        
+        return if baseGlyphIndex < 0
+        
+        ligIndex = @coverageIndex table.ligatureCoverage, @glyphs[baseGlyphIndex].id
+        return if ligIndex is -1
+        
+        ligAttach = table.ligatureArray[ligIndex]
+        compIndex = @glyphs[baseGlyphIndex].codePoints.length - 1 # TODO: other positions than just the last component?
+                
+        markRecord = table.markArray[markIndex]
+        baseAnchor = ligAttach[compIndex][markRecord.class]
+        @applyAnchor markRecord, baseAnchor, baseGlyphIndex
+        
+      when 6 # Mark to mark positioning
+        mark1Index = @coverageIndex table.mark1Coverage
+        return if mark1Index is -1
+        
+        # get the previous mark to attach to
+        glyphIndex = @glyphIndex - 1
+        return if glyphIndex < 0 or not @glyphs[glyphIndex].isMark
+        
+        # TODO: check that marks below to the same ligature component?
+        
+        mark2Index = @coverageIndex table.mark2Coverage, @glyphs[glyphIndex].id
+        return if mark2Index is -1
+        
+        markRecord = table.mark1Array[mark1Index]
+        baseAnchor = table.mark2Array[mark2Index][markRecord.class]
+        @applyAnchor markRecord, baseAnchor, glyphIndex
+        
       else
-        throw new Error "Unsupported GPOS table!"
+        throw new Error "Unsupported GPOS table: #{lookupType}"
+        
+  applyAnchor: (markRecord, baseAnchor, baseGlyphIndex) ->
+    baseCoords = @getAnchor baseAnchor
+    markCoords = @getAnchor markRecord.markAnchor
+    
+    basePos = @advances[baseGlyphIndex]
+    markPos = @advances[@glyphIndex]
+    
+    markPos.xOffset = -basePos.xAdvance + basePos.xOffset + baseCoords.x - markCoords.x
+    markPos.yOffset = -basePos.yAdvance + basePos.yOffset + baseCoords.y - markCoords.y
+        
+  getAnchor: (anchor) ->
+    switch anchor.version
+      when 1
+        return { x: anchor.xCoordinate, y: anchor.yCoordinate }
+        
+      else
+        throw new Error "Unsupported anchor format: #{anchor.version}"
         
 module.exports = GPOSProcessor
