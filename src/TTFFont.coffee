@@ -188,37 +188,42 @@ class TTFFont
     
   widthOfGlyph: (glyph) ->
     return @_getMetrics(@hmtx, glyph).advanceWidth
-      
-    return @hmtx.metrics[@hmtx.metrics.length - 1].advanceWidth * @scale
     
-  advancesForGlyphs: (glyphs, userFeatures) ->
-    x = 0
-    advances = []
+  class GlyphPosition
+    constructor: (@xAdvance = 0, @yAdvance = 0, @xOffset = 0, @yOffset = 0) ->
+      
+  positionsForGlyphs: (glyphs, userFeatures) ->
+    positions = []
     for glyph in glyphs
-      advances.push @widthOfGlyph glyph.id
+      positions.push new GlyphPosition glyph.advanceWidth
       
-    return advances if userFeatures?.length is 0
-    userFeatures ?= ['kern'] # TODO 'mark', 'mkmk'
+    # if no user features array is given, use a default set
+    userFeatures ?= ['kern']
     
+    # always position marks with respect to base characters
+    userFeatures.push 'mark', 'mkmk'
+    
+    # if the font has an OpenType GPOS table, use that
     if @GPOS?
       @_GPOSProcessor ?= new GPOSProcessor(this, @GPOS)
-      @_GPOSProcessor.applyFeatures(userFeatures, glyphs, advances)
+      @_GPOSProcessor.applyFeatures(userFeatures, glyphs, positions)
       
-      return advances if 'kern' of @_GPOSProcessor.features
+    gposFeatures = @_GPOSProcessor?.features or {}
       
-    if 'kern' in userFeatures and @kern?
+    # if kerning is not supported by GPOS, do kerning with the TrueType/AAT kern table
+    if 'kern' not of gposFeatures and 'kern' in userFeatures and @kern?
       @_kernProcessor ?= new KernProcessor this
-      @_kernProcessor.process glyphs, advances
-        
-    return advances
+      @_kernProcessor.process glyphs, positions
+    
+    return positions
     
   widthOfString: (string, features) ->
     glyphs = @glyphsForString '' + string, features
-    advances = @advancesForGlyphs glyphs, features
+    positions = @positionsForGlyphs glyphs, features
     
     width = 0
-    for advance in advances
-      width += advance
+    for position in positions
+      width += position.xAdvance
     
     return width
     

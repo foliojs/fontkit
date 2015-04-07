@@ -2,10 +2,20 @@ OpenTypeProcessor = require './OpenTypeProcessor'
 
 class GPOSProcessor extends OpenTypeProcessor
   applyPositionValue: (sequenceIndex, value) ->
+    position = @advances[@glyphIndex + sequenceIndex]
     if value.xAdvance?
-      @advances[@glyphIndex + sequenceIndex] += value.xAdvance * @font.scale
+      position.xAdvance += value.xAdvance
       
-    # TODO: maybe other adjustments?
+    if value.yAdvance?
+      position.yAdvance += value.yAdvance
+      
+    if value.xPlacement?
+      position.xOffset += value.xPlacement
+      
+    if value.yPlacement?
+      position.yOffset += value.yPlacement
+            
+    # TODO: device tables
   
   applyLookup: (lookupType, table) ->
     switch lookupType
