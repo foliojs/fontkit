@@ -7,6 +7,7 @@ GPOSProcessor = require './opentype/GPOSProcessor'
 AATFeatureMap = require './aat/AATFeatureMap'
 AATMorxProcessor = require './aat/AATMorxProcessor'
 KernProcessor = require './KernProcessor'
+UnicodeLayoutEngine = require './UnicodeLayoutEngine'
 TTFGlyph = require './glyph/TTFGlyph'
 CFFGlyph = require './glyph/CFFGlyph'
 SBIXGlyph = require './glyph/SBIXGlyph'
@@ -209,6 +210,12 @@ class TTFFont
       @_GPOSProcessor.applyFeatures(userFeatures, glyphs, positions)
       
     gposFeatures = @_GPOSProcessor?.features or {}
+    
+    # if the mark and mkmk features are not supported by GPOS, or if
+    # there is no GPOS table, use unicode properties to position marks.
+    if 'mark' not of gposFeatures or 'mkmk' not of gposFeatures
+      @_unicodeLayoutEngine ?= new UnicodeLayoutEngine this
+      @_unicodeLayoutEngine.positionGlyphs glyphs, positions
       
     # if kerning is not supported by GPOS, do kerning with the TrueType/AAT kern table
     if 'kern' not of gposFeatures and 'kern' in userFeatures and @kern?

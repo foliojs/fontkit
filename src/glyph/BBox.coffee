@@ -24,5 +24,8 @@ class BBox
       
     if y > @maxY
       @maxY = y
+      
+  copy: ->
+    return new BBox @minX, @minY, @maxX, @maxY
 
 module.exports = BBox
