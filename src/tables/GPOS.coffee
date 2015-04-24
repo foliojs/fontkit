@@ -1,5 +1,5 @@
 r = require 'restructure'
-{ScriptList, FeatureList, LookupList, Coverage, ClassDef, Device} = require './opentype'
+{ScriptList, FeatureList, LookupList, Coverage, ClassDef, Device, Context, ChainingContext} = require './opentype'
 
 ValueFormat = new r.Bitfield r.uint16, [
   'xPlacement', 'yPlacement',
@@ -144,11 +144,9 @@ GPOSLookup = new r.VersionedStruct 'lookupType',
     mark1Array:         new r.Pointer(r.uint16, MarkArray)
     mark2Array:         new r.Pointer(r.uint16, BaseArray)
     
-  7: 
-    format: r.uint16
+  7: Context          # Contextual positioning
+  8: ChainingContext  # Chaining contextual positioning
     
-  8: 
-    format: r.uint16
     
   9: 
     format: r.uint16
