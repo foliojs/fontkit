@@ -4,7 +4,7 @@ unicode = require 'unicode-properties'
 class Glyph
   constructor: (@id, @codePoints, @_font) ->
     # TODO: get this info from GDEF if available
-    @isMark = @codePoints.length is 1 and unicode.isMark @codePoints[0]
+    @isMark = @codePoints.every unicode.isMark
     
   get = (key, fn) =>
     Object.defineProperty @prototype, key,
