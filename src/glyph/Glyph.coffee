@@ -5,6 +5,7 @@ class Glyph
   constructor: (@id, @codePoints, @_font) ->
     # TODO: get this info from GDEF if available
     @isMark = @codePoints.every unicode.isMark
+    @isLigature = @codePoints.length > 1
     
   get = (key, fn) =>
     Object.defineProperty @prototype, key,
