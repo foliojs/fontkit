@@ -147,9 +147,10 @@ GPOSLookup = new r.VersionedStruct 'lookupType',
   7: Context          # Contextual positioning
   8: ChainingContext  # Chaining contextual positioning
     
-    
-  9: 
-    format: r.uint16
+  9: # Extension Positioning
+    posFormat:   r.uint16
+    lookupType:  r.uint16   # cannot also be 9
+    extension:   new r.Pointer(r.uint32, GPOSLookup)
   
 module.exports = new r.Struct
   version:        r.int32
