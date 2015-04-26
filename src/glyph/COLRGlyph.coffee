@@ -1,13 +1,9 @@
 Glyph = require './Glyph'
 
 class COLRGlyph extends Glyph
+  get = require('../get')(this)
   class COLRLayer
     constructor: (@glyph, @color) ->
-      
-  get = (key, fn) =>
-    Object.defineProperty @prototype, key,
-      get: fn
-      enumerable: true
     
   _getBBox: ->
     bbox = [Infinity, Infinity, -Infinity, -Infinity]
