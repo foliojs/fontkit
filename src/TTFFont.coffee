@@ -17,6 +17,7 @@ CFFSubset = require './subset/CFFSubset'
 BBox = require './glyph/BBox'
 
 class TTFFont
+  get = require('./get')(this)
   constructor: (@stream) ->
     @_glyphs = {}
     @_decodeDirectory()
@@ -27,12 +28,7 @@ class TTFFont
         get: getTable.bind(this, table)
         
     return
-    
-  get = (key, fn) =>
-    Object.defineProperty @prototype, key,
-      get: fn
-      enumerable: true
-    
+        
   getTable = (table) ->
     key = '_' + table.tag
     unless key of this
@@ -78,34 +74,34 @@ class TTFFont
     @name.records.version?.English
     
   get 'ascent', ->
-    return @hhea.ascent
+    @hhea.ascent
     
   get 'descent', ->
-    return @hhea.descent
+    @hhea.descent
     
   get 'lineGap', ->
-    return @hhea.lineGap
+    @hhea.lineGap
     
   get 'underlinePosition', ->
-    return @post.underlinePosition
+    @post.underlinePosition
     
   get 'underlineThickness', ->
-    return @post.underlineThickness
+    @post.underlineThickness
     
   get 'italicAngle', ->
-    return @post.italicAngle
+    @post.italicAngle
     
   get 'capHeight', ->
-    return this['OS/2']?.capHeight or @ascent
+    this['OS/2']?.capHeight or @ascent
     
   get 'xHeight', ->
-    return this['OS/2']?.xHeight or 0
+    this['OS/2']?.xHeight or 0
     
   get 'numGlyphs', ->
-    return @maxp.numGlyphs
+    @maxp.numGlyphs
     
   get 'unitsPerEm', ->
-    return @head.unitsPerEm
+    @head.unitsPerEm
     
   get 'bbox', ->
     @_bbox ?= Object.freeze new BBox @head.xMin, @head.yMin, @head.xMax, @head.yMax

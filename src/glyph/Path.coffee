@@ -1,6 +1,7 @@
 BBox = require './BBox'
 
 class Path
+  get = require('../get')(this)
   constructor: ->
     @commands = []
     @_bbox = @_cbox = null
@@ -38,11 +39,6 @@ class Path
       cmds.push "#{SVG_COMMANDS[c.command]}#{c.args.join(' ')}"
       
     return cmds.join('')
-    
-  get = (key, fn) =>
-    Object.defineProperty @prototype, key,
-      get: fn
-      enumerable: true
     
   # Gets the "control box" of a path.
   # This is like the bounding box, but it includes all points including

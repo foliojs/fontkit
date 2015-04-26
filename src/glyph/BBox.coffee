@@ -1,10 +1,6 @@
 class BBox
+  get = require('../get')(this)
   constructor: (@minX = Infinity, @minY = Infinity, @maxX = -Infinity, @maxY = -Infinity) ->
-    
-  get = (key, fn) =>
-    Object.defineProperty @prototype, key,
-      get: fn
-      enumerable: true
       
   get 'width', ->
     @maxX - @minX

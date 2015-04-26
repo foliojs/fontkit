@@ -4,6 +4,7 @@ Directory = require './tables/directory'
 tables = require './tables'
 
 class TrueTypeCollection
+  get = require('./get')(this)
   TTCHeader = new r.VersionedStruct r.uint32,
     0x00010000:
       numFonts:   r.uint32
@@ -30,11 +31,6 @@ class TrueTypeCollection
         return font
         
     return null
-    
-  get = (key, fn) =>
-    Object.defineProperty @prototype, key,
-      get: fn
-      enumerable: true
   
   get 'fonts', ->
     fonts = []

@@ -5,6 +5,7 @@ CFFPrivateDict = require './cff/CFFPrivateDict'
 standardStrings = require './cff/CFFStandardStrings'
   
 class CFFFont
+  get = require('./get')(this)
   constructor: (@stream) ->
     @decode()
   
@@ -39,11 +40,6 @@ class CFFFont
         break
     
     return this
-    
-  get = (key, fn) =>
-    Object.defineProperty @prototype, key,
-      get: fn
-      enumerable: true
   
   string: (sid) ->
     if sid <= standardStrings.length
