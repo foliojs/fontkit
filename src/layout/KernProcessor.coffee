@@ -2,13 +2,13 @@ class KernProcessor
   constructor: (@font) ->
     @kern = @font.kern
     
-  process: (glyphs, advances) ->
+  process: (glyphs, positions) ->
     for glyph, glyphIndex in glyphs
       break if glyphIndex + 1 >= glyphs.length
       
       left = glyphs[glyphIndex].id
       right = glyphs[glyphIndex + 1].id
-      advances[glyphIndex].xAdvance += @getKerning(left, right)
+      positions[glyphIndex].xAdvance += @getKerning(left, right)
       
   getKerning: (left, right) ->
     res = 0

@@ -2,12 +2,7 @@ r = require 'restructure'
 Directory = require './tables/directory'
 tables = require './tables'
 CmapProcessor = require './CmapProcessor'
-GSUBProcessor = require './opentype/GSUBProcessor'
-GPOSProcessor = require './opentype/GPOSProcessor'
-AATFeatureMap = require './aat/AATFeatureMap'
-AATMorxProcessor = require './aat/AATMorxProcessor'
-KernProcessor = require './KernProcessor'
-UnicodeLayoutEngine = require './UnicodeLayoutEngine'
+LayoutEngine = require './layout/LayoutEngine'
 TTFGlyph = require './glyph/TTFGlyph'
 CFFGlyph = require './glyph/CFFGlyph'
 SBIXGlyph = require './glyph/SBIXGlyph'
@@ -128,54 +123,25 @@ class TTFFont
       
     return code
                 
-  glyphsForString: (str, userFeatures) ->
+  glyphsForString: (string) ->
     # Map character codes to glyph ids
     glyphs = []
-    for i in [0...str.length]
+    for i in [0...string.length] by 1
       # check for already processed low surrogates
-      continue if 0xdc00 <= str.charCodeAt(i) <= 0xdfff
+      continue if 0xdc00 <= string.charCodeAt(i) <= 0xdfff
       
       # get the glyph
-      glyphs.push @glyphForCodePoint codePointAt(str, i)
+      glyphs.push @glyphForCodePoint codePointAt(string, i)
       
-    return glyphs if userFeatures?.length is 0
-    userFeatures ?= ['ccmp', 'liga', 'rlig', 'clig', 'calt']
-          
-    # apply glyph substitutions
-    # first, try the OpenType GSUB table
-    # TODO: OT feature defaults for GSUB. AAT has defaults for each font built in
-    if userFeatures.length > 0 and @GSUB
-      @_GSUBProcessor ?= new GSUBProcessor(this, @GSUB)
-      @_GSUBProcessor.applyFeatures(userFeatures, glyphs)
-      
-    # if not found, try AAT morx table
-    else if @morx
-      @_morxProcessor ?= new AATMorxProcessor(this)
-      @_morxProcessor.process(glyphs, AATFeatureMap.mapOTToAAT(userFeatures))
-    
     return glyphs
     
+  layout: (string, userFeatures, script, language) ->
+    @_layoutEngine ?= new LayoutEngine this
+    return @_layoutEngine.layout string, userFeatures, script, language
+    
   get 'availableFeatures', ->
-    features = []
-    t = @directory.tables
-    
-    if t.GSUB?
-      @_GSUBProcessor ?= new GSUBProcessor(this, @GSUB)
-      features.push Object.keys(@_GSUBProcessor.features)...
-    
-    if t.GPOS?
-      @_GPOSProcessor ?= new GPOSProcessor(this, @GPOS)
-      features.push Object.keys(@_GPOSProcessor.features)...
-      
-    if t.morx?
-      @_morxProcessor ?= new AATMorxProcessor(this)
-      aatFeatures = AATFeatureMap.mapAATToOT @_morxProcessor.getSupportedFeatures()
-      features.push aatFeatures...
-      
-    if t.kern? and (not t.GPOS or 'kern' not of @_GPOSProcessor.features)
-      features.push 'kern'
-    
-    return features
+    @_layoutEngine ?= new LayoutEngine this
+    return @_layoutEngine.getAvailableFeatures()
     
   _getMetrics: (table, glyph) ->
     if glyph < table.metrics.length
@@ -185,50 +151,10 @@ class TTFFont
     
   widthOfGlyph: (glyph) ->
     return @_getMetrics(@hmtx, glyph).advanceWidth
-    
-  class GlyphPosition
-    constructor: (@xAdvance = 0, @yAdvance = 0, @xOffset = 0, @yOffset = 0) ->
-      
-  positionsForGlyphs: (glyphs, userFeatures) ->
-    positions = []
-    for glyph in glyphs
-      positions.push new GlyphPosition glyph.advanceWidth
-      
-    # if no user features array is given, use a default set
-    userFeatures ?= ['kern']
-    
-    # always position marks with respect to base characters
-    userFeatures.push 'mark', 'mkmk'
-    
-    # if the font has an OpenType GPOS table, use that
-    if @GPOS?
-      @_GPOSProcessor ?= new GPOSProcessor(this, @GPOS)
-      @_GPOSProcessor.applyFeatures(userFeatures, glyphs, positions)
-      
-    gposFeatures = @_GPOSProcessor?.features or {}
-    
-    # if the mark and mkmk features are not supported by GPOS, or if
-    # there is no GPOS table, use unicode properties to position marks.
-    if 'mark' not of gposFeatures or 'mkmk' not of gposFeatures
-      @_unicodeLayoutEngine ?= new UnicodeLayoutEngine this
-      @_unicodeLayoutEngine.positionGlyphs glyphs, positions
-      
-    # if kerning is not supported by GPOS, do kerning with the TrueType/AAT kern table
-    if 'kern' not of gposFeatures and 'kern' in userFeatures and @kern?
-      @_kernProcessor ?= new KernProcessor this
-      @_kernProcessor.process glyphs, positions
-    
-    return positions
-    
-  widthOfString: (string, features) ->
-    glyphs = @glyphsForString '' + string, features
-    positions = @positionsForGlyphs glyphs, features
-    
-    width = 0
-    for position in positions
-      width += position.xAdvance
-    
-    return width
+        
+  widthOfString: (string, features, script, language) ->
+    @_layoutEngine ?= new LayoutEngine this
+    return @_layoutEngine.layout(string, features, script, language).width
     
   _getBaseGlyph: (glyph, characters = []) ->
     unless @_glyphs[glyph]
