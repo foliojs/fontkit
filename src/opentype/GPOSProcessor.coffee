@@ -107,9 +107,24 @@ class GPOSProcessor extends OpenTypeProcessor
         # get the previous mark to attach to
         prevIndex = @glyphIterator.peekIndex -1
         prev = @glyphs[prevIndex]
-        # TODO: check that marks below to the same ligature component?
-        
         return unless prev?.isMark
+        
+        cur = @glyphIterator.cur
+        
+        # The following logic was borrowed from Harfbuzz
+        good = no
+        if cur.ligatureID is prev.ligatureID
+          if not cur.ligatureID # Marks belonging to the same base
+            good = yes
+          else if cur.ligatureComponent is prev.ligatureComponent # Marks belonging to the same ligature component
+            good = yes
+        else
+          # If ligature ids don't match, it may be the case that one of the marks
+          # itself is a ligature, in which case match.
+          if (cur.ligatureID and not cur.ligatureComponent) or (prev.ligatureID and not prev.ligatureComponent)
+            good = yes
+            
+        return unless good
         
         mark2Index = @coverageIndex table.mark2Coverage, prev.id
         return if mark2Index is -1
