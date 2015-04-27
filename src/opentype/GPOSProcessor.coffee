@@ -21,7 +21,7 @@ class GPOSProcessor extends OpenTypeProcessor
     switch lookupType
       when 1 # Single positioning value
         index = @coverageIndex table.coverage
-        return if index is -1
+        return false if index is -1
         
         switch table.version
           when 1
@@ -29,13 +29,15 @@ class GPOSProcessor extends OpenTypeProcessor
             
           when 2
             @applyPositionValue 0, table.values[index]
+            
+        return true
     
       when 2 # Pair Adjustment Positioning
         nextGlyph = @glyphIterator.peek()
-        return unless nextGlyph
+        return false unless nextGlyph
         
         index = @coverageIndex table.coverage
-        return if index is -1
+        return false if index is -1
       
         switch table.version
           when 1 # Adjustments for glyph pairs
@@ -49,43 +51,45 @@ class GPOSProcessor extends OpenTypeProcessor
           when 2 # Class pair adjustment
             class1 = @getClassID @glyphIterator.cur.id, table.classDef1
             class2 = @getClassID nextGlyph.id, table.classDef2    
-            return if class1 is -1 or class2 is -1
+            return false if class1 is -1 or class2 is -1
               
             pair = table.classRecords[class1][class2]
             @applyPositionValue 0, pair.value1
             @applyPositionValue 1, pair.value2
-      
+            
+        return true
       when 4 # Mark to base positioning
         markIndex = @coverageIndex table.markCoverage
-        return if markIndex is -1
+        return false if markIndex is -1
         
         # search backward for a base glyph
         baseGlyphIndex = @glyphIterator.index
         while --baseGlyphIndex >= 0
           break unless @glyphs[baseGlyphIndex].isMark
         
-        return if baseGlyphIndex < 0
+        return false if baseGlyphIndex < 0
         
         baseIndex = @coverageIndex table.baseCoverage, @glyphs[baseGlyphIndex].id
-        return if baseIndex is -1
+        return false if baseIndex is -1
         
         markRecord = table.markArray[markIndex]
         baseAnchor = table.baseArray[baseIndex][markRecord.class]
         @applyAnchor markRecord, baseAnchor, baseGlyphIndex
+        return true
         
       when 5 # Mark to ligature positioning
         markIndex = @coverageIndex table.markCoverage
-        return if markIndex is -1
+        return false if markIndex is -1
         
         # search backward for a base glyph
         baseGlyphIndex = @glyphIterator.index
         while --baseGlyphIndex >= 0
           break unless @glyphs[baseGlyphIndex].isMark
         
-        return if baseGlyphIndex < 0
+        return false if baseGlyphIndex < 0
         
         ligIndex = @coverageIndex table.ligatureCoverage, @glyphs[baseGlyphIndex].id
-        return if ligIndex is -1
+        return false if ligIndex is -1
         
         ligAttach = table.ligatureArray[ligIndex]
         
@@ -99,15 +103,16 @@ class GPOSProcessor extends OpenTypeProcessor
         markRecord = table.markArray[markIndex]
         baseAnchor = ligAttach[compIndex][markRecord.class]
         @applyAnchor markRecord, baseAnchor, baseGlyphIndex
+        return true
         
       when 6 # Mark to mark positioning
         mark1Index = @coverageIndex table.mark1Coverage
-        return if mark1Index is -1
+        return false if mark1Index is -1
         
         # get the previous mark to attach to
         prevIndex = @glyphIterator.peekIndex -1
         prev = @glyphs[prevIndex]
-        return unless prev?.isMark
+        return false unless prev?.isMark
         
         cur = @glyphIterator.cur
         
@@ -124,14 +129,15 @@ class GPOSProcessor extends OpenTypeProcessor
           if (cur.ligatureID and not cur.ligatureComponent) or (prev.ligatureID and not prev.ligatureComponent)
             good = yes
             
-        return unless good
+        return false unless good
         
         mark2Index = @coverageIndex table.mark2Coverage, prev.id
-        return if mark2Index is -1
+        return false if mark2Index is -1
         
         markRecord = table.mark1Array[mark1Index]
         baseAnchor = table.mark2Array[mark2Index][markRecord.class]
         @applyAnchor markRecord, baseAnchor, prevIndex
+        return true
         
       when 7 # Contextual positioning
         @applyContext table
@@ -144,6 +150,8 @@ class GPOSProcessor extends OpenTypeProcessor
         
       else
         throw new Error "Unsupported GPOS table: #{lookupType}"
+        
+    return false
         
   applyAnchor: (markRecord, baseAnchor, baseGlyphIndex) ->
     baseCoords = @getAnchor baseAnchor

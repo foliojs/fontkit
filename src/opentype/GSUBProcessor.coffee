@@ -12,11 +12,11 @@ class GSUBProcessor extends OpenTypeProcessor
         switch table.version
           when 1
             glyph.id += table.deltaGlyphID
-            return true
             
           when 2
             glyph.id = table.substitute[index]
-            return true
+            
+        return true
             
       when 2 # Multiple Substitution
         index = @coverageIndex table.coverage
