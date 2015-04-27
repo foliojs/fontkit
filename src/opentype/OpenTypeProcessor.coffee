@@ -77,7 +77,12 @@ class OpenTypeProcessor
         continue if exclude and lookupIndex in exclude
         lookups.push 
           feature: tag
+          index: lookupIndex
           lookup: @table.lookupList[lookupIndex]
+          
+    lookups.sort (a, b) ->
+      a.index - b.index
+      
     return lookups
     
   applyFeatures: (userFeatures, glyphs, advances) ->    
