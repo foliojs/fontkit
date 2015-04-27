@@ -18,6 +18,7 @@ class OpenTypeProcessor
     # current context (set by applyFeatures)
     @glyphs = []
     @positions = [] # only used by GPOS
+    @ligatureID = 1
   
   findScript: (script) ->
     for entry in @table.scriptList when entry.tag is script
