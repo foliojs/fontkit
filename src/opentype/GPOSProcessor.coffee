@@ -88,8 +88,14 @@ class GPOSProcessor extends OpenTypeProcessor
         return if ligIndex is -1
         
         ligAttach = table.ligatureArray[ligIndex]
-        compIndex = @glyphs[baseGlyphIndex].codePoints.length - 1 # TODO: other positions than just the last component?
-                
+        
+        markGlyph = @glyphIterator.cur
+        ligGlyph = @glyphs[baseGlyphIndex]
+        compIndex = if ligGlyph.ligatureID and ligGlyph.ligatureID is markGlyph.ligatureID and markGlyph.ligatureComponent?
+          Math.min(markGlyph.ligatureComponent, ligGlyph.codePoints.length) - 1
+        else
+          ligGlyph.codePoints.length - 1
+                    
         markRecord = table.markArray[markIndex]
         baseAnchor = ligAttach[compIndex][markRecord.class]
         @applyAnchor markRecord, baseAnchor, baseGlyphIndex
