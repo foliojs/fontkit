@@ -110,6 +110,15 @@ class GPOSProcessor extends OpenTypeProcessor
         baseAnchor = table.mark2Array[mark2Index][markRecord.class]
         @applyAnchor markRecord, baseAnchor, glyphIndex
         
+      when 7 # Contextual positioning
+        @applyContext table
+        
+      when 8 # Chaining contextual positioning
+        @applyChainingContext table
+        
+      when 9 # Extension positioning
+        @applyLookup table.lookupType, table.extension
+        
       else
         throw new Error "Unsupported GPOS table: #{lookupType}"
         
