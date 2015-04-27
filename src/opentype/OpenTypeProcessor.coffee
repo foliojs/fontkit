@@ -1,3 +1,5 @@
+Script = require '../layout/Script'
+
 class OpenTypeProcessor
   constructor: (@font, @table) ->
     @script = null
@@ -43,6 +45,7 @@ class OpenTypeProcessor
             
       @scriptTag = entry.tag
       @script = entry.script
+      @direction = Script.direction script
     
     if language? and language isnt @langugeTag
       for lang in @script.langSysRecords when lang.tag is language
