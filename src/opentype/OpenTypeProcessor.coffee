@@ -13,14 +13,7 @@ class OpenTypeProcessor
     
     # initialize to default script + language
     @selectScript()
-    
-    # Build a feature lookup table
-    @features = {}    
-    if @language?
-      for featureIndex in @language.featureIndexes
-        record = @table.featureList[featureIndex]
-        @features[record.tag] = record.feature
-    
+        
     # current context (set by applyFeatures)
     @glyphIndex = 0
     @glyphs = []
@@ -33,26 +26,46 @@ class OpenTypeProcessor
     return null
     
   selectScript: (script, language) ->
+    changed = false
     if not @script? or script isnt @scriptTag
       if script?
-        entry = @findScript script
+        if Array.isArray(script)
+          for s in script
+            entry = @findScript s
+            break if entry
+        else
+          entry = @findScript script
       
       entry ?= @findScript 'DFLT'
       entry ?= @findScript 'dflt'
       entry ?= @findScript 'latn'
-      
+
       return unless entry?
             
       @scriptTag = entry.tag
       @script = entry.script
       @direction = Script.direction script
+      @language = null
+      changed = true
     
     if language? and language isnt @langugeTag
       for lang in @script.langSysRecords when lang.tag is language
         @language = lang.langSys
+        @langugeTag = lang.tag
+        changed = true
         break
         
     @language ?= @script.defaultLangSys
+    
+    # Build a feature lookup table
+    if changed
+      @features = {}
+      if @language?
+        for featureIndex in @language.featureIndexes
+          record = @table.featureList[featureIndex]
+          @features[record.tag] = record.feature
+        
+    return
     
   lookupsForFeatures: (userFeatures = [], exclude) ->
     lookups = []
