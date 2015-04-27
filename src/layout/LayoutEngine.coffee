@@ -43,11 +43,6 @@ class LayoutEngine
     glyphs = @substitute glyphs, features, script
     positions = @position glyphs, features, script
     
-    # Reverse the glyphs and positions if the script is right-to-left
-    if Script.direction(script) is 'rtl'
-      glyphs.reverse()
-      positions.reverse()
-    
     return new GlyphRun glyphs, positions
     
   substitute: (glyphs, features, script, language) ->
@@ -59,8 +54,20 @@ class LayoutEngine
 
     # if not found, try AAT morx table
     else if @font.morx
+      # AAT expects the glyphs to be reversed prior to morx processing,
+      # so reverse the glyphs if the script is right-to-left.
+      isRTL = Script.direction(script) is 'rtl'
+      if isRTL
+        glyphs.reverse()
+      
       @morxProcessor ?= new AATMorxProcessor(@font)
       @morxProcessor.process(glyphs, AATFeatureMap.mapOTToAAT(features))
+      
+      # It is very unlikely, but possible for a font to have an AAT morx table
+      # along with an OpenType GPOS table. If so, reverse the glyphs again for
+      # GPOS, which expects glyphs to be in logical order.
+      if isRTL and @font.GPOS
+        glyphs.reverse()
       
     return glyphs
     
@@ -80,6 +87,11 @@ class LayoutEngine
       # Map the GlyphInfo objects back to real Glyphs
       for glyph, i in glyphs
         glyphs[i] = @font.getGlyph glyph.id, glyph.codePoints
+        
+      # Reverse the glyphs and positions if the script is right-to-left
+      if Script.direction(script) is 'rtl'
+        glyphs.reverse()
+        positions.reverse()
       
     gposFeatures = @GPOSProcessor?.features or {}
         
