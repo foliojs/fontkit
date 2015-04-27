@@ -32,6 +32,12 @@ class LayoutEngine
     # Attempt to detect the script from the first glyph if none is provided.
     # Assumes that all glyphs are 
     script ?= Script.fromUnicode unicode.getScript glyphs[0].codePoints[0]
+    
+    if @font.GSUB or @font.GPOS
+      # Map glyphs to GlyphInfo objects so data can be passed between
+      # GSUB and GPOS without mutating the real (shared) Glyph objects.
+      glyphs = for glyph, i in glyphs
+        new GlyphInfo glyph.id, [glyph.codePoints...], features
       
     # Substitute and position the glyphs
     glyphs = @substitute glyphs, features, script
@@ -70,6 +76,10 @@ class LayoutEngine
       @GPOSProcessor ?= new GPOSProcessor(@font, @font.GPOS)
       @GPOSProcessor.selectScript script, language
       @GPOSProcessor.applyFeatures(features, glyphs, positions)
+      
+      # Map the GlyphInfo objects back to real Glyphs
+      for glyph, i in glyphs
+        glyphs[i] = @font.getGlyph glyph.id, glyph.codePoints
       
     gposFeatures = @GPOSProcessor?.features or {}
         

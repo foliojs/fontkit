@@ -1,34 +1,40 @@
 OpenTypeProcessor = require './OpenTypeProcessor'
+GlyphInfo = require './GlyphInfo'
 
 class GSUBProcessor extends OpenTypeProcessor
   applyLookup: (lookupType, table) ->
     switch lookupType
       when 1 # Single Substitution
         index = @coverageIndex table.coverage
-        return if index is -1
+        return false if index is -1
         
-        glyph = @glyphs[@glyphIndex]
+        glyph = @glyphIterator.cur
         switch table.version
           when 1
-            @glyphs[@glyphIndex] = @font.getGlyph glyph.id + table.deltaGlyphID, glyph.codePoints
+            glyph.id += table.deltaGlyphID
+            return true
             
           when 2
-            @glyphs[@glyphIndex] = @font.getGlyph table.substitute[index], glyph.codePoints
+            glyph.id = table.substitute[index]
+            return true
             
       when 2 # Multiple Substitution
         index = @coverageIndex table.coverage
         unless index is -1
-          @glyphs.splice @glyphIndex, 1, table.sequence[index]... # FIX!!!!
+          sequence = table.sequence[index]
+          @glyphIterator.cur.id = sequence[0]
+          @glyphs.splice @glyphIterator.index + 1, 0, (new GlyphInfo gid for gid in sequence[1..])
+          return true
           
       when 3 # Alternate Substitution
         index = @coverageIndex table.coverage
         unless index is -1
-          USER_INDEX = 0
-          @glyphs[@glyphIndex] = @font.getGlyph table.alternateSet[index][USER_INDEX], @glyphs[@glyphIndex].codePoints # TODO
+          USER_INDEX = 0 # TODO
+          @glyphIterator.cur.id = table.alternateSet[index][USER_INDEX]
+          return true
     
       when 4 # Ligature Substitution
         index = @coverageIndex table.coverage
-        return if index is -1
             
         set = table.ligatureSets[index]
             
@@ -52,5 +58,7 @@ class GSUBProcessor extends OpenTypeProcessor
         
       else
         throw new Error "GSUB lookupType #{lookupType} is not supported"
+        
+    return false
         
 module.exports = GSUBProcessor
