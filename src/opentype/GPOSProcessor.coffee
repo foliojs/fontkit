@@ -2,7 +2,7 @@ OpenTypeProcessor = require './OpenTypeProcessor'
 
 class GPOSProcessor extends OpenTypeProcessor
   applyPositionValue: (sequenceIndex, value) ->
-    position = @advances[@glyphIndex + sequenceIndex]
+    position = @positions[@glyphIterator.peekIndex sequenceIndex]
     if value.xAdvance?
       position.xAdvance += value.xAdvance
       
@@ -31,7 +31,8 @@ class GPOSProcessor extends OpenTypeProcessor
             @applyPositionValue 0, table.values[index]
     
       when 2 # Pair Adjustment Positioning
-        return unless @glyphIndex + 1 < @glyphs.length
+        nextGlyph = @glyphIterator.peek()
+        return unless nextGlyph
         
         index = @coverageIndex table.coverage
         return if index is -1
@@ -40,14 +41,14 @@ class GPOSProcessor extends OpenTypeProcessor
           when 1 # Adjustments for glyph pairs
             set = table.pairSets[index]
             
-            for pair in set when pair.secondGlyph is @glyphs[@glyphIndex + 1].id
+            for pair in set when pair.secondGlyph is nextGlyph.id
               @applyPositionValue 0, pair.value1
               @applyPositionValue 1, pair.value2
               break
           
           when 2 # Class pair adjustment
-            class1 = @getClassID 0, table.classDef1
-            class2 = @getClassID 1, table.classDef2    
+            class1 = @getClassID @glyphIterator.cur.id, table.classDef1
+            class2 = @getClassID nextGlyph.id, table.classDef2    
             return if class1 is -1 or class2 is -1
               
             pair = table.classRecords[class1][class2]
@@ -59,7 +60,7 @@ class GPOSProcessor extends OpenTypeProcessor
         return if markIndex is -1
         
         # search backward for a base glyph
-        baseGlyphIndex = @glyphIndex
+        baseGlyphIndex = @glyphIterator.index
         while --baseGlyphIndex >= 0
           break unless @glyphs[baseGlyphIndex].isMark
         
@@ -77,7 +78,7 @@ class GPOSProcessor extends OpenTypeProcessor
         return if markIndex is -1
         
         # search backward for a base glyph
-        baseGlyphIndex = @glyphIndex
+        baseGlyphIndex = @glyphIterator.index
         while --baseGlyphIndex >= 0
           break unless @glyphs[baseGlyphIndex].isMark
         
@@ -98,17 +99,18 @@ class GPOSProcessor extends OpenTypeProcessor
         return if mark1Index is -1
         
         # get the previous mark to attach to
-        glyphIndex = @glyphIndex - 1
-        return if glyphIndex < 0 or not @glyphs[glyphIndex].isMark
-        
+        prevIndex = @glyphIterator.peekIndex -1
+        prev = @glyphs[prevIndex]
         # TODO: check that marks below to the same ligature component?
         
-        mark2Index = @coverageIndex table.mark2Coverage, @glyphs[glyphIndex].id
+        return unless prev?.isMark
+        
+        mark2Index = @coverageIndex table.mark2Coverage, prev.id
         return if mark2Index is -1
         
         markRecord = table.mark1Array[mark1Index]
         baseAnchor = table.mark2Array[mark2Index][markRecord.class]
-        @applyAnchor markRecord, baseAnchor, glyphIndex
+        @applyAnchor markRecord, baseAnchor, prevIndex
         
       when 7 # Contextual positioning
         @applyContext table
@@ -126,8 +128,9 @@ class GPOSProcessor extends OpenTypeProcessor
     baseCoords = @getAnchor baseAnchor
     markCoords = @getAnchor markRecord.markAnchor
     
-    basePos = @advances[baseGlyphIndex]
-    markPos = @advances[@glyphIndex]
+    basePos = @positions[baseGlyphIndex]
+    markPos = @positions[@glyphIterator.index]
+    
     
     markPos.xOffset = -basePos.xAdvance + basePos.xOffset + baseCoords.x - markCoords.x
     markPos.yOffset = -basePos.yAdvance + basePos.yOffset + baseCoords.y - markCoords.y
