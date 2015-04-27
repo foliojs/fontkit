@@ -131,9 +131,11 @@ class GPOSProcessor extends OpenTypeProcessor
     basePos = @positions[baseGlyphIndex]
     markPos = @positions[@glyphIterator.index]
     
+    markPos.xOffset = basePos.xOffset + baseCoords.x - markCoords.x
+    markPos.yOffset = basePos.yOffset + baseCoords.y - markCoords.y
     
-    markPos.xOffset = -basePos.xAdvance + basePos.xOffset + baseCoords.x - markCoords.x
-    markPos.yOffset = -basePos.yAdvance + basePos.yOffset + baseCoords.y - markCoords.y
+    if @direction is 'ltr'
+      markPos.xOffset -= basePos.xAdvance
         
   getAnchor: (anchor) ->
     switch anchor.version
