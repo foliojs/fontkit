@@ -1,3 +1,4 @@
+GlyphIterator = require './GlyphIterator'
 Script = require '../layout/Script'
 
 class OpenTypeProcessor
@@ -15,9 +16,8 @@ class OpenTypeProcessor
     @selectScript()
         
     # current context (set by applyFeatures)
-    @glyphIndex = 0
     @glyphs = []
-    @advances = [] # only used by GPOS
+    @positions = [] # only used by GPOS
   
   findScript: (script) ->
     for entry in @table.scriptList when entry.tag is script
@@ -75,23 +75,31 @@ class OpenTypeProcessor
       
       for lookupIndex in feature.lookupListIndexes
         continue if exclude and lookupIndex in exclude
-        lookups.push @table.lookupList[lookupIndex]
-        
+        lookups.push 
+          feature: tag
+          lookup: @table.lookupList[lookupIndex]
     return lookups
     
   applyFeatures: (userFeatures, glyphs, advances) ->    
     lookups = @lookupsForFeatures userFeatures
     @applyLookups lookups, glyphs, advances
     
-  applyLookups: (lookups, @glyphs, @advances) ->
-    @glyphIndex = 0
+  applyLookups: (lookups, @glyphs, @positions) ->
+    @glyphIterator = new GlyphIterator @glyphs
     
-    while @glyphIndex < @glyphs.length
-      for lookup in lookups
+    for {feature, lookup} in lookups
+      @glyphIterator.reset lookup.flags
+            
+      while @glyphIterator.index < @glyphs.length
+        unless feature of @glyphIterator.cur.features
+          @glyphIterator.index++
+          continue
+        
         for table in lookup.subTables
-          @applyLookup lookup.lookupType, table
+          res = @applyLookup lookup.lookupType, table
+          break if res
           
-      @glyphIndex++
+        @glyphIterator.index++
         
     return
     
@@ -99,20 +107,20 @@ class OpenTypeProcessor
     throw new Error "applyLookup must be implemented by subclasses"
       
   applyLookupList: (lookupRecords) ->
-    glyphIndex = @glyphIndex
+    glyphIndex = @glyphIterator.index
     
     for lookupRecord in lookupRecords
-      @glyphIndex = glyphIndex + lookupRecord.sequenceIndex
+      @glyphIterator.index = glyphIndex + lookupRecord.sequenceIndex
       
       lookup = @table.lookupList[lookupRecord.lookupListIndex]
       for table in lookup.subTables
         @applyLookup lookup.lookupType, table
     
-    @glyphIndex = glyphIndex                        
+    @glyphIterator.index = glyphIndex                        
     return
     
   coverageIndex: (coverage, glyph) ->
-    glyph ?= @glyphs[@glyphIndex].id
+    glyph ?= @glyphIterator.cur.id
     
     switch coverage.version
       when 1
@@ -125,27 +133,37 @@ class OpenTypeProcessor
       
     return -1
     
-  sequenceMatches: (sequenceIndex, sequence) ->
-    glyphIndex = @glyphIndex + sequenceIndex
-    return false if glyphIndex < 0 or glyphIndex + sequence.length > @glyphs.length
+  match: (sequenceIndex, sequence, fn, matched) ->    
+    pos = @glyphIterator.index
     
-    for component, i in sequence
-      return false unless component is @glyphs[glyphIndex + i].id
+    glyph = @glyphIterator.increment sequenceIndex    
+    idx = 0
+    
+    while idx < sequence.length and glyph and fn(sequence[idx], glyph.id)
+      matched?.push @glyphIterator.index
+      idx++
+      glyph = @glyphIterator.next()
       
-    return true
+    @glyphIterator.index = pos
+    if idx < sequence.length
+      return false
+      
+    return matched or true
+        
+  sequenceMatches: (sequenceIndex, sequence) ->
+    @match sequenceIndex, sequence, (component, glyph) ->
+      component is glyph
+      
+  sequenceMatchIndices: (sequenceIndex, sequence) ->
+    @match sequenceIndex, sequence, (component, glyph) ->
+      component is glyph
+    , []
     
   coverageSequenceMatches: (sequenceIndex, sequence) ->
-    glyphIndex = @glyphIndex + sequenceIndex
-    return false if glyphIndex < 0 or glyphIndex + sequence.length > @glyphs.length
+    @match sequenceIndex, sequence, (coverage, glyph) =>
+      @coverageIndex(coverage, glyph) >= 0
     
-    for coverage, i in sequence
-      return false if @coverageIndex(coverage, @glyphs[glyphIndex + i].id) is -1
-      
-    return true
-    
-  getClassID: (sequenceIndex, classDef) ->
-    glyph = @glyphs[@glyphIndex + sequenceIndex].id
-    
+  getClassID: (glyph, classDef) ->    
     switch classDef.version
       when 1 # Class array
         glyphID = classDef.startGlyph
@@ -159,12 +177,7 @@ class OpenTypeProcessor
     return -1
     
   classSequenceMatches: (sequenceIndex, sequence, classDef) ->
-    glyphIndex = @glyphIndex + sequenceIndex
-    return false if glyphIndex + sequence.length > @glyphs.length
-    
-    for classID, i in sequence
-      return false if classID isnt @getClassID i, classDef
-        
-    return true
-    
+    @match sequenceIndex, sequence, (classID, glyph) =>
+      classID is @getClassID glyph, classDef
+          
 module.exports = OpenTypeProcessor
