@@ -14,6 +14,7 @@ BBox = require './glyph/BBox'
 class TTFFont
   get = require('./get')(this)
   constructor: (@stream) ->
+    @_tables = {}
     @_glyphs = {}
     @_decodeDirectory()
     
@@ -25,14 +26,13 @@ class TTFFont
     return
         
   getTable = (table) ->
-    key = '_' + table.tag
-    unless key of this
+    unless table.tag of @_tables
       pos = @stream.pos
       @stream.pos = table.offset
-      this[key] = @_decodeTable table
+      @_tables[table.tag] = @_decodeTable table
       @stream.pos = pos
       
-    return this[key]
+    return @_tables[table.tag]
     
   _getTableStream: (tag) ->
     table = @directory.tables[tag]
