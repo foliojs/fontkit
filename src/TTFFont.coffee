@@ -184,5 +184,21 @@ class TTFFont
       return new CFFSubset this
       
     return new TTFSubset this
+    
+  # Returns an object describing the available variation axes
+  # that this font supports. Keys are setting tags, and values
+  # contain the axis name, range, and default value.
+  get 'variationAxes', ->    
+    res = {}
+    return res unless @fvar
+    
+    for axis in @fvar.axis
+      res[axis.axisTag] = 
+        name: axis.name
+        min: axis.minValue
+        default: axis.defaultValue
+        max: axis.maxValue
+        
+    return res
         
 module.exports = TTFFont
