@@ -45,6 +45,7 @@ class TTFFont
     return null
     
   _decodeDirectory: ->
+    @_directoryPos = @stream.pos
     @directory = Directory.decode(@stream, _startOffset: 0)
     
   _decodeTable: (table) ->
@@ -218,5 +219,33 @@ class TTFFont
       res[instance.name] = settings
         
     return res
+    
+  # Returns a new font with the given variation settings applied.
+  # Settings can either be an instance name, or an object containing
+  # variation tags as specified by the `variationAxes` property.
+  getVariation: (settings) ->
+    unless @directory.tables.fvar and @directory.tables.gvar and @directory.tables.glyf
+      throw new Error 'Variations require a font with the fvar, gvar, and glyf tables.'
+      
+    if typeof settings is 'string'
+      settings = @namedVariations[settings]
+    
+    if typeof settings isnt 'object'
+      throw new Error 'Variation settings must be either a variation name or settings object.'  
+    
+    # normalize the coordinates
+    coords = for axis, i in @fvar.axis
+      if axis.axisTag of settings
+        Math.max axis.minValue, Math.min axis.maxValue, settings[axis.axisTag]
+      else
+        axis.defaultValue
+        
+    stream = new r.DecodeStream @stream.buffer
+    stream.pos = @_directoryPos
+    
+    font = new TTFFont stream, coords
+    font._tables = @_tables
+    
+    return font
         
 module.exports = TTFFont
