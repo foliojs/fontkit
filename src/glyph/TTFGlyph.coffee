@@ -37,6 +37,8 @@ class TTFGlyph extends Glyph
   # Represents a point in a simple glyph
   class Point
     constructor: (@onCurve, @endContour, @x = 0, @y = 0) ->
+    copy: ->
+      new Point @onCurve, @endContour, @x, @y
     
   # Represents a component in a composite glyph
   class Component
@@ -46,6 +48,11 @@ class TTFGlyph extends Glyph
           
   # Parses just the glyph header and returns the bounding box
   _getCBox: ->
+    # We need to decode the glyph if variation processing is requested,
+    # so it's easier just to recompute the path's cbox after decoding.
+    if @_font._variationProcessor
+      return @path.cbox
+    
     stream = @_font._getTableStream 'glyf'
     stream.pos += @_font.loca.offsets[@id]
     glyph = GlyfHeader.decode(stream)
@@ -118,6 +125,7 @@ class TTFGlyph extends Glyph
     for flag, i in flags
       glyph.points[i].y = py = parseGlyphCoord stream, py, flag & Y_SHORT_VECTOR, flag & SAME_Y
       
+    @_font._variationProcessor?.transformPoints @id, glyph.points
     return
     
   _decodeComposite: (glyph, stream, offset = 0) ->
@@ -160,6 +168,16 @@ class TTFGlyph extends Glyph
         component.scaleY  = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
         
       glyph.components.push component
+      
+    if @_font._variationProcessor
+      points = for component in glyph.components
+        new Point yes, yes, component.dx, component.dy
+      
+      @_font._variationProcessor.transformPoints @id, points
+    
+      for point, i in points
+        glyph.components[i].dx = point.x
+        glyph.components[i].dy = point.y
         
     return haveInstructions
   
