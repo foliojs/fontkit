@@ -200,5 +200,21 @@ class TTFFont
         max: axis.maxValue
         
     return res
+    
+  # Returns an object describing the named variation instances
+  # that the font designer has specified. Keys are variation names
+  # and values are the variation settings for this instance.
+  get 'namedVariations', ->    
+    res = {}
+    return res unless @fvar
+    
+    for instance in @fvar.instance
+      settings = {}
+      for axis, i in @fvar.axis
+        settings[axis.axisTag] = instance.coord[i]
+      
+      res[instance.name] = settings
+        
+    return res
         
 module.exports = TTFFont
