@@ -7,13 +7,14 @@ TTFGlyph = require './glyph/TTFGlyph'
 CFFGlyph = require './glyph/CFFGlyph'
 SBIXGlyph = require './glyph/SBIXGlyph'
 COLRGlyph = require './glyph/COLRGlyph'
+GlyphVariationProcessor = require './glyph/GlyphVariationProcessor'
 TTFSubset = require './subset/TTFSubset'
 CFFSubset = require './subset/CFFSubset'
 BBox = require './glyph/BBox'
 
 class TTFFont
   get = require('./get')(this)
-  constructor: (@stream) ->
+  constructor: (@stream, variationCoords = null) ->    
     @_tables = {}
     @_glyphs = {}
     @_decodeDirectory()
@@ -23,7 +24,8 @@ class TTFFont
       Object.defineProperty this, tag,
         get: getTable.bind(this, table)
         
-    return
+    if variationCoords
+      @_variationProcessor = new GlyphVariationProcessor this, variationCoords
         
   getTable = (table) ->
     unless table.tag of @_tables
