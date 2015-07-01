@@ -104,8 +104,8 @@ class GlyphVariationProcessor
       else
         points = sharedPoints
       
-      # points.length = 0 means there are deltas for all points + 4 phantom points
-      nPoints = if points.length is 0 then glyphPoints.length + 4 else points.length
+      # points.length = 0 means there are deltas for all points
+      nPoints = if points.length is 0 then glyphPoints.length else points.length
       xDeltas = @decodeDeltas nPoints
       yDeltas = @decodeDeltas nPoints
             
