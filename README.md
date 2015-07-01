@@ -128,10 +128,6 @@ The `features` parameter is an array of [OpenType feature tags](https://www.micr
 
 Returns the width of the given string, applying the given features as described above. This is just the sum of `advancesForGlyphs(glyphsForString(string))`.
 
-#### `font.widthOfGlyph(glyph_id)`
-
-Returns the advance width (described above) for a single glyph id.
-
 ### Other methods
 
 #### `font.getGlyph(glyph_id, codePoints = [])`
@@ -167,7 +163,7 @@ You do not create glyph objects directly. They are created by various methods on
 * `path` - a vector Path object representing the glyph
 * `bbox` - the glyph’s bounding box, i.e. the rectangle that encloses the glyph outline as tightly as possible.
 * `cbox` - the glyph’s control box. This is often the same as the bounding box, but is faster to compute. Because of the way bezier curves are defined, some of the control points can be outside of the bounding box. Where `bbox` takes this into account, `cbox` does not. Thus, `cbox` is less accurate, but faster to compute. See [here](http://www.freetype.org/freetype2/docs/glyphs/glyphs-6.html#section-2) for a more detailed description.
-* `advanceWidth` - the glyph’s advance width. Equivalent to calling `font.widthOfGlyph(glyph.id)`
+* `advanceWidth` - the glyph’s advance width.
 
 ### `glyph.render(ctx, size)`
 

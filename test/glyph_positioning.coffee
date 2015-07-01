@@ -5,9 +5,6 @@ describe 'glyph positioning', ->
   describe 'basic positioning', ->
     font = fontkit.openSync __dirname + '/data/ACaslonPro-Regular.otf'
     
-    it 'should get a glyph width', ->
-      assert.equal font.widthOfGlyph(68), 354
-
     it 'should get advances for an array of glyphs', ->
       glyphs = font.glyphsForString 'Twitter', []
       advances = font.advancesForGlyphs glyphs, []
