@@ -125,7 +125,7 @@ class TTFFont
       return ((code - 0xd800) * 0x400) + (next - 0xdc00) + 0x10000
       
     return code
-                
+    
   glyphsForString: (string) ->
     # Map character codes to glyph ids
     glyphs = []
@@ -146,11 +146,15 @@ class TTFFont
     @_layoutEngine ?= new LayoutEngine this
     return @_layoutEngine.getAvailableFeatures()
     
-  _getMetrics: (table, glyph) ->
-    if glyph < table.metrics.length
-      return table.metrics[glyph]
+  _getMetrics: (table, gid) ->
+    if gid < table.metrics.length
+      return table.metrics[gid]
       
-    return table.metrics[table.metrics.length - 1]
+    res = 
+      advance: table.metrics[table.metrics.length - 1].advance
+      bearing: table.bearings[gid - table.metrics.length]
+      
+    return res
     
   widthOfGlyph: (glyph) ->
     return @_getMetrics(@hmtx, glyph).advanceWidth
