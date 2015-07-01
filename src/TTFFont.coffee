@@ -155,9 +155,6 @@ class TTFFont
       bearing: table.bearings[gid - table.metrics.length]
       
     return res
-    
-  widthOfGlyph: (glyph) ->
-    return @_getMetrics(@hmtx, glyph).advanceWidth
         
   widthOfString: (string, features, script, language) ->
     @_layoutEngine ?= new LayoutEngine this
