@@ -35,7 +35,9 @@ class Glyph
     
   render: (ctx, size) ->
     ctx.save()
-    ctx.scale 1 / @_font.head.unitsPerEm * size
+    
+    scale = 1 / @_font.head.unitsPerEm * size
+    ctx.scale(scale, scale)
 
     fn = @path.toFunction()
     fn(ctx)
