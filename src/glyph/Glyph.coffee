@@ -16,6 +16,9 @@ class Glyph
     
   _getBBox: ->
     @path.bbox
+    
+  _getAdvanceWidth: ->
+    @_font._getMetrics(@_font.hmtx, @id).advance
       
   get 'cbox', ->
     @_cbox ?= @_getCBox()
@@ -29,7 +32,7 @@ class Glyph
     @_path ?= @_getPath()
     
   get 'advanceWidth', ->
-    return @_font.widthOfGlyph @id
+    @_advanceWidth ?= @_getAdvanceWidth()
     
   get 'ligatureCaretPositions', ->
     

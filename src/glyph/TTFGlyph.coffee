@@ -125,7 +125,13 @@ class TTFGlyph extends Glyph
     for flag, i in flags
       glyph.points[i].y = py = parseGlyphCoord stream, py, flag & Y_SHORT_VECTOR, flag & SAME_Y
       
-    @_font._variationProcessor?.transformPoints @id, glyph.points
+    if @_font._variationProcessor
+      points = glyph.points.slice()
+      points.push @_getPhantomPoints(glyph)...
+      
+      @_font._variationProcessor.transformPoints @id, points
+      glyph.phantomPoints = points.slice -4
+      
     return
     
   _decodeComposite: (glyph, stream, offset = 0) ->
@@ -172,15 +178,41 @@ class TTFGlyph extends Glyph
     if @_font._variationProcessor
       points = for component in glyph.components
         new Point yes, yes, component.dx, component.dy
+        
+      points.push @_getPhantomPoints(glyph)...
       
       @_font._variationProcessor.transformPoints @id, points
+      glyph.phantomPoints = points.slice -4
     
       for point, i in points
         glyph.components[i].dx = point.x
         glyph.components[i].dy = point.y
         
     return haveInstructions
-  
+    
+  _getPhantomPoints: (glyph) ->
+    {advance:advanceWidth, bearing:leftBearing} = @_font._getMetrics(@_font.hmtx, @id)
+    
+    # For vertical metrics, use vmtx if available, or fall back to global data from OS/2 or hhea
+    if @_font.vmtx
+      {advance:advanceHeight, bearing:topBearing} = @_font._getMetrics(@_font.vmtx, @id)
+      
+    else if (os2 = @_font['OS/2']) and os2.version > 0
+      advanceHeight = Math.abs os2.typoAscender - os2.typoDescender
+      topBearing = os2.typoAscender - glyph.yMax
+      
+    else
+      hhea = @_font.hhea
+      advanceHeight = Math.abs hhea.ascent - hhea.descent
+      topBearing = hhea.ascent - glyph.yMax
+    
+    return [
+      new Point no, yes, glyph.xMin - leftBearing, 0
+      new Point no, yes, glyph.xMin - leftBearing + advanceWidth, 0
+      new Point no, yes, 0, glyph.yMax + topBearing
+      new Point no, yes, 0, glyph.yMax + topBearing + advanceHeight
+    ]
+    
   # Decodes font data, resolves composite glyphs, and returns an array of contours
   _getContours: ->
     glyph = @_decode()
@@ -194,6 +226,10 @@ class TTFGlyph extends Glyph
           points.push new Point point.onCurve, point.endContour, point.x + component.dx, point.y + component.dy
     else
       points = glyph.points
+      
+    # Recompute and cache advance width if we performed variation processing
+    if glyph.phantomPoints
+      @_advanceWidth = glyph.phantomPoints[1].x - glyph.phantomPoints[0].x
           
     contours = []
     cur = []
@@ -204,6 +240,14 @@ class TTFGlyph extends Glyph
         cur = []
     
     return contours
+    
+  _getAdvanceWidth: ->
+    if @_font._variationProcessor
+      # Decode the font data (and cache for later)
+      @_path ?= @_getPath()
+      return @_advanceWidth
+    else
+      super
     
   # Converts contours to a Path object that can be rendered
   _getPath: ->
