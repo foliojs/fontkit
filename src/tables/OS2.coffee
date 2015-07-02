@@ -31,29 +31,47 @@ module.exports = new r.VersionedStruct r.uint16,
     usLastCharIndex:        r.uint16  # The maximum Unicode index in this font
   
   # The Apple version of this table ends here, but the Microsoft one continues on...
+  0: {}
   
   1:
-    ascent:             r.int16
-    descent:            r.int16
-    lineGap:            r.int16
+    typoAscender:       r.int16
+    typoDescender:      r.int16
+    typoLineGap:        r.int16
     winAscent:          r.uint16
     winDescent:         r.uint16
-    codePageRange:      new r.Array(r.uint32, 2) # version 1+
+    codePageRange:      new r.Array(r.uint32, 2)
     
   2:
     # these should be common with version 1 somehow
-    ascent:             r.int16
-    descent:            r.int16
-    lineGap:            r.int16
+    typoAscender:       r.int16
+    typoDescender:      r.int16
+    typoLineGap:        r.int16
     winAscent:          r.uint16
     winDescent:         r.uint16
-    codePageRange:      new r.Array(r.uint32, 2) # version 1+
+    codePageRange:      new r.Array(r.uint32, 2)
     
     xHeight:            r.int16
     capHeight:          r.int16
     defaultChar:        r.uint16
     breakChar:          r.uint16
     maxContent:         r.uint16
+    
+  5:
+    typoAscender:       r.int16
+    typoDescender:      r.int16
+    typoLineGap:        r.int16
+    winAscent:          r.uint16
+    winDescent:         r.uint16
+    codePageRange:      new r.Array(r.uint32, 2)
+  
+    xHeight:            r.int16
+    capHeight:          r.int16
+    defaultChar:        r.uint16
+    breakChar:          r.uint16
+    maxContent:         r.uint16
+  
+    usLowerOpticalPointSize: r.uint16
+    usUpperOpticalPointSize: r.uint16
 
 os2 = module.exports.versions
 os2[3] = os2[4] = os2[2]
