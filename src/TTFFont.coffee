@@ -145,17 +145,7 @@ class TTFFont
   get 'availableFeatures', ->
     @_layoutEngine ?= new LayoutEngine this
     return @_layoutEngine.getAvailableFeatures()
-    
-  _getMetrics: (table, gid) ->
-    if gid < table.metrics.length
-      return table.metrics[gid]
-      
-    res = 
-      advance: table.metrics[table.metrics.length - 1].advance
-      bearing: table.bearings[gid - table.metrics.length]
-      
-    return res
-        
+            
   widthOfString: (string, features, script, language) ->
     @_layoutEngine ?= new LayoutEngine this
     return @_layoutEngine.layout(string, features, script, language).width

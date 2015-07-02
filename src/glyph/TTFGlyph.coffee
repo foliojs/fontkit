@@ -47,10 +47,10 @@ class TTFGlyph extends Glyph
       @scale = @xScale = @yScale = @scale01 = @scale10 = null
           
   # Parses just the glyph header and returns the bounding box
-  _getCBox: ->
+  _getCBox: (internal) ->
     # We need to decode the glyph if variation processing is requested,
     # so it's easier just to recompute the path's cbox after decoding.
-    if @_font._variationProcessor
+    if @_font._variationProcessor and not internal
       return @path.cbox
     
     stream = @_font._getTableStream 'glyf'
@@ -191,20 +191,10 @@ class TTFGlyph extends Glyph
     return haveInstructions
     
   _getPhantomPoints: (glyph) ->
-    {advance:advanceWidth, bearing:leftBearing} = @_font._getMetrics(@_font.hmtx, @id)
+    cbox = @_getCBox true
+    @_metrics ?= Glyph::_getMetrics.call this, cbox
     
-    # For vertical metrics, use vmtx if available, or fall back to global data from OS/2 or hhea
-    if @_font.vmtx
-      {advance:advanceHeight, bearing:topBearing} = @_font._getMetrics(@_font.vmtx, @id)
-      
-    else if (os2 = @_font['OS/2']) and os2.version > 0
-      advanceHeight = Math.abs os2.typoAscender - os2.typoDescender
-      topBearing = os2.typoAscender - glyph.yMax
-      
-    else
-      hhea = @_font.hhea
-      advanceHeight = Math.abs hhea.ascent - hhea.descent
-      topBearing = hhea.ascent - glyph.yMax
+    { advanceWidth, advanceHeight, leftBearing, topBearing } = @_metrics
     
     return [
       new Point no, yes, glyph.xMin - leftBearing, 0
@@ -227,10 +217,13 @@ class TTFGlyph extends Glyph
     else
       points = glyph.points
       
-    # Recompute and cache advance width if we performed variation processing
+    # Recompute and cache metrics if we performed variation processing
     if glyph.phantomPoints
-      @_advanceWidth = glyph.phantomPoints[1].x - glyph.phantomPoints[0].x
-          
+      @_metrics.advanceWidth  = glyph.phantomPoints[1].x - glyph.phantomPoints[0].x
+      @_metrics.advanceHeight = glyph.phantomPoints[3].y - glyph.phantomPoints[2].y
+      @_metrics.leftBearing   = glyph.xMin - glyph.phantomPoints[0].x
+      @_metrics.topBearing    = glyph.phantomPoints[2].y - glyph.yMax
+        
     contours = []
     cur = []
     for point in points
@@ -241,13 +234,16 @@ class TTFGlyph extends Glyph
     
     return contours
     
-  _getAdvanceWidth: ->
+  _getMetrics: ->
+    return @_metrics if @_metrics
+    super
+    
     if @_font._variationProcessor
-      # Decode the font data (and cache for later)
+      # Decode the font data (and cache for later).
+      # This triggers recomputation of metrics
       @_path ?= @_getPath()
-      return @_advanceWidth
-    else
-      super
+      
+    return @_metrics
     
   # Converts contours to a Path object that can be rendered
   _getPath: ->
