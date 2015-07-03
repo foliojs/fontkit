@@ -14,8 +14,8 @@ class LayoutEngine
         
   layout: (string, features = [], script, language) ->
     # Make the userFeatures parameter optional
-    if typeof userFeatures is 'string'
-      script = userFeatures
+    if typeof features is 'string'
+      script = features
       language = script
       features = []
     
@@ -30,7 +30,7 @@ class LayoutEngine
       return new GlyphRun glyphs, []
       
     # Attempt to detect the script from the first glyph if none is provided.
-    # Assumes that all glyphs are 
+    # Assumes that all glyphs are the same script.
     script ?= Script.fromUnicode unicode.getScript glyphs[0].codePoints[0]
     
     if @font.GSUB or @font.GPOS

@@ -1,7 +1,7 @@
 class GlyphIterator
   get = require('../get')(this)
-  constructor: (@glyphs, @flags = {}) ->
-    @index = 0
+  constructor: (@glyphs, flags) ->
+    @reset flags
     
   reset: (@flags = {}) ->
     @index = 0
