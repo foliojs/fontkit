@@ -30,8 +30,8 @@ class TTFSubset extends Subset
       @hmtx.metrics.push @font.hmtx.metrics[gid]
     else
       @hmtx.metrics.push
-        advanceWidth: @font.hmtx.metrics[@font.hmtx.metrics.length - 1].advanceWidth
-        leftSideBearing: @font.hmtx.leftSideBearings[gid - @font.hmtx.metrics.length]
+        width: @font.hmtx.metrics[@font.hmtx.metrics.length - 1].advanceWidth
+        bearing: @font.hmtx.bearings[gid - @font.hmtx.metrics.length]
       
     @offset += buffer.length
     return @glyf.length - 1
@@ -50,7 +50,7 @@ class TTFSubset extends Subset
     
     @hmtx =
       metrics: []
-      leftSideBearings: []
+      bearings: []
       
     # include all the glyphs
     # not using a for loop because we need to support adding more
