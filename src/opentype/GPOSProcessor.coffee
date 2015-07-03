@@ -46,11 +46,13 @@ class GPOSProcessor extends OpenTypeProcessor
             for pair in set when pair.secondGlyph is nextGlyph.id
               @applyPositionValue 0, pair.value1
               @applyPositionValue 1, pair.value2
-              break
+              return true
+              
+            return false
           
           when 2 # Class pair adjustment
             class1 = @getClassID @glyphIterator.cur.id, table.classDef1
-            class2 = @getClassID nextGlyph.id, table.classDef2    
+            class2 = @getClassID nextGlyph.id, table.classDef2
             return false if class1 is -1 or class2 is -1
               
             pair = table.classRecords[class1][class2]

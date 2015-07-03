@@ -37,10 +37,10 @@ describe 'character to glyph mapping', ->
       ]
 
     it 'should apply opentype GSUB features', ->
-      glyphs = font.glyphsForString 'ffi 1/2', ['liga', 'dlig', 'frac']
-      assert.equal glyphs.length, 5
-      assert.deepEqual glyphs.map((g) -> g.id), [323, 53, 601, 800, 619]
-      assert.deepEqual glyphs.map((g) -> g.codePoints), [[102, 102, 105], [32], [49], [47], [50]]
+      {glyphs} = font.layout 'ffi 1/2', ['liga', 'dlig', 'frac']
+      assert.equal glyphs.length, 3
+      assert.deepEqual glyphs.map((g) -> g.id), [323, 53, 124]
+      assert.deepEqual glyphs.map((g) -> g.codePoints), [[102, 102, 105], [32], [49, 47, 50]]
       
   describe 'AAT features', ->
     font = fontkit.openSync __dirname + '/data/Skia.ttf'
@@ -52,26 +52,20 @@ describe 'character to glyph mapping', ->
       ]
 
     it 'should apply default AAT morx features', ->
-      glyphs = font.glyphsForString 'ffi 1⁄2'
+      {glyphs} = font.layout 'ffi 1⁄2'
       assert.equal glyphs.length, 5
       assert.deepEqual glyphs.map((g) -> g.id), [535, 3, 389, 218, 408]
       assert.deepEqual glyphs.map((g) -> g.codePoints), [[102, 102, 105], [32], [49], [8260], [50]]
-      
-    it 'should apply no features if an empty array is passed', ->
-      glyphs = font.glyphsForString 'ffi 1⁄2', []
-      assert.equal glyphs.length, 7
-      assert.deepEqual glyphs.map((g) -> g.id), [102, 102, 105, 3, 49, 218, 50]
-      assert.deepEqual glyphs.map((g) -> g.codePoints), [[102], [102], [105], [32], [49], [8260], [50]]
-      
+            
     it 'should apply user specified features', ->
-      glyphs = font.glyphsForString 'ffi 1⁄2', ['afrc'] # switch to vertical fractions
+      {glyphs} = font.layout 'ffi 1⁄2', ['afrc'] # switch to vertical fractions
       assert.equal glyphs.length, 3
       assert.deepEqual glyphs.map((g) -> g.id), [535, 3, 451]
       assert.deepEqual glyphs.map((g) -> g.codePoints), [[102, 102, 105], [32], [49, 8260, 50]]
 
     it 'should apply indic reordering features', ->
       f = fontkit.openSync __dirname + '/data/DevanagariMT.ttc', 'DevanagariMT'
-      glyphs = f.glyphsForString 'पि'
+      {glyphs} = f.layout 'पि'
       assert.equal glyphs.length, 2
       assert.deepEqual glyphs.map((g) -> g.id), [101, 86]
       assert.deepEqual glyphs.map((g) -> g.codePoints), [[2367], [2346]]
