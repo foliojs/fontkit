@@ -72,8 +72,14 @@ class TTFGlyph extends Glyph
   # Decodes the glyph data into points for simple glyphs, 
   # or components for composite glyphs
   _decode: ->
+    glyfPos = @_font.loca.offsets[@id]
+    nextPos = @_font.loca.offsets[@id + 1]
+    
+    # Nothing to do if there is no data for this glyph
+    return null if glyfPos is nextPos
+    
     stream = @_font._getTableStream 'glyf'
-    stream.pos += @_font.loca.offsets[@id]
+    stream.pos += glyfPos
     startPos = stream.pos
     
     glyph = GlyfHeader.decode(stream)
@@ -166,6 +172,8 @@ class TTFGlyph extends Glyph
   # Decodes font data, resolves composite glyphs, and returns an array of contours
   _getContours: ->
     glyph = @_decode()
+    return [] unless glyph
+    
     if glyph.numberOfContours < 0
       # resolve composite glyphs
       points = []
