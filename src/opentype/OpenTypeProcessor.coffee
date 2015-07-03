@@ -86,7 +86,7 @@ class OpenTypeProcessor
       
     return lookups
     
-  applyFeatures: (userFeatures, glyphs, advances) ->    
+  applyFeatures: (userFeatures, glyphs, advances) ->
     lookups = @lookupsForFeatures userFeatures
     @applyLookups lookups, glyphs, advances
     

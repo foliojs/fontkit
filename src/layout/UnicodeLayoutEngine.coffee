@@ -11,8 +11,8 @@ class UnicodeLayoutEngine
     
   positionGlyphs: (glyphs, positions) ->
     # find each base + mark cluster, and position the marks relative to the base
-    clusterStart = -1
-    clusterEnd = -1
+    clusterStart = 0
+    clusterEnd = 0
     for glyph, index in glyphs        
       if glyph.isMark # TODO: handle ligatures
         clusterEnd = index

@@ -1,4 +1,5 @@
 Glyph = require './Glyph'
+BBox = require './BBox'
 
 class COLRGlyph extends Glyph
   get = require('../get')(this)
@@ -6,20 +7,11 @@ class COLRGlyph extends Glyph
     constructor: (@glyph, @color) ->
     
   _getBBox: ->
-    bbox = [Infinity, Infinity, -Infinity, -Infinity]
+    bbox = new BBox
     for layer in @layers
       b = layer.glyph.bbox
-      if b[0] < bbox[0]
-        bbox[0] = b[0]
-        
-      if b[1] < bbox[1]
-        bbox[1] = b[1]
-        
-      if b[2] > bbox[2]
-        bbox[2] = b[2]
-        
-      if b[3] > bbox[3]
-        bbox[3] = b[3]
+      bbox.addPoint b.minX, b.minY
+      bbox.addPoint b.maxX, b.maxY
           
     return bbox
       
