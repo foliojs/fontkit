@@ -1,6 +1,7 @@
 GSUBProcessor = require '../opentype/GSUBProcessor'
 GPOSProcessor = require '../opentype/GPOSProcessor'
 GlyphInfo = require '../opentype/GlyphInfo'
+Shapers = require '../opentype/shapers'
 AATFeatureMap = require '../aat/AATFeatureMap'
 AATMorxProcessor = require '../aat/AATMorxProcessor'
 KernProcessor = require './KernProcessor'
@@ -34,10 +35,22 @@ class LayoutEngine
     script ?= Script.fromUnicode unicode.getScript glyphs[0].codePoints[0]
     
     if @font.GSUB or @font.GPOS
+      shaper = Shapers.choose script
+      features.push shaper.getGlobalFeatures(script)...
+      
       # Map glyphs to GlyphInfo objects so data can be passed between
       # GSUB and GPOS without mutating the real (shared) Glyph objects.
       glyphs = for glyph, i in glyphs
         new GlyphInfo glyph.id, [glyph.codePoints...], features
+        
+      features.push shaper.assignFeatures(glyphs, script)...
+      
+    # Remove duplicate features
+    featureMap = {}
+    for feature in features
+      featureMap[feature] = true
+      
+    features = Object.keys(featureMap)
       
     # Substitute and position the glyphs
     glyphs = @substitute glyphs, features, script

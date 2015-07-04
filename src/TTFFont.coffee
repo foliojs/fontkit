@@ -154,7 +154,7 @@ class TTFFont
         
   widthOfString: (string, features, script, language) ->
     @_layoutEngine ?= new LayoutEngine this
-    return @_layoutEngine.layout(string, features, script, language).width
+    return @_layoutEngine.layout(string, features, script, language).advanceWidth
     
   _getBaseGlyph: (glyph, characters = []) ->
     unless @_glyphs[glyph]
