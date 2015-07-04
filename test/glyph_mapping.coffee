@@ -42,6 +42,11 @@ describe 'character to glyph mapping', ->
       assert.deepEqual glyphs.map((g) -> g.id), [323, 53, 124]
       assert.deepEqual glyphs.map((g) -> g.codePoints), [[102, 102, 105], [32], [49, 47, 50]]
       
+    it 'should enable fractions when using fraction slash', ->
+      {glyphs} = font.layout '123 1⁄16 123'
+      assert.deepEqual glyphs.map((g) -> g.id), [103, 104, 105, 53, 601, 133, 618, 623, 53, 103, 104, 105]
+      
+      
   describe 'AAT features', ->
     font = fontkit.openSync __dirname + '/data/Skia.ttf'
     
