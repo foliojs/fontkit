@@ -94,7 +94,7 @@ GPOSLookup = new r.VersionedStruct 'lookupType',
       coverage:       new r.Pointer(r.uint16, Coverage)
       valueFormat:    ValueFormat
       valueCount:     r.uint16
-      values:         new r.Array(new ValueRecord, 'valueCou')
+      values:         new r.Array(new ValueRecord, 'valueCount')
   
   2: new r.VersionedStruct r.uint16, # Pair Adjustment Positioning
     1: # Adjustments for glyph pairs
