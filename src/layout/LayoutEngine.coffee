@@ -21,19 +21,25 @@ class LayoutEngine
       features = []
     
     # Map string to glyphs if needed
-    glyphs = if typeof string is 'string'
-      @font.glyphsForString string
+    if typeof string is 'string'
+      # Attempt to detect the script from the string if not provided.
+      script ?= Script.forString string
+      glyphs = @font.glyphsForString string
     else
-      string
+      # Attempt to detect the script from the glyph code points if not provided.
+      unless script?
+        codePoints = []
+        for glyph in string
+          codePoints.push glyph.codePoints...
+        
+        script = Script.forCodePoints codePoints
+        
+      glyphs = string
             
     # Return early if there are no glyphs
     if glyphs.length is 0
-      return new GlyphRun glyphs, []
-      
-    # Attempt to detect the script from the first glyph if none is provided.
-    # Assumes that all glyphs are the same script.
-    script ?= Script.fromUnicode unicode.getScript glyphs[0].codePoints[0]
-    
+      return new GlyphRun glyphs, []    
+          
     if @font.GSUB or @font.GPOS
       shaper = Shapers.choose script
       features.push shaper.getGlobalFeatures(script)...
