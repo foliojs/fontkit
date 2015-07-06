@@ -103,6 +103,7 @@ class LayoutEngine
       @GPOSProcessor.selectScript script, language
       @GPOSProcessor.applyFeatures(features, glyphs, positions)
       
+    if @font.GPOS or @font.GSUB
       # Map the GlyphInfo objects back to real Glyphs
       for glyph, i in glyphs
         glyphs[i] = @font.getGlyph glyph.id, glyph.codePoints
