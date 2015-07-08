@@ -1,7 +1,9 @@
 r = require 'restructure'
 TTFFont = require './TTFFont'
   
-class DFont    
+class DFont
+  get = require('./get')(this)
+  
   DFontName = new r.String(r.uint8)
   DFontData = new r.Struct
     len: r.uint32
@@ -77,11 +79,6 @@ class DFont
         return font
         
     return null
-    
-  get = (key, fn) =>
-    Object.defineProperty @prototype, key,
-      get: fn
-      enumerable: true
   
   get 'fonts', ->
     fonts = []

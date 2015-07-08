@@ -52,7 +52,7 @@ CmapSubtable = new r.VersionedStruct r.uint16,
     endCode:          new r.Array(r.uint16, 'segCount')
     reservedPad:      new r.Reserved(r.uint16)       # This value should be zero
     startCode:        new r.Array(r.uint16, 'segCount')
-    idDelta:          new r.Array(r.uint16, 'segCount')
+    idDelta:          new r.Array(r.int16, 'segCount')
     idRangeOffset:    new r.Array(r.uint16, 'segCount')
     glyphIndexArray:  new r.Array(r.uint16, -> (@length - @_currentOffset) / 2)
     

@@ -1,5 +1,6 @@
 fontkit = require '../'
 assert = require 'assert'
+BBox = require '../src/glyph/BBox'
 
 describe 'metadata', ->
   font = fontkit.openSync __dirname + '/data/Skia.ttf'
@@ -14,9 +15,8 @@ describe 'metadata', ->
 
   it 'exposes some metrics', ->
     assert.equal font.unitsPerEm, 2048
-    assert.equal font.scale, 1000 / 2048
-    assert.equal font.ascent | 0, 776
-    assert.equal font.descent | 0, -223
+    assert.equal font.ascent | 0, 1591
+    assert.equal font.descent | 0, -457
     assert.equal font.lineGap, 0
     assert.equal font.underlinePosition, 0
     assert.equal font.underlineThickness, 0
@@ -24,7 +24,7 @@ describe 'metadata', ->
     assert.equal font.capHeight, font.ascent
     assert.equal font.xHeight, 0
     assert.equal font.numGlyphs, 591
-    assert.deepEqual font.bbox, [-1024 * 1000 / 2048, -803 * 1000 / 2048, 2765 * 1000 / 2048, 1896 * 1000 / 2048]
+    assert.deepEqual font.bbox, new BBox -1024, -803, 2765, 1896
     
   it 'exposes tables directly', ->
     for table in ['head', 'hhea', 'OS/2', 'post']

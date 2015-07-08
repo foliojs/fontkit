@@ -64,13 +64,15 @@ RangeRecord = new r.Struct
   end:                r.uint16
   startCoverageIndex: r.uint16
   
-exports.Coverage = new r.VersionedStruct r.uint16,
+Coverage = new r.VersionedStruct r.uint16,
   1: 
     glyphCount:   r.uint16
     glyphs:       new r.Array(r.uint16, 'glyphCount')
   2:
     rangeCount:   r.uint16
     rangeRecords: new r.Array(RangeRecord, 'rangeCount')
+    
+exports.Coverage = Coverage
     
 ##########################
 # Class Definition Table #
@@ -81,7 +83,7 @@ ClassRangeRecord = new r.Struct
   end:    r.uint16
   class:  r.uint16
 
-exports.ClassDef = new r.VersionedStruct r.uint16,
+ClassDef = new r.VersionedStruct r.uint16,
   1: # Class array
     startGlyph:       r.uint16
     glyphCount:       r.uint16
@@ -89,6 +91,8 @@ exports.ClassDef = new r.VersionedStruct r.uint16,
   2: # Class ranges
     classRangeCount:  r.uint16
     classRangeRecord: new r.Array(ClassRangeRecord, 'classRangeCount')
+    
+exports.ClassDef = ClassDef
       
 ################
 # Device Table #
@@ -98,3 +102,83 @@ exports.Device = new r.Struct
   startSize:    r.uint16
   endSize:      r.uint16
   deltaFormat:  r.uint16
+  
+##############################################
+# Contextual Substitution/Positioning Tables #
+##############################################
+  
+LookupRecord = new r.Struct
+  sequenceIndex:      r.uint16
+  lookupListIndex:    r.uint16
+  
+Rule = new r.Struct
+  glyphCount:     r.uint16
+  lookupCount:    r.uint16
+  input:          new r.Array(r.uint16, -> @glyphCount - 1)
+  lookupRecords:  new r.Array(LookupRecord, 'lookupCount')
+
+RuleSet = new r.Array(new r.Pointer(r.uint16, Rule), r.uint16)
+
+ClassRule = new r.Struct
+  glyphCount:     r.uint16
+  lookupCount:    r.uint16
+  classes:        new r.Array(r.uint16, -> @glyphCount - 1)
+  lookupRecords:  new r.Array(LookupRecord, 'lookupCount')
+      
+ClassSet = new r.Array(new r.Pointer(r.uint16, ClassRule), r.uint16)
+  
+exports.Context = new r.VersionedStruct r.uint16,
+  1: # Simple context
+    coverage:      new r.Pointer(r.uint16, Coverage)
+    ruleSetCount:  r.uint16
+    ruleSets:      new r.Array(new r.Pointer(r.uint16, RuleSet), 'ruleSetCount')
+  2: # Class-based context
+    coverage:      new r.Pointer(r.uint16, Coverage)
+    classDef:      new r.Pointer(r.uint16, ClassDef)
+    classSetCnt:   r.uint16
+    classSet:      new r.Array(new r.Pointer(r.uint16, ClassSet), 'classSetCnt')
+  3:
+    glyphCount:    r.uint16
+    lookupCount:   r.uint16
+    coverages:     new r.Array(new r.Pointer(r.uint16, Coverage), 'glyphCount')
+    lookupRecords: new r.Array(LookupRecord, 'lookupCount')
+    
+#######################################################
+# Chaining Contextual Substitution/Positioning Tables #
+#######################################################
+    
+ChainRule = new r.Struct
+  backtrackGlyphCount:  r.uint16
+  backtrack:            new r.Array(r.uint16, 'backtrackGlyphCount')
+  inputGlyphCount:      r.uint16
+  input:                new r.Array(r.uint16, -> @inputGlyphCount - 1)
+  lookaheadGlyphCount:  r.uint16
+  lookahead:            new r.Array(r.uint16, 'lookaheadGlyphCount')
+  lookupCount:          r.uint16
+  lookupRecords:        new r.Array(LookupRecord, 'lookupCount')
+
+ChainRuleSet = new r.Array(new r.Pointer(r.uint16, ChainRule), r.uint16)
+
+exports.ChainingContext = new r.VersionedStruct r.uint16,
+  1: # Simple context glyph substitution
+    coverage:           new r.Pointer(r.uint16, Coverage)
+    chainCount:         r.uint16
+    chainRuleSets:      new r.Array(new r.Pointer(r.uint16, ChainRuleSet), 'chainCount')
+    
+  2: # Class-based chaining context
+    coverage:           new r.Pointer(r.uint16, Coverage)
+    backtrackClassDef:  new r.Pointer(r.uint16, ClassDef)
+    inputClassDef:      new r.Pointer(r.uint16, ClassDef)
+    lookaheadClassDef:  new r.Pointer(r.uint16, ClassDef)
+    chainCount:         r.uint16
+    chainClassSet:      new r.Array(new r.Pointer(r.uint16, ChainRuleSet), 'chainCount')
+    
+  3: # Coverage-based chaining context 
+    backtrackGlyphCount:    r.uint16
+    backtrackCoverage:      new r.Array(new r.Pointer(r.uint16, Coverage), 'backtrackGlyphCount')
+    inputGlyphCount:        r.uint16
+    inputCoverage:          new r.Array(new r.Pointer(r.uint16, Coverage), 'inputGlyphCount')
+    lookaheadGlyphCount:    r.uint16
+    lookaheadCoverage:      new r.Array(new r.Pointer(r.uint16, Coverage), 'lookaheadGlyphCount')
+    lookupCount:            r.uint16
+    lookupRecords:          new r.Array(LookupRecord, 'lookupCount')

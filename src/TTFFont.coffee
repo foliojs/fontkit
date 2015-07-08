@@ -2,19 +2,17 @@ r = require 'restructure'
 Directory = require './tables/directory'
 tables = require './tables'
 CmapProcessor = require './CmapProcessor'
-GSUBProcessor = require './opentype/GSUBProcessor'
-GPOSProcessor = require './opentype/GPOSProcessor'
-AATFeatureMap = require './aat/AATFeatureMap'
-AATMorxProcessor = require './aat/AATMorxProcessor'
-KernProcessor = require './KernProcessor'
+LayoutEngine = require './layout/LayoutEngine'
 TTFGlyph = require './glyph/TTFGlyph'
 CFFGlyph = require './glyph/CFFGlyph'
 SBIXGlyph = require './glyph/SBIXGlyph'
 COLRGlyph = require './glyph/COLRGlyph'
 TTFSubset = require './subset/TTFSubset'
 CFFSubset = require './subset/CFFSubset'
+BBox = require './glyph/BBox'
 
 class TTFFont
+  get = require('./get')(this)
   constructor: (@stream) ->
     @_glyphs = {}
     @_decodeDirectory()
@@ -25,12 +23,7 @@ class TTFFont
         get: getTable.bind(this, table)
         
     return
-    
-  get = (key, fn) =>
-    Object.defineProperty @prototype, key,
-      get: fn
-      enumerable: true
-    
+        
   getTable = (table) ->
     key = '_' + table.tag
     unless key of this
@@ -75,41 +68,38 @@ class TTFFont
   get 'version', ->
     @name.records.version?.English
     
-  get 'scale', ->
-    return 1000 / @head.unitsPerEm
-    
   get 'ascent', ->
-    return @hhea.ascent * @scale
+    @hhea.ascent
     
   get 'descent', ->
-    return @hhea.descent * @scale
+    @hhea.descent
     
   get 'lineGap', ->
-    return @hhea.lineGap * @scale
+    @hhea.lineGap
     
   get 'underlinePosition', ->
-    return @post.underlinePosition * @scale
+    @post.underlinePosition
     
   get 'underlineThickness', ->
-    return @post.underlineThickness * @scale
+    @post.underlineThickness
     
   get 'italicAngle', ->
-    return @post.italicAngle
+    @post.italicAngle
     
   get 'capHeight', ->
-    return this['OS/2']?.capHeight * @scale or @ascent
+    this['OS/2']?.capHeight or @ascent
     
   get 'xHeight', ->
-    return this['OS/2']?.xHeight * @scale or 0
+    this['OS/2']?.xHeight or 0
     
   get 'numGlyphs', ->
-    return @maxp.numGlyphs
+    @maxp.numGlyphs
     
   get 'unitsPerEm', ->
-    return @head.unitsPerEm
+    @head.unitsPerEm
     
   get 'bbox', ->
-    return [@head.xMin * @scale, @head.yMin * @scale, @head.xMax * @scale, @head.yMax * @scale]
+    @_bbox ?= Object.freeze new BBox @head.xMin, @head.yMin, @head.xMax, @head.yMax
     
   get 'characterSet', ->
     @_cmapProcessor ?= new CmapProcessor @cmap
@@ -133,91 +123,38 @@ class TTFFont
       
     return code
                 
-  glyphsForString: (str, userFeatures) ->
+  glyphsForString: (string) ->
     # Map character codes to glyph ids
     glyphs = []
-    for i in [0...str.length]
+    for i in [0...string.length] by 1
       # check for already processed low surrogates
-      continue if 0xdc00 <= str.charCodeAt(i) <= 0xdfff
+      continue if 0xdc00 <= string.charCodeAt(i) <= 0xdfff
       
       # get the glyph
-      glyphs.push @glyphForCodePoint codePointAt(str, i)
+      glyphs.push @glyphForCodePoint codePointAt(string, i)
       
-    return glyphs if userFeatures?.length is 0
-    userFeatures ?= ['ccmp', 'liga', 'rlig', 'clig', 'calt']
-          
-    # apply glyph substitutions
-    # first, try the OpenType GSUB table
-    # TODO: OT feature defaults for GSUB. AAT has defaults for each font built in
-    if userFeatures.length > 0 and @GSUB
-      @_GSUBProcessor ?= new GSUBProcessor(this, @GSUB)
-      @_GSUBProcessor.applyFeatures(userFeatures, glyphs)
-      
-    # if not found, try AAT morx table
-    else if @morx
-      @_morxProcessor ?= new AATMorxProcessor(this)
-      @_morxProcessor.process(glyphs, AATFeatureMap.mapOTToAAT(userFeatures))
-    
     return glyphs
     
+  layout: (string, userFeatures, script, language) ->
+    @_layoutEngine ?= new LayoutEngine this
+    return @_layoutEngine.layout string, userFeatures, script, language
+    
   get 'availableFeatures', ->
-    features = []
-    t = @directory.tables
+    @_layoutEngine ?= new LayoutEngine this
+    return @_layoutEngine.getAvailableFeatures()
     
-    if t.GSUB?
-      @_GSUBProcessor ?= new GSUBProcessor(this, @GSUB)
-      features.push Object.keys(@_GSUBProcessor.features)...
-    
-    if t.GPOS?
-      @_GPOSProcessor ?= new GPOSProcessor(this, @GPOS)
-      features.push Object.keys(@_GPOSProcessor.features)...
+  _getMetrics: (table, glyph) ->
+    if glyph < table.metrics.length
+      return table.metrics[glyph]
       
-    if t.morx?
-      @_morxProcessor ?= new AATMorxProcessor(this)
-      aatFeatures = AATFeatureMap.mapAATToOT @_morxProcessor.getSupportedFeatures()
-      features.push aatFeatures...
-      
-    if t.kern? and (not t.GPOS or 'kern' not of @GPOS.features)
-      features.push 'kern'
-    
-    return features
+    return table.metrics[table.metrics.length - 1]
     
   widthOfGlyph: (glyph) ->
-    if glyph < @hmtx.metrics.length
-      return @hmtx.metrics[glyph].advanceWidth * @scale
-      
-    return @hmtx.metrics[@hmtx.metrics.length - 1].advanceWidth * @scale
-    
-  advancesForGlyphs: (glyphs, userFeatures) ->
-    x = 0
-    advances = []
-    for glyph in glyphs
-      advances.push @widthOfGlyph glyph.id
-      
-    return advances if userFeatures?.length is 0
-    userFeatures ?= ['kern'] # TODO 'mark', 'mkmk'
-    
-    if @GPOS?
-      @_GPOSProcessor ?= new GPOSProcessor(this, @GPOS)
-      @_GPOSProcessor.applyFeatures(userFeatures, glyphs, advances)
-      
-      return advances if 'kern' of @_GPOSProcessor.features
-      
-    if 'kern' in userFeatures and @kern?
-      @_kernProcessor ?= new KernProcessor this
-      @_kernProcessor.process glyphs, advances
+    return @_getMetrics(@hmtx, glyph).advanceWidth
         
-    return advances
-    
-  widthOfString: (string, features) ->
-    glyphs = @glyphsForString '' + string, features
-    advances = @advancesForGlyphs glyphs, features
-    
-    width = 0
-    for advance in advances
-      width += advance
-    
-    return width
+  widthOfString: (string, features, script, language) ->
+    @_layoutEngine ?= new LayoutEngine this
+    return @_layoutEngine.layout(string, features, script, language).advanceWidth
     
   _getBaseGlyph: (glyph, characters = []) ->
     unless @_glyphs[glyph]

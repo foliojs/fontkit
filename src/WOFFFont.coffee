@@ -1,7 +1,7 @@
 TTFFont = require './TTFFont'
 WOFFDirectory = require './tables/WOFFDirectory'
 tables = require './tables'
-pako = require 'pako'
+pako = require 'pako/lib/inflate'
 toBuffer = require 'typedarray-to-buffer'
 r = require 'restructure'
 

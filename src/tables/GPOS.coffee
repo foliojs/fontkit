@@ -1,5 +1,5 @@
 r = require 'restructure'
-{ScriptList, FeatureList, LookupList, Coverage, ClassDef, Device} = require './opentype'
+{ScriptList, FeatureList, LookupList, Coverage, ClassDef, Device, Context, ChainingContext} = require './opentype'
 
 ValueFormat = new r.Bitfield r.uint16, [
   'xPlacement', 'yPlacement',
@@ -17,10 +17,10 @@ class ValueRecord
     yPlacement: r.int16
     xAdvance:   r.int16
     yAdvance:   r.int16
-    xPlaDevice: new r.Pointer(r.uint16, Device)
-    yPlaDevice: new r.Pointer(r.uint16, Device)
-    xAdvDevice: new r.Pointer(r.uint16, Device)
-    yAdvDevice: new r.Pointer(r.uint16, Device)
+    xPlaDevice: new r.Pointer(r.uint16, Device, type: 'global', relativeTo: 'rel')
+    yPlaDevice: new r.Pointer(r.uint16, Device, type: 'global', relativeTo: 'rel')
+    xAdvDevice: new r.Pointer(r.uint16, Device, type: 'global', relativeTo: 'rel')
+    yAdvDevice: new r.Pointer(r.uint16, Device, type: 'global', relativeTo: 'rel')
     
   decode: (stream, parent) ->
     struct = parent
@@ -28,16 +28,17 @@ class ValueRecord
       struct = struct.parent
       
     return unless struct[@key]
-    
-    fields = {}
-    for key, included of struct[@key] when included
-      type = types[key]
-      if type instanceof r.Pointer
-        type.relativeTo = -> struct._startOffset
         
+    fields = {}
+    fields.rel = -> struct._startOffset
+        
+    for key, included of struct[@key] when included
+      type = types[key]        
       fields[key] = type
       
-    return new r.Struct(fields).decode(stream, parent)
+    res = new r.Struct(fields).decode(stream, parent)
+    delete res.rel
+    return res
   
 PairValueRecord = new r.Struct
   secondGlyph:    r.uint16
@@ -67,8 +68,8 @@ Anchor = new r.VersionedStruct r.uint16,
     yDeviceTable:   new r.Pointer(r.uint16, Device)
   
 EntryExitRecord = new r.Struct
-  entryAnchor:    new r.Pointer(r.uint16, Anchor)
-  exitAnchor:     new r.Pointer(r.uint16, Anchor)
+  entryAnchor:    new r.Pointer(r.uint16, Anchor, type: 'parent')
+  exitAnchor:     new r.Pointer(r.uint16, Anchor, type: 'parent')
   
 MarkRecord = new r.Struct
   class:      r.uint16
@@ -93,7 +94,7 @@ GPOSLookup = new r.VersionedStruct 'lookupType',
       coverage:       new r.Pointer(r.uint16, Coverage)
       valueFormat:    ValueFormat
       valueCount:     r.uint16
-      values:         new r.Array(new ValueRecord, 'valueCou')
+      values:         new r.Array(new ValueRecord, 'valueCount')
   
   2: new r.VersionedStruct r.uint16, # Pair Adjustment Positioning
     1: # Adjustments for glyph pairs
@@ -143,14 +144,13 @@ GPOSLookup = new r.VersionedStruct 'lookupType',
     mark1Array:         new r.Pointer(r.uint16, MarkArray)
     mark2Array:         new r.Pointer(r.uint16, BaseArray)
     
-  7: 
-    format: r.uint16
+  7: Context          # Contextual positioning
+  8: ChainingContext  # Chaining contextual positioning
     
-  8: 
-    format: r.uint16
-    
-  9: 
-    format: r.uint16
+  9: # Extension Positioning
+    posFormat:   r.uint16
+    lookupType:  r.uint16   # cannot also be 9
+    extension:   new r.Pointer(r.uint32, GPOSLookup)
   
 module.exports = new r.Struct
   version:        r.int32
