@@ -25,7 +25,7 @@ class SBIXGlyph extends TTFGlyph
   render: (ctx, size) ->
     img = @getImageForSize size
     if img?
-      scale = 1 / @_font.head.unitsPerEm * size
+      scale = size / @_font.unitsPerEm
       ctx.image img.data, height: size, x: img.originX, y: (@bbox[1] - img.originY) * scale
       
     if @_font.sbix.flags.renderOutlines

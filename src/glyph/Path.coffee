@@ -1,4 +1,7 @@
+BBox = require './BBox'
+
 class Path
+  get = require('../get')(this)
   constructor: ->
     @commands = []
     @_bbox = @_cbox = null
@@ -37,33 +40,6 @@ class Path
       
     return cmds.join('')
     
-  get = (key, fn) =>
-    Object.defineProperty @prototype, key,
-      get: fn
-      enumerable: true
-      
-  # Internal class representing a bounding box during computation
-  class BBox
-    constructor: ->
-      @minX = @minY = Infinity
-      @maxX = @maxY = -Infinity
-      
-    addPoint: (x, y) ->
-      if x < @minX
-        @minX = x
-        
-      if y < @minY
-        @minY = y
-        
-      if x > @maxX
-        @maxX = x
-        
-      if y > @maxY
-        @maxY = y
-        
-    toArray: ->
-      return [@minX, @minY, @maxX, @maxY]
-    
   # Gets the "control box" of a path.
   # This is like the bounding box, but it includes all points including
   # control points of bezier segments and is much faster to compute than
@@ -77,7 +53,7 @@ class Path
       for x, i in command.args by 2
         cbox.addPoint x, command.args[i + 1]
           
-    @_cbox = cbox.toArray()
+    @_cbox = Object.freeze cbox
     
   # Gets the exact bounding box of the path by evaluating curve segments.
   # Slower to compute than the control box, but more accurate.
@@ -152,6 +128,6 @@ class Path
           cx = p3x
           cy = p3y
                     
-    @_bbox = bbox.toArray()
+    @_bbox = Object.freeze bbox
         
 module.exports = Path

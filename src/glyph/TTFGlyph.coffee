@@ -1,5 +1,6 @@
 Glyph = require './Glyph'
 Path = require './Path'
+BBox = require './BBox'
 r = require 'restructure'
 
 class TTFGlyph extends Glyph
@@ -21,11 +22,17 @@ class TTFGlyph extends Glyph
   
   # Flags for composite glyphs
   ARG_1_AND_2_ARE_WORDS     = 1 << 0
+  ARGS_ARE_XY_VALUES        = 1 << 1
+  ROUND_XY_TO_GRID          = 1 << 2
   WE_HAVE_A_SCALE           = 1 << 3
   MORE_COMPONENTS           = 1 << 5
   WE_HAVE_AN_X_AND_Y_SCALE  = 1 << 6
   WE_HAVE_A_TWO_BY_TWO      = 1 << 7
   WE_HAVE_INSTRUCTIONS      = 1 << 8
+  USE_MY_METRICS            = 1 << 9
+  OVERLAP_COMPOUND          = 1 << 10
+  SCALED_COMPONENT_OFFSET   = 1 << 11
+  UNSCALED_COMPONENT_OFFSET = 1 << 12
   
   # Represents a point in a simple glyph
   class Point
@@ -43,7 +50,8 @@ class TTFGlyph extends Glyph
     stream.pos += @_font.loca.offsets[@id]
     glyph = GlyfHeader.decode(stream)
     
-    return [glyph.xMin, glyph.yMin, glyph.xMax, -glyph.yMax]
+    cbox = new BBox glyph.xMin, glyph.yMin, glyph.xMax, glyph.yMax
+    return Object.freeze cbox
     
   # Parses a single glyph coordinate
   parseGlyphCoord = (stream, prev, short, same) ->
@@ -64,8 +72,14 @@ class TTFGlyph extends Glyph
   # Decodes the glyph data into points for simple glyphs, 
   # or components for composite glyphs
   _decode: ->
+    glyfPos = @_font.loca.offsets[@id]
+    nextPos = @_font.loca.offsets[@id + 1]
+    
+    # Nothing to do if there is no data for this glyph
+    return null if glyfPos is nextPos
+    
     stream = @_font._getTableStream 'glyf'
-    stream.pos += @_font.loca.offsets[@id]
+    stream.pos += glyfPos
     startPos = stream.pos
     
     glyph = GlyfHeader.decode(stream)
@@ -158,6 +172,8 @@ class TTFGlyph extends Glyph
   # Decodes font data, resolves composite glyphs, and returns an array of contours
   _getContours: ->
     glyph = @_decode()
+    return [] unless glyph
+    
     if glyph.numberOfContours < 0
       # resolve composite glyphs
       points = []
@@ -203,14 +219,14 @@ class TTFGlyph extends Glyph
           
         curvePt = firstPt
         
-      path.moveTo firstPt.x, -firstPt.y
+      path.moveTo firstPt.x, firstPt.y
       
       for j in [start...contour.length] by 1
         pt = contour[j]
         prevPt = if j is 0 then firstPt else contour[j - 1]
         
         if prevPt.onCurve and pt.onCurve
-          path.lineTo pt.x, -pt.y
+          path.lineTo pt.x, pt.y
         
         else if prevPt.onCurve and not pt.onCurve
           curvePt = pt
@@ -218,11 +234,11 @@ class TTFGlyph extends Glyph
         else if not prevPt.onCurve and not pt.onCurve
           midX = (prevPt.x + pt.x) / 2
           midY = (prevPt.y + pt.y) / 2
-          path.quadraticCurveTo prevPt.x, -prevPt.y, midX, -midY
+          path.quadraticCurveTo prevPt.x, prevPt.y, midX, midY
           curvePt = pt
           
         else if not prevPt.onCurve and pt.onCurve
-          path.quadraticCurveTo curvePt.x, -curvePt.y, pt.x, -pt.y
+          path.quadraticCurveTo curvePt.x, curvePt.y, pt.x, pt.y
           curvePt = null
           
         else
@@ -231,9 +247,9 @@ class TTFGlyph extends Glyph
       # Connect the first and last points
       if firstPt isnt lastPt
         if curvePt
-          path.quadraticCurveTo curvePt.x, -curvePt.y, firstPt.x, -firstPt.y
+          path.quadraticCurveTo curvePt.x, curvePt.y, firstPt.x, firstPt.y
         else
-          path.lineTo firstPt.x, -firstPt.y
+          path.lineTo firstPt.x, firstPt.y
           
     path.closePath()
     return path

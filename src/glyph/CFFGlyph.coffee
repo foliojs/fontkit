@@ -57,13 +57,13 @@ class CFFGlyph extends Glyph
                 width ?= stack.shift() + privateDict.nominalWidthX
               
               y += stack.shift()
-              path.moveTo x, -y
+              path.moveTo x, y
           
             when 5 # rlineto
               while stack.length >= 2
                 x += stack.shift()
                 y += stack.shift()
-                path.lineTo x, -y
+                path.lineTo x, y
             
             when 6, 7 # hlineto, vlineto
               phase = op is 6
@@ -73,7 +73,7 @@ class CFFGlyph extends Glyph
                 else
                   y += stack.shift()
                 
-                path.lineTo x, -y
+                path.lineTo x, y
                 phase = !phase
             
             when 8 # rrcurveto
@@ -84,7 +84,7 @@ class CFFGlyph extends Glyph
                 c2y = c1y + stack.shift()
                 x = c2x + stack.shift()
                 y = c2y + stack.shift()
-                path.bezierCurveTo c1x, -c1y, c2x, -c2y, x, -y
+                path.bezierCurveTo c1x, c1y, c2x, c2y, x, y
             
             when 10 # callsubr
               index = stack.pop() + subrsBias
@@ -119,14 +119,14 @@ class CFFGlyph extends Glyph
             
               x += stack.shift()
               y += stack.shift()
-              path.moveTo x, -y
+              path.moveTo x, y
           
             when 22 # hmoveto
               if stack.length > 1
                 width ?= stack.shift() + privateDict.nominalWidthX
             
               x += stack.shift()
-              path.moveTo x, -y
+              path.moveTo x, y
           
             when 24 # rcurveline
               while stack.length >= 8
@@ -136,17 +136,17 @@ class CFFGlyph extends Glyph
                 c2y = c1y + stack.shift()
                 x = c2x + stack.shift()
                 y = c2y + stack.shift()
-                path.bezierCurveTo c1x, -c1y, c2x, -c2y, x, -y
+                path.bezierCurveTo c1x, c1y, c2x, c2y, x, y
           
               x += stack.shift()
               y += stack.shift()
-              path.lineTo x, -y
+              path.lineTo x, y
           
             when 25 # rlinecurve
               while stack.length >= 8
                 x += stack.shift()
                 y += stack.shift()
-                path.lineTo x, -y
+                path.lineTo x, y
           
               c1x = x + stack.shift()
               c1y = y + stack.shift()
@@ -154,7 +154,7 @@ class CFFGlyph extends Glyph
               c2y = c1y + stack.shift()
               x = c2x + stack.shift()
               y = c2y + stack.shift()
-              path.bezierCurveTo c1x, -c1y, c2x, -c2y, x, -y
+              path.bezierCurveTo c1x, c1y, c2x, c2y, x, y
           
             when 26 # vvcurveto
               if stack.length % 2
@@ -167,7 +167,7 @@ class CFFGlyph extends Glyph
                 c2y = c1y + stack.shift()
                 x = c2x
                 y = c2y + stack.shift()
-                path.bezierCurveTo c1x, -c1y, c2x, -c2y, x, -y
+                path.bezierCurveTo c1x, c1y, c2x, c2y, x, y
           
             when 27 # hhcurveto
               if stack.length % 2
@@ -180,7 +180,7 @@ class CFFGlyph extends Glyph
                 c2y = c1y + stack.shift()
                 x = c2x + stack.shift()
                 y = c2y
-                path.bezierCurveTo c1x, -c1y, c2x, -c2y, x, -y
+                path.bezierCurveTo c1x, c1y, c2x, c2y, x, y
           
             when 28 # shortint
               stack.push stream.readInt16BE()
@@ -216,7 +216,7 @@ class CFFGlyph extends Glyph
                   x = c2x + stack.shift()
                   y = c2y + (if stack.length is 1 then stack.shift() else 0)
                 
-                path.bezierCurveTo c1x, -c1y, c2x, -c2y, x, -y
+                path.bezierCurveTo c1x, c1y, c2x, c2y, x, y
                 phase = !phase
               
             when 12
@@ -350,8 +350,8 @@ class CFFGlyph extends Glyph
                   x = c6x
                   y = c6y
               
-                  path.bezierCurveTo c1x, -c1y, c2x, -c2y, c3x, -c3y
-                  path.bezierCurveTo c4x, -c4y, c5x, -c5y, c6x, -c6y
+                  path.bezierCurveTo c1x, c1y, c2x, c2y, c3x, c3y
+                  path.bezierCurveTo c4x, c4y, c5x, c5y, c6x, c6y
               
                 when 35 # flex
                   pts = []
@@ -380,8 +380,8 @@ class CFFGlyph extends Glyph
                   x = c6x
                   y = c6y
               
-                  path.bezierCurveTo c1x, -c1y, c2x, -c2y, c3x, -c3y
-                  path.bezierCurveTo c4x, -c4y, c5x, -c5y, c6x, -c6y
+                  path.bezierCurveTo c1x, c1y, c2x, c2y, c3x, c3y
+                  path.bezierCurveTo c4x, c4y, c5x, c5y, c6x, c6y
               
                 when 37 # flex1
                   startx = x
