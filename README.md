@@ -26,18 +26,16 @@ var fontkit = require('fontkit');
 // open a font synchronously
 var font = fontkit.openSync('font.ttf');
 
-// get some glyphs for a string, and apply ligature substitutions
-var glyphs = font.glyphsForString('hello world!', ['liga']);
-
-// get glyph advances, and apply kerning
-var advances = font.advancesForGlyphs(glyphs, ['kern']);
+// layout a string, using default shaping features.
+// returns a GlyphRun, describing glyphs and positions.
+var run = font.layout('hello world!');
 
 // get an SVG path for a glyph
-var svg = glyphs[0].path.toSVG();
+var svg = run.glyphs[0].path.toSVG();
 
 // create a font subset
 var subset = font.createSubset();
-glyphs.forEach(function(glyph) {
+run.glyphs.forEach(function(glyph) {
   subset.includeGlyph(glyph);
 });
 
@@ -78,7 +76,6 @@ The following properties are strings (or null if the font does not contain strin
 
 The following properties describe the general metrics of the font. See [here](http://www.freetype.org/freetype2/docs/glyphs/glyphs-3.html) for a good overview of how all of these properties relate to one another.
 
-* `scale` - the font’s internal scale factor
 * `unitsPerEm` - the size of the font’s internal coordinate grid
 * `ascent` - the font’s [ascender](http://en.wikipedia.org/wiki/Ascender_(typography))
 * `descent` - the font’s [descender](http://en.wikipedia.org/wiki/Descender)
@@ -100,12 +97,6 @@ The following properties describe the general metrics of the font. See [here](ht
 
 Fontkit includes several methods for character to glyph mapping, including support for advanced OpenType and AAT substitutions.
 
-#### `font.glyphsForString(string, features = null)`
-
-This method returns an array of Glyph objects for the given string. This may not be a one to one mapping if OpenType or AAT substitutions are applied.
-
-The `features` parameter is an array of [OpenType feature tags](https://www.microsoft.com/typography/otspec/featuretags.htm) to be applied. If this is an AAT font, the OpenType feature tags are mapped to AAT features. If nothing is passed to the `features` parameter, a set of default features are applied. To disable features entirely, explicitly pass an empty array to the `features` parameter.
-
 #### `font.glyphForCodePoint(codePoint)`
 
 Maps a single unicode code point (number) to a Glyph object. Does not perform any advanced substitutions (there is no context to do so).
@@ -114,19 +105,30 @@ Maps a single unicode code point (number) to a Glyph object. Does not perform an
 
 Returns whether there is glyph in the font for the given unicode code point.
 
+#### `font.glyphsForString(string)`
+
+This method returns an array of Glyph objects for the given string. This is only a one-to-one mapping from characters
+to glyphs. For most uses, you should use `font.layout` (described below), which provides a much more advanced mapping
+supporting AAT and OpenType shaping.
+
 ### Glyph metrics and layout
 
 Fontkit includes several methods for accessing glyph metrics and performing layout, including support for kerning and other advanced OpenType positioning adjustments.
 
-#### `font.advancesForGlyphs(glyphs, features = null)`
+#### `font.widthOfGlyph(glyph_id)`
 
-Returns an array of advances for the given array of Glyph objects. Conceptually, an advance is the distance to move the “pen” after a glyph has been rendered, before the next glyph is rendered.
+Returns the advance width (described above) for a single glyph id.
 
-The `features` parameter is an array of [OpenType feature tags](https://www.microsoft.com/typography/otspec/featuretags.htm) to be applied. If this is an AAT font, only the ‘kern’ feature is supported. If nothing is passed to the `features` parameter, a set of default features are applied. To disable features entirely, explicitly pass an empty array to the `features` parameter.
+### Glyph Layout
 
-#### `font.widthOfString(string, features = null)`
+#### `font.layout(string, features = [])`
 
-Returns the width of the given string, applying the given features as described above. This is just the sum of `advancesForGlyphs(glyphsForString(string))`.
+This method returns a `GlyphRun` object, which includes an array of `Glyph`s and `GlyphPosition`s for the given string.
+`Glyph` objects are described below. `GlyphPosition` objects include 4 properties: `xAdvance`, `yAdvance`, `xOffset`,
+and `yOffset`.
+
+The `features` parameter is an array of [OpenType feature tags](https://www.microsoft.com/typography/otspec/featuretags.htm) to be applied
+in addition to the default set. If this is an AAT font, the OpenType feature tags are mapped to AAT features.
 
 ### Other methods
 

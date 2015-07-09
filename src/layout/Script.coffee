@@ -1,3 +1,5 @@
+unicode = require 'unicode-properties'
+
 # This maps the Unicode Script property to an OpenType script tag
 # Data from http://www.microsoft.com/typography/otspec/scripttags.htm
 # and http://www.unicode.org/Public/UNIDATA/PropertyValueAliases.txt.
@@ -132,7 +134,36 @@ UNICODE_SCRIPTS =
   
 exports.fromUnicode = (script) ->
   return UNICODE_SCRIPTS[script]
-
+  
+exports.forString = (string) ->
+  len = string.length
+  idx = 0
+  while idx < len
+    code = string.charCodeAt idx++
+    
+    # Check if this is a high surrogate
+    if 0xd800 <= code <= 0xdbff and idx < len
+      next = str.charCodeAt idx
+      
+      # Check if this is a low surrogate
+      if 0xdc00 <= next <= 0xdfff
+        idx++
+        code = ((code & 0x3FF) << 10) + (next & 0x3FF) + 0x10000
+        
+    script = unicode.getScript code
+    unless script in ['Common', 'Inherited', 'Unknown']
+      return UNICODE_SCRIPTS[script]
+      
+  return UNICODE_SCRIPTS.Unknown
+  
+exports.forCodePoints = (codePoints) ->
+  for codePoint in codePoints
+    script = unicode.getScript codePoint
+    unless script in ['Common', 'Inherited', 'Unknown']
+      return UNICODE_SCRIPTS[script]
+    
+  return UNICODE_SCRIPTS.Unknown
+  
 # The scripts in this map are written from right to left
 RTL =
   arab: true # Arabic
