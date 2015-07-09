@@ -6,7 +6,7 @@ describe 'glyph positioning', ->
     font = fontkit.openSync __dirname + '/data/ACaslonPro-Regular.otf'
     
     it 'should get a glyph width', ->
-      assert.equal font.widthOfGlyph(68), 354
+      assert.equal font.getGlyph(68).advanceWidth, 354
 
   describe 'opentype positioning', ->
     font = fontkit.openSync __dirname + '/data/ACaslonPro-Regular.otf'

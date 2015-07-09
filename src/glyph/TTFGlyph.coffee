@@ -37,6 +37,8 @@ class TTFGlyph extends Glyph
   # Represents a point in a simple glyph
   class Point
     constructor: (@onCurve, @endContour, @x = 0, @y = 0) ->
+    copy: ->
+      new Point @onCurve, @endContour, @x, @y
     
   # Represents a component in a composite glyph
   class Component
@@ -45,7 +47,12 @@ class TTFGlyph extends Glyph
       @scale = @xScale = @yScale = @scale01 = @scale10 = null
           
   # Parses just the glyph header and returns the bounding box
-  _getCBox: ->
+  _getCBox: (internal) ->
+    # We need to decode the glyph if variation processing is requested,
+    # so it's easier just to recompute the path's cbox after decoding.
+    if @_font._variationProcessor and not internal
+      return @path.cbox
+    
     stream = @_font._getTableStream 'glyf'
     stream.pos += @_font.loca.offsets[@id]
     glyph = GlyfHeader.decode(stream)
@@ -124,6 +131,13 @@ class TTFGlyph extends Glyph
     for flag, i in flags
       glyph.points[i].y = py = parseGlyphCoord stream, py, flag & Y_SHORT_VECTOR, flag & SAME_Y
       
+    if @_font._variationProcessor
+      points = glyph.points.slice()
+      points.push @_getPhantomPoints(glyph)...
+      
+      @_font._variationProcessor.transformPoints @id, points
+      glyph.phantomPoints = points.slice -4
+      
     return
     
   _decodeComposite: (glyph, stream, offset = 0) ->
@@ -166,9 +180,35 @@ class TTFGlyph extends Glyph
         component.scaleY  = ((stream.readUInt8() << 24) | (stream.readUInt8() << 16)) / 1073741824
         
       glyph.components.push component
+      
+    if @_font._variationProcessor
+      points = for component in glyph.components
+        new Point yes, yes, component.dx, component.dy
+        
+      points.push @_getPhantomPoints(glyph)...
+      
+      @_font._variationProcessor.transformPoints @id, points
+      glyph.phantomPoints = points.slice -4
+    
+      for point, i in points
+        glyph.components[i].dx = point.x
+        glyph.components[i].dy = point.y
         
     return haveInstructions
-  
+    
+  _getPhantomPoints: (glyph) ->
+    cbox = @_getCBox true
+    @_metrics ?= Glyph::_getMetrics.call this, cbox
+    
+    { advanceWidth, advanceHeight, leftBearing, topBearing } = @_metrics
+    
+    return [
+      new Point no, yes, glyph.xMin - leftBearing, 0
+      new Point no, yes, glyph.xMin - leftBearing + advanceWidth, 0
+      new Point no, yes, 0, glyph.yMax + topBearing
+      new Point no, yes, 0, glyph.yMax + topBearing + advanceHeight
+    ]
+    
   # Decodes font data, resolves composite glyphs, and returns an array of contours
   _getContours: ->
     glyph = @_decode()
@@ -184,7 +224,14 @@ class TTFGlyph extends Glyph
           points.push new Point point.onCurve, point.endContour, point.x + component.dx, point.y + component.dy
     else
       points = glyph.points
-          
+      
+    # Recompute and cache metrics if we performed variation processing
+    if glyph.phantomPoints
+      @_metrics.advanceWidth  = glyph.phantomPoints[1].x - glyph.phantomPoints[0].x
+      @_metrics.advanceHeight = glyph.phantomPoints[3].y - glyph.phantomPoints[2].y
+      @_metrics.leftBearing   = glyph.xMin - glyph.phantomPoints[0].x
+      @_metrics.topBearing    = glyph.phantomPoints[2].y - glyph.yMax
+        
     contours = []
     cur = []
     for point in points
@@ -194,6 +241,17 @@ class TTFGlyph extends Glyph
         cur = []
     
     return contours
+    
+  _getMetrics: ->
+    return @_metrics if @_metrics
+    super
+    
+    if @_font._variationProcessor
+      # Decode the font data (and cache for later).
+      # This triggers recomputation of metrics
+      @_path ?= @_getPath()
+      
+    return @_metrics
     
   # Converts contours to a Path object that can be rendered
   _getPath: ->

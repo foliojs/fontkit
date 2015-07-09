@@ -94,9 +94,16 @@ class LayoutEngine
     constructor: (@xAdvance = 0, @yAdvance = 0, @xOffset = 0, @yOffset = 0) ->
       
   position: (glyphs, features, script, language) ->
+    realGlyphs = if @font.GPOS
+      # Map the GlyphInfo objects back to real Glyph objects
+      for glyph, i in glyphs
+        @font.getGlyph glyph.id, glyph.codePoints
+    else
+      glyphs
+    
     positions = []
-    for glyph in glyphs
-      positions.push new GlyphPosition @font.widthOfGlyph glyph.id
+    for glyph, i in glyphs
+      positions.push new GlyphPosition realGlyphs[i].advanceWidth
       
     if @font.GPOS
       @GPOSProcessor ?= new GPOSProcessor(@font, @font.GPOS)
@@ -104,9 +111,9 @@ class LayoutEngine
       @GPOSProcessor.applyFeatures(features, glyphs, positions)
       
     if @font.GPOS or @font.GSUB
-      # Map the GlyphInfo objects back to real Glyphs
-      for glyph, i in glyphs
-        glyphs[i] = @font.getGlyph glyph.id, glyph.codePoints
+      # Restore the real Glyph objects
+      for realGlyph, i in realGlyphs
+        glyphs[i] = realGlyph
         
       # Reverse the glyphs and positions if the script is right-to-left
       if Script.direction(script) is 'rtl'

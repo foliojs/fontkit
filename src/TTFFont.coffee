@@ -7,13 +7,15 @@ TTFGlyph = require './glyph/TTFGlyph'
 CFFGlyph = require './glyph/CFFGlyph'
 SBIXGlyph = require './glyph/SBIXGlyph'
 COLRGlyph = require './glyph/COLRGlyph'
+GlyphVariationProcessor = require './glyph/GlyphVariationProcessor'
 TTFSubset = require './subset/TTFSubset'
 CFFSubset = require './subset/CFFSubset'
 BBox = require './glyph/BBox'
 
 class TTFFont
   get = require('./get')(this)
-  constructor: (@stream) ->
+  constructor: (@stream, variationCoords = null) ->    
+    @_tables = {}
     @_glyphs = {}
     @_decodeDirectory()
     
@@ -22,17 +24,17 @@ class TTFFont
       Object.defineProperty this, tag,
         get: getTable.bind(this, table)
         
-    return
+    if variationCoords
+      @_variationProcessor = new GlyphVariationProcessor this, variationCoords
         
   getTable = (table) ->
-    key = '_' + table.tag
-    unless key of this
+    unless table.tag of @_tables
       pos = @stream.pos
       @stream.pos = table.offset
-      this[key] = @_decodeTable table
+      @_tables[table.tag] = @_decodeTable table
       @stream.pos = pos
       
-    return this[key]
+    return @_tables[table.tag]
     
   _getTableStream: (tag) ->
     table = @directory.tables[tag]
@@ -43,6 +45,7 @@ class TTFFont
     return null
     
   _decodeDirectory: ->
+    @_directoryPos = @stream.pos
     @directory = Directory.decode(@stream, _startOffset: 0)
     
   _decodeTable: (table) ->
@@ -122,7 +125,7 @@ class TTFFont
       return ((code - 0xd800) * 0x400) + (next - 0xdc00) + 0x10000
       
     return code
-                
+    
   glyphsForString: (string) ->
     # Map character codes to glyph ids
     glyphs = []
@@ -142,16 +145,7 @@ class TTFFont
   get 'availableFeatures', ->
     @_layoutEngine ?= new LayoutEngine this
     return @_layoutEngine.getAvailableFeatures()
-    
-  _getMetrics: (table, glyph) ->
-    if glyph < table.metrics.length
-      return table.metrics[glyph]
-      
-    return table.metrics[table.metrics.length - 1]
-    
-  widthOfGlyph: (glyph) ->
-    return @_getMetrics(@hmtx, glyph).advanceWidth
-        
+            
   widthOfString: (string, features, script, language) ->
     @_layoutEngine ?= new LayoutEngine this
     return @_layoutEngine.layout(string, features, script, language).advanceWidth
@@ -184,5 +178,65 @@ class TTFFont
       return new CFFSubset this
       
     return new TTFSubset this
+    
+  # Returns an object describing the available variation axes
+  # that this font supports. Keys are setting tags, and values
+  # contain the axis name, range, and default value.
+  get 'variationAxes', ->    
+    res = {}
+    return res unless @fvar
+    
+    for axis in @fvar.axis
+      res[axis.axisTag] = 
+        name: axis.name
+        min: axis.minValue
+        default: axis.defaultValue
+        max: axis.maxValue
+        
+    return res
+    
+  # Returns an object describing the named variation instances
+  # that the font designer has specified. Keys are variation names
+  # and values are the variation settings for this instance.
+  get 'namedVariations', ->    
+    res = {}
+    return res unless @fvar
+    
+    for instance in @fvar.instance
+      settings = {}
+      for axis, i in @fvar.axis
+        settings[axis.axisTag] = instance.coord[i]
+      
+      res[instance.name] = settings
+        
+    return res
+    
+  # Returns a new font with the given variation settings applied.
+  # Settings can either be an instance name, or an object containing
+  # variation tags as specified by the `variationAxes` property.
+  getVariation: (settings) ->
+    unless @directory.tables.fvar and @directory.tables.gvar and @directory.tables.glyf
+      throw new Error 'Variations require a font with the fvar, gvar, and glyf tables.'
+      
+    if typeof settings is 'string'
+      settings = @namedVariations[settings]
+    
+    if typeof settings isnt 'object'
+      throw new Error 'Variation settings must be either a variation name or settings object.'  
+    
+    # normalize the coordinates
+    coords = for axis, i in @fvar.axis
+      if axis.axisTag of settings
+        Math.max axis.minValue, Math.min axis.maxValue, settings[axis.axisTag]
+      else
+        axis.defaultValue
+        
+    stream = new r.DecodeStream @stream.buffer
+    stream.pos = @_directoryPos
+    
+    font = new TTFFont stream, coords
+    font._tables = @_tables
+    
+    return font
         
 module.exports = TTFFont

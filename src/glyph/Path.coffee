@@ -36,7 +36,8 @@ class Path
   toSVG: ->
     cmds = []
     for c in @commands
-      cmds.push "#{SVG_COMMANDS[c.command]}#{c.args.join(' ')}"
+      args = (Math.round(arg * 100) / 100 for arg in c.args)
+      cmds.push "#{SVG_COMMANDS[c.command]}#{args.join(' ')}"
       
     return cmds.join('')
     

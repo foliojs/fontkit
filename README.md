@@ -12,6 +12,7 @@ Fontkit is an advanced font engine for Node and the browser, used by [PDFKit](ht
 * Support for getting glyph vector paths and converting them to SVG paths, or rendering them to a graphics context
 * Supports TrueType (glyf) and PostScript (CFF) outlines
 * Support for color glyphs (e.g. emoji), including Apple’s SBIX table, and Microsoft’s COLR table
+* Support for AAT variation glyphs, allowing for nearly infinite design control over weight, width, and other axes.
 * Font subsetting support - create a new font including only the specified glyphs
 
 ## Installation
@@ -115,13 +116,32 @@ supporting AAT and OpenType shaping.
 
 Fontkit includes several methods for accessing glyph metrics and performing layout, including support for kerning and other advanced OpenType positioning adjustments.
 
-#### `font.widthOfString(string, features = null)`
-
-Returns the width of the given string, applying the given features as described above. This is just the sum of `advancesForGlyphs(glyphsForString(string))`.
-
 #### `font.widthOfGlyph(glyph_id)`
 
 Returns the advance width (described above) for a single glyph id.
+
+### Variation fonts
+
+Fontkit has support for AAT variation fonts, where glyphs can adjust their shape according to user defined settings along
+various axes including weight, width, and slant. Font designers specify the minimum, default, and maximum values for each
+axis they support, and allow the user fine grained control over the rendered text.
+
+#### `font.variationAxes`
+
+Returns an object describing the available variation axes. Keys are 4 letter axis tags, and values include `name`,
+`min`, `default`, and `max` properties for the axis.
+
+#### `font.namedVariations`
+
+The font designer may have picked out some variations that they think look particularly good, for example a light, regular,
+and bold weight which would traditionally be separate fonts. This property returns an object describing these named variation
+instances that the designer has specified. Keys are variation names, and values are objects with axis settings.
+
+#### `font.getVariation(variation)`
+
+Returns a new font object representing this variation, from which you can get glyphs and perform layout as normal.
+The `variation` parameter can either be a variation settings object or a string variation name. Variation settings objects
+have axis names as keys, and numbers as values (should be in the range specified by `font.variationAxes`).
 
 ### Glyph Layout
 
@@ -169,7 +189,7 @@ You do not create glyph objects directly. They are created by various methods on
 * `path` - a vector Path object representing the glyph
 * `bbox` - the glyph’s bounding box, i.e. the rectangle that encloses the glyph outline as tightly as possible.
 * `cbox` - the glyph’s control box. This is often the same as the bounding box, but is faster to compute. Because of the way bezier curves are defined, some of the control points can be outside of the bounding box. Where `bbox` takes this into account, `cbox` does not. Thus, `cbox` is less accurate, but faster to compute. See [here](http://www.freetype.org/freetype2/docs/glyphs/glyphs-6.html#section-2) for a more detailed description.
-* `advanceWidth` - the glyph’s advance width. Equivalent to calling `font.widthOfGlyph(glyph.id)`
+* `advanceWidth` - the glyph’s advance width.
 
 ### `glyph.render(ctx, size)`
 
