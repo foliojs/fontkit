@@ -12,6 +12,7 @@ Fontkit is an advanced font engine for Node and the browser, used by [PDFKit](ht
 * Support for getting glyph vector paths and converting them to SVG paths, or rendering them to a graphics context
 * Supports TrueType (glyf) and PostScript (CFF) outlines
 * Support for color glyphs (e.g. emoji), including Apple’s SBIX table, and Microsoft’s COLR table
+* Support for AAT variation glyphs, allowing for nearly infinite design control over weight, width, and other axes.
 * Font subsetting support - create a new font including only the specified glyphs
 
 ## Installation
@@ -118,6 +119,29 @@ Fontkit includes several methods for accessing glyph metrics and performing layo
 #### `font.widthOfGlyph(glyph_id)`
 
 Returns the advance width (described above) for a single glyph id.
+
+### Variation fonts
+
+Fontkit has support for AAT variation fonts, where glyphs can adjust their shape according to user defined settings along
+various axes including weight, width, and slant. Font designers specify the minimum, default, and maximum values for each
+axis they support, and allow the user fine grained control over the rendered text.
+
+#### `font.variationAxes`
+
+Returns an object describing the available variation axes. Keys are 4 letter axis tags, and values include `name`,
+`min`, `default`, and `max` properties for the axis.
+
+#### `font.namedVariations`
+
+The font designer may have picked out some variations that they think look particularly good, for example a light, regular,
+and bold weight which would traditionally be separate fonts. This property returns an object describing these named variation
+instances that the designer has specified. Keys are variation names, and values are objects with axis settings.
+
+#### `font.getVariation(variation)`
+
+Returns a new font object representing this variation, from which you can get glyphs and perform layout as normal.
+The `variation` parameter can either be a variation settings object or a string variation name. Variation settings objects
+have axis names as keys, and numbers as values (should be in the range specified by `font.variationAxes`).
 
 ### Glyph Layout
 
