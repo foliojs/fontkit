@@ -11,7 +11,7 @@ class GSUBProcessor extends OpenTypeProcessor
         glyph = @glyphIterator.cur
         switch table.version
           when 1
-            glyph.id += table.deltaGlyphID
+            glyph.id = (glyph.id + table.deltaGlyphID) & 0xffff
             
           when 2
             glyph.id = table.substitute[index]
