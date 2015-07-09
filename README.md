@@ -120,6 +120,15 @@ Fontkit includes several methods for accessing glyph metrics and performing layo
 
 Returns the advance width (described above) for a single glyph id.
 
+#### `font.layout(string, features = [])`
+
+This method returns a `GlyphRun` object, which includes an array of `Glyph`s and `GlyphPosition`s for the given string.
+`Glyph` objects are described below. `GlyphPosition` objects include 4 properties: `xAdvance`, `yAdvance`, `xOffset`,
+and `yOffset`.
+
+The `features` parameter is an array of [OpenType feature tags](https://www.microsoft.com/typography/otspec/featuretags.htm) to be applied
+in addition to the default set. If this is an AAT font, the OpenType feature tags are mapped to AAT features.
+
 ### Variation fonts
 
 Fontkit has support for AAT variation fonts, where glyphs can adjust their shape according to user defined settings along
@@ -142,17 +151,6 @@ instances that the designer has specified. Keys are variation names, and values 
 Returns a new font object representing this variation, from which you can get glyphs and perform layout as normal.
 The `variation` parameter can either be a variation settings object or a string variation name. Variation settings objects
 have axis names as keys, and numbers as values (should be in the range specified by `font.variationAxes`).
-
-### Glyph Layout
-
-#### `font.layout(string, features = [])`
-
-This method returns a `GlyphRun` object, which includes an array of `Glyph`s and `GlyphPosition`s for the given string.
-`Glyph` objects are described below. `GlyphPosition` objects include 4 properties: `xAdvance`, `yAdvance`, `xOffset`,
-and `yOffset`.
-
-The `features` parameter is an array of [OpenType feature tags](https://www.microsoft.com/typography/otspec/featuretags.htm) to be applied
-in addition to the default set. If this is an AAT font, the OpenType feature tags are mapped to AAT features.
 
 ### Other methods
 
