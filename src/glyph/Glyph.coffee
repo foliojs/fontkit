@@ -22,8 +22,8 @@ class Glyph
       return table.metrics[gid]
       
     res = 
-      advance: table.metrics[table.metrics.length - 1].advance
-      bearing: table.bearings[gid - table.metrics.length]
+      advance: table.metrics[table.metrics.length - 1]?.advance or 0
+      bearing: table.bearings[gid - table.metrics.length] or 0
       
     return res
     
