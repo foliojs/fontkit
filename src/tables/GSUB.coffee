@@ -18,25 +18,25 @@ GSUBLookup = new r.VersionedStruct 'lookupType',
     2:
       coverage:       new r.Pointer(r.uint16, Coverage)
       glyphCount:     r.uint16
-      substitute:     new r.Array(r.uint16, 'glyphCount')
+      substitute:     new r.LazyArray(r.uint16, 'glyphCount')
         
   2: # Multiple Substitution
     substFormat:    r.uint16
     coverage:       new r.Pointer(r.uint16, Coverage)
     count:          r.uint16
-    sequences:      new r.Array(new r.Pointer(r.uint16, Sequence), 'count')
+    sequences:      new r.LazyArray(new r.Pointer(r.uint16, Sequence), 'count')
     
   3: # Alternate Substitution
     substFormat:    r.uint16
     coverage:       new r.Pointer(r.uint16, Coverage)
     count:          r.uint16
-    alternateSet:   new r.Array(new r.Pointer(r.uint16, AlternateSet), 'count')
+    alternateSet:   new r.LazyArray(new r.Pointer(r.uint16, AlternateSet), 'count')
     
   4: # Ligature Substitution
     substFormat:    r.uint16
     coverage:       new r.Pointer(r.uint16, Coverage)
     count:          r.uint16
-    ligatureSets:   new r.Array(new r.Pointer(r.uint16, LigatureSet), 'count')
+    ligatureSets:   new r.LazyArray(new r.Pointer(r.uint16, LigatureSet), 'count')
     
   5: Context         # Contextual Substitution
   6: ChainingContext # Chaining Contextual Substitution

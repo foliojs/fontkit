@@ -28,7 +28,7 @@ class GPOSProcessor extends OpenTypeProcessor
             @applyPositionValue 0, table.value
             
           when 2
-            @applyPositionValue 0, table.values[index]
+            @applyPositionValue 0, table.values.get(index)
             
         return true
     
@@ -41,7 +41,7 @@ class GPOSProcessor extends OpenTypeProcessor
       
         switch table.version
           when 1 # Adjustments for glyph pairs
-            set = table.pairSets[index]
+            set = table.pairSets.get(index)
             
             for pair in set when pair.secondGlyph is nextGlyph.id
               @applyPositionValue 0, pair.value1
@@ -55,7 +55,7 @@ class GPOSProcessor extends OpenTypeProcessor
             class2 = @getClassID nextGlyph.id, table.classDef2
             return false if class1 is -1 or class2 is -1
               
-            pair = table.classRecords[class1][class2]
+            pair = table.classRecords.get(class1).get(class2)
             @applyPositionValue 0, pair.value1
             @applyPositionValue 1, pair.value2
             

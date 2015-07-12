@@ -10,7 +10,6 @@ ValueFormat = new r.Bitfield r.uint16, [
 
 class ValueRecord
   constructor: (@key = 'valueFormat') ->
-    @size = undefined
     
   types = 
     xPlacement: r.int16
@@ -22,7 +21,7 @@ class ValueRecord
     xAdvDevice: new r.Pointer(r.uint16, Device, type: 'global', relativeTo: 'rel')
     yAdvDevice: new r.Pointer(r.uint16, Device, type: 'global', relativeTo: 'rel')
     
-  decode: (stream, parent) ->
+  buildStruct: (parent) ->
     struct = parent
     while not struct[@key] and struct.parent
       struct = struct.parent
@@ -36,7 +35,13 @@ class ValueRecord
       type = types[key]        
       fields[key] = type
       
-    res = new r.Struct(fields).decode(stream, parent)
+    return new r.Struct(fields)
+    
+  size: (val, ctx) ->
+    return @buildStruct(ctx).size(val, ctx)
+    
+  decode: (stream, parent) ->
+    res = @buildStruct(parent).decode(stream, parent)
     delete res.rel
     return res
   
@@ -94,7 +99,7 @@ GPOSLookup = new r.VersionedStruct 'lookupType',
       coverage:       new r.Pointer(r.uint16, Coverage)
       valueFormat:    ValueFormat
       valueCount:     r.uint16
-      values:         new r.Array(new ValueRecord, 'valueCount')
+      values:         new r.LazyArray(new ValueRecord, 'valueCount')
   
   2: new r.VersionedStruct r.uint16, # Pair Adjustment Positioning
     1: # Adjustments for glyph pairs
@@ -102,7 +107,7 @@ GPOSLookup = new r.VersionedStruct 'lookupType',
       valueFormat1:   ValueFormat
       valueFormat2:   ValueFormat
       pairSetCount:   r.uint16
-      pairSets:       new r.Array(new r.Pointer(r.uint16, PairSet), 'pairSetCount')
+      pairSets:       new r.LazyArray(new r.Pointer(r.uint16, PairSet), 'pairSetCount')
       
     2: # Class pair adjustment
       coverage:       new r.Pointer(r.uint16, Coverage)
@@ -112,7 +117,7 @@ GPOSLookup = new r.VersionedStruct 'lookupType',
       classDef2:      new r.Pointer(r.uint16, ClassDef)
       class1Count:    r.uint16
       class2Count:    r.uint16
-      classRecords:  new r.Array(new r.Array(Class2Record, 'class2Count'), 'class1Count')
+      classRecords:   new r.LazyArray(new r.LazyArray(Class2Record, 'class2Count'), 'class1Count')
   
   3: # Cursive Attachment Positioning
     format:             r.uint16
