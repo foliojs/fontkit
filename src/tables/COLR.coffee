@@ -19,5 +19,5 @@ module.exports = new r.Struct
   version: r.uint16
   numBaseGlyphRecords: r.uint16
   baseGlyphRecord: new r.Pointer(r.uint32, new r.Array(BaseGlyphRecord, 'numBaseGlyphRecords'))
-  layerRecords: new r.Pointer(r.uint32, new r.Array(LayerRecord, 'numLayerRecords'))
+  layerRecords: new r.Pointer(r.uint32, new r.Array(LayerRecord, 'numLayerRecords'), lazy: yes)
   numLayerRecords: r.uint16
