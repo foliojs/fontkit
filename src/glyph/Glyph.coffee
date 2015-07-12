@@ -19,11 +19,11 @@ class Glyph
     
   getMetrics = (table, gid) ->
     if gid < table.metrics.length
-      return table.metrics[gid]
+      return table.metrics.get gid
       
     res = 
-      advance: table.metrics[table.metrics.length - 1]?.advance or 0
-      bearing: table.bearings[gid - table.metrics.length] or 0
+      advance: table.metrics.get(table.metrics.length - 1)?.advance or 0
+      bearing: table.bearings.get(gid - table.metrics.length) or 0
       
     return res
     
