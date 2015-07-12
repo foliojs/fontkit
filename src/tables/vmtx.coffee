@@ -6,5 +6,5 @@ VmtxEntry = new r.Struct
 
 # Vertical Metrics Table
 module.exports = new r.Struct
-  metrics:  new r.Array(VmtxEntry, -> @parent.vhea.numberOfMetrics)
-  bearings: new r.Array(r.int16, -> @parent.maxp.numGlyphs - @parent.vhea.numberOfMetrics)
+  metrics:  new r.LazyArray(VmtxEntry, -> @parent.vhea.numberOfMetrics)
+  bearings: new r.LazyArray(r.int16, -> @parent.maxp.numGlyphs - @parent.vhea.numberOfMetrics)

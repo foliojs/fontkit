@@ -22,7 +22,7 @@ class CmapProcessor
     cmap = @cmap
     switch cmap.version
       when 0
-        return cmap.codeMap[codepoint] or 0
+        return cmap.codeMap.get(codepoint) or 0
         
       when 4
         min = 0
@@ -30,19 +30,19 @@ class CmapProcessor
         while min <= max
           mid = (min + max) >> 1
           
-          if codepoint < cmap.startCode[mid]
+          if codepoint < cmap.startCode.get(mid)
             max = mid - 1
-          else if codepoint > cmap.endCode[mid]
+          else if codepoint > cmap.endCode.get(mid)
             min = mid + 1
           else
-            rangeOffset = cmap.idRangeOffset[mid]
+            rangeOffset = cmap.idRangeOffset.get(mid)
             if rangeOffset is 0
-              gid = codepoint + cmap.idDelta[mid]
+              gid = codepoint + cmap.idDelta.get(mid)
             else
-              index = rangeOffset / 2 + (codepoint - cmap.startCode[mid]) - (cmap.segCount - mid)
-              gid = cmap.glyphIndexArray[index] or 0
+              index = rangeOffset / 2 + (codepoint - cmap.startCode.get(mid)) - (cmap.segCount - mid)
+              gid = cmap.glyphIndexArray.get(index) or 0
               unless gid is 0
-                gid += cmap.idDelta[mid]
+                gid += cmap.idDelta.get(mid)
                 
             return gid & 0xffff
         
@@ -52,14 +52,14 @@ class CmapProcessor
         throw new Error 'TODO: cmap format 8'
             
       when 6, 10
-        return cmap.glyphIndices[codepoint - cmap.firstCode] or 0
+        return cmap.glyphIndices.get(codepoint - cmap.firstCode) or 0
         
       when 12, 13
         min = 0
         max = cmap.nGroups - 1
         while min <= max
           mid = (min + max) >> 1
-          group = cmap.groups[mid]
+          group = cmap.groups.get(mid)
           
           if codepoint < group.startCharCode
             max = mid - 1
@@ -90,8 +90,8 @@ class CmapProcessor
           
       when 4
         res = []
-        for tail, i in cmap.endCode
-          start = cmap.startCode[i]
+        for tail, i in cmap.endCode.toArray()
+          start = cmap.startCode.get(i)
           res.push [start..tail]...
           
         @_characterSet = res
@@ -104,7 +104,7 @@ class CmapProcessor
         
       when 12, 13
         res = []
-        for group in cmap.groups
+        for group in cmap.groups.toArray()
           res.push [group.startCharCode..group.endCharCode]...
           
         @_characterSet = res

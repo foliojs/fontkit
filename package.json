@@ -24,7 +24,7 @@
     "clone": "^1.0.1",
     "deep-equal": "^1.0.0",
     "pako": "^0.2.5",
-    "restructure": "^0.3.2",
+    "restructure": "^0.5.0",
     "typedarray-to-buffer": "^3.0.0",
     "unicode-properties": "^1.0.0"
   },

@@ -5,5 +5,5 @@ HmtxEntry = new r.Struct
   bearing: r.int16
 
 module.exports = new r.Struct
-  metrics:    new r.Array(HmtxEntry, -> @parent.hhea.numberOfMetrics)
-  bearings:   new r.Array(r.int16, -> @parent.maxp.numGlyphs - @parent.hhea.numberOfMetrics)
+  metrics:    new r.LazyArray(HmtxEntry, -> @parent.hhea.numberOfMetrics)
+  bearings:   new r.LazyArray(r.int16, -> @parent.maxp.numGlyphs - @parent.hhea.numberOfMetrics)

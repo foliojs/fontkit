@@ -14,14 +14,14 @@ class GSUBProcessor extends OpenTypeProcessor
             glyph.id = (glyph.id + table.deltaGlyphID) & 0xffff
             
           when 2
-            glyph.id = table.substitute[index]
+            glyph.id = table.substitute.get(index)
             
         return true
             
       when 2 # Multiple Substitution
         index = @coverageIndex table.coverage
         unless index is -1
-          sequence = table.sequence[index]
+          sequence = table.sequence.get(index)
           @glyphIterator.cur.id = sequence[0]
           @glyphs.splice @glyphIterator.index + 1, 0, (new GlyphInfo gid for gid in sequence[1..])
           return true
@@ -30,14 +30,14 @@ class GSUBProcessor extends OpenTypeProcessor
         index = @coverageIndex table.coverage
         unless index is -1
           USER_INDEX = 0 # TODO
-          @glyphIterator.cur.id = table.alternateSet[index][USER_INDEX]
+          @glyphIterator.cur.id = table.alternateSet.get(index)[USER_INDEX]
           return true
     
       when 4 # Ligature Substitution
         index = @coverageIndex table.coverage
         return false if index is -1
         
-        for ligature in table.ligatureSets[index]
+        for ligature in table.ligatureSets.get(index)
           matched = @sequenceMatchIndices 1, ligature.components
           continue unless matched
           

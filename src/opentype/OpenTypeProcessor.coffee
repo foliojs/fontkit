@@ -79,7 +79,7 @@ class OpenTypeProcessor
         lookups.push 
           feature: tag
           index: lookupIndex
-          lookup: @table.lookupList[lookupIndex]
+          lookup: @table.lookupList.get(lookupIndex)
           
     lookups.sort (a, b) ->
       a.index - b.index
@@ -118,7 +118,7 @@ class OpenTypeProcessor
     for lookupRecord in lookupRecords
       @glyphIterator.index = glyphIndex + lookupRecord.sequenceIndex
       
-      lookup = @table.lookupList[lookupRecord.lookupListIndex]
+      lookup = @table.lookupList.get(lookupRecord.lookupListIndex)
       for table in lookup.subTables
         @applyLookup lookup.lookupType, table
     

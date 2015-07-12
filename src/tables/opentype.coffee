@@ -53,7 +53,7 @@ exports.LookupList = (SubTable) ->
     subTables:          new r.Array(new r.Pointer(r.uint16, SubTable), 'subTableCount')
     markFilteringSet:   r.uint16 # TODO: only present when flags says so...
       
-  return new r.Array new r.Pointer(r.uint16, Lookup), r.uint16
+  return new r.LazyArray new r.Pointer(r.uint16, Lookup), r.uint16
   
 ##################
 # Coverage Table #

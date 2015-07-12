@@ -27,11 +27,11 @@ class TTFSubset extends Subset
     @loca.offsets.push @offset
     
     if gid < @font.hmtx.metrics.length
-      @hmtx.metrics.push @font.hmtx.metrics[gid]
+      @hmtx.metrics.push @font.hmtx.metrics.get gid
     else
       @hmtx.metrics.push
-        width: @font.hmtx.metrics[@font.hmtx.metrics.length - 1].advanceWidth
-        bearing: @font.hmtx.bearings[gid - @font.hmtx.metrics.length]
+        width: @font.hmtx.metrics.get(@font.hmtx.metrics.length - 1).advance
+        bearing: @font.hmtx.bearings.get(gid - @font.hmtx.metrics.length)
       
     @offset += buffer.length
     return @glyf.length - 1
