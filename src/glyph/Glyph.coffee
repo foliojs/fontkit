@@ -27,7 +27,7 @@ class Glyph
       
     return res
     
-  _getMetrics: (cbox = @cbox) ->
+  _getMetrics: (cbox) ->
     return @_metrics if @_metrics
       
     {advance:advanceWidth, bearing:leftBearing} = getMetrics @_font.hmtx, @id
@@ -36,14 +36,17 @@ class Glyph
     if @_font.vmtx
       {advance:advanceHeight, bearing:topBearing} = getMetrics @_font.vmtx, @id
       
-    else if (os2 = @_font['OS/2']) and os2.version > 0
-      advanceHeight = Math.abs os2.typoAscender - os2.typoDescender
-      topBearing = os2.typoAscender - cbox.maxY
-    
     else
-      hhea = @_font.hhea
-      advanceHeight = Math.abs hhea.ascent - hhea.descent
-      topBearing = hhea.ascent - cbox.maxY
+      cbox ?= @cbox
+      
+      if (os2 = @_font['OS/2']) and os2.version > 0
+        advanceHeight = Math.abs os2.typoAscender - os2.typoDescender
+        topBearing = os2.typoAscender - cbox.maxY
+    
+      else
+        hhea = @_font.hhea
+        advanceHeight = Math.abs hhea.ascent - hhea.descent
+        topBearing = hhea.ascent - cbox.maxY
     
     @_metrics = { advanceWidth, advanceHeight, leftBearing, topBearing }
       

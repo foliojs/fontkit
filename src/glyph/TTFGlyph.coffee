@@ -244,7 +244,9 @@ class TTFGlyph extends Glyph
     
   _getMetrics: ->
     return @_metrics if @_metrics
-    super
+    
+    cbox = @_getCBox true
+    super cbox
     
     if @_font._variationProcessor
       # Decode the font data (and cache for later).
