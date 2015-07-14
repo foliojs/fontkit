@@ -5,6 +5,17 @@ KernPair = new r.Struct
   right:  r.uint16
   value:  r.int16
   
+ClassTable = new r.Struct
+  firstGlyph: r.uint16
+  nGlyphs: r.uint16
+  offsets: new r.Array(r.uint16, 'nGlyphs')
+  max: -> @offsets.length and Math.max.apply Math, @offsets
+  
+Kern2Array = new r.Struct
+  off: -> @_startOffset - @parent.parent._startOffset
+  len: -> (((@parent.leftTable.max - @off) / @parent.rowWidth) + 1) * (@parent.rowWidth / 2)
+  values: new r.LazyArray r.int16, 'len'
+  
 KernSubtable = new r.VersionedStruct 'format', 
   0:
     nPairs:         r.uint16
@@ -12,26 +23,23 @@ KernSubtable = new r.VersionedStruct 'format',
     entrySelector:  r.uint16
     rangeShift:     r.uint16
     pairs:          new r.Array(KernPair, 'nPairs')
-    
-  # 1:
-  #   stateHeader: StateHeader
-  #   valueTable: new r.Pointer(r.uint16, new UnboundedArray(r.uint16))
-  # 2:
-  #   rowWidth: r.uint16
-  #   leftTable: new r.Pointer(r.uint16, 'void')
-  #   rightTable: new r.Pointer(r.uint16, 'void')
-  #   array: new r.Pointer(r.uint16, 'void')
-  #
+  
+  2:
+    rowWidth:   r.uint16
+    leftTable:  new r.Pointer r.uint16, ClassTable, type: 'parent'
+    rightTable: new r.Pointer r.uint16, ClassTable, type: 'parent'
+    array:      new r.Pointer r.uint16, Kern2Array, type: 'parent'
+
   3:
-    glyphCount: r.uint16
-    kernValueCount: r.uint8
-    leftClassCount: r.uint8
-    rightClassCount: r.uint8
-    flags: r.uint8
-    kernValue: new r.Array(r.int16, 'kernValueCount')
-    leftClass: new r.Array(r.uint8, 'glyphCount')
-    rightClass: new r.Array(r.uint8, 'glyphCount')
-    kernIndex: new r.Array(r.uint8, -> @leftClassCount * @rightClassCount)
+    glyphCount:       r.uint16
+    kernValueCount:   r.uint8
+    leftClassCount:   r.uint8
+    rightClassCount:  r.uint8
+    flags:            r.uint8
+    kernValue:        new r.Array(r.int16, 'kernValueCount')
+    leftClass:        new r.Array(r.uint8, 'glyphCount')
+    rightClass:       new r.Array(r.uint8, 'glyphCount')
+    kernIndex:        new r.Array(r.uint8, -> @leftClassCount * @rightClassCount)
 
 KernTable = new r.VersionedStruct 'version',
   0: # Microsoft uses this format
@@ -59,7 +67,6 @@ KernTable = new r.VersionedStruct 'version',
     subtable:   KernSubtable
     padding: new r.Reserved r.uint8, -> @length - @_currentOffset
 
-# The kern table has been largely superseded by the GPOS table
 module.exports = new r.VersionedStruct r.uint16,
   0: # Microsoft Version
     nTables:    r.uint16
