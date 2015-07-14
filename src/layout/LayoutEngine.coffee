@@ -131,7 +131,7 @@ class LayoutEngine
       @unicodeLayoutEngine.positionGlyphs glyphs, positions
       
     # if kerning is not supported by GPOS, do kerning with the TrueType/AAT kern table
-    if 'kern' not of gposFeatures and 'kern' in features and @font.kern
+    if 'kern' not of gposFeatures and @font.kern
       @kernProcessor ?= new KernProcessor @font
       @kernProcessor.process glyphs, positions
           
