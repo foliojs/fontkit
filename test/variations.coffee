@@ -1,8 +1,10 @@
 fontkit = require '../'
 assert = require 'assert'
+fs = require 'fs'
 
 describe 'variations', ->
-  font = fontkit.openSync __dirname + '/data/Skia.ttf'
+  return unless fs.existsSync '/Library/Fonts/Skia.ttf'
+  font = fontkit.openSync '/Library/Fonts/Skia.ttf'
   
   it 'should get available variation axes', ->
     axes = font.variationAxes

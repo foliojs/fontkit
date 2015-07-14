@@ -33,6 +33,20 @@ class KernProcessor
               val = pair.value
               break
               
+        when 2
+          if left >= s.leftTable.firstGlyph and left < s.leftTable.firstGlyph + s.leftTable.nGlyphs
+            leftOffset = s.leftTable.offsets[left - s.leftTable.firstGlyph]
+          else
+            leftOffset = s.array.off
+          
+          if right >= s.rightTable.firstGlyph and right < s.rightTable.firstGlyph + s.rightTable.nGlyphs
+            rightOffset = s.rightTable.offsets[right - s.rightTable.firstGlyph]
+          else
+            rightOffset = 0
+            
+          index = (leftOffset + rightOffset - s.array.off) / 2
+          val = s.array.values.get(index)
+              
         when 3
           return 0 if left >= s.glyphCount or right >= s.glyphCount
           val = s.kernValue[s.kernIndex[s.leftClass[left] * s.rightClassCount + s.rightClass[right]]]

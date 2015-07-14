@@ -1,4 +1,3 @@
-cloneDeep = require 'clone'
 Subset = require './Subset'
 CFFTop = require '../cff/CFFTop'
 CFFPrivateDict = require '../cff/CFFPrivateDict'
@@ -37,6 +36,13 @@ class CFFSubset extends Subset
         
     return res
     
+  shallowCopy = (obj) ->
+    res = {}
+    for key, val of obj
+      res[key] = val
+      
+    return res
+    
   subsetFontdict: (topDict) ->
     topDict.FDArray = []
     topDict.FDSelect =
@@ -50,7 +56,7 @@ class CFFSubset extends Subset
       continue unless fd?
       
       unless used_fds[fd]
-        topDict.FDArray.push cloneDeep @cff.topDict.FDArray[fd]
+        topDict.FDArray.push shallowCopy @cff.topDict.FDArray[fd]
         used_subrs.push {}
         
       used_fds[fd] = true
@@ -64,6 +70,7 @@ class CFFSubset extends Subset
     for dict, i in topDict.FDArray
       delete dict.FontName
       if dict.Private?.Subrs
+        dict.Private = shallowCopy dict.Private
         dict.Private.Subrs = @subsetSubrs dict.Private.Subrs, used_subrs[i]
         
     return
@@ -77,7 +84,7 @@ class CFFSubset extends Subset
       for subr of glyph._usedSubrs
         used_subrs[subr] = true
     
-    privateDict = cloneDeep @cff.topDict.Private
+    privateDict = shallowCopy @cff.topDict.Private
     privateDict.Subrs = @subsetSubrs @cff.topDict.Private.Subrs, used_subrs
     
     topDict.FDArray = [{ Private: privateDict }]
@@ -101,7 +108,7 @@ class CFFSubset extends Subset
       version: if @charstrings.length > 255 then 2 else 1
       ranges: [{ first: 1, nLeft: @charstrings.length - 2 }]
     
-    topDict = cloneDeep @cff.topDict
+    topDict = shallowCopy @cff.topDict
     topDict.Private = null
     topDict.charset = charset
     topDict.Encoding = null

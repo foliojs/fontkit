@@ -3,38 +3,38 @@ assert = require 'assert'
 
 describe 'fontkit', ->
   it 'should open a font asynchronously', ->
-    fontkit.open __dirname + '/data/Skia.ttf', (err, font) ->
+    fontkit.open __dirname + '/data/OpenSans-Regular.ttf', (err, font) ->
       assert.equal err, null
       assert font instanceof fontkit.TTFFont
       
   it 'should open a font synchronously', ->
-    font = fontkit.openSync __dirname + '/data/Skia.ttf'
+    font = fontkit.openSync __dirname + '/data/OpenSans-Regular.ttf'
     assert font instanceof fontkit.TTFFont
   
   it 'should open fonts of different formats', ->
-    font = fontkit.openSync __dirname + '/data/Skia.ttf'
+    font = fontkit.openSync __dirname + '/data/OpenSans-Regular.ttf'
     assert font instanceof fontkit.TTFFont
     
-    font = fontkit.openSync __dirname + '/data/ACaslonPro-Regular.otf'
+    font = fontkit.openSync __dirname + '/data/SourceSansPro-Regular.otf'
     assert font instanceof fontkit.TTFFont
     
-    font = fontkit.openSync __dirname + '/data/Chalkboard.ttc'
+    font = fontkit.openSync __dirname + '/data/NotoSans.ttc'
     assert font instanceof fontkit.TrueTypeCollection
 
-    font = fontkit.openSync __dirname + '/data/Chalkboard.ttc', 'Chalkboard'
+    font = fontkit.openSync __dirname + '/data/NotoSans.ttc', 'NotoSans'
     assert font instanceof fontkit.TTFFont
     
-    font = fontkit.openSync __dirname + '/data/Helvetica.dfont'
+    font = fontkit.openSync __dirname + '/data/NotoSans.dfont'
     assert font instanceof fontkit.DFont
 
-    font = fontkit.openSync __dirname + '/data/Helvetica.dfont', 'Helvetica'
+    font = fontkit.openSync __dirname + '/data/NotoSans.dfont', 'NotoSans'
     assert font instanceof fontkit.TTFFont
 
-    font = fontkit.openSync __dirname + '/data/MuseoSans.woff'
+    font = fontkit.openSync __dirname + '/data/SourceSansPro-Regular.woff'
     assert font instanceof fontkit.WOFFFont
     assert font instanceof fontkit.TTFFont
 
-    font = fontkit.openSync __dirname + '/data/ACaslonPro-Regular.woff2'
+    font = fontkit.openSync __dirname + '/data/SourceSansPro-Regular.woff2'
     assert font instanceof fontkit.WOFF2Font
     assert font instanceof fontkit.TTFFont
     
@@ -49,21 +49,21 @@ describe 'fontkit', ->
     , /Unknown font format/
     
   it 'should get collection objects for ttc fonts', ->
-    collection = fontkit.openSync __dirname + '/data/Chalkboard.ttc'
+    collection = fontkit.openSync __dirname + '/data/NotoSans.ttc'
     assert collection instanceof fontkit.TrueTypeCollection
     
     names = collection.fonts.map (f) -> f.postscriptName
-    assert.deepEqual names, ['Chalkboard', 'Chalkboard-Bold']
+    assert.deepEqual names, ['NotoSans-Bold', 'NotoSans', 'NotoSans-Italic', 'NotoSans-BoldItalic']
     
-    font = collection.getFont 'Chalkboard-Bold'
-    assert.equal font.postscriptName, 'Chalkboard-Bold'
+    font = collection.getFont 'NotoSans-Italic'
+    assert.equal font.postscriptName, 'NotoSans-Italic'
     
   it 'should get collection objects for dfonts', ->
-    collection = fontkit.openSync '/System/Library/Fonts/Helvetica.dfont'
+    collection = fontkit.openSync __dirname + '/data/NotoSans.dfont'
     assert collection instanceof fontkit.DFont
         
     names = collection.fonts.map (f) -> f.postscriptName
-    assert.deepEqual names, ['Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 'Helvetica-BoldOblique', 'Helvetica-Light', 'Helvetica-LightOblique']
+    assert.deepEqual names, ['NotoSans', 'NotoSans-Bold', 'NotoSans-Italic', 'NotoSans-BoldItalic']
     
-    font = collection.getFont 'Helvetica-Bold'
-    assert.equal font.postscriptName, 'Helvetica-Bold'
+    font = collection.getFont 'NotoSans-Italic'
+    assert.equal font.postscriptName, 'NotoSans-Italic'

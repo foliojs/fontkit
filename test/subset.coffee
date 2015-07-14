@@ -7,7 +7,7 @@ CFFGlyph = require '../src/glyph/CFFGlyph'
 
 describe 'font subsetting', ->
   describe 'truetype subsetting', ->
-    font = fontkit.openSync __dirname + '/data/Skia.ttf'
+    font = fontkit.openSync __dirname + '/data/OpenSans-Regular.ttf'
     
     it 'should create a TTFSubset instance', ->
       subset = font.createSubset()
@@ -35,9 +35,9 @@ describe 'font subsetting', ->
         done()
         
   describe 'CFF subsetting', ->
-    font = fontkit.openSync __dirname + '/data/ACaslonPro-Regular.otf'
+    font = fontkit.openSync __dirname + '/data/SourceSansPro-Regular.otf'
     
-    it 'should create a TTFSubset instance', ->
+    it 'should create a CFFSubset instance', ->
       subset = font.createSubset()
       assert.equal subset.constructor.name, 'CFFSubset'
       
@@ -54,7 +54,7 @@ describe 'font subsetting', ->
         done()
         
     it 'should handle CID fonts', (done) ->
-      f = fontkit.openSync __dirname + '/data/MunhwaGothicStd-Bold.otf'
+      f = fontkit.openSync __dirname + '/data/NotoSansCJKkr-Regular.otf'
       subset = f.createSubset()
       for glyph in f.glyphsForString '갈휸'
         subset.includeGlyph glyph
