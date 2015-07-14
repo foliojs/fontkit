@@ -39,8 +39,8 @@ class LayoutEngine
     # Return early if there are no glyphs
     if glyphs.length is 0
       return new GlyphRun glyphs, []    
-          
-    if @font.GSUB or @font.GPOS
+      
+    if not @font.morx and (@font.GSUB or @font.GPOS)
       shaper = Shapers.choose script
       features.push shaper.getGlobalFeatures(script)...
       
@@ -65,14 +65,10 @@ class LayoutEngine
     return new GlyphRun glyphs, positions
     
   substitute: (glyphs, features, script, language) ->
-    # first, try the OpenType GSUB table
-    if @font.GSUB
-      @GSUBProcessor ?= new GSUBProcessor(@font, @font.GSUB)
-      @GSUBProcessor.selectScript script, language
-      @GSUBProcessor.applyFeatures(features, glyphs)
-
-    # if not found, try AAT morx table
-    else if @font.morx
+    # First, try AAT morx table.
+    # We do this first since more scripts are currently supported by AAT
+    # because the shaping logic is built into the font.
+    if @font.morx
       # AAT expects the glyphs to be reversed prior to morx processing,
       # so reverse the glyphs if the script is right-to-left.
       isRTL = Script.direction(script) is 'rtl'
@@ -87,6 +83,12 @@ class LayoutEngine
       # GPOS, which expects glyphs to be in logical order.
       if isRTL and @font.GPOS
         glyphs.reverse()
+        
+    # If not found, try the OpenType GSUB table.
+    else if @font.GSUB
+      @GSUBProcessor ?= new GSUBProcessor(@font, @font.GSUB)
+      @GSUBProcessor.selectScript script, language
+      @GSUBProcessor.applyFeatures(features, glyphs)
       
     return glyphs
     
