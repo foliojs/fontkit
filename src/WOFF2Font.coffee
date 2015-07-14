@@ -162,8 +162,8 @@ class WOFF2Font extends TTFFont
         
         instructionSize = read255UInt16 table.glyphs
         
-      else if nContours < 0 # composite glyph
-        haveInstructions = TTFGlyph::_decodeComposite glyph, table.composites          
+      else if nContours < 0 # composite glyph          
+        haveInstructions = TTFGlyph::_decodeComposite.call { _font: this }, glyph, table.composites          
         if haveInstructions
           instructionSize = read255UInt16 table.glyphs
           
