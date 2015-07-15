@@ -3,7 +3,7 @@ assert = require 'assert'
 BBox = require '../src/glyph/BBox'
 
 describe 'metadata', ->
-  font = fontkit.openSync __dirname + '/data/NotoSans.ttc', 'NotoSans'
+  font = fontkit.openSync __dirname + '/data/NotoSans/NotoSans.ttc', 'NotoSans'
   
   it 'has metadata properties', ->
     assert.equal font.fullName, 'Noto Sans'

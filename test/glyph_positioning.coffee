@@ -3,13 +3,13 @@ assert = require 'assert'
 
 describe 'glyph positioning', ->
   describe 'basic positioning', ->
-    font = fontkit.openSync __dirname + '/data/SourceSansPro-Regular.otf'
+    font = fontkit.openSync __dirname + '/data/SourceSansPro/SourceSansPro-Regular.otf'
     
     it 'should get a glyph width', ->
       assert.equal font.getGlyph(5).advanceWidth, 615
 
   describe 'opentype positioning', ->
-    font = fontkit.openSync __dirname + '/data/SourceSansPro-Regular.otf'
+    font = fontkit.openSync __dirname + '/data/SourceSansPro/SourceSansPro-Regular.otf'
     
     it 'should apply opentype GPOS features', ->
       {positions} = font.layout 'Twitter'
@@ -20,7 +20,7 @@ describe 'glyph positioning', ->
       assert.deepEqual positions.map((p) -> p.xAdvance), [ 502, 718, 246, 318, 324, 496, 347 ]
 
   describe 'AAT features', ->
-    font = fontkit.openSync __dirname + '/data/Play-Regular.ttf'
+    font = fontkit.openSync __dirname + '/data/Play/Play-Regular.ttf'
     
     it 'should apply kerning by default', ->
       {positions} = font.layout 'Twitter'

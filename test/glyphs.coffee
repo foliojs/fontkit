@@ -4,7 +4,7 @@ BBox = require '../src/glyph/BBox'
 
 describe 'glyphs', ->
   describe 'truetype glyphs', ->
-    font = fontkit.openSync __dirname + '/data/OpenSans-Regular.ttf'
+    font = fontkit.openSync __dirname + '/data/OpenSans/OpenSans-Regular.ttf'
     
     it 'should get a TTFGlyph', ->
       glyph = font.getGlyph 39 # D
@@ -31,7 +31,7 @@ describe 'glyphs', ->
       assert.equal glyph.advanceWidth | 0, 1493
 
   describe 'CFF glyphs', ->
-    font = fontkit.openSync __dirname + '/data/SourceSansPro-Regular.otf'
+    font = fontkit.openSync __dirname + '/data/SourceSansPro/SourceSansPro-Regular.otf'
     
     it 'should get a CFFGlyph', ->
       glyph = font.getGlyph 5 # D
@@ -50,7 +50,7 @@ describe 'glyphs', ->
       assert.deepEqual glyph.bbox, new BBox 90, 0, 564, 656
 
   describe 'SBIX glyphs', ->
-    font = fontkit.openSync __dirname + '/data/ss-emoji-apple.ttf'
+    font = fontkit.openSync __dirname + '/data/ss-emoji/ss-emoji-apple.ttf'
     
     it 'should get an SBIXGlyph', ->
       glyph = font.glyphsForString('😜')[0]
@@ -70,7 +70,7 @@ describe 'glyphs', ->
         data: image.data
         
   describe 'COLR glyphs', ->
-    font = fontkit.openSync __dirname + '/data/ss-emoji-microsoft.ttf'
+    font = fontkit.openSync __dirname + '/data/ss-emoji/ss-emoji-microsoft.ttf'
     
     it 'should get an SBIXGlyph', ->
       glyph = font.glyphsForString('😜')[0]
@@ -93,7 +93,7 @@ describe 'glyphs', ->
       assert.deepEqual glyph.bbox, new BBox 0, 0, 2048, 2048
       
   describe 'WOFF glyphs', ->
-    font = fontkit.openSync __dirname + '/data/SourceSansPro-Regular.woff'
+    font = fontkit.openSync __dirname + '/data/SourceSansPro/SourceSansPro-Regular.woff'
     
     it 'should get a TTFGlyph', ->
       glyph = font.glyphsForString('T')[0]
@@ -104,7 +104,7 @@ describe 'glyphs', ->
       assert.equal glyph.path.toSVG(), 'M226 586L28 586L28 656L508 656L508 586L310 586L310 0L226 0L226 586Z'
       
   describe 'WOFF2 glyph', ->
-    font = fontkit.openSync __dirname + '/data/SourceSansPro-Regular.woff2'
+    font = fontkit.openSync __dirname + '/data/SourceSansPro/SourceSansPro-Regular.woff2'
     
     it 'should get a WOFF2Glyph', ->
       glyph = font.glyphsForString('T')[0]

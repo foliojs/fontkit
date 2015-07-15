@@ -3,7 +3,7 @@ assert = require 'assert'
 
 describe 'character to glyph mapping', ->
   describe 'basic cmap handling', ->
-    font = fontkit.openSync __dirname + '/data/OpenSans-Regular.ttf'
+    font = fontkit.openSync __dirname + '/data/OpenSans/OpenSans-Regular.ttf'
     
     it 'should get characterSet', ->
       assert Array.isArray(font.characterSet)
@@ -26,7 +26,7 @@ describe 'character to glyph mapping', ->
       assert.deepEqual glyphs.map((g) -> g.codePoints), [[104], [101], [108], [108], [111]]
       
   describe 'opentype features', ->
-    font = fontkit.openSync __dirname + '/data/SourceSansPro-Regular.otf'
+    font = fontkit.openSync __dirname + '/data/SourceSansPro/SourceSansPro-Regular.otf'
     
     it 'should list available features', ->
       assert.deepEqual font.availableFeatures, [
@@ -47,7 +47,7 @@ describe 'character to glyph mapping', ->
       assert.deepEqual glyphs.map((g) -> g.id), [ 1088, 1089, 1090, 1, 1617, 1724, 1603, 1608, 1, 1088, 1089, 1090 ]
               
   describe 'AAT features', ->
-    font = fontkit.openSync __dirname + '/data/Play-Regular.ttf'
+    font = fontkit.openSync __dirname + '/data/Play/Play-Regular.ttf'
     
     it 'should list available features', ->
       assert.deepEqual font.availableFeatures, [ 'tnum', 'sups', 'subs', 'numr', 'onum', 'lnum', 'liga', 'kern' ]
@@ -65,7 +65,7 @@ describe 'character to glyph mapping', ->
       assert.deepEqual glyphs.map((g) -> g.codePoints), [[102, 102, 105], [32], [49, 8260, 50]]
 
     it 'should apply indic reordering features', ->
-      f = fontkit.openSync __dirname + '/data/Khmer.ttf'
+      f = fontkit.openSync __dirname + '/data/Khmer/Khmer.ttf'
       {glyphs} = f.layout 'ខ្ញុំអាចញ៉ាំកញ្ចក់បាន ដោយគ្មានបញ្ហា'
       assert.deepEqual glyphs.map((g) -> g.id), [
         45, 153, 177, 112, 248, 188, 49, 296, 44, 187, 149, 44, 117, 236, 188, 63, 3, 107, 
