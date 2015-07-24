@@ -1,6 +1,7 @@
 DefaultShaper = require './DefaultShaper'
 
 SHAPERS =
+  hang: HangulShaper
   latn: DefaultShaper
   DFLT: DefaultShaper
 

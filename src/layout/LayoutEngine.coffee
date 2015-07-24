@@ -49,7 +49,7 @@ class LayoutEngine
       glyphs = for glyph, i in glyphs
         new GlyphInfo glyph.id, [glyph.codePoints...], features
         
-      features.push shaper.assignFeatures(glyphs, script)...
+      features.push shaper.assignFeatures(glyphs, script, @font)...
       
     # Remove duplicate features
     featureMap = {}
