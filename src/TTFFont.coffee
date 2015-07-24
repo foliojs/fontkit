@@ -115,26 +115,21 @@ class TTFFont
   glyphForCodePoint: (codePoint) ->
     @_cmapProcessor ?= new CmapProcessor @cmap
     return @getGlyph @_cmapProcessor.lookup(codePoint), [codePoint]
-        
-  codePointAt = (str, idx = 0) ->
-    code = str.charCodeAt(idx)
-    next = str.charCodeAt(idx + 1)
-    
-    # If a surrogate pair
-    if 0xd800 <= code <= 0xdbff and 0xdc00 <= next <= 0xdfff
-      return ((code - 0xd800) * 0x400) + (next - 0xdc00) + 0x10000
-      
-    return code
     
   glyphsForString: (string) ->
     # Map character codes to glyph ids
-    glyphs = []
-    for i in [0...string.length] by 1
-      # check for already processed low surrogates
-      continue if 0xdc00 <= string.charCodeAt(i) <= 0xdfff
-      
-      # get the glyph
-      glyphs.push @glyphForCodePoint codePointAt(string, i)
+    glyphs = []    
+    len = string.length
+    idx = 0
+    while idx < len
+      code = string.charCodeAt idx++
+      if 0xd800 <= code <= 0xdbff and idx < len
+        next = string.charCodeAt idx
+        if 0xdc00 <= next <= 0xdfff
+          idx++
+          code = ((code & 0x3FF) << 10) + (next & 0x3FF) + 0x10000
+    
+      glyphs.push @glyphForCodePoint code
       
     return glyphs
     
