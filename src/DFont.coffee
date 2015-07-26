@@ -36,15 +36,13 @@ class DFont
     dataLength: r.uint32
     mapLength: r.uint32
     
-  @isDFont: (stream) ->
-    pos = stream.pos
+  @probe: (buffer) ->
+    stream = new r.DecodeStream(buffer)
     
     try
       header = DFontHeader.decode stream
     catch e
       return false
-    finally
-      stream.pos = pos
       
     for type in header.map.typeList.types
       if type.name is 'sfnt'

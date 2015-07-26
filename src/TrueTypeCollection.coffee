@@ -16,6 +16,9 @@ class TrueTypeCollection
       dsigLength: r.uint32
       dsigOffset: r.uint32
       
+  @probe: (buffer) ->
+    return buffer.toString('ascii', 0, 4) is 'ttcf'
+      
   constructor: (@stream) ->
     if @stream.readString(4) isnt 'ttcf'
       throw new Error 'Not a TrueType collection'
