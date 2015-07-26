@@ -14,8 +14,8 @@
   "scripts": {
     "test": "mocha",
     "coverage": "mocha --require coverage.js --reporter html-cov > coverage.html",
-    "prepublish": "coffee -c src/ index.coffee",
-    "postpublish": "rm -rf index.js src/*.js src/**/*.js"
+    "prepublish": "coffee -c src/ *.coffee",
+    "postpublish": "rm *.js && find src -name '*.js' -delete"
   },
   "author": "Devon Govett <devongovett@gmail.com>",
   "license": "MIT",

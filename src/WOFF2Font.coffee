@@ -6,7 +6,10 @@ WOFF2Glyph = require './glyph/WOFF2Glyph'
 
 # Subclass of TTFFont that represents a TTF/OTF font compressed by WOFF2
 # See spec here: http://www.w3.org/TR/WOFF2/
-class WOFF2Font extends TTFFont  
+class WOFF2Font extends TTFFont
+  @probe: (buffer) ->
+    return buffer.toString('ascii', 0, 4) is 'wOF2'
+    
   WOFF2Header = new r.Struct
     tag: new r.String(4) # should be 'wOF2'
     flavor: r.uint32
