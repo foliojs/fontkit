@@ -1,10 +1,5 @@
 r = require 'restructure'
 fs = require 'fs'
-TTFFont = require './src/TTFFont'
-WOFFFont = require './src/WOFFFont'
-WOFF2Font = require './src/WOFF2Font'
-TrueTypeCollection = require './src/TrueTypeCollection'
-DFont = require './src/DFont'
 
 formats = []
 exports.registerFormat = (format) ->
