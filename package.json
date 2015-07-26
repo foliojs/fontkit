@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "test": "mocha",
-    "coverage": "mocha --require coverage.js --reporter html-cov > coverage.html",
+    "coverage": "mocha --require coffee-coverage/register-istanbul && istanbul report",
     "prepublish": "coffee -c src/ *.coffee",
     "postpublish": "rm *.js && find src -name '*.js' -delete"
   },
@@ -33,6 +33,7 @@
     "coffee-script": "^1.8.0",
     "concat-stream": "^1.4.6",
     "iconv-lite": "^0.4.7",
+    "istanbul": "^0.3.17",
     "mocha": "^2.0.1"
   }
 }
