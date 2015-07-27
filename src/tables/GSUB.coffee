@@ -54,6 +54,9 @@ GSUBLookup = new r.VersionedStruct 'lookupType',
     lookaheadCoverage:      new r.Array(new r.Pointer(r.uint16, Coverage), 'lookaheadGlyphCount')
     glyphCount:             r.uint16
     substitutes:            new r.Array(r.uint16, 'glyphCount')
+    
+# Fix circular reference
+GSUBLookup.versions[7].extension.type = GSUBLookup
   
 module.exports = new r.Struct
   version:        r.int32
