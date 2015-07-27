@@ -156,6 +156,9 @@ GPOSLookup = new r.VersionedStruct 'lookupType',
     posFormat:   r.uint16
     lookupType:  r.uint16   # cannot also be 9
     extension:   new r.Pointer(r.uint32, GPOSLookup)
+    
+# Fix circular reference
+GPOSLookup.versions[9].extension.type = GPOSLookup
   
 module.exports = new r.Struct
   version:        r.int32
