@@ -218,9 +218,9 @@ class OpenTypeProcessor
         
         set = table.chainRuleSets[index]
         for rule in set
-          if @sequenceMatches(-table.backtrack.length, table.backtrack) and
-             @sequenceMatches(1, table.input) and
-             @sequenceMatches(1 + table.input.length, table.lookahead)
+          if @sequenceMatches(-rule.backtrack.length, rule.backtrack) and
+             @sequenceMatches(1, rule.input) and
+             @sequenceMatches(1 + rule.input.length, rule.lookahead)
               return @applyLookupList rule.lookupRecords
       
       when 2
