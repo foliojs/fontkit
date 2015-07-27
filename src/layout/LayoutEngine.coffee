@@ -96,7 +96,7 @@ class LayoutEngine
     constructor: (@xAdvance = 0, @yAdvance = 0, @xOffset = 0, @yOffset = 0) ->
       
   position: (glyphs, features, script, language) ->
-    realGlyphs = if @font.GPOS
+    realGlyphs = if @font.GPOS or @font.GSUB
       # Map the GlyphInfo objects back to real Glyph objects
       for glyph, i in glyphs
         @font.getGlyph glyph.id, glyph.codePoints
