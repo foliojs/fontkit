@@ -17,7 +17,7 @@ class TTFSubset extends Subset
     buffer = stream.readBuffer(nextOffset - curOffset)
   
     # if it is a compound glyph, include its components
-    if glyf.numberOfContours < 0
+    if glyf?.numberOfContours < 0
       buffer = new Buffer(buffer)
       for component in glyf.components
         gid = @includeGlyph component.glyphID
