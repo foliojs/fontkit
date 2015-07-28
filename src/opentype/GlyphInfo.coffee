@@ -12,5 +12,6 @@ class GlyphInfo
       
     @ligatureID = null
     @ligatureComponent = null
+    @cursiveAttachment = null
     
 module.exports = GlyphInfo

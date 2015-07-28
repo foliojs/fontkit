@@ -60,6 +60,47 @@ class GPOSProcessor extends OpenTypeProcessor
             @applyPositionValue 1, pair.value2
             
         return true
+            
+      when 3 # Cursive Attachment Positioning
+        nextIndex = @glyphIterator.peekIndex()
+        nextGlyph = @glyphs[nextIndex]
+        return false unless nextGlyph
+
+        curRecord = table.entryExitRecords[@coverageIndex table.coverage]
+        return false unless curRecord?.exitAnchor
+        
+        nextRecord = table.entryExitRecords[@coverageIndex table.coverage, nextGlyph.id]
+        return false unless nextRecord?.entryAnchor
+        
+        entry = @getAnchor nextRecord.entryAnchor
+        exit = @getAnchor curRecord.exitAnchor
+        
+        cur = @positions[@glyphIterator.index]
+        next = @positions[nextIndex]
+                
+        switch @direction
+          when 'ltr'
+            cur.xAdvance = exit.x + cur.xOffset
+
+            d = entry.x + next.xOffset
+            next.xAdvance -= d
+            next.xOffset -= d
+
+          when 'rtl'
+            d = exit.x + cur.xOffset
+            cur.xAdvance -= d
+            cur.xOffset -= d
+            next.xAdvance = entry.x + next.xOffset
+
+        if @glyphIterator.flags.rightToLeft
+          @glyphIterator.cur.cursiveAttachment = nextIndex
+          cur.yOffset = entry.y - exit.y
+        else
+          nextGlyph.cursiveAttachment = @glyphIterator.index
+          cur.yOffset = exit.y - entry.y
+          
+        return true
+            
       when 4 # Mark to base positioning
         markIndex = @coverageIndex table.markCoverage
         return false if markIndex is -1
@@ -172,4 +213,22 @@ class GPOSProcessor extends OpenTypeProcessor
     # TODO: contour point, device tables
     return { x: anchor.xCoordinate, y: anchor.yCoordinate }
         
+  applyLookups: ->
+    super
+    
+    for glyph, i in @glyphs
+      @fixCursiveAttachment i
+      
+    return
+    
+  fixCursiveAttachment: (i) ->
+    glyph = @glyphs[i]
+    if glyph.cursiveAttachment?
+      j = glyph.cursiveAttachment
+      
+      glyph.cursiveAttachment = null
+      @fixCursiveAttachment j
+      
+      @positions[i].yOffset += @positions[j].yOffset
+      
 module.exports = GPOSProcessor
