@@ -193,7 +193,7 @@ class OpenTypeProcessor
         return if index is -1
     
         set = table.ruleSets[index]
-        for rule in set when @sequenceMatches 1, set.input
+        for rule in set when @sequenceMatches 1, rule.input
           return @applyLookupList rule.lookupRecords
           
       when 2
