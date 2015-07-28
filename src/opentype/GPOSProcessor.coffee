@@ -169,11 +169,7 @@ class GPOSProcessor extends OpenTypeProcessor
       markPos.xOffset -= basePos.xAdvance
         
   getAnchor: (anchor) ->
-    switch anchor.version
-      when 1
-        return { x: anchor.xCoordinate, y: anchor.yCoordinate }
-        
-      else
-        throw new Error "Unsupported anchor format: #{anchor.version}"
+    # TODO: contour point, device tables
+    return { x: anchor.xCoordinate, y: anchor.yCoordinate }
         
 module.exports = GPOSProcessor
