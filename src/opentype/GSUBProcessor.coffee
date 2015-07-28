@@ -21,9 +21,9 @@ class GSUBProcessor extends OpenTypeProcessor
       when 2 # Multiple Substitution
         index = @coverageIndex table.coverage
         unless index is -1
-          sequence = table.sequence.get(index)
+          sequence = table.sequences.get(index)
           @glyphIterator.cur.id = sequence[0]
-          @glyphs.splice @glyphIterator.index + 1, 0, (new GlyphInfo gid for gid in sequence[1..])
+          @glyphs.splice @glyphIterator.index + 1, 0, (new GlyphInfo gid for gid in sequence[1..])...
           return true
           
       when 3 # Alternate Substitution
