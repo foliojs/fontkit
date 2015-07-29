@@ -23,7 +23,14 @@ class GSUBProcessor extends OpenTypeProcessor
         unless index is -1
           sequence = table.sequences.get(index)
           @glyphIterator.cur.id = sequence[0]
-          @glyphs.splice @glyphIterator.index + 1, 0, (new GlyphInfo gid for gid in sequence[1..])...
+          
+          replacement = []
+          for gid in sequence[1...]
+            g = new GlyphInfo gid
+            g.features = @glyphIterator.cur.features
+            replacement.push g
+          
+          @glyphs.splice @glyphIterator.index + 1, 0, replacement...
           return true
           
       when 3 # Alternate Substitution
