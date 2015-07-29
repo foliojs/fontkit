@@ -45,48 +45,7 @@ describe 'character to glyph mapping', ->
     it 'should enable fractions when using fraction slash', ->
       {glyphs} = font.layout '123 1⁄16 123'
       assert.deepEqual glyphs.map((g) -> g.id), [ 1088, 1089, 1090, 1, 1617, 1724, 1603, 1608, 1, 1088, 1089, 1090 ]
-      
-  describe 'hangul', ->
-    font = fontkit.openSync __dirname + '/data/NotoSansCJK/NotoSansCJKkr-Regular.otf'
-        
-    it 'should use composed versions if supported by the font', ->
-      {glyphs} = font.layout '\uD734\uAC00\u0020\uAC00\u002D\u002D\u0020\u0028\uC624\u002D\u002D\u0029'
-      assert.deepEqual glyphs.map((g) -> g.id), [ 58626, 47566, 62995, 47566, 14, 14, 1, 9, 54258, 14, 14, 10 ]
-    
-    it 'should compose decomposed syllables if supported', ->
-      {glyphs} = font.layout '\u1112\u1172\u1100\u1161\u0020\u1100\u1161\u002D\u002D\u0020\u0028\u110B\u1169\u002D\u002D\u0029'
-      assert.deepEqual glyphs.map((g) -> g.id), [ 58626, 47566, 62995, 47566, 14, 14, 1, 9, 54258, 14, 14, 10 ]
-              
-    it 'should use OT features for non-combining <L,V,T>', ->
-      {glyphs} = font.layout '\ua960\ud7b0\ud7cb'
-      assert.deepEqual glyphs.map((g) -> g.id), [ 64003, 64479, 64822 ]
-      
-    it 'should decompose <LV,T> to <L,V,T> if <LVT> is not supported', ->
-      # <L,V> combine at first, but the T is non-combining, so this
-      # tests that the <LV> gets decomposed again in this case.
-      {glyphs} = font.layout '\u1100\u1161\ud7cb'
-      assert.deepEqual glyphs.map((g) -> g.id), [ 63657, 64408, 64685 ]
-      
-    it 'should reorder tone marks to the beginning of <L,V> syllables', ->
-      {glyphs} = font.layout '\ua960\ud7b0\u302f'
-      assert.deepEqual glyphs.map((g) -> g.id), [ 1436, 64378, 64574 ]
-      
-    it 'should reorder tone marks to the beginning of <L,V,T> syllables', ->
-      {glyphs} = font.layout '\ua960\ud7b0\ud7cb\u302f'
-      assert.deepEqual glyphs.map((g) -> g.id), [ 1436, 64003, 64479, 64822 ]
-      
-    it 'should reorder tone marks to the beginning of <LV> syllables', ->
-      {glyphs} = font.layout '\uac00\u302f'
-      assert.deepEqual glyphs.map((g) -> g.id), [ 1436, 47566 ]
-      
-    it 'should reorder tone marks to the beginning of <LVT> syllables', ->
-      {glyphs} = font.layout '\uac01\u302f'
-      assert.deepEqual glyphs.map((g) -> g.id), [ 1436, 47567 ]
-      
-    it 'should insert a dotted circle for invalid tone marks', ->
-      {glyphs} = font.layout '\u1100\u302f\u1161'
-      assert.deepEqual glyphs.map((g) -> g.id), [ 365, 1436, 1256, 462 ]
-              
+                    
   describe 'AAT features', ->
     font = fontkit.openSync __dirname + '/data/Play/Play-Regular.ttf'
     

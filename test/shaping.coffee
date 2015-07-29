@@ -43,3 +43,44 @@ describe 'shaping', ->
     test 'should shape Phags Pa text', 'NotoSans/NotoSansPhagsPa-Regular.ttf', 'ꡀꡁꡂꡃ ꡄꡅꡆꡇ ꡈꡉꡊꡋ ꡌꡍꡎꡏ',
       '100+1491|212+1462|217+1462|87+1386|3+532|161+1677|168+1427|148+1532|329+1122|3+532|112+1614' +
       '|153+1491|158+1073|107+1231|3+532|171+1686|178+1542|313+1542|115+1231'
+
+  describe 'hangul shaper', ->
+    font = fontkit.openSync __dirname + '/data/NotoSansCJK/NotoSansCJKkr-Regular.otf'
+        
+    it 'should use composed versions if supported by the font', ->
+      {glyphs} = font.layout '\uD734\uAC00\u0020\uAC00\u002D\u002D\u0020\u0028\uC624\u002D\u002D\u0029'
+      assert.deepEqual glyphs.map((g) -> g.id), [ 58626, 47566, 62995, 47566, 14, 14, 1, 9, 54258, 14, 14, 10 ]
+    
+    it 'should compose decomposed syllables if supported', ->
+      {glyphs} = font.layout '\u1112\u1172\u1100\u1161\u0020\u1100\u1161\u002D\u002D\u0020\u0028\u110B\u1169\u002D\u002D\u0029'
+      assert.deepEqual glyphs.map((g) -> g.id), [ 58626, 47566, 62995, 47566, 14, 14, 1, 9, 54258, 14, 14, 10 ]
+              
+    it 'should use OT features for non-combining <L,V,T>', ->
+      {glyphs} = font.layout '\ua960\ud7b0\ud7cb'
+      assert.deepEqual glyphs.map((g) -> g.id), [ 64003, 64479, 64822 ]
+      
+    it 'should decompose <LV,T> to <L,V,T> if <LVT> is not supported', ->
+      # <L,V> combine at first, but the T is non-combining, so this
+      # tests that the <LV> gets decomposed again in this case.
+      {glyphs} = font.layout '\u1100\u1161\ud7cb'
+      assert.deepEqual glyphs.map((g) -> g.id), [ 63657, 64408, 64685 ]
+      
+    it 'should reorder tone marks to the beginning of <L,V> syllables', ->
+      {glyphs} = font.layout '\ua960\ud7b0\u302f'
+      assert.deepEqual glyphs.map((g) -> g.id), [ 1436, 64378, 64574 ]
+      
+    it 'should reorder tone marks to the beginning of <L,V,T> syllables', ->
+      {glyphs} = font.layout '\ua960\ud7b0\ud7cb\u302f'
+      assert.deepEqual glyphs.map((g) -> g.id), [ 1436, 64003, 64479, 64822 ]
+      
+    it 'should reorder tone marks to the beginning of <LV> syllables', ->
+      {glyphs} = font.layout '\uac00\u302f'
+      assert.deepEqual glyphs.map((g) -> g.id), [ 1436, 47566 ]
+      
+    it 'should reorder tone marks to the beginning of <LVT> syllables', ->
+      {glyphs} = font.layout '\uac01\u302f'
+      assert.deepEqual glyphs.map((g) -> g.id), [ 1436, 47567 ]
+      
+    it 'should insert a dotted circle for invalid tone marks', ->
+      {glyphs} = font.layout '\u1100\u302f\u1161'
+      assert.deepEqual glyphs.map((g) -> g.id), [ 365, 1436, 1256, 462 ]
