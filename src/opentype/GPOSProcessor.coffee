@@ -203,11 +203,9 @@ class GPOSProcessor extends OpenTypeProcessor
     basePos = @positions[baseGlyphIndex]
     markPos = @positions[@glyphIterator.index]
     
-    markPos.xOffset = basePos.xOffset + baseCoords.x - markCoords.x
-    markPos.yOffset = basePos.yOffset + baseCoords.y - markCoords.y
-    
-    if @direction is 'ltr'
-      markPos.xOffset -= basePos.xAdvance
+    markPos.xOffset = baseCoords.x - markCoords.x
+    markPos.yOffset = baseCoords.y - markCoords.y
+    @glyphIterator.cur.markAttachment = baseGlyphIndex
         
   getAnchor: (anchor) ->
     # TODO: contour point, device tables
@@ -219,7 +217,7 @@ class GPOSProcessor extends OpenTypeProcessor
     for glyph, i in @glyphs
       @fixCursiveAttachment i
       
-    return
+    @fixMarkAttachment i      
     
   fixCursiveAttachment: (i) ->
     glyph = @glyphs[i]
@@ -230,5 +228,19 @@ class GPOSProcessor extends OpenTypeProcessor
       @fixCursiveAttachment j
       
       @positions[i].yOffset += @positions[j].yOffset
+      
+  fixMarkAttachment: ->
+    for glyph, i in @glyphs when glyph.markAttachment?
+      j = glyph.markAttachment
+      
+      @positions[i].xOffset += @positions[j].xOffset
+      @positions[i].yOffset += @positions[j].yOffset
+      
+      if @direction is 'ltr'
+        for k in [j...i] by 1
+          @positions[i].xOffset -= @positions[k].xAdvance
+          @positions[i].yOffset -= @positions[k].yAdvance
+        
+    return
       
 module.exports = GPOSProcessor
