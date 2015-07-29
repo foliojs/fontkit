@@ -188,7 +188,7 @@ class TTFGlyph extends Glyph
       points.push @_getPhantomPoints(glyph)...
       
       @_font._variationProcessor.transformPoints @id, points
-      glyph.phantomPoints = points.slice -4
+      glyph.phantomPoints = points.splice -4, 4
     
       for point, i in points
         glyph.components[i].dx = point.x

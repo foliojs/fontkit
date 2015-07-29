@@ -14,6 +14,10 @@ BBox = require './glyph/BBox'
 
 class TTFFont
   get = require('./get')(this)
+  
+  @probe: (buffer) ->
+    return buffer.toString('ascii', 0, 4) in ['true', 'OTTO', String.fromCharCode(0, 1, 0, 0)]
+  
   constructor: (@stream, variationCoords = null) ->    
     @_tables = {}
     @_glyphs = {}
@@ -177,7 +181,7 @@ class TTFFont
   # Returns an object describing the available variation axes
   # that this font supports. Keys are setting tags, and values
   # contain the axis name, range, and default value.
-  get 'variationAxes', ->    
+  get 'variationAxes', ->
     res = {}
     return res unless @fvar
     
@@ -193,7 +197,7 @@ class TTFFont
   # Returns an object describing the named variation instances
   # that the font designer has specified. Keys are variation names
   # and values are the variation settings for this instance.
-  get 'namedVariations', ->    
+  get 'namedVariations', ->
     res = {}
     return res unless @fvar
     
@@ -233,5 +237,9 @@ class TTFFont
     font._tables = @_tables
     
     return font
-        
+    
+  # Standardized format plugin API
+  getFont: (name) ->
+    return @getVariation name
+    
 module.exports = TTFFont

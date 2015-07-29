@@ -143,7 +143,7 @@ exports.forString = (string) ->
     
     # Check if this is a high surrogate
     if 0xd800 <= code <= 0xdbff and idx < len
-      next = str.charCodeAt idx
+      next = string.charCodeAt idx
       
       # Check if this is a low surrogate
       if 0xdc00 <= next <= 0xdfff

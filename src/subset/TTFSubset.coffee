@@ -17,7 +17,7 @@ class TTFSubset extends Subset
     buffer = stream.readBuffer(nextOffset - curOffset)
   
     # if it is a compound glyph, include its components
-    if glyf.numberOfContours < 0
+    if glyf?.numberOfContours < 0
       buffer = new Buffer(buffer)
       for component in glyf.components
         gid = @includeGlyph component.glyphID
@@ -30,7 +30,7 @@ class TTFSubset extends Subset
       @hmtx.metrics.push @font.hmtx.metrics.get gid
     else
       @hmtx.metrics.push
-        width: @font.hmtx.metrics.get(@font.hmtx.metrics.length - 1).advance
+        advance: @font.hmtx.metrics.get(@font.hmtx.metrics.length - 1).advance
         bearing: @font.hmtx.bearings.get(gid - @font.hmtx.metrics.length)
       
     @offset += buffer.length

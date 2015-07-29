@@ -6,6 +6,9 @@ toBuffer = require 'typedarray-to-buffer'
 r = require 'restructure'
 
 class WOFFFont extends TTFFont
+  @probe: (buffer) ->
+    return buffer.toString('ascii', 0, 4) is 'wOFF'
+    
   _decodeDirectory: ->
     @directory = WOFFDirectory.decode(@stream, _startOffset: 0)
     

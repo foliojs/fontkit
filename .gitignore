@@ -1,4 +1,5 @@
 node_modules/
 playground/
 .DS_Store
+coverage/
 coverage.html
