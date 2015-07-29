@@ -124,9 +124,8 @@ class LayoutEngine
       
     gposFeatures = @GPOSProcessor?.features or {}
         
-    # if the mark and mkmk features are not supported by GPOS, or if
-    # there is no GPOS table, use unicode properties to position marks.
-    if 'mark' not of gposFeatures and 'mkmk' not of gposFeatures
+    # if there is no GPOS table, use unicode properties to position marks.
+    unless @font.GPOS
       @unicodeLayoutEngine ?= new UnicodeLayoutEngine @font
       @unicodeLayoutEngine.positionGlyphs glyphs, positions
       
