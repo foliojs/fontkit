@@ -60,6 +60,47 @@ class GPOSProcessor extends OpenTypeProcessor
             @applyPositionValue 1, pair.value2
             
         return true
+            
+      when 3 # Cursive Attachment Positioning
+        nextIndex = @glyphIterator.peekIndex()
+        nextGlyph = @glyphs[nextIndex]
+        return false unless nextGlyph
+
+        curRecord = table.entryExitRecords[@coverageIndex table.coverage]
+        return false unless curRecord?.exitAnchor
+        
+        nextRecord = table.entryExitRecords[@coverageIndex table.coverage, nextGlyph.id]
+        return false unless nextRecord?.entryAnchor
+        
+        entry = @getAnchor nextRecord.entryAnchor
+        exit = @getAnchor curRecord.exitAnchor
+        
+        cur = @positions[@glyphIterator.index]
+        next = @positions[nextIndex]
+                
+        switch @direction
+          when 'ltr'
+            cur.xAdvance = exit.x + cur.xOffset
+
+            d = entry.x + next.xOffset
+            next.xAdvance -= d
+            next.xOffset -= d
+
+          when 'rtl'
+            d = exit.x + cur.xOffset
+            cur.xAdvance -= d
+            cur.xOffset -= d
+            next.xAdvance = entry.x + next.xOffset
+
+        if @glyphIterator.flags.rightToLeft
+          @glyphIterator.cur.cursiveAttachment = nextIndex
+          cur.yOffset = entry.y - exit.y
+        else
+          nextGlyph.cursiveAttachment = @glyphIterator.index
+          cur.yOffset = exit.y - entry.y
+          
+        return true
+            
       when 4 # Mark to base positioning
         markIndex = @coverageIndex table.markCoverage
         return false if markIndex is -1
@@ -162,18 +203,44 @@ class GPOSProcessor extends OpenTypeProcessor
     basePos = @positions[baseGlyphIndex]
     markPos = @positions[@glyphIterator.index]
     
-    markPos.xOffset = basePos.xOffset + baseCoords.x - markCoords.x
-    markPos.yOffset = basePos.yOffset + baseCoords.y - markCoords.y
-    
-    if @direction is 'ltr'
-      markPos.xOffset -= basePos.xAdvance
+    markPos.xOffset = baseCoords.x - markCoords.x
+    markPos.yOffset = baseCoords.y - markCoords.y
+    @glyphIterator.cur.markAttachment = baseGlyphIndex
         
   getAnchor: (anchor) ->
-    switch anchor.version
-      when 1
-        return { x: anchor.xCoordinate, y: anchor.yCoordinate }
+    # TODO: contour point, device tables
+    return { x: anchor.xCoordinate, y: anchor.yCoordinate }
         
-      else
-        throw new Error "Unsupported anchor format: #{anchor.version}"
+  applyFeatures: ->
+    super
+    
+    for glyph, i in @glyphs
+      @fixCursiveAttachment i
+      
+    @fixMarkAttachment i      
+    
+  fixCursiveAttachment: (i) ->
+    glyph = @glyphs[i]
+    if glyph.cursiveAttachment?
+      j = glyph.cursiveAttachment
+      
+      glyph.cursiveAttachment = null
+      @fixCursiveAttachment j
+      
+      @positions[i].yOffset += @positions[j].yOffset
+      
+  fixMarkAttachment: ->
+    for glyph, i in @glyphs when glyph.markAttachment?
+      j = glyph.markAttachment
+      
+      @positions[i].xOffset += @positions[j].xOffset
+      @positions[i].yOffset += @positions[j].yOffset
+      
+      if @direction is 'ltr'
+        for k in [j...i] by 1
+          @positions[i].xOffset -= @positions[k].xAdvance
+          @positions[i].yOffset -= @positions[k].yAdvance
         
+    return
+      
 module.exports = GPOSProcessor
