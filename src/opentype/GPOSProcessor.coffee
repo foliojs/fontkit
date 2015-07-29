@@ -211,7 +211,7 @@ class GPOSProcessor extends OpenTypeProcessor
     # TODO: contour point, device tables
     return { x: anchor.xCoordinate, y: anchor.yCoordinate }
         
-  applyLookups: ->
+  applyFeatures: ->
     super
     
     for glyph, i in @glyphs
