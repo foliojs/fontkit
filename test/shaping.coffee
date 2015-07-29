@@ -1,7 +1,7 @@
 fontkit = require '../'
 assert = require 'assert'
 
-describe.only 'shaping', ->
+describe 'shaping', ->
   test = (description, font, text, output) ->
     it description, ->
       f = fontkit.openSync __dirname + '/data/' + font
@@ -24,6 +24,9 @@ describe.only 'shaping', ->
   describe 'arabic shaper', ->
     test 'should shape Arabic text', 'NotoSans/NotoKufiArabic-Regular.ttf', 'سُلَّاِّمتی',
       '223+1974|143+801|39+1176|270@180,80+0|268@1060,50+0|51+1452|101@900,-600+0|15+1798'
+      
+    test 'should handle cursive attachment positioning', 'NotoSans/NotoNastaliqUrduDraft.ttf', 'ححححححب',
+      '18@652,-180+0|226+1350|574@0,279+90|825@0,707+176|825@0,1058+176|825@0,1409+176|825@0,1760+176|509@0,2111+636'
 
     test 'should shape Mongolian text', 'NotoSans/NotoSansMongolian-Regular.ttf', 'ᠬᠦᠮᠦᠨ ᠪᠦᠷ ᠲᠥᠷᠥᠵᠦ ᠮᠡᠨᠳᠡᠯᠡᠬᠦ ᠡᠷᠬᠡ',
       '488+2417|193+582|945+1174|56+874|3+532|358+2507|32+1032|3+532|35+1372|942+1778|31+1145|943+1174|101+1085|' + 
