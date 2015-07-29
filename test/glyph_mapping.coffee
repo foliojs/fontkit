@@ -45,7 +45,7 @@ describe 'character to glyph mapping', ->
     it 'should enable fractions when using fraction slash', ->
       {glyphs} = font.layout '123 1⁄16 123'
       assert.deepEqual glyphs.map((g) -> g.id), [ 1088, 1089, 1090, 1, 1617, 1724, 1603, 1608, 1, 1088, 1089, 1090 ]
-              
+                    
   describe 'AAT features', ->
     font = fontkit.openSync __dirname + '/data/Play/Play-Regular.ttf'
     

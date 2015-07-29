@@ -1,5 +1,6 @@
 DefaultShaper = require './DefaultShaper'
 ArabicShaper = require './ArabicShaper'
+HangulShaper = require './HangulShaper'
 
 SHAPERS =
   arab: ArabicShaper    # Arabic
@@ -10,6 +11,8 @@ SHAPERS =
   mand: ArabicShaper    # Mandaic
   mani: ArabicShaper    # Manichaean
   phlp: ArabicShaper    # Psalter Pahlavi
+  
+  hang: HangulShaper    # Hangul
   
   latn: DefaultShaper   # Latin
   DFLT: DefaultShaper   # Default
