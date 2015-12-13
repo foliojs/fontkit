@@ -198,6 +198,7 @@ class AATMorxProcessor
       last = false
       ligatureIndex = 0
       codePoints = []
+      ligatureGlyphs = []
       
       until last
         componentGlyph = @ligatureStack.pop()
@@ -215,11 +216,15 @@ class AATMorxProcessor
         if last or store
           ligatureEntry = ligatureList.getItem ligatureIndex
           @glyphs[componentGlyph] = @font.getGlyph ligatureEntry, codePoints
+          ligatureGlyphs.push componentGlyph
           ligatureIndex = 0
           codePoints = []
         else
           @glyphs[componentGlyph] = @font.getGlyph 0xffff
-              
+        
+      # Put ligature glyph indexes back on the stack
+      @ligatureStack.push ligatureGlyphs...
+          
     return
   
   processNoncontextualSubstitutions: (subtable, glyphs, index) =>
