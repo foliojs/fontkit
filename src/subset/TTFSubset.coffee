@@ -1,6 +1,6 @@
 cloneDeep = require 'clone'
 Subset = require './Subset'
-Directory = require '../tables/Directory'
+Directory = require '../tables/directory'
 Tables = require '../tables'
 
 class TTFSubset extends Subset
