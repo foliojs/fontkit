@@ -1,25 +1,38 @@
-Script = require '../../layout/Script'
 unicode = require 'unicode-properties'
 
+COMMON_FEATURES = ['ccmp', 'locl', 'rlig', 'mark', 'mkmk']
+FRACTIONAL_FEATURES = ['frac', 'numr', 'dnom']
+HORIZONTAL_FEATURES = ['calt', 'clig', 'liga', 'rclt', 'curs', 'kern']
+VERTICAL_FEATURES = ['vert']
+DIRECTIONAL_FEATURES =
+  ltr: ['ltra', 'ltrm']
+  rtl: ['rtla', 'rtlm']
+
 class DefaultShaper
-  @getGlobalFeatures: (script, isVertical = false) ->
-    features = ['ccmp', 'locl', 'rlig', 'mark', 'mkmk']
+  @plan: (plan, glyphs, features) ->
+    # Plan the features we want to apply
+    @planPreprocessing plan
+    @planFeatures plan
+    @planPostprocessing plan, features
     
-    switch Script.direction(script)
-      when 'ltr'
-        features.push 'ltra', 'ltrm'
+    # Assign the global features to all the glyphs
+    plan.assignGlobalFeatures glyphs
+    
+    # Assign local features to glyphs
+    @assignFeatures plan, glyphs
+    
+  @planPreprocessing: (plan) ->
+    plan.add
+      global: DIRECTIONAL_FEATURES[plan.direction]
+      local: FRACTIONAL_FEATURES
         
-      when 'rtl'
-        features.push 'rtla', 'rtlm'
+  @planFeatures: (plan) ->
+    # Do nothing by default. Let subclasses override this.
+  
+  @planPostprocessing: (plan, userFeatures) ->
+    plan.add [COMMON_FEATURES..., HORIZONTAL_FEATURES..., userFeatures...]
       
-    if isVertical
-      features.push 'vert'
-    else
-      features.push 'calt', 'clig', 'liga', 'rclt', 'curs', 'kern'
-      
-    return features
-    
-  @assignFeatures: (glyphs, script) ->
+  @assignFeatures: (plan, glyphs) ->
     # Enable contextual fractions
     i = 0
     while i < glyphs.length
@@ -47,6 +60,6 @@ class DefaultShaper
       else
         i++
         
-    return ['frac', 'numr', 'dnom']
+    return
     
 module.exports = DefaultShaper

@@ -1,7 +1,7 @@
-OpenTypeProcessor = require './OpenTypeProcessor'
+OTProcessor = require './OTProcessor'
 GlyphInfo = require './GlyphInfo'
 
-class GSUBProcessor extends OpenTypeProcessor
+class GSUBProcessor extends OTProcessor
   applyLookup: (lookupType, table) ->
     switch lookupType
       when 1 # Single Substitution

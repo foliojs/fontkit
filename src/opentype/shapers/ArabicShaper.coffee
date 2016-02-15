@@ -13,10 +13,13 @@ trie = new UnicodeTrie fs.readFileSync __dirname + '/data.trie'
 # https://github.com/behdad/harfbuzz/blob/master/src/hb-ot-shape-complex-arabic.cc
 #
 class ArabicShaper extends DefaultShaper
-  @getGlobalFeatures: (script, isVertical = false) ->
-    features = super
-    features.push 'mset'
-    return features
+  FEATURES = ['isol', 'fina', 'fin2', 'fin3', 'medi', 'med2', 'init']
+  @planFeatures: (plan) ->
+    plan.add ['ccmp', 'locl']
+    for feature in FEATURES
+      plan.addStage feature, false
+      
+    plan.addStage 'mset'
     
   ShapingClasses = 
     Non_Joining: 0
@@ -72,8 +75,8 @@ class ArabicShaper extends DefaultShaper
 
     return ShapingClasses.Non_Joining
     
-  @assignFeatures: (glyphs, script) ->
-    features = super
+  @assignFeatures: (plan, glyphs) ->
+    super
         
     prev = -1
     state = 0
@@ -99,7 +102,6 @@ class ArabicShaper extends DefaultShaper
       if feature = actions[index]
         glyph.features[feature] = true
 
-    features.push 'isol', 'fina', 'fin2', 'fin3', 'medi', 'med2', 'init'
-    return features
+    return
   
 module.exports = ArabicShaper

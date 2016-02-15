@@ -1,7 +1,7 @@
 GlyphIterator = require './GlyphIterator'
 Script = require '../layout/Script'
 
-class OpenTypeProcessor
+class OTProcessor
   constructor: (@font, @table) ->
     @script = null
     @scriptTag = null
@@ -242,4 +242,4 @@ class OpenTypeProcessor
            @coverageSequenceMatches(table.inputGlyphCount, table.lookaheadCoverage)
              return @applyLookupList table.lookupRecords
     
-module.exports = OpenTypeProcessor
+module.exports = OTProcessor
