@@ -29,15 +29,6 @@ class CFFFont
       
     # if @topDict.CharstringType isnt 2
     #   throw new Error "Only CharstringType 2 is supported"
-      
-    # charset?
-    switch @topDictIndex[0].Encoding
-      when 0 # standard encoding
-        break
-      when 1 # expert encoding
-        break
-      else # custom
-        break
     
     return this
   
