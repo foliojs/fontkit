@@ -93,8 +93,11 @@ class HangulShaper extends DefaultShaper
     # State 3: <L,V,T> or <LVT>
     [ [ NO_ACTION, 0 ], [ NO_ACTION, 1 ], [ NO_ACTION, 0 ], [ NO_ACTION, 0 ], [ DECOMPOSE, 2 ], [ DECOMPOSE, 3 ], [ TONE_MARK, 0 ] ]
   ]
+  
+  @planFeatures: (plan) ->
+    plan.add ['ljmo', 'vjmo', 'tjmo'], false
       
-  @assignFeatures: (glyphs, script, font) ->
+  @assignFeatures: (plan, glyphs) ->
     state = 0
     i = 0
     while i < glyphs.length
@@ -107,24 +110,24 @@ class HangulShaper extends DefaultShaper
       switch action
         when DECOMPOSE
           # Decompose the composed syllable if it is not supported by the font.
-          unless font.hasGlyphForCodePoint code
-            i = decompose glyphs, i, font
+          unless plan.font.hasGlyphForCodePoint code
+            i = decompose glyphs, i, plan.font
       
         when COMPOSE
           # Found a decomposed syllable. Try to compose if supported by the font.
-          i = compose glyphs, i, font
+          i = compose glyphs, i, plan.font
           
         when TONE_MARK
           # Got a valid syllable, followed by a tone mark. Move the tone mark to the beginning of the syllable.
-          reorderToneMark glyphs, i, font
+          reorderToneMark glyphs, i, plan.font
           
         when INVALID
           # Tone mark has no valid syllable to attach to, so insert a dotted circle
-          i = insertDottedCircle glyphs, i, font
+          i = insertDottedCircle glyphs, i, plan.font
                 
       i++
 
-    return ['ljmo', 'vjmo', 'tjmo']
+    return
     
   getGlyph = (font, code, features) ->
     return new GlyphInfo font.glyphForCodePoint(code).id, [code], Object.keys features

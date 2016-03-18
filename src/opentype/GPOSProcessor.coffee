@@ -1,6 +1,6 @@
-OpenTypeProcessor = require './OpenTypeProcessor'
+OTProcessor = require './OTProcessor'
 
-class GPOSProcessor extends OpenTypeProcessor
+class GPOSProcessor extends OTProcessor
   applyPositionValue: (sequenceIndex, value) ->
     position = @positions[@glyphIterator.peekIndex sequenceIndex]
     if value.xAdvance?
