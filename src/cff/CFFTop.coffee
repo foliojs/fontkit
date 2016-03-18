@@ -1,9 +1,40 @@
 r = require 'restructure'
+{resolveLength} = require 'restructure/src/utils'
 CFFDict = require './CFFDict'
 CFFIndex = require './CFFIndex'
 CFFPointer = require './CFFPointer'
 CFFPrivateDict = require './CFFPrivateDict'
+StandardStrings = require './CFFStandardStrings'
+{StandardEncoding, ExpertEncoding} = require './CFFEncodings'
+{ISOAdobeCharset, ExpertCharset, ExpertSubsetCharset} = require './CFFCharsets';
 
+# Checks if an operand is an index of a predefined value,
+# otherwise delegates to the provided type.
+class PredefinedOp
+  constructor: (@predefinedOps, @type) ->
+  decode: (stream, parent, operands) ->
+    if @predefinedOps[operands[0]]
+      return @predefinedOps[operands[0]]
+      
+    return @type.decode(stream, parent, operands)
+    
+  size: (value, ctx) ->
+    return @type.size(value, ctx)
+    
+  encode: (stream, value, ctx) ->
+    index = @predefinedOps.indexOf(value)
+    if index isnt -1
+      return index
+      
+    return @type.encode(stream, value, ctx)
+  
+class CFFEncodingVersion extends r.Number
+  constructor: ->
+    super 'UInt8'
+    
+  decode: (stream) ->
+    return r.uint8.decode(stream) & 0x7f
+    
 Range1 = new r.Struct
   first: r.uint16
   nLeft: r.uint8
@@ -11,15 +42,8 @@ Range1 = new r.Struct
 Range2 = new r.Struct
   first: r.uint16
   nLeft: r.uint16
-  
-class CFFEncodingVersion extends r.Number
-  constructor: ->
-    super r.uint8
-    
-  decode: (stream) ->
-    return r.uint8.decode(stream) & 0x7f
 
-CFFEncoding = new r.VersionedStruct new CFFEncodingVersion,
+CFFCustomEncoding = new r.VersionedStruct new CFFEncodingVersion,
   0:
     nCodes: r.uint8
     codes: new r.Array(r.uint8, 'nCodes')
@@ -30,17 +54,35 @@ CFFEncoding = new r.VersionedStruct new CFFEncodingVersion,
     
   # TODO: supplement?
   
-CFFCharset = new r.VersionedStruct r.uint8,
+CFFEncoding = new PredefinedOp [ StandardEncoding, ExpertEncoding ], new CFFPointer(CFFCustomEncoding, lazy: true)
+
+# Decodes an array of ranges until the total
+# length is equal to the provided length.
+class RangeArray extends r.Array
+  decode: (stream, parent) ->
+    length = resolveLength @length, stream, parent
+    count = 0
+    res = []
+    while count < length
+      range = @type.decode(stream, parent)
+      count += range.nLeft + 1
+      res.push range
+      
+    return res
+
+CFFCustomCharset = new r.VersionedStruct r.uint8,
   0:
-    glyphs: new r.Array(r.uint16, 'nGlyphs')
+    glyphs: new r.Array(r.uint16, -> @parent.CharStrings.length - 1)
     
   1:
-    ranges: new r.Array(Range1, 0)
+    ranges: new RangeArray(Range1, -> @parent.CharStrings.length - 1)
     
   2:
-    ranges: new r.Array(Range2, 0)
-    
-Range3 = new r.Struct
+    ranges: new RangeArray(Range2, -> @parent.CharStrings.length - 1)
+
+CFFCharset = new PredefinedOp [ ISOAdobeCharset, ExpertCharset, ExpertSubsetCharset ], new CFFPointer(CFFCustomCharset, lazy: true)
+
+FDRange = new r.Struct
   first: r.uint16
   fd: r.uint8
 
@@ -50,7 +92,7 @@ FDSelect = new r.VersionedStruct r.uint8,
     
   3:
     nRanges: r.uint16
-    ranges: new r.Array(Range3, 'nRanges')
+    ranges: new r.Array(FDRange, 'nRanges')
     sentinel: r.uint16
     
 class CFFPrivateOp
@@ -92,8 +134,8 @@ CFFTopDict = new CFFDict [
   [5,         'FontBBox',             'array',                                [0, 0, 0, 0]]
   [[12, 8],   'StrokeWidth',          'number',                               0]
   [14,        'XUID',                 'array',                                null]
-  [15,        'charset',              new CFFPointer(CFFCharset),             0]
-  [16,        'Encoding',             'offset',                               0]
+  [15,        'charset',              CFFCharset,                             ISOAdobeCharset]
+  [16,        'Encoding',             CFFEncoding,                            StandardEncoding]
   [17,        'CharStrings',          new CFFPointer(new CFFIndex),           null]
   [18,        'Private',              new CFFPrivateOp,                       null]
   [[12, 20],  'SyntheticBase',        'number',                               null]

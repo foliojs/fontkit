@@ -1,6 +1,7 @@
 isEqual = require 'deep-equal'
 r = require 'restructure'
 CFFOperand = require './CFFOperand'
+{PropertyDescriptor} = require 'restructure/src/utils'
 
 class CFFDict
   constructor: (@ops = []) ->
@@ -48,6 +49,10 @@ class CFFDict
     Object.defineProperties ret,
       parent:         { value: parent }
       _startOffset:   { value: stream.pos }
+      
+    # fill in defaults
+    for key, field of @fields
+      ret[field[1]] = field[3]
     
     while stream.pos < end
       b = stream.readUInt8()
@@ -58,14 +63,16 @@ class CFFDict
         field = @fields[b]
         throw new Error "Unknown operator " + b unless field
         
-        ret[field[1]] = decodeOperands field[2], stream, ret, operands
+        val = decodeOperands field[2], stream, ret, operands
+        if val?
+          if val instanceof PropertyDescriptor
+            Object.defineProperty ret, field[1], val
+          else
+            ret[field[1]] = val
+          
         operands = []
       else
         operands.push CFFOperand.decode(stream, b)
-        
-    # fill in defaults
-    for key, field of @fields
-      ret[field[1]] ?= field[3]
         
     return ret
     
