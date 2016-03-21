@@ -5,7 +5,7 @@ WOFFDirectoryEntry = new r.Struct
   tag:          new r.String(4)
   offset:       new r.Pointer(r.uint32, 'void', type: 'global')
   compLength:   r.uint32
-  origLength:   r.uint32
+  length:       r.uint32
   origChecksum: r.uint32
 
 WOFFDirectory = new r.Struct

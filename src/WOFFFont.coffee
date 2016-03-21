@@ -17,7 +17,7 @@ class WOFFFont extends TTFFont
     if table
       @stream.pos = table.offset
     
-      if table.compLength < table.origLength
+      if table.compLength < table.length
         buf = toBuffer pako.inflate @stream.readBuffer(table.compLength)
         return new r.DecodeStream(buf)
       else
