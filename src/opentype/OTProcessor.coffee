@@ -21,6 +21,7 @@ class OTProcessor
     @ligatureID = 1
   
   findScript: (script) ->
+    return null unless @table.scriptList?
     for entry in @table.scriptList when entry.tag is script
       return entry
       
