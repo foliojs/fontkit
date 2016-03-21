@@ -24,7 +24,7 @@ class TTFFont
     @_decodeDirectory()
     
     # define properties for each table to lazily parse
-    for tag, table of @directory.tables when tables[tag]
+    for tag, table of @directory.tables when tables[tag] and table.length > 0
       Object.defineProperty this, tag,
         get: getTable.bind(this, table)
         
