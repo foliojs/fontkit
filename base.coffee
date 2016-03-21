@@ -1,6 +1,8 @@
 r = require 'restructure'
 fs = require 'fs'
 
+exports.logErrors = false
+
 formats = []
 exports.registerFormat = (format) ->
   formats.push format

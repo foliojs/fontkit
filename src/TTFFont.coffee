@@ -1,4 +1,5 @@
 r = require 'restructure'
+fontkit = require '../base'
 Directory = require './tables/directory'
 tables = require './tables'
 CmapProcessor = require './CmapProcessor'
@@ -35,7 +36,14 @@ class TTFFont
     unless table.tag of @_tables
       pos = @stream.pos
       @stream.pos = table.offset
-      @_tables[table.tag] = @_decodeTable table
+      
+      try
+        @_tables[table.tag] = @_decodeTable table
+      catch e
+        if fontkit.logErrors
+          console.error "Error decoding table #{table.tag}"
+          console.error e.stack
+        
       @stream.pos = pos
       
     return @_tables[table.tag]
