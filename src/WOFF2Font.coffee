@@ -24,7 +24,7 @@ class WOFF2Font extends TTFFont
       decompressedSize = 0
       for tag, entry of @directory.tables
         entry.offset = decompressedSize
-        decompressedSize += entry.transformLength or entry.length
+        decompressedSize += if entry.transformLength? then entry.transformLength else entry.length
         
       decompressed = brotli buffer, decompressedSize
       unless decompressed
