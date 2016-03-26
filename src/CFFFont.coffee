@@ -54,6 +54,27 @@ class CFFFont
     @stream.pos = @topDict.CharStrings[glyph].offset
     return @stream.readBuffer @topDict.CharStrings[glyph].length
     
+  getGlyphName: (gid) ->
+    charset = @topDict.charset
+    if Array.isArray(charset)
+      return charset[gid]
+      
+    if gid is 0
+      return '.notdef'
+      
+    gid -= 1
+    
+    switch charset.version
+      when 0
+        return @string charset.glyphs[gid]
+        
+      when 1, 2
+        for range in charset.ranges
+          if range.offset <= gid <= range.offset + range.nLeft
+            return @string range.first + (gid - range.offset)
+            
+    return null
+    
   fdForGlyph: (gid) ->
     return null unless @topDict.FDSelect
     

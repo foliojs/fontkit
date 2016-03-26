@@ -65,6 +65,7 @@ class RangeArray extends r.Array
     res = []
     while count < length
       range = @type.decode(stream, parent)
+      range.offset = count
       count += range.nLeft + 1
       res.push range
       

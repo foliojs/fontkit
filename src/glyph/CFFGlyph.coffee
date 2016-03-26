@@ -2,6 +2,9 @@ Glyph = require './Glyph'
 Path = require './Path'
 
 class CFFGlyph extends Glyph
+  _getName: ->
+    return @_font['CFF '].getGlyphName @id
+  
   bias = (s) ->
     if s.length < 1240
       return 107
