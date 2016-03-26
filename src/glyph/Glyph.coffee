@@ -1,5 +1,6 @@
 Path = require './Path'
 unicode = require 'unicode-properties'
+StandardNames = require './StandardNames'
 
 class Glyph
   get = require('../get')(this)
@@ -68,6 +69,31 @@ class Glyph
     @_advanceHeight ?= @_getMetrics().advanceHeight
     
   get 'ligatureCaretPositions', ->
+    
+  _getName: ->
+    post = @_font.post
+    if not post
+      return null
+      
+    switch post.version
+      when 1
+        StandardNames[@id]
+        
+      when 2
+        id = post.glyphNameIndex[@id]
+        if id < StandardNames.length
+          StandardNames[id]
+        else
+          post.names[id - StandardNames.length]
+          
+      when 2.5
+        StandardNames[@id + post.offsets[@id]]
+        
+      when 4
+        String.fromCharCode post.map[@id]
+    
+  get 'name', ->
+    @_name ?= @_getName()
     
   render: (ctx, size) ->
     ctx.save()

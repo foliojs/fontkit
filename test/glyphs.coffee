@@ -29,6 +29,10 @@ describe 'glyphs', ->
     it 'should get the advance width', ->
       glyph = font.getGlyph 39
       assert.equal glyph.advanceWidth | 0, 1493
+      
+    it 'should get the glyph name', ->
+      glyph = font.getGlyph 171
+      assert.equal glyph.name, 'eacute'
 
   describe 'CFF glyphs', ->
     font = fontkit.openSync __dirname + '/data/SourceSansPro/SourceSansPro-Regular.otf'
@@ -48,6 +52,10 @@ describe 'glyphs', ->
     it 'should get the glyph bbox', ->
       glyph = font.getGlyph 5
       assert.deepEqual glyph.bbox, new BBox 90, 0, 564, 656
+      
+    it 'should get the glyph name', ->
+      glyph = font.getGlyph 5
+      assert.equal glyph.name, 'D'
 
   describe 'SBIX glyphs', ->
     font = fontkit.openSync __dirname + '/data/ss-emoji/ss-emoji-apple.ttf'
@@ -68,6 +76,10 @@ describe 'glyphs', ->
         originY: 0
         type: 'png '
         data: image.data
+        
+    it 'should get the glyph name', ->
+      glyph = font.glyphsForString('😜')[0]
+      assert.equal glyph.name, 'stuckouttonguewinkingeye'
         
   describe 'COLR glyphs', ->
     font = fontkit.openSync __dirname + '/data/ss-emoji/ss-emoji-microsoft.ttf'
@@ -92,6 +104,10 @@ describe 'glyphs', ->
       glyph = font.glyphsForString('😜')[0]
       assert.deepEqual glyph.bbox, new BBox 0, 0, 2048, 2048
       
+    it 'should get the glyph name', ->
+      glyph = font.glyphsForString('😜')[0]
+      assert.equal glyph.name, 'stuckouttonguewinkingeye'
+      
   describe 'WOFF glyphs', ->
     font = fontkit.openSync __dirname + '/data/SourceSansPro/SourceSansPro-Regular.woff'
     
@@ -100,8 +116,12 @@ describe 'glyphs', ->
       assert.equal glyph.constructor.name, 'TTFGlyph'
       
     it 'should get a path for the glyph', ->
-      glyph = font.glyphsForString('T')[0]      
+      glyph = font.glyphsForString('T')[0]
       assert.equal glyph.path.toSVG(), 'M226 586L28 586L28 656L508 656L508 586L310 586L310 0L226 0L226 586Z'
+      
+    it 'should get the glyph name', ->
+      glyph = font.glyphsForString('T')[0]
+      assert.equal glyph.name, 'T'
       
   describe 'WOFF2 glyph', ->
     font = fontkit.openSync __dirname + '/data/SourceSansPro/SourceSansPro-Regular.woff2'
@@ -121,3 +141,7 @@ describe 'glyphs', ->
     it 'should get the glyph bbox', ->
       glyph = font.glyphsForString('T')[0]
       assert.deepEqual glyph.bbox, new BBox 28, 0, 508, 656
+      
+    it 'should get the glyph name', ->
+      glyph = font.glyphsForString('T')[0]
+      assert.equal glyph.name, 'T'
