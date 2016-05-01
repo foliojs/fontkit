@@ -13,15 +13,13 @@
   ],
   "scripts": {
     "test": "mocha",
-    "coverage": "mocha --require coffee-coverage/register-istanbul && istanbul report",
-    "prepublish": "coffee -c src/ *.coffee",
-    "postpublish": "rm *.js && find src -name '*.js' -delete"
+    "coverage": "babel-node ./node_modules/.bin/isparta cover ./node_modules/.bin/_mocha"
   },
   "author": "Devon Govett <devongovett@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "brfs": "^1.4.0",
-    "brotli": "^1.0.0",
+    "brotli": "^1.2.0",
     "clone": "^1.0.1",
     "deep-equal": "^1.0.0",
     "iconv-lite": "^0.4.11",
@@ -32,12 +30,11 @@
     "unicode-trie": "^0.3.0"
   },
   "devDependencies": {
+    "babel": "^5.8.38",
     "codepoints": "^1.2.0",
-    "coffee-coverage": "^0.4.2",
-    "coffee-script": "^1.8.0",
     "concat-stream": "^1.4.6",
     "iconv-lite": "^0.4.7",
-    "istanbul": "^0.3.17",
+    "isparta": "^3.5.3",
     "mocha": "^2.0.1"
   },
   "browserify": {
