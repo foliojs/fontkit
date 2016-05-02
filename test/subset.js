@@ -1,7 +1,7 @@
 import fontkit from '../';
 import assert from 'assert';
 import concat from 'concat-stream';
-import CFFFont from '../src/CFFFont';
+import CFFFont from '../src/cff/CFFFont';
 import r from 'restructure';
 import CFFGlyph from '../src/glyph/CFFGlyph';
 

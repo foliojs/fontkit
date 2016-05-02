@@ -1,8 +1,8 @@
 import r from 'restructure';
-import CFFIndex from './cff/CFFIndex';
-import CFFTop from './cff/CFFTop';
-import CFFPrivateDict from './cff/CFFPrivateDict';
-import standardStrings from './cff/CFFStandardStrings';
+import CFFIndex from './CFFIndex';
+import CFFTop from './CFFTop';
+import CFFPrivateDict from './CFFPrivateDict';
+import standardStrings from './CFFStandardStrings';
 import fs from 'fs';
   
 class CFFFont {

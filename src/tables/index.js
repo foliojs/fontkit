@@ -19,7 +19,7 @@ tables.prep = require('./prep');
 tables.glyf = require('./glyf');
 
 // PostScript Outlines
-tables['CFF ']    = require('../CFFFont');
+tables['CFF ']    = require('../cff/CFFFont');
 tables.VORG = require('./VORG');
 
 // Bitmap Glyphs
