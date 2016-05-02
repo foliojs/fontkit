@@ -394,7 +394,6 @@ const OTMapping = {
   pkna: feature('kanaSpacing', 'proportionalKana'),
   half: feature('textSpacing', 'halfWidthText'), // also HalfWidthCJKRoman, HalfWidthIdeographs?
   halt: feature('textSpacing', 'altHalfWidthText'),
-  hwid: feature('textSpacing', 'halfWidthText'), // ?? what's the difference
   
   hkna: feature('alternateKana', 'alternateHorizKana'),
   vkna: feature('alternateKana', 'alternateVertKana'),
