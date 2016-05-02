@@ -1,19 +1,11 @@
 import KernProcessor from './KernProcessor';
 import UnicodeLayoutEngine from './UnicodeLayoutEngine';
 import GlyphRun from './GlyphRun';
+import GlyphPosition from './GlyphPosition';
 import * as Script from './Script';
 import unicode from 'unicode-properties';
 import AATLayoutEngine from '../aat/AATLayoutEngine';
 import OTLayoutEngine from '../opentype/OTLayoutEngine';
-
-class GlyphPosition {
-  constructor(xAdvance = 0, yAdvance = 0, xOffset = 0, yOffset = 0) {
-    this.xAdvance = xAdvance;
-    this.yAdvance = yAdvance;
-    this.xOffset = xOffset;
-    this.yOffset = yOffset;
-  }
-}
 
 export default class LayoutEngine {
   constructor(font) {

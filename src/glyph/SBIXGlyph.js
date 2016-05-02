@@ -5,10 +5,21 @@ let SBIXImage = new r.Struct({
   originX: r.uint16,
   originY: r.uint16,
   type: new r.String(4),
-  data: new r.Buffer(function() { return this.parent.buflen - this._currentOffset; })
+  data: new r.Buffer(t => t.parent.buflen - t._currentOffset)
 });
 
-export default class SBIXGlyph extends TTFGlyph {  
+/**
+ * Represents a color (e.g. emoji) glyph in Apple's SBIX format.
+ */
+export default class SBIXGlyph extends TTFGlyph {
+  /**
+   * Returns an object representing a glyph image at the given point size.
+   * The object has a data property with a Buffer containing the actual image data,
+   * along with the image type, and origin.
+   *
+   * @param {number} size
+   * @return {object}
+   */
   getImageForSize(size) {
     for (let i = 0; i < this._font.sbix.imageTables.length; i++) {
       var table = this._font.sbix.imageTables[i];

@@ -8,6 +8,12 @@ const SVG_COMMANDS = {
   closePath: 'Z'
 };
 
+/**
+ * Path objects are returned by glyphs and represent the actual 
+ * vector outlines for each glyph in the font. Paths can be converted
+ * to SVG path data strings, or to functions that can be applied to
+ * render the path to a graphics context.
+ */
 export default class Path {
   constructor() {
     this.commands = [];
@@ -15,14 +21,20 @@ export default class Path {
     this._cbox = null;
   }
   
-  // Compiles the path to a JavaScript function that can be applied with
-  // a graphics context in order to render the path.
+  /**
+   * Compiles the path to a JavaScript function that can be applied with
+   * a graphics context in order to render the path.
+   * @return {string}
+   */
   toFunction() {
     let cmds = this.commands.map(c => `  ctx.${c.command}(${c.args.join(', ')});`);
     return new Function('ctx', cmds.join('\n'));
   }
   
-  // Converts the path to an SVG path data string
+  /**
+   * Converts the path to an SVG path data string
+   * @return {string}
+   */
   toSVG() {
     let cmds = this.commands.map(c => {
       let args = c.args.map(arg => Math.round(arg * 100) / 100);
@@ -32,10 +44,13 @@ export default class Path {
     return cmds.join('');
   }
   
-  // Gets the "control box" of a path.
-  // This is like the bounding box, but it includes all points including
-  // control points of bezier segments and is much faster to compute than
-  // the real bounding box.
+  /**
+   * Gets the "control box" of a path.
+   * This is like the bounding box, but it includes all points including
+   * control points of bezier segments and is much faster to compute than
+   * the real bounding box.
+   * @type {BBox}
+   */
   get cbox() {
     if (!this._cbox) {
       let cbox = new BBox;
@@ -51,8 +66,11 @@ export default class Path {
     return this._cbox;
   }
   
-  // Gets the exact bounding box of the path by evaluating curve segments.
-  // Slower to compute than the control box, but more accurate.
+  /**
+   * Gets the exact bounding box of the path by evaluating curve segments.
+   * Slower to compute than the control box, but more accurate.
+   * @type {BBox}
+   */
   get bbox() {
     if (this._bbox) {
       return this._bbox;

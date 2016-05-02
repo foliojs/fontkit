@@ -10,15 +10,17 @@ const DELTAS_ARE_ZERO            = 0x80;
 const DELTAS_ARE_WORDS           = 0x40;
 const DELTA_RUN_COUNT_MASK       = 0x3f;
 
-//
-// This class is transforms TrueType glyphs according to the data from
-// the Apple Advanced Typography variation tables (fvar, gvar, and avar).
-// These tables allow infinite adjustments to glyph weight, width, slant, 
-// and optical size without the designer needing to specify every exact style.
-//
-// Apple's documentation for these tables is not great, so thanks to the 
-// Freetype project for figuring much of this out.
-//
+/**
+ * This class is transforms TrueType glyphs according to the data from
+ * the Apple Advanced Typography variation tables (fvar, gvar, and avar).
+ * These tables allow infinite adjustments to glyph weight, width, slant, 
+ * and optical size without the designer needing to specify every exact style.
+ *
+ * Apple's documentation for these tables is not great, so thanks to the 
+ * Freetype project for figuring much of this out.
+ *
+ * @private
+ */
 export default class GlyphVariationProcessor {
   constructor(font, coords) {
     this.font = font;

@@ -1,4 +1,5 @@
 import r from 'restructure';
+import { cache } from './decorators';
 import fontkit from '../base';
 import Directory from './tables/directory';
 import tables from './tables';
@@ -13,9 +14,16 @@ import TTFSubset from './subset/TTFSubset';
 import CFFSubset from './subset/CFFSubset';
 import BBox from './glyph/BBox';
 
-class TTFFont {
+/**
+ * This is the base class for all SFNT-based font formats in fontkit.
+ * It supports TrueType, and PostScript glyphs, and several color glyph formats.
+ */
+export default class TTFFont {
   static probe(buffer) {
-    return __in__(buffer.toString('ascii', 0, 4), ['true', 'OTTO', String.fromCharCode(0, 1, 0, 0)]);
+    let format = buffer.toString('ascii', 0, 4);
+    return format === 'true'
+        || format === 'OTTO'
+        || format === String.fromCharCode(0, 1, 0, 0);
   }
   
   constructor(stream, variationCoords = null) {
@@ -29,8 +37,9 @@ class TTFFont {
     for (let tag in this.directory.tables) { 
       let table = this.directory.tables[tag];
       if (tables[tag] && table.length > 0) {
-        Object.defineProperty(this, tag,
-          {get: this._getTable.bind(this, table)});
+        Object.defineProperty(this, tag, {
+          get: this._getTable.bind(this, table)
+        });
       }
     }
     
@@ -44,16 +53,16 @@ class TTFFont {
       try {
         this._tables[table.tag] = this._decodeTable(table);
       } catch (e) {
-        // if (fontkit.logErrors) {
+        if (fontkit.logErrors) {
           console.error(`Error decoding table ${table.tag}`);
           console.error(e.stack);
-        // }
+        }
       }
     }
       
     return this._tables[table.tag];
   }
-    
+  
   _getTableStream(tag) {
     let table = this.directory.tables[tag];
     if (table) {
@@ -63,11 +72,11 @@ class TTFFont {
       
     return null;
   }
-    
+  
   _decodeDirectory() {
     return this.directory = Directory.decode(this.stream, {_startOffset: 0});
   }
-    
+  
   _decodeTable(table) {
     let pos = this.stream.pos;
     
@@ -78,65 +87,122 @@ class TTFFont {
     return result;
   }
   
+  /**
+   * The unique PostScript name for this font
+   * @type {string}
+   */
   get postscriptName() {
     let name = this.name.records.postscriptName;
     let lang = Object.keys(name)[0];
     return name[lang];
   }
-    
-  _getNameRecord(key) {
+  
+  /**
+   * Gets a string from the font's `name` table
+   * @return {string}
+   */
+  getName(key, lang = 'English') {
     let record = this.name.records[key];
     if (record) {
-      return record.English;
+      return record[lang];
     }
       
     return null;
   }
-    
+  
+  /**
+   * The font's full name, e.g. "Helvetica Bold"
+   * @type {string}
+   */
   get fullName() {
-    return this._getNameRecord('fullName');
+    return this.getName('fullName');
   }
-    
+  
+  /**
+   * The font's family name, e.g. "Helvetica"
+   * @type {string}
+   */
   get familyName() {
-    return this._getNameRecord('fontFamily');
+    return this.getName('fontFamily');
   }
-    
+  
+  /**
+   * The font's sub-family, e.g. "Bold".
+   * @type {string}
+   */
   get subfamilyName() {
-    return this._getNameRecord('fontSubfamily');
+    return this.getName('fontSubfamily');
   }
-    
+  
+  /**
+   * The font's copyright information
+   * @type {string}
+   */
   get copyright() {
-    return this._getNameRecord('copyright');
+    return this.getName('copyright');
   }
-    
+  
+  /**
+   * The font's version number
+   * @type {string}
+   */
   get version() {
-    return this._getNameRecord('version');
+    return this.getName('version');
   }
-    
+  
+  /**
+   * The font’s [ascender](https://en.wikipedia.org/wiki/Ascender_(typography))
+   * @type {number}
+   */
   get ascent() {
     return this.hhea.ascent;
   }
-    
+  
+  /**
+   * The font’s [descender](https://en.wikipedia.org/wiki/Descender)
+   * @type {number}
+   */
   get descent() {
     return this.hhea.descent;
   }
-    
+  
+  /**
+   * The amount of space that should be included between lines
+   * @type {number}
+   */
   get lineGap() {
     return this.hhea.lineGap;
   }
-    
+  
+  /**
+   * The offset from the normal underline position that should be used
+   * @type {number}
+   */
   get underlinePosition() {
     return this.post.underlinePosition;
   }
-    
+  
+  /**
+   * The weight of the underline that should be used
+   * @type {number}
+   */
   get underlineThickness() {
     return this.post.underlineThickness;
   }
-    
+  
+  /**
+   * If this is an italic font, the angle the cursor should be drawn at to match the font design
+   * @type {number}
+   */
   get italicAngle() {
     return this.post.italicAngle;
   }
-    
+  
+  /**
+   * The height of capital letters above the baseline.
+   * See [here](https://en.wikipedia.org/wiki/Cap_height) for more details.
+   * @type {number}
+   */
   get capHeight() {
     let os2 = this['OS/2'];
     if (os2) {
@@ -145,7 +211,12 @@ class TTFFont {
       
     return this.ascent;
   }
-    
+  
+  /**
+   * The height of lower case letters in the font.
+   * See [here](https://en.wikipedia.org/wiki/X-height) for more details.
+   * @type {number}
+   */
   get xHeight() {
     let os2 = this['OS/2'];
     if (os2) {
@@ -154,34 +225,76 @@ class TTFFont {
       
     return 0;
   }
-    
+  
+  /**
+   * The number of glyphs in the font.
+   * @type {number}
+   */
   get numGlyphs() {
     return this.maxp.numGlyphs;
   }
-    
+  
+  /**
+   * The size of the font’s internal coordinate grid
+   * @type {number}
+   */
   get unitsPerEm() {
     return this.head.unitsPerEm;
   }
-    
+  
+  /**
+   * The font’s bounding box, i.e. the box that encloses all glyphs in the font.
+   * @type {BBox}
+   */
+  @cache
   get bbox() {
-    return this._bbox != null ? this._bbox : (this._bbox = Object.freeze(new BBox(this.head.xMin, this.head.yMin, this.head.xMax, this.head.yMax)));
+    return Object.freeze(new BBox(this.head.xMin, this.head.yMin, this.head.xMax, this.head.yMax));
   }
-    
+  
+  @cache
+  get _cmapProcessor() {
+    return new CmapProcessor(this.cmap);
+  }
+  
+  /**
+   * An array of all of the unicode code points supported by the font.
+   * @type {number[]}
+   */
+  @cache
   get characterSet() {
-    if (this._cmapProcessor == null) { this._cmapProcessor = new CmapProcessor(this.cmap); }
     return this._cmapProcessor.getCharacterSet();
   }
-        
+  
+  /**
+   * Returns whether there is glyph in the font for the given unicode code point.
+   *
+   * @param {number} codePoint
+   * @return {boolean}
+   */
   hasGlyphForCodePoint(codePoint) {
-    if (this._cmapProcessor == null) { this._cmapProcessor = new CmapProcessor(this.cmap); }
     return !!this._cmapProcessor.lookup(codePoint);
   }
-            
+  
+  /**
+   * Maps a single unicode code point to a Glyph object.
+   * Does not perform any advanced substitutions (there is no context to do so).
+   *
+   * @param {number} codePoint
+   * @return {Glyph}
+   */
   glyphForCodePoint(codePoint) {
-    if (this._cmapProcessor == null) { this._cmapProcessor = new CmapProcessor(this.cmap); }
     return this.getGlyph(this._cmapProcessor.lookup(codePoint), [codePoint]);
   }
-    
+  
+  /**
+   * Returns an array of Glyph objects for the given string.
+   * This is only a one-to-one mapping from characters to glyphs.
+   * For most uses, you should use font.layout (described below), which 
+   * provides a much more advanced mapping supporting AAT and OpenType shaping.
+   *
+   * @param {string} string
+   * @return {Glyph[]}
+   */
   glyphsForString(string) {
     // Map character codes to glyph ids
     let glyphs = [];    
@@ -202,22 +315,37 @@ class TTFFont {
       
     return glyphs;
   }
-    
-  layout(string, userFeatures, script, language) {
-    if (this._layoutEngine == null) { this._layoutEngine = new LayoutEngine(this); }
+  
+  @cache
+  get _layoutEngine() {
+    return new LayoutEngine(this);
+  }
+  
+  /**
+   * Returns a GlyphRun object, which includes an array of Glyphs and GlyphPositions for the given string.
+   *
+   * @param {string} string
+   * @param {string[]} [userFeatures]
+   * @param {string} [script]
+   * @param {string} [language]
+   * @return {GlyphRun}
+   */
+  layout(string, userFeatures , script, language) {
     return this._layoutEngine.layout(string, userFeatures, script, language);
   }
-    
+  
+  /**
+   * An array of all [OpenType feature tags](https://www.microsoft.com/typography/otspec/featuretags.htm)
+   * (or mapped AAT tags) supported by the font.
+   * The features parameter is an array of OpenType feature tags to be applied in addition to the default set.
+   * If this is an AAT font, the OpenType feature tags are mapped to AAT features.
+   *
+   * @type {string[]}
+   */
   get availableFeatures() {
-    if (this._layoutEngine == null) { this._layoutEngine = new LayoutEngine(this); }
     return this._layoutEngine.getAvailableFeatures();
   }
-            
-  widthOfString(string, features, script, language) {
-    if (this._layoutEngine == null) { this._layoutEngine = new LayoutEngine(this); }
-    return this._layoutEngine.layout(string, features, script, language).advanceWidth;
-  }
-    
+  
   _getBaseGlyph(glyph, characters = []) {
     if (!this._glyphs[glyph]) {
       if (this.directory.tables.glyf != null) {
@@ -230,7 +358,16 @@ class TTFFont {
     
     return this._glyphs[glyph] || null;
   }
-    
+  
+  /**
+   * Returns a glyph object for the given glyph id.
+   * You can pass the array of code points this glyph represents for 
+   * your use later, and it will be stored in the glyph object.
+   *
+   * @param {number} glyph
+   * @param {number[]} characters
+   * @return {Glyph}
+   */
   getGlyph(glyph, characters = []) {
     if (!this._glyphs[glyph]) {
       if (this.directory.tables.sbix != null) {
@@ -246,7 +383,11 @@ class TTFFont {
     
     return this._glyphs[glyph] || null;
   }
-    
+  
+  /**
+   * Returns a Subset for this font.
+   * @return {Subset}
+   */
   createSubset() {
     if (this.directory.tables['CFF '] != null) {
       return new CFFSubset(this);
@@ -254,13 +395,19 @@ class TTFFont {
       
     return new TTFSubset(this);
   }
-    
-  // Returns an object describing the available variation axes
-  // that this font supports. Keys are setting tags, and values
-  // contain the axis name, range, and default value.
+  
+  /**
+   * Returns an object describing the available variation axes
+   * that this font supports. Keys are setting tags, and values
+   * contain the axis name, range, and default value.
+   *
+   * @type {object}
+   */
   get variationAxes() {
     let res = {};
-    if (!this.fvar) { return res; }
+    if (!this.fvar) {
+      return res;
+    }
     
     for (let i = 0; i < this.fvar.axis.length; i++) {
       let axis = this.fvar.axis[i];
@@ -275,12 +422,18 @@ class TTFFont {
     return res;
   }
     
-  // Returns an object describing the named variation instances
-  // that the font designer has specified. Keys are variation names
-  // and values are the variation settings for this instance.
+  /**
+   * Returns an object describing the named variation instances
+   * that the font designer has specified. Keys are variation names
+   * and values are the variation settings for this instance.
+   *
+   * @type {object}
+   */
   get namedVariations() {
     let res = {};
-    if (!this.fvar) { return res; }
+    if (!this.fvar) {
+      return res;
+    }
     
     for (let j = 0; j < this.fvar.instance.length; j++) {
       let instance = this.fvar.instance[j];
@@ -295,10 +448,15 @@ class TTFFont {
         
     return res;
   }
-    
-  // Returns a new font with the given variation settings applied.
-  // Settings can either be an instance name, or an object containing
-  // variation tags as specified by the `variationAxes` property.
+  
+  /**
+   * Returns a new font with the given variation settings applied.
+   * Settings can either be an instance name, or an object containing
+   * variation tags as specified by the `variationAxes` property.
+   *
+   * @param {object} settings
+   * @return {TTFFont}
+   */
   getVariation(settings) {
     if (!this.directory.tables.fvar || !this.directory.tables.gvar || !this.directory.tables.glyf) {
       throw new Error('Variations require a font with the fvar, gvar, and glyf tables.');
@@ -334,10 +492,4 @@ class TTFFont {
   getFont(name) {
     return this.getVariation(name);
   }
-}
-    
-export default TTFFont;
-
-function __in__(needle, haystack) {
-  return haystack.indexOf(needle) >= 0;
 }

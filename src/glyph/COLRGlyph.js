@@ -8,6 +8,11 @@ class COLRLayer {
   }
 }
 
+/**
+ * Represents a color (e.g. emoji) glyph in Microsoft's COLR format.
+ * Each glyph in this format contain a list of colored layers, each 
+ * of which  is another vector glyph.
+ */
 export default class COLRGlyph extends Glyph {    
   _getBBox() {
     let bbox = new BBox;
@@ -20,7 +25,12 @@ export default class COLRGlyph extends Glyph {
           
     return bbox;
   }
-      
+  
+  /**
+   * Returns an array of objects containing the glyph and color for
+   * each layer in the composite color glyph.
+   * @type {object[]}
+   */
   get layers() {
     let cpal = this._font.CPAL;
     let colr = this._font.COLR;

@@ -59,6 +59,9 @@ class Component {
   }
 }
 
+/**
+ * Represents a TrueType glyph.
+ */
 export default class TTFGlyph extends Glyph {          
   // Parses just the glyph header and returns the bounding box
   _getCBox(internal) {
@@ -309,7 +312,7 @@ export default class TTFGlyph extends Glyph {
     if (this._font._variationProcessor) {
       // Decode the font data (and cache for later).
       // This triggers recomputation of metrics
-      if (this._path == null) { this._path = this._getPath(); }
+      this.path;
     }
       
     return this._metrics;

@@ -1,10 +1,11 @@
 import TTFGlyph from './TTFGlyph';
 
-// This is a subclass of TTFGlyph for WOFF2, where the decoding is different
-// for simple glyphs. We have to do this ahead of time (it's done in WOFF2Font)
-// so this class just returns the pre-decoded glyph data.
+/**
+ * Represents a TrueType glyph in the WOFF2 format, which compresses glyphs differently.
+ */
 export default class WOFF2Glyph extends TTFGlyph {
   _decode() {
+    // We have to decode in advance (in WOFF2Font), so just return the pre-decoded data.
     return this._font._transformedGlyphs[this.id];
   }
     

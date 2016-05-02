@@ -1,11 +1,28 @@
 import BBox from '../glyph/BBox';
 
+/**
+ * Represents a run of Glyph and GlyphPosition objects.
+ * Returned by the font layout method.
+ */
 export default class GlyphRun {
   constructor(glyphs, positions) {
+    /**
+     * An array of Glyph objects in the run
+     * @type {Glyph[]}
+     */
     this.glyphs = glyphs;
+    
+    /**
+     * An array of GlyphPosition objects for each glyph in the run
+     * @type {GlyphPosition[]}
+     */
     this.positions = positions;
   }
-    
+  
+  /**
+   * The total advance width of the run.
+   * @type {number}
+   */
   get advanceWidth() {
     let width = 0;
     for (let position of this.positions) {
@@ -14,7 +31,11 @@ export default class GlyphRun {
       
     return width;
   }
-    
+  
+ /**
+  * The total advance height of the run.
+  * @type {number}
+  */
   get advanceHeight() {
     let height = 0;
     for (let position of this.positions) {
@@ -23,7 +44,11 @@ export default class GlyphRun {
       
     return height;
   }
-      
+  
+ /**
+  * The bounding box containing all glyphs in the run.
+  * @type {BBox}
+  */
   get bbox() {
     let bbox = new BBox;
     

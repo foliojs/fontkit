@@ -1,7 +1,7 @@
 import r from 'restructure';
 import brotli from 'brotli/decompress';
 import TTFFont from './TTFFont';
-import TTFGlyph from './glyph/TTFGlyph';
+import TTFGlyph, { Point } from './glyph/TTFGlyph';
 import WOFF2Glyph from './glyph/WOFF2Glyph';
 import WOFF2Directory from './tables/WOFF2Directory';
 
@@ -60,16 +60,6 @@ let read255UInt16 = function(stream) {
     
   return code;
 };
-  
-// Represents a glyph point
-class Point {
-  constructor(x, y, onCurve) {
-    this.x = x;
-    this.y = y;
-    this.onCurve = onCurve;
-    this.endContour = false;
-  }
-}
 
 let withSign = function(flag, baseval) {
   if (flag & 1) { return baseval; } else { return -baseval; }
@@ -119,7 +109,7 @@ let decodeTriplet = function(flags, glyphs, nPoints) {
       
     x += dx;
     y += dy;
-    res.push(new Point(x, y, onCurve));
+    res.push(new Point(onCurve, false, x, y));
   }
     
   return res;
