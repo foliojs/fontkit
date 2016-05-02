@@ -390,7 +390,6 @@ const OTMapping = {
   fin3: feature('smartSwash', 'wordFinalSwashes'), // ??
   fina: feature('smartSwash', 'wordFinalSwashes'), // ??
   
-  fwid: feature('kanaSpacing', 'fullWidthKana'), // also ideographicSpacing: fullWidthIdeographs?
   pkna: feature('kanaSpacing', 'proportionalKana'),
   half: feature('textSpacing', 'halfWidthText'), // also HalfWidthCJKRoman, HalfWidthIdeographs?
   halt: feature('textSpacing', 'altHalfWidthText'),
