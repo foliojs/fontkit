@@ -18,12 +18,12 @@ let Ref = new r.Struct({
 let Type = new r.Struct({
   name: new r.String(4),
   maxTypeIndex: r.uint16,
-  refList: new r.Pointer(r.uint16, new r.Array(Ref, function() { return this.maxTypeIndex + 1; }), {type: 'parent'})
+  refList: new r.Pointer(r.uint16, new r.Array(Ref, t => t.maxTypeIndex + 1), { type: 'parent' })
 });
 
 let TypeList = new r.Struct({
   length: r.uint16,
-  types: new r.Array(Type, function() { return this.length + 1; })
+  types: new r.Array(Type, t => t.length + 1)
 });
 
 let DFontMap = new r.Struct({
@@ -39,7 +39,7 @@ let DFontHeader = new r.Struct({
   mapLength: r.uint32
 });
   
-class DFont {
+export default class DFont {
   static probe(buffer) {
     let stream = new r.DecodeStream(buffer);
     
@@ -49,8 +49,7 @@ class DFont {
       return false;
     }
       
-    for (let i = 0; i < header.map.typeList.types.length; i++) {
-      let type = header.map.typeList.types[i];
+    for (let type of header.map.typeList.types) {
       if (type.name === 'sfnt') {
         return true;
       }
@@ -63,10 +62,8 @@ class DFont {
     this.stream = stream;
     this.header = DFontHeader.decode(this.stream);
     
-    for (let i = 0; i < this.header.map.typeList.types.length; i++) {
-      let type = this.header.map.typeList.types[i];
-      for (let j = 0; j < type.refList.length; j++) {
-        let ref = type.refList[j];
+    for (let type of this.header.map.typeList.types) {
+      for (let ref of type.refList) {
         if (ref.nameOffset >= 0) {
           this.stream.pos = ref.nameOffset + this.header.map.nameListOffset;
           ref.name = DFontName.decode(this.stream);
@@ -79,15 +76,14 @@ class DFont {
         this.sfnt = type;
       }
     }
-          
-    return;
   }
     
   getFont(name) {
-    if (!this.sfnt) { return null; }
+    if (!this.sfnt) {
+      return null;
+    }
     
-    for (let i = 0; i < this.sfnt.refList.length; i++) {
-      let ref = this.sfnt.refList[i];
+    for (let ref of this.sfnt.refList) {
       let pos = this.header.dataOffset + ref.dataOffset + 4;
       let stream = new r.DecodeStream(this.stream.buffer.slice(pos));
       let font = new TTFFont(stream);
@@ -101,8 +97,7 @@ class DFont {
   
   get fonts() {
     let fonts = [];
-    for (let i = 0; i < this.sfnt.refList.length; i++) {
-      let ref = this.sfnt.refList[i];
+    for (let ref of this.sfnt.refList) {
       let pos = this.header.dataOffset + ref.dataOffset + 4;
       let stream = new r.DecodeStream(this.stream.buffer.slice(pos));
       fonts.push(new TTFFont(stream));
@@ -111,5 +106,3 @@ class DFont {
     return fonts;
   }
 }
-
-export default DFont;

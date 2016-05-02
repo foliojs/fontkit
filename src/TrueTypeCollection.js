@@ -17,7 +17,7 @@ let TTCHeader = new r.VersionedStruct(r.uint32, {
   }
 });
 
-class TrueTypeCollection {
+export default class TrueTypeCollection {
   static probe(buffer) {
     return buffer.toString('ascii', 0, 4) === 'ttcf';
   }
@@ -32,8 +32,7 @@ class TrueTypeCollection {
   }
     
   getFont(name) {
-    for (let i = 0; i < this.header.offsets.length; i++) {
-      let offset = this.header.offsets[i];
+    for (let offset of this.header.offsets) {
       let stream = new r.DecodeStream(this.stream.buffer);
       stream.pos = offset;
       let font = new TTFFont(stream);
@@ -47,8 +46,7 @@ class TrueTypeCollection {
   
   get fonts() {
     let fonts = [];
-    for (let i = 0; i < this.header.offsets.length; i++) {
-      let offset = this.header.offsets[i];
+    for (let offset of this.header.offsets) {
       let stream = new r.DecodeStream(this.stream.buffer);
       stream.pos = offset;
       fonts.push(new TTFFont(stream));
@@ -57,5 +55,3 @@ class TrueTypeCollection {
     return fonts;
   }
 }
-    
-export default TrueTypeCollection;

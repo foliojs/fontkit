@@ -1,12 +1,11 @@
-class CmapProcessor {
+export default class CmapProcessor {
   constructor(cmapTable) {
     this._characterSet = null;
     
     // find the unicode cmap
     // check for a 32-bit cmap first
-    for (let i = 0; i < cmapTable.tables.length; i++) {
+    for (let cmap of cmapTable.tables) {
       // unicode or windows platform
-      var cmap = cmapTable.tables[i];
       if ((cmap.platformID === 0 && (cmap.encodingID === 4 || cmap.encodingID === 6)) || (cmap.platformID === 3 && cmap.encodingID === 10)) {
          this.cmap = cmap.table;
          return;
@@ -14,8 +13,7 @@ class CmapProcessor {
     }
        
     // try "old" 16-bit cmap
-    for (let j = 0; j < cmapTable.tables.length; j++) {
-      var cmap = cmapTable.tables[j];
+    for (let cmap of cmapTable.tables) {
       if (cmap.platformID === 0 || (cmap.platformID === 3 && cmap.encodingID === 1)) {
         this.cmap = cmap.table;
         return;
@@ -26,16 +24,16 @@ class CmapProcessor {
   }
     
   lookup(codepoint) {
-    let { cmap } = this;
+    let cmap = this.cmap;
     switch (cmap.version) {
       case 0:
         return cmap.codeMap.get(codepoint) || 0;
         
-      case 4:
+      case 4: {
         let min = 0;
         let max = cmap.segCount - 1;
         while (min <= max) {
-          var mid = (min + max) >> 1;
+          let mid = (min + max) >> 1;
           
           if (codepoint < cmap.startCode.get(mid)) {
             max = mid - 1;
@@ -43,11 +41,13 @@ class CmapProcessor {
             min = mid + 1;
           } else {
             let rangeOffset = cmap.idRangeOffset.get(mid);
+            let gid;
+            
             if (rangeOffset === 0) {
-              var gid = codepoint + cmap.idDelta.get(mid);
+              gid = codepoint + cmap.idDelta.get(mid);
             } else {
               let index = rangeOffset / 2 + (codepoint - cmap.startCode.get(mid)) - (cmap.segCount - mid);
-              var gid = cmap.glyphIndexArray.get(index) || 0;
+              gid = cmap.glyphIndexArray.get(index) || 0;
               if (gid !== 0) {
                 gid += cmap.idDelta.get(mid);
               }
@@ -58,18 +58,21 @@ class CmapProcessor {
         }
         
         return 0;
+      }
         
       case 8:
         throw new Error('TODO: cmap format 8');
             
-      case 6: case 10:
+      case 6:
+      case 10:
         return cmap.glyphIndices.get(codepoint - cmap.firstCode) || 0;
         
-      case 12: case 13:
-        min = 0;
-        max = cmap.nGroups - 1;
+      case 12:
+      case 13: {
+        let min = 0;
+        let max = cmap.nGroups - 1;
         while (min <= max) {
-          var mid = (min + max) >> 1;
+          let mid = (min + max) >> 1;
           let group = cmap.groups.get(mid);
           
           if (codepoint < group.startCharCode) {
@@ -86,6 +89,7 @@ class CmapProcessor {
         }
               
         return 0;
+      }
         
       case 14:
         throw new Error('TODO: cmap format 14');
@@ -100,63 +104,53 @@ class CmapProcessor {
       return this._characterSet;
     }
       
-    let { cmap } = this;
+    let cmap = this.cmap;
     switch (cmap.version) {
       case 0:
-        this._characterSet = __range__(0, cmap.codeMap.length, false);
-        break;
+        return this._characterSet = range(0, cmap.codeMap.length);
           
-      case 4:
+      case 4: {
         let res = [];
-        let iterable = cmap.endCode.toArray();
-        for (let i = 0; i < iterable.length; i++) {
-          let tail = iterable[i];
+        let endCodes = cmap.endCode.toArray();
+        for (let i = 0; i < endCodes.length; i++) {
+          let tail = endCodes[i] + 1;
           let start = cmap.startCode.get(i);
-          res.push(...__range__(start, tail, true));
+          res.push(...range(start, tail));
         }
           
-        this._characterSet = res;
-        break;
+        return this._characterSet = res;
+      }
       
       case 8:
         throw new Error('TODO: cmap format 8');
-        break;
         
-      case 6: case 10:
-        this._characterSet = __range__(cmap.firstCode, cmap.firstCode + cmap.glyphIndices.length, false);
-        break;
+      case 6:
+      case 10:
+        return this._characterSet = range(cmap.firstCode, cmap.firstCode + cmap.glyphIndices.length);
         
-      case 12: case 13:
-        res = [];
-        let iterable1 = cmap.groups.toArray();
-        for (let j = 0; j < iterable1.length; j++) {
-          let group = iterable1[j];
-          res.push(...__range__(group.startCharCode, group.endCharCode, true));
+      case 12:
+      case 13: {
+        let res = [];
+        for (let group of cmap.groups.toArray()) {
+          res.push(...range(group.startCharCode, group.endCharCode + 1));
         }
           
-        this._characterSet = res;
-        break;
+        return this._characterSet = res;
+      }
         
       case 14:
         throw new Error('TODO: cmap format 14');
-        break;
         
       default:
         throw new Error(`Unknown cmap format ${cmap.version}`);
     }
-        
-    return this._characterSet;
   }
 }
 
-export default CmapProcessor;
-
-function __range__(left, right, inclusive) {
+function range(index, end) {
   let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
-  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-    range.push(i);
+  while (index < end) {
+    range.push(index++);
   }
   return range;
 }

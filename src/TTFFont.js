@@ -21,9 +21,7 @@ import BBox from './glyph/BBox';
 export default class TTFFont {
   static probe(buffer) {
     let format = buffer.toString('ascii', 0, 4);
-    return format === 'true'
-        || format === 'OTTO'
-        || format === String.fromCharCode(0, 1, 0, 0);
+    return format === 'true' || format === 'OTTO' || format === String.fromCharCode(0, 1, 0, 0);
   }
   
   constructor(stream, variationCoords = null) {
@@ -69,7 +67,7 @@ export default class TTFFont {
       this.stream.pos = table.offset;
       return this.stream;
     }
-      
+    
     return null;
   }
   
@@ -205,11 +203,7 @@ export default class TTFFont {
    */
   get capHeight() {
     let os2 = this['OS/2'];
-    if (os2) {
-      return os2.capHeight;
-    }
-      
-    return this.ascent;
+    return os2 ? os2.capHeight : this.ascent;
   }
   
   /**
@@ -219,11 +213,7 @@ export default class TTFFont {
    */
   get xHeight() {
     let os2 = this['OS/2'];
-    if (os2) {
-      return os2.xHeight;
-    }
-      
-    return 0;
+    return os2 ? os2.xHeight : 0;
   }
   
   /**
@@ -300,6 +290,7 @@ export default class TTFFont {
     let glyphs = [];    
     let len = string.length;
     let idx = 0;
+    
     while (idx < len) {
       let code = string.charCodeAt(idx++);
       if (0xd800 <= code && code <= 0xdbff && idx < len) {
@@ -348,10 +339,10 @@ export default class TTFFont {
   
   _getBaseGlyph(glyph, characters = []) {
     if (!this._glyphs[glyph]) {
-      if (this.directory.tables.glyf != null) {
+      if (this.directory.tables.glyf) {
         this._glyphs[glyph] = new TTFGlyph(glyph, characters, this);
       
-      } else if (this.directory.tables['CFF '] != null) {
+      } else if (this.directory.tables['CFF ']) {
         this._glyphs[glyph] = new CFFGlyph(glyph, characters, this);
       }
     }
@@ -370,10 +361,10 @@ export default class TTFFont {
    */
   getGlyph(glyph, characters = []) {
     if (!this._glyphs[glyph]) {
-      if (this.directory.tables.sbix != null) {
+      if (this.directory.tables.sbix) {
         this._glyphs[glyph] = new SBIXGlyph(glyph, characters, this);
         
-      } else if ((this.directory.tables.COLR != null) && (this.directory.tables.CPAL != null)) {
+      } else if ((this.directory.tables.COLR) && (this.directory.tables.CPAL)) {
         this._glyphs[glyph] = new COLRGlyph(glyph, characters, this);
         
       } else {
@@ -389,7 +380,7 @@ export default class TTFFont {
    * @return {Subset}
    */
   createSubset() {
-    if (this.directory.tables['CFF '] != null) {
+    if (this.directory.tables['CFF ']) {
       return new CFFSubset(this);
     }
       
@@ -409,8 +400,7 @@ export default class TTFFont {
       return res;
     }
     
-    for (let i = 0; i < this.fvar.axis.length; i++) {
-      let axis = this.fvar.axis[i];
+    for (let axis of this.fvar.axis) {
       res[axis.axisTag] = { 
         name: axis.name,
         min: axis.minValue,
@@ -435,8 +425,7 @@ export default class TTFFont {
       return res;
     }
     
-    for (let j = 0; j < this.fvar.instance.length; j++) {
-      let instance = this.fvar.instance[j];
+    for (let instance of this.fvar.instance) {
       let settings = {};
       for (let i = 0; i < this.fvar.axis.length; i++) {
         let axis = this.fvar.axis[i];

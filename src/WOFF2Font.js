@@ -38,12 +38,12 @@ let GlyfTable = new r.Struct({
   instructions: new Substream('instructionStreamSize')
 });
 
-let WORD_CODE = 253;
-let ONE_MORE_BYTE_CODE2 = 254;
-let ONE_MORE_BYTE_CODE1 = 255;
-let LOWEST_U_CODE = 253;
+const WORD_CODE = 253;
+const ONE_MORE_BYTE_CODE2 = 254;
+const ONE_MORE_BYTE_CODE1 = 255;
+const LOWEST_U_CODE = 253;
   
-let read255UInt16 = function(stream) {
+function read255UInt16(stream) {
   let code = stream.readUInt8();
   
   if (code === WORD_CODE) {
@@ -59,20 +59,18 @@ let read255UInt16 = function(stream) {
   }
     
   return code;
-};
+}
 
-let withSign = function(flag, baseval) {
-  if (flag & 1) { return baseval; } else { return -baseval; }
-};
+function withSign(flag, baseval) {
+  return flag & 1 ? baseval : -baseval;
+}
   
-let decodeTriplet = function(flags, glyphs, nPoints) {
+function decodeTriplet(flags, glyphs, nPoints) {
   let y;
   let x = y = 0;
   let res = [];
   
-  let iterable = __range__(0, nPoints, false);
-  for (let j = 0; j < iterable.length; j++) {
-    let i = iterable[j];
+  for (let i = 0; i < nPoints; i++) {
     let flag = flags.readUInt8();
     let onCurve = !(flag >> 7);
     flag &= 0x7f;
@@ -113,18 +111,18 @@ let decodeTriplet = function(flags, glyphs, nPoints) {
   }
     
   return res;
-};
+}
 
 // Subclass of TTFFont that represents a TTF/OTF font compressed by WOFF2
 // See spec here: http://www.w3.org/TR/WOFF2/
-class WOFF2Font extends TTFFont {
+export default class WOFF2Font extends TTFFont {
   static probe(buffer) {
     return buffer.toString('ascii', 0, 4) === 'wOF2';
   }
   
   _decodeDirectory() {
     this.directory = WOFF2Directory.decode(this.stream);
-    return this._dataPos = this.stream.pos;
+    this._dataPos = this.stream.pos;
   }
     
   _decompress() {
@@ -146,7 +144,7 @@ class WOFF2Font extends TTFFont {
       }
         
       this.stream = new r.DecodeStream(new Buffer(decompressed));
-      return this._decompressed = true;
+      this._decompressed = true;
     }
   }
     
@@ -175,9 +173,7 @@ class WOFF2Font extends TTFFont {
     let table = GlyfTable.decode(this.stream);
     let glyphs = [];
         
-    let iterable = __range__(0, table.numGlyphs, false);
-    for (let j = 0; j < iterable.length; j++) {
-      let index = iterable[j];
+    for (let index = 0; index < table.numGlyphs; index++) {
       let glyph = {};
       let nContours = table.nContours.readInt16BE();
       glyph.numberOfContours = nContours;
@@ -186,18 +182,14 @@ class WOFF2Font extends TTFFont {
         let nPoints = [];
         let totalPoints = 0;
                 
-        let iterable1 = __range__(0, nContours, false);
-        for (let k = 0; k < iterable1.length; k++) {
-          var i = iterable1[k];
+        for (let i = 0; i < nContours; i++) {
           let r = read255UInt16(table.nPoints);
           nPoints.push(r);
           totalPoints += r;
         }
           
         glyph.points = decodeTriplet(table.flags, table.glyphs, totalPoints);
-        let iterable2 = __range__(0, nContours, false);
-        for (let i1 = 0; i1 < iterable2.length; i1++) {
-          var i = iterable2[i1];
+        for (let i = 0; i < nContours; i++) {
           glyph.points[nPoints[i] - 1].endContour = true;
         }
         
@@ -213,18 +205,6 @@ class WOFF2Font extends TTFFont {
       glyphs.push(glyph);
     }
       
-    return this._transformedGlyphs = glyphs;
+    this._transformedGlyphs = glyphs;
   }
-}
-    
-export default WOFF2Font;
-
-function __range__(left, right, inclusive) {
-  let range = [];
-  let ascending = left < right;
-  let end = !inclusive ? right : ascending ? right + 1 : right - 1;
-  for (let i = left; ascending ? i < end : i > end; ascending ? i++ : i--) {
-    range.push(i);
-  }
-  return range;
 }
