@@ -110,7 +110,7 @@ const UNICODE_SCRIPTS = {
   Syloti_Nagri: 'sylo',
   Syriac: 'syrc',
   Tagbanwa: 'tagb',
-  Syloti_Nagri: 'takr',
+  Takri: 'takr',
   Tai_Le: 'tale',
   New_Tai_Lue: 'talu',
   Tamil: 'taml',
