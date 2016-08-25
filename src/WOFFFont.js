@@ -1,8 +1,7 @@
 import TTFFont from './TTFFont';
 import WOFFDirectory from './tables/WOFFDirectory';
-import tables from './tables';
-import pako from 'pako/lib/inflate';
-import toBuffer from 'typedarray-to-buffer';
+import tables from './tables/index';
+import inflate from 'tiny-inflate';
 import r from 'restructure';
 
 export default class WOFFFont extends TTFFont {
@@ -20,7 +19,9 @@ export default class WOFFFont extends TTFFont {
       this.stream.pos = table.offset;
 
       if (table.compLength < table.length) {
-        let buf = toBuffer(pako.inflate(this.stream.readBuffer(table.compLength)));
+        this.stream.pos += 2; // skip deflate header
+        let outBuffer = new Buffer(table.length);
+        let buf = inflate(this.stream.readBuffer(table.compLength - 2), outBuffer);
         return new r.DecodeStream(buf);
       } else {
         return this.stream;
