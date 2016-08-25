@@ -1,3 +1,2 @@
 --reporter spec
 --compilers js:babel-register
---require babel-polyfill

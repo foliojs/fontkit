@@ -2,6 +2,7 @@ import Subset from './Subset';
 import CFFTop from '../cff/CFFTop';
 import CFFPrivateDict from '../cff/CFFPrivateDict';
 import standardStrings from '../cff/CFFStandardStrings';
+import assign from 'object-assign';
 
 export default class CFFSubset extends Subset {
   constructor(font) {
@@ -62,7 +63,7 @@ export default class CFFSubset extends Subset {
       }
 
       if (!used_fds[fd]) {
-        topDict.FDArray.push(Object.assign({}, this.cff.topDict.FDArray[fd]));
+        topDict.FDArray.push(assign({}, this.cff.topDict.FDArray[fd]));
         used_subrs.push({});
       }
 
@@ -80,7 +81,7 @@ export default class CFFSubset extends Subset {
       let dict = topDict.FDArray[i];
       delete dict.FontName;
       if (dict.Private && dict.Private.Subrs) {
-        dict.Private = Object.assign({}, dict.Private);
+        dict.Private = assign({}, dict.Private);
         dict.Private.Subrs = this.subsetSubrs(dict.Private.Subrs, used_subrs[i]);
       }
     }
@@ -99,7 +100,7 @@ export default class CFFSubset extends Subset {
       }
     }
 
-    let privateDict = Object.assign({}, this.cff.topDict.Private);
+    let privateDict = assign({}, this.cff.topDict.Private);
     privateDict.Subrs = this.subsetSubrs(this.cff.topDict.Private.Subrs, used_subrs);
 
     topDict.FDArray = [{ Private: privateDict }];
@@ -132,7 +133,7 @@ export default class CFFSubset extends Subset {
       ranges: [{ first: 1, nLeft: this.charstrings.length - 2 }]
     };
 
-    let topDict = Object.assign({}, this.cff.topDict);
+    let topDict = assign({}, this.cff.topDict);
     topDict.Private = null;
     topDict.charset = charset;
     topDict.Encoding = null;
