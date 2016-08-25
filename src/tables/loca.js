@@ -8,7 +8,7 @@ let loca = new r.VersionedStruct('head.indexToLocFormat', {
     offsets: new r.Array(r.uint32)
   }
 });
-    
+
 loca.process = function() {
   if (this.version === 0) {
     for (let i = 0; i < this.offsets.length; i++) {
@@ -29,5 +29,5 @@ loca.preEncode = function() {
     }
   }
 };
-  
+
 export default loca;

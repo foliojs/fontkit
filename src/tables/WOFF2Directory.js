@@ -7,22 +7,22 @@ const Base128 = {
     for (let j = 0; j < iterable.length; j++) {
       let i = iterable[j];
       let code = stream.readUInt8();
-    
+
       // If any of the top seven bits are set then we're about to overflow.
       if (result & 0xe0000000) {
         throw new Error('Overflow');
       }
-      
+
       result = (result << 7) | (code & 0x7f);
       if ((code & 0x80) === 0) {
         return result;
       }
     }
-      
+
     throw new Error('Bad base 128 number');
   }
 };
-    
+
 let knownTags = [
   'cmap', 'head', 'hhea', 'hmtx', 'maxp', 'name', 'OS/2', 'post', 'cvt ',
   'fpgm', 'glyf', 'loca', 'prep', 'CFF ', 'VORG', 'EBDT', 'EBLC', 'gasp',
@@ -67,7 +67,7 @@ WOFF2Directory.process = function() {
     let table = this.tables[i];
     tables[table.tag] = table;
   }
-    
+
   return this.tables = tables;
 };
 

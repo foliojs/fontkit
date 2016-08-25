@@ -9,7 +9,7 @@ const SVG_COMMANDS = {
 };
 
 /**
- * Path objects are returned by glyphs and represent the actual 
+ * Path objects are returned by glyphs and represent the actual
  * vector outlines for each glyph in the font. Paths can be converted
  * to SVG path data strings, or to functions that can be applied to
  * render the path to a graphics context.
@@ -20,7 +20,7 @@ export default class Path {
     this._bbox = null;
     this._cbox = null;
   }
-  
+
   /**
    * Compiles the path to a JavaScript function that can be applied with
    * a graphics context in order to render the path.
@@ -30,7 +30,7 @@ export default class Path {
     let cmds = this.commands.map(c => `  ctx.${c.command}(${c.args.join(', ')});`);
     return new Function('ctx', cmds.join('\n'));
   }
-  
+
   /**
    * Converts the path to an SVG path data string
    * @return {string}
@@ -40,10 +40,10 @@ export default class Path {
       let args = c.args.map(arg => Math.round(arg * 100) / 100);
       return `${SVG_COMMANDS[c.command]}${args.join(' ')}`;
     });
-    
+
     return cmds.join('');
   }
-  
+
   /**
    * Gets the "control box" of a path.
    * This is like the bounding box, but it includes all points including
@@ -59,13 +59,13 @@ export default class Path {
           cbox.addPoint(command.args[i], command.args[i + 1]);
         }
       }
-      
+
       this._cbox = Object.freeze(cbox);
     }
-    
+
     return this._cbox;
   }
-  
+
   /**
    * Gets the exact bounding box of the path by evaluating curve segments.
    * Slower to compute than the control box, but more accurate.
@@ -75,17 +75,17 @@ export default class Path {
     if (this._bbox) {
       return this._bbox;
     }
-    
-    let bbox = new BBox;        
+
+    let bbox = new BBox;
     let cx = 0, cy = 0;
-    
+
     let f = t => (
       Math.pow(1 - t, 3) * p0[i]
         + 3 * Math.pow(1 - t, 2) * t * p1[i]
         + 3 * (1 - t) * Math.pow(t, 2) * p2[i]
         + Math.pow(t, 3) * p3[i]
     );
-    
+
     for (let c of this.commands) {
       switch (c.command) {
         case 'moveTo':
@@ -95,7 +95,7 @@ export default class Path {
           cx = x;
           cy = y;
           break;
-      
+
         case 'quadraticCurveTo':
         case 'bezierCurveTo':
           if (c.command === 'quadraticCurveTo') {
@@ -108,25 +108,25 @@ export default class Path {
           } else {
             var [cp1x, cp1y, cp2x, cp2y, p3x, p3y] = c.args;
           }
-          
+
           // http://blog.hackers-cafe.net/2009/06/how-to-calculate-bezier-curves-bounding.html
           bbox.addPoint(p3x, p3y);
-          
+
           var p0 = [cx, cy];
           var p1 = [cp1x, cp1y];
           var p2 = [cp2x, cp2y];
           var p3 = [p3x, p3y];
-          
+
           for (let i = 0; i <= 1; i++) {
             let b = 6 * p0[i] - 12 * p1[i] + 6 * p2[i];
             let a = -3 * p0[i] + 9 * p1[i] - 9 * p2[i] + 3 * p3[i];
             c = 3 * p1[i] - 3 * p0[i];
-          
+
             if (a === 0) {
               if (b === 0) {
                 continue;
               }
-              
+
               let t = -c / b;
               if (0 < t && t < 1) {
                 if (i === 0) {
@@ -135,15 +135,15 @@ export default class Path {
                   bbox.addPoint(bbox.maxX, f(t));
                 }
               }
-              
+
               continue;
             }
-          
+
             let b2ac = Math.pow(b, 2) - 4 * c * a;
             if (b2ac < 0) {
               continue;
             }
-            
+
             let t1 = (-b + Math.sqrt(b2ac)) / (2 * a);
             if (0 < t1 && t1 < 1) {
               if (i === 0) {
@@ -152,7 +152,7 @@ export default class Path {
                 bbox.addPoint(bbox.maxX, f(t1));
               }
             }
-            
+
             let t2 = (-b - Math.sqrt(b2ac)) / (2 * a);
             if (0 < t2 && t2 < 1) {
               if (i === 0) {
@@ -162,13 +162,13 @@ export default class Path {
               }
             }
           }
-          
+
           cx = p3x;
           cy = p3y;
           break;
       }
     }
-    
+
     return this._bbox = Object.freeze(bbox);
   }
 }
@@ -180,7 +180,7 @@ for (let command of ['moveTo', 'lineTo', 'quadraticCurveTo', 'bezierCurveTo', 'c
       command,
       args
     });
-      
+
     return this;
   };
 }

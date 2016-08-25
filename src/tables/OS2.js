@@ -6,7 +6,7 @@ var OS2 = new r.VersionedStruct(r.uint16, {
     usWeightClass:          r.uint16,  // visual weight of stroke in glyphs
     usWidthClass:           r.uint16,  // relative change from the normal aspect ratio (width to height ratio)
     fsType:                 new r.Bitfield(r.uint16, [ // Indicates font embedding licensing rights
-      null, 'noEmbedding', 'viewOnly', 'editable', null, 
+      null, 'noEmbedding', 'viewOnly', 'editable', null,
       null, null, null, 'noSubsetting', 'bitmapOnly'
     ]),
     ySubscriptXSize:        r.int16,   // recommended horizontal size in pixels for subscripts
@@ -30,10 +30,10 @@ var OS2 = new r.VersionedStruct(r.uint16, {
     usFirstCharIndex:       r.uint16,  // The minimum Unicode index in this font
     usLastCharIndex:        r.uint16   // The maximum Unicode index in this font
   },
-  
+
   // The Apple version of this table ends here, but the Microsoft one continues on...
   0: {},
-  
+
   1: {
     typoAscender:       r.int16,
     typoDescender:      r.int16,
@@ -42,7 +42,7 @@ var OS2 = new r.VersionedStruct(r.uint16, {
     winDescent:         r.uint16,
     codePageRange:      new r.Array(r.uint32, 2)
   },
-  
+
   2: {
     // these should be common with version 1 somehow
     typoAscender:       r.int16,
@@ -51,14 +51,14 @@ var OS2 = new r.VersionedStruct(r.uint16, {
     winAscent:          r.uint16,
     winDescent:         r.uint16,
     codePageRange:      new r.Array(r.uint32, 2),
-    
+
     xHeight:            r.int16,
     capHeight:          r.int16,
     defaultChar:        r.uint16,
     breakChar:          r.uint16,
     maxContent:         r.uint16
   },
-  
+
   5: {
     typoAscender:       r.int16,
     typoDescender:      r.int16,
@@ -66,13 +66,13 @@ var OS2 = new r.VersionedStruct(r.uint16, {
     winAscent:          r.uint16,
     winDescent:         r.uint16,
     codePageRange:      new r.Array(r.uint32, 2),
-  
+
     xHeight:            r.int16,
     capHeight:          r.int16,
     defaultChar:        r.uint16,
     breakChar:          r.uint16,
     maxContent:         r.uint16,
-  
+
     usLowerOpticalPointSize: r.uint16,
     usUpperOpticalPointSize: r.uint16
   }

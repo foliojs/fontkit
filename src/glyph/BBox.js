@@ -8,26 +8,26 @@ export default class BBox {
      * @type {number}
      */
     this.minX = minX;
-    
+
     /**
      * The minimum Y position in the bounding box
      * @type {number}
      */
     this.minY = minY;
-    
+
     /**
      * The maxmimum X position in the bounding box
      * @type {number}
      */
     this.maxX = maxX;
-    
+
     /**
      * The maxmimum Y position in the bounding box
      * @type {number}
      */
     this.maxY = maxY;
   }
-  
+
   /**
    * The width of the bounding box
    * @type {number}
@@ -35,7 +35,7 @@ export default class BBox {
   get width() {
     return this.maxX - this.minX;
   }
-  
+
   /**
    * The height of the bounding box
    * @type {number}
@@ -43,25 +43,25 @@ export default class BBox {
   get height() {
     return this.maxY - this.minY;
   }
-  
+
   addPoint(x, y) {
     if (x < this.minX) {
       this.minX = x;
     }
-      
+
     if (y < this.minY) {
       this.minY = y;
     }
-      
+
     if (x > this.maxX) {
       this.maxX = x;
     }
-      
+
     if (y > this.maxY) {
       this.maxY = y;
     }
   }
-  
+
   copy() {
     return new BBox(this.minX, this.minY, this.maxX, this.maxY);
   }

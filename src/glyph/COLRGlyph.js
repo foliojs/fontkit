@@ -10,10 +10,10 @@ class COLRLayer {
 
 /**
  * Represents a color (e.g. emoji) glyph in Microsoft's COLR format.
- * Each glyph in this format contain a list of colored layers, each 
+ * Each glyph in this format contain a list of colored layers, each
  * of which  is another vector glyph.
  */
-export default class COLRGlyph extends Glyph {    
+export default class COLRGlyph extends Glyph {
   _getBBox() {
     let bbox = new BBox;
     for (let i = 0; i < this.layers.length; i++) {
@@ -22,10 +22,10 @@ export default class COLRGlyph extends Glyph {
       bbox.addPoint(b.minX, b.minY);
       bbox.addPoint(b.maxX, b.maxY);
     }
-          
+
     return bbox;
   }
-  
+
   /**
    * Returns an array of objects containing the glyph and color for
    * each layer in the composite color glyph.
@@ -50,21 +50,21 @@ export default class COLRGlyph extends Glyph {
         break;
       }
     }
-        
-    // if base glyph not found in COLR table, 
+
+    // if base glyph not found in COLR table,
     // default to normal glyph from glyf or CFF
     if (baseLayer == null) {
       var g = this._font._getBaseGlyph(this.id);
-      var color = { 
+      var color = {
         red: 0,
         green: 0,
         blue: 0,
         alpha: 255
       };
-        
+
       return [new COLRLayer(g, color)];
     }
-    
+
     // otherwise, return an array of all the layers
     let layers = [];
     for (let i = baseLayer.firstLayerIndex; i < baseLayer.firstLayerIndex + baseLayer.numLayers; i++) {
@@ -73,16 +73,16 @@ export default class COLRGlyph extends Glyph {
       var g = this._font._getBaseGlyph(rec.gid);
       layers.push(new COLRLayer(g, color));
     }
-      
+
     return layers;
   }
-  
+
   render(ctx, size) {
     for (let {glyph, color} of this.layers) {
       ctx.fillColor([color.red, color.green, color.blue], color.alpha / 255 * 100);
       glyph.render(ctx, size);
     }
-      
+
     return;
   }
 }

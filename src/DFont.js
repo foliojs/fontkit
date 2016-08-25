@@ -38,30 +38,30 @@ let DFontHeader = new r.Struct({
   dataLength: r.uint32,
   mapLength: r.uint32
 });
-  
+
 export default class DFont {
   static probe(buffer) {
     let stream = new r.DecodeStream(buffer);
-    
+
     try {
       var header = DFontHeader.decode(stream);
     } catch (e) {
       return false;
     }
-      
+
     for (let type of header.map.typeList.types) {
       if (type.name === 'sfnt') {
         return true;
       }
     }
-      
+
     return false;
   }
-    
+
   constructor(stream) {
     this.stream = stream;
     this.header = DFontHeader.decode(this.stream);
-    
+
     for (let type of this.header.map.typeList.types) {
       for (let ref of type.refList) {
         if (ref.nameOffset >= 0) {
@@ -71,18 +71,18 @@ export default class DFont {
           ref.name = null;
         }
       }
-          
+
       if (type.name === 'sfnt') {
         this.sfnt = type;
       }
     }
   }
-    
+
   getFont(name) {
     if (!this.sfnt) {
       return null;
     }
-    
+
     for (let ref of this.sfnt.refList) {
       let pos = this.header.dataOffset + ref.dataOffset + 4;
       let stream = new r.DecodeStream(this.stream.buffer.slice(pos));
@@ -91,10 +91,10 @@ export default class DFont {
         return font;
       }
     }
-        
+
     return null;
   }
-  
+
   get fonts() {
     let fonts = [];
     for (let ref of this.sfnt.refList) {
@@ -102,7 +102,7 @@ export default class DFont {
       let stream = new r.DecodeStream(this.stream.buffer.slice(pos));
       fonts.push(new TTFFont(stream));
     }
-      
+
     return fonts;
   }
 }

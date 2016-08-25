@@ -9,37 +9,37 @@ export default class GSUBProcessor extends OTProcessor {
         if (index === -1) {
           return false;
         }
-        
+
         let glyph = this.glyphIterator.cur;
         switch (table.version) {
           case 1:
             glyph.id = (glyph.id + table.deltaGlyphID) & 0xffff;
             break;
-            
+
           case 2:
             glyph.id = table.substitute.get(index);
             break;
         }
-            
+
         return true;
       }
-            
+
       case 2: { // Multiple Substitution
         let index = this.coverageIndex(table.coverage);
         if (index !== -1) {
           let sequence = table.sequences.get(index);
           this.glyphIterator.cur.id = sequence[0];
-          
+
           let features = this.glyphIterator.cur.features;
           let replacement = sequence.slice(1).map(gid => new GlyphInfo(gid, undefined, features));
-          
+
           this.glyphs.splice(this.glyphIterator.index + 1, 0, ...replacement);
           return true;
         }
-        
+
         return false;
       }
-          
+
       case 3: { // Alternate Substitution
         let index = this.coverageIndex(table.coverage);
         if (index !== -1) {
@@ -47,34 +47,34 @@ export default class GSUBProcessor extends OTProcessor {
           this.glyphIterator.cur.id = table.alternateSet.get(index)[USER_INDEX];
           return true;
         }
-        
+
         return false;
       }
-    
+
       case 4: { // Ligature Substitution
         let index = this.coverageIndex(table.coverage);
         if (index === -1) {
           return false;
         }
-        
+
         for (let ligature of table.ligatureSets.get(index)) {
           let matched = this.sequenceMatchIndices(1, ligature.components);
           if (!matched) {
             continue;
           }
-          
+
           let curGlyph = this.glyphIterator.cur;
-          
+
           // Concatenate all of the characters the new ligature will represent
           let characters = curGlyph.codePoints.slice();
           for (let index of matched) {
             characters.push(...this.glyphs[index].codePoints);
           }
-            
+
           // Create the replacement ligature glyph
           let ligatureGlyph = new GlyphInfo(ligature.glyph, characters);
           ligatureGlyph.features = curGlyph.features;
-          
+
           // From Harfbuzz:
           // - If it *is* a mark ligature, we don't allocate a new ligature id, and leave
           //   the ligature to keep its old ligature id.  This will allow it to attach to
@@ -100,12 +100,12 @@ export default class GSUBProcessor extends OTProcessor {
           //
           //   This in fact happened to a font...  See https://bugzilla.gnome.org/show_bug.cgi?id=437633
           ligatureGlyph.ligatureID = ligatureGlyph.isMark ? 0 : this.ligatureID++;
-          
+
           let lastLigID = curGlyph.ligatureID;
           let lastNumComps = curGlyph.codePoints.length;
           let curComps = lastNumComps;
           let idx = this.glyphIterator.index + 1;
-          
+
           // Set ligatureID and ligatureComponent on glyphs that were skipped in the matched sequence.
           // This allows GPOS to attach marks to the correct ligature components.
           for (let matchIndex of matched) {
@@ -120,13 +120,13 @@ export default class GSUBProcessor extends OTProcessor {
                 idx++;
               }
             }
-              
+
             lastLigID = this.glyphs[idx].ligatureID;
             lastNumComps = this.glyphs[idx].codePoints.length;
             curComps += lastNumComps;
             idx++; // skip base glyph
           }
-            
+
           // Adjust ligature components for any marks following
           if (lastLigID && !ligatureGlyph.isMark) {
             for (let i = idx; i < this.glyphs.length; i++) {
@@ -138,31 +138,31 @@ export default class GSUBProcessor extends OTProcessor {
               }
             }
           }
-          
+
           // Delete the matched glyphs, and replace the current glyph with the ligature glyph
           for (let i = matched.length - 1; i >= 0; i--) {
             this.glyphs.splice(matched[i], 1);
           }
-            
+
           this.glyphs[this.glyphIterator.index] = ligatureGlyph;
           return true;
         }
-        
+
         return false;
       }
-                    
+
       case 5: // Contextual Substitution
         this.applyContext(table);
         return false;
-            
+
       case 6: // Chaining Contextual Substitution
         this.applyChainingContext(table);
         return false;
-            
+
       case 7: // Extension Substitution
         this.applyLookup(table.lookupType, table.extension);
         return false;
-        
+
       default:
         throw new Error(`GSUB lookupType ${lookupType} is not supported`);
     }

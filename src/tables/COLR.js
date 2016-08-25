@@ -9,9 +9,9 @@ let LayerRecord = new r.Struct({
                           // the text foreground color should be used.
 
 let BaseGlyphRecord = new r.Struct({
-  gid: r.uint16,             // Glyph ID of reference glyph. This glyph is for reference only 
+  gid: r.uint16,             // Glyph ID of reference glyph. This glyph is for reference only
                              // and is not rendered for color.
-  firstLayerIndex: r.uint16, // Index (from beginning of the Layer Records) to the layer record. 
+  firstLayerIndex: r.uint16, // Index (from beginning of the Layer Records) to the layer record.
                              // There will be numLayers consecutive entries for this base glyph.
   numLayers: r.uint16
 });

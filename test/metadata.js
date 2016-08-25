@@ -4,7 +4,7 @@ import BBox from '../src/glyph/BBox';
 
 describe('metadata', function() {
   let font = fontkit.openSync(__dirname + '/data/NotoSans/NotoSans.ttc', 'NotoSans');
-  
+
   it('has metadata properties', function() {
     assert.equal(font.fullName, 'Noto Sans');
     assert.equal(font.postscriptName, 'NotoSans');
@@ -27,7 +27,7 @@ describe('metadata', function() {
     assert.equal(font.numGlyphs, 8708);
     return assert.deepEqual(font.bbox, new BBox(-1268, -600, 2952, 2189));
   });
-    
+
   it('exposes tables directly', function() {
     let iterable = ['head', 'hhea', 'OS/2', 'post'];
     for (let i = 0; i < iterable.length; i++) {

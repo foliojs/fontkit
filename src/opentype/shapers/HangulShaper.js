@@ -14,7 +14,7 @@ const L_END   = L_BASE + L_COUNT - 1;
 const V_END   = V_BASE + V_COUNT - 1;
 const T_END   = T_BASE + T_COUNT - 1;
 const DOTTED_CIRCLE = 0x25cc;
-  
+
 const isL = code => 0x1100 <= code && code <= 0x115f || 0xa960 <= code && code <= 0xa97c;
 const isV = code => 0x1160 <= code && code <= 0x11a7 || 0xd7b0 <= code && code <= 0xd7c6;
 const isT = code => 0x11a8 <= code && code <= 0x11ff || 0xd7cb <= code && code <= 0xd7fb;
@@ -24,10 +24,10 @@ function isLV(c) {
   c -= HANGUL_BASE;
   return c < HANGUL_COUNT && c % T_COUNT === 0;
 }
-    
+
 const isCombiningL = code => L_BASE <= code && code <= L_END;
 const isCombiningV = code => V_BASE <= code && code <= V_END;
-const isCombiningT = code => T_BASE + 1 && 1 <= code && code <= T_END;  
+const isCombiningT = code => T_BASE + 1 && 1 <= code && code <= T_END;
 
 // Character categories
 const X   = 0; // Other character
@@ -48,7 +48,7 @@ function getType(code) {
   if (isTone(code)) { return M; }
   return X;
 }
-  
+
 // State machine actions
 const NO_ACTION = 0;
 const DECOMPOSE = 1;
@@ -62,13 +62,13 @@ const STATE_TABLE = [
   //       X                 L                 V                T                  LV                LVT               M
   // State 0: start state
   [ [ NO_ACTION, 0 ], [ NO_ACTION, 1 ], [ NO_ACTION, 0 ], [ NO_ACTION, 0 ], [ DECOMPOSE, 2 ], [ DECOMPOSE, 3 ], [  INVALID, 0  ] ],
-  
+
   // State 1: <L>
   [ [ NO_ACTION, 0 ], [ NO_ACTION, 1 ], [  COMPOSE, 2  ], [ NO_ACTION, 0 ], [ DECOMPOSE, 2 ], [ DECOMPOSE, 3 ], [  INVALID, 0  ] ],
-  
+
   // State 2: <L,V> or <LV>
   [ [ NO_ACTION, 0 ], [ NO_ACTION, 1 ], [ NO_ACTION, 0 ], [  COMPOSE, 3  ], [ DECOMPOSE, 2 ], [ DECOMPOSE, 3 ], [ TONE_MARK, 0 ] ],
-  
+
   // State 3: <L,V,T> or <LVT>
   [ [ NO_ACTION, 0 ], [ NO_ACTION, 1 ], [ NO_ACTION, 0 ], [ NO_ACTION, 0 ], [ DECOMPOSE, 2 ], [ DECOMPOSE, 3 ], [ TONE_MARK, 0 ] ]
 ];
@@ -76,24 +76,24 @@ const STATE_TABLE = [
 function getGlyph(font, code, features) {
   return new GlyphInfo(font.glyphForCodePoint(code).id, [code], Object.keys(features));
 }
-  
+
 function decompose(glyphs, i, font) {
   let glyph = glyphs[i];
   let code = glyph.codePoints[0];
-      
+
   let s = code - HANGUL_BASE;
   let t = T_BASE + s % T_COUNT;
   s = s / T_COUNT | 0;
   let l = L_BASE + s / V_COUNT | 0;
   let v = V_BASE + s % V_COUNT;
-  
+
   // Don't decompose if all of the components are not available
-  if (!font.hasGlyphForCodePoint(l) || 
+  if (!font.hasGlyphForCodePoint(l) ||
       !font.hasGlyphForCodePoint(v) ||
       (t !== T_BASE && !font.hasGlyphForCodePoint(t))) {
     return i;
   }
-  
+
   // Replace the current glyph with decomposed L, V, and T glyphs,
   // and apply the proper OpenType features to each component.
   let ljmo = getGlyph(font, l, glyph.features);
@@ -110,18 +110,18 @@ function decompose(glyphs, i, font) {
     insert.push(tjmo);
   }
 
-  glyphs.splice(i, 1, ...insert);    
+  glyphs.splice(i, 1, ...insert);
   return i + insert.length - 1;
 }
-  
+
 function compose(glyphs, i, font) {
   let glyph = glyphs[i];
   let code = glyphs[i].codePoints[0];
   let type = getType(code);
-  
+
   let prev = glyphs[i - 1].codePoints[0];
   let prevType = getType(prev);
-  
+
   // Figure out what type of syllable we're dealing with
   let lv, ljmo, vjmo, tjmo;
   if (prevType === LV && type === T) {
@@ -148,11 +148,11 @@ function compose(glyphs, i, font) {
       lv = HANGUL_BASE + ((l - L_BASE) * V_COUNT + (v - V_BASE)) * T_COUNT;
     }
   }
-    
+
   let t = (tjmo && tjmo.codePoints[0]) || T_BASE;
   if ((lv != null) && (t === T_BASE || isCombiningT(t))) {
     let s = lv + (t - T_BASE);
-  
+
     // Replace with a composed glyph if supported by the font,
     // otherwise apply the proper OpenType features to each component.
     if (font.hasGlyphForCodePoint(s)) {
@@ -161,12 +161,12 @@ function compose(glyphs, i, font) {
       return i - del + 1;
     }
   }
-      
+
   // Didn't compose (either a non-combining component or unsupported by font).
   if (ljmo) { ljmo.features.ljmo = true; }
   if (vjmo) { vjmo.features.vjmo = true; }
   if (tjmo) { tjmo.features.tjmo = true; }
-      
+
   if (prevType === LV) {
     // Sequence was originally <L,V>, which got combined earlier.
     // Either the T was non-combining, or the LVT glyph wasn't supported.
@@ -174,7 +174,7 @@ function compose(glyphs, i, font) {
     decompose(glyphs, i - 1, font);
     return i + 1;
   }
-    
+
   return i;
 }
 
@@ -193,33 +193,33 @@ function getLength(code) {
 function reorderToneMark(glyphs, i, font) {
   let glyph = glyphs[i];
   let code = glyphs[i].codePoints[0];
-  
+
   // Move tone mark to the beginning of the previous syllable, unless it is zero width
   if (font.glyphForCodePoint(code).advanceWidth === 0) { return; }
-  
+
   let prev = glyphs[i - 1].codePoints[0];
   let len = getLength(prev);
-    
+
   glyphs.splice(i, 1);
   return glyphs.splice(i - len, 0, glyph);
 }
-  
+
 function insertDottedCircle(glyphs, i, font) {
   let glyph = glyphs[i];
   let code = glyphs[i].codePoints[0];
-  
+
   if (font.hasGlyphForCodePoint(DOTTED_CIRCLE)) {
     let dottedCircle = getGlyph(font, DOTTED_CIRCLE, glyph.features);
-    
+
     // If the tone mark is zero width, insert the dotted circle before, otherwise after
-    let idx = font.glyphForCodePoint(code).advanceWidth === 0 ? i : i + 1;            
+    let idx = font.glyphForCodePoint(code).advanceWidth === 0 ? i : i + 1;
     glyphs.splice(idx, 0, dottedCircle);
     i++;
   }
-    
+
   return i;
 }
-    
+
 //
 // This is a shaper for the Hangul script, used by the Korean language.
 // It does the following:
@@ -246,7 +246,7 @@ export default class HangulShaper extends DefaultShaper {
   static planFeatures(plan) {
     plan.add(['ljmo', 'vjmo', 'tjmo'], false);
   }
-  
+
   static assignFeatures(plan, glyphs) {
     let state = 0;
     let i = 0;
@@ -255,9 +255,9 @@ export default class HangulShaper extends DefaultShaper {
       let glyph = glyphs[i];
       let code = glyph.codePoints[0];
       let type = getType(code);
-      
+
       [ action, state ] = STATE_TABLE[state][type];
-      
+
       switch (action) {
         case DECOMPOSE:
           // Decompose the composed syllable if it is not supported by the font.
@@ -265,23 +265,23 @@ export default class HangulShaper extends DefaultShaper {
             i = decompose(glyphs, i, plan.font);
           }
           break;
-      
+
         case COMPOSE:
           // Found a decomposed syllable. Try to compose if supported by the font.
           i = compose(glyphs, i, plan.font);
           break;
-          
+
         case TONE_MARK:
           // Got a valid syllable, followed by a tone mark. Move the tone mark to the beginning of the syllable.
           reorderToneMark(glyphs, i, plan.font);
           break;
-          
+
         case INVALID:
           // Tone mark has no valid syllable to attach to, so insert a dotted circle
           i = insertDottedCircle(glyphs, i, plan.font);
           break;
       }
-                
+
       i++;
     }
   }

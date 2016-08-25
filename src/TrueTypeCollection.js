@@ -21,16 +21,16 @@ export default class TrueTypeCollection {
   static probe(buffer) {
     return buffer.toString('ascii', 0, 4) === 'ttcf';
   }
-      
+
   constructor(stream) {
     this.stream = stream;
     if (stream.readString(4) !== 'ttcf') {
       throw new Error('Not a TrueType collection');
     }
-      
+
     this.header = TTCHeader.decode(stream);
   }
-    
+
   getFont(name) {
     for (let offset of this.header.offsets) {
       let stream = new r.DecodeStream(this.stream.buffer);
@@ -40,10 +40,10 @@ export default class TrueTypeCollection {
         return font;
       }
     }
-        
+
     return null;
   }
-  
+
   get fonts() {
     let fonts = [];
     for (let offset of this.header.offsets) {
@@ -51,7 +51,7 @@ export default class TrueTypeCollection {
       stream.pos = offset;
       fonts.push(new TTFFont(stream));
     }
-      
+
     return fonts;
   }
 }

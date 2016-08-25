@@ -6,39 +6,39 @@ let SubHeader = new r.Struct({
   idDelta:        r.int16,
   idRangeOffset:  r.uint16
 });
-  
+
 let CmapGroup = new r.Struct({
   startCharCode:  r.uint32,
   endCharCode:    r.uint32,
   glyphID:        r.uint32
 });
-  
+
 let UnicodeValueRange = new r.Struct({
   startUnicodeValue:  r.uint24,
   additionalCount:    r.uint8
 });
-  
+
 let UVSMapping = new r.Struct({
   unicodeValue: r.uint24,
   glyphID:      r.uint16
 });
-  
+
 let DefaultUVS = new r.Array(UnicodeValueRange, r.uint32);
 let NonDefaultUVS = new r.Array(UVSMapping, r.uint32);
-  
+
 let VarSelectorRecord = new r.Struct({
   varSelector:    r.uint24,
   defaultUVS:     new r.Pointer(r.uint32, DefaultUVS, {type: 'parent'}),
   nonDefaultUVS:  new r.Pointer(r.uint32, NonDefaultUVS, {type: 'parent'})
 });
-  
+
 let CmapSubtable = new r.VersionedStruct(r.uint16, {
   0: { // Byte encoding
     length:     r.uint16,   // Total table length in bytes (set to 262 for format 0)
     language:   r.uint16,   // Language code for this encoding subtable, or zero if language-independent
     codeMap:    new r.LazyArray(r.uint8, 256)
   },
-    
+
   2: { // High-byte mapping (CJK)
     length:           r.uint16,
     language:         r.uint16,
@@ -47,7 +47,7 @@ let CmapSubtable = new r.VersionedStruct(r.uint16, {
     subHeaders:       new r.LazyArray(SubHeader, 'subHeaderCount'),
     glyphIndexArray:  new r.LazyArray(r.uint16, 'subHeaderCount')
   },
-  
+
   4: { // Segment mapping to delta values
     length:           r.uint16,              // Total table length in bytes
     language:         r.uint16,              // Language code
@@ -63,7 +63,7 @@ let CmapSubtable = new r.VersionedStruct(r.uint16, {
     idRangeOffset:    new r.LazyArray(r.uint16, 'segCount'),
     glyphIndexArray:  new r.LazyArray(r.uint16, t => (t.length - t._currentOffset) / 2)
   },
-    
+
   6: { // Trimmed table
     length:         r.uint16,
     language:       r.uint16,
@@ -71,7 +71,7 @@ let CmapSubtable = new r.VersionedStruct(r.uint16, {
     entryCount:     r.uint16,
     glyphIndices:   new r.LazyArray(r.uint16, 'entryCount')
   },
-    
+
   8: { // mixed 16-bit and 32-bit coverage
     reserved: new r.Reserved(r.uint16),
     length:   r.uint32,
@@ -80,7 +80,7 @@ let CmapSubtable = new r.VersionedStruct(r.uint16, {
     nGroups:  r.uint32,
     groups:   new r.LazyArray(CmapGroup, 'nGroups')
   },
-    
+
   10: { // Trimmed Array
     reserved:       new r.Reserved(r.uint16),
     length:         r.uint32,
@@ -89,7 +89,7 @@ let CmapSubtable = new r.VersionedStruct(r.uint16, {
     entryCount:     r.uint32,
     glyphIndices:   new r.LazyArray(r.uint16, 'numChars')
   },
-    
+
   12: { // Segmented coverage
     reserved: new r.Reserved(r.uint16),
     length:   r.uint32,
@@ -97,7 +97,7 @@ let CmapSubtable = new r.VersionedStruct(r.uint16, {
     nGroups:  r.uint32,
     groups:   new r.LazyArray(CmapGroup, 'nGroups')
   },
-    
+
   13: { // Many-to-one range mappings (same as 12 except for group.startGlyphID)
     reserved: new r.Reserved(r.uint16),
     length:   r.uint32,
@@ -105,7 +105,7 @@ let CmapSubtable = new r.VersionedStruct(r.uint16, {
     nGroups:  r.uint32,
     groups:   new r.LazyArray(CmapGroup, 'nGroups')
   },
-    
+
   14: { // Unicode Variation Sequences
     length:       r.uint32,
     numRecords:   r.uint32,
@@ -118,7 +118,7 @@ let CmapEntry = new r.Struct({
   encodingID:  r.uint16,  // Platform-specific encoding identifier
   table:       new r.Pointer(r.uint32, CmapSubtable, {type: 'parent', lazy: true})
 });
-  
+
 // character to glyph mapping
 export default new r.Struct({
   version:      r.uint16,

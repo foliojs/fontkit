@@ -19,7 +19,7 @@ export default class ShapingPlan {
     this.globalFeatures = {};
     this.allFeatures = {};
   }
-  
+
   /**
    * Adds the given features to the last stage.
    * Ignores features that have already been applied.
@@ -33,7 +33,7 @@ export default class ShapingPlan {
       }
     }
   }
-    
+
   /**
    * Adds the given features to the global list
    */
@@ -42,7 +42,7 @@ export default class ShapingPlan {
       this.globalFeatures[feature] = true;
     }
   }
-    
+
   /**
    * Add features to the last stage
    */
@@ -50,11 +50,11 @@ export default class ShapingPlan {
     if (this.stages.length === 0) {
       this.stages.push([]);
     }
-    
+
     if (typeof arg === 'string') {
       arg = [arg];
     }
-    
+
     if (Array.isArray(arg)) {
       this._addFeatures(arg);
       if (global) {
@@ -70,9 +70,9 @@ export default class ShapingPlan {
       throw new Error("Unsupported argument to ShapingPlan#add");
     }
   }
-  
+
   /**
-   * Add a new stage 
+   * Add a new stage
    */
   addStage(arg, global) {
     if (typeof arg === 'function') {
@@ -82,7 +82,7 @@ export default class ShapingPlan {
       this.add(arg, global);
     }
   }
-      
+
   /**
    * Assigns the global features to the given glyphs
    */
@@ -93,17 +93,17 @@ export default class ShapingPlan {
       }
     }
   }
-    
+
   /**
    * Executes the planned stages using the given OTProcessor
    */
   process(processor, glyphs, positions) {
     processor.selectScript(this.script, this.language);
-    
+
     for (let stage of this.stages) {
       if (typeof stage === 'function') {
         stage(glyphs, positions);
-        
+
       } else if (stage.length > 0) {
         processor.applyFeatures(stage, glyphs, positions);
       }

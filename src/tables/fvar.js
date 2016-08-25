@@ -14,7 +14,7 @@ let Axis = new r.Struct({
   nameID: r.uint16,
   name: getName
 });
-  
+
 let Instance = new r.Struct({
   nameID: r.uint16,
   name: getName,

@@ -4,21 +4,21 @@ import { UnboundedArray, LookupTable, StateTable } from './aat';
 let LigatureData = {
   action: r.uint16
 };
-  
+
 let ContextualData = {
   markIndex: r.uint16,
   currentIndex: r.uint16
 };
-  
+
 let InsertionData = {
   currentInsertIndex: r.uint16,
   markedInsertIndex: r.uint16
 };
-  
+
 let SubstitutionTable = new r.Struct({
   items: new UnboundedArray(new r.Pointer(r.uint32, new LookupTable))
 });
-  
+
 let SubtableData = new r.VersionedStruct('type', {
   0: { // Indic Rearrangement Subtable
     stateTable: new StateTable
@@ -35,7 +35,7 @@ let SubtableData = new r.VersionedStruct('type', {
     components: new r.Pointer(r.uint32, new UnboundedArray(r.uint16)),
     ligatureList: new r.Pointer(r.uint32, new UnboundedArray(r.uint16))
   },
-    
+
   4: { // Non-contextual Glyph Substitution Subtable
     lookupTable: new LookupTable
   },
@@ -45,7 +45,7 @@ let SubtableData = new r.VersionedStruct('type', {
     insertionActions: new r.Pointer(r.uint32, new UnboundedArray(r.uint16))
   }
 });
-    
+
 let Subtable = new r.Struct({
   length: r.uint32,
   coverage: r.uint24,

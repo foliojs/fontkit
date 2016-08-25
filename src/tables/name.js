@@ -11,12 +11,12 @@ let NameRecord = new r.Struct({
     { type: 'parent', relativeTo: 'parent.stringOffset', allowNull: false }
   )
 });
-  
+
 let LangTagRecord = new r.Struct({
   length:  r.uint16,
   tag:     new r.Pointer(r.uint16, new r.String('length', 'utf16be'), {type: 'parent', relativeTo: 'stringOffset'})
 });
-  
+
 var NameTable = new r.VersionedStruct(r.uint16, {
   0: {
     count:          r.uint16,
@@ -63,7 +63,7 @@ let NAMES = [
 let ENCODINGS = [
   // unicode
   ['utf16be', 'utf16be', 'utf16be', 'utf16be', 'utf16be', 'utf16be'],
-  
+
   // macintosh
   // Mappings available at http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/
   // 0	  Roman                 17	Malayalam
@@ -83,15 +83,15 @@ let ENCODINGS = [
   // 14	Tamil	                31	Sindhi
   // 15	Telugu	              32	(Uninterpreted)
   // 16	Kannada
-  ['macroman', 'shift-jis', 'big5', 'euc-kr', 'iso-8859-6', 'iso-8859-8', 
+  ['macroman', 'shift-jis', 'big5', 'euc-kr', 'iso-8859-6', 'iso-8859-8',
    'macgreek', 'maccyrillic', 'symbol', 'Devanagari', 'Gurmukhi', 'Gujarati',
    'Oriya', 'Bengali', 'Tamil', 'Telugu', 'Kannada', 'Malayalam', 'Sinhalese',
-   'Burmese', 'Khmer', 'macthai', 'Laotian', 'Georgian', 'Armenian', 'gb-2312-80', 
+   'Burmese', 'Khmer', 'macthai', 'Laotian', 'Georgian', 'Armenian', 'gb-2312-80',
    'Tibetan', 'Mongolian', 'Geez', 'maccyrillic', 'Vietnamese', 'Sindhi'],
-  
+
   // ISO (deprecated)
   ['ascii'],
-  
+
   // windows
   // Docs here: http://msdn.microsoft.com/en-us/library/system.text.encoding(v=vs.110).aspx
   ['symbol', 'utf16be', 'shift-jis', 'gb18030', 'big5', 'wansung', 'johab', null, null, null, 'ucs-4']
@@ -100,7 +100,7 @@ let ENCODINGS = [
 let LANGUAGES = [
   // unicode
   [],
-  
+
   { // macintosh
      0: "English",                          59: "Pashto",
      1: "French",                           60: "Kurdish",
@@ -160,12 +160,12 @@ let LANGUAGES = [
     55: "Tajiki",                           147: "Tongan",
     56: "Turkmen",                          148: "Greek (polytonic)",
     57: "Mongolian (Mongolian script)",     149: "Greenlandic",
-    58: "Mongolian (Cyrillic script)",      150: "Azerbaijani (Roman script)"                           
+    58: "Mongolian (Cyrillic script)",      150: "Azerbaijani (Roman script)"
   },
-  
+
   // ISO (deprecated)
   [],
-  
+
   { // windows
     0x0436: "Afrikaans",               0x0453: "Khmer",
     0x041C: "Albanian",                0x0486: "K'iche",
@@ -273,25 +273,25 @@ let LANGUAGES = [
   }
 ];
 
-NameTable.process = function(stream) {  
+NameTable.process = function(stream) {
   var records = {};
   for (let record of this.records) {
     // find out what language this is for
     let language = LANGUAGES[record.platformID][record.languageID];
-    
+
     if (language == null && this.langTags != null && record.languageID >= 0x8000) {
       language = this.langTags[record.languageID - 0x8000].tag;
     }
-    
+
     if (language == null) {
       language = record.platformID + '-' + record.languageID;
     }
-    
+
     // check for reserved nameIDs
     // if (20 <= record.nameID && record.nameID <= 255) {
     //   throw new Error(`Reserved nameID ${record.nameID}`);
     // }
-    
+
     // if the nameID is >= 256, it is a font feature record (AAT)
     if (record.nameID >= 256) {
       if (records.fontFeatures == null) { records.fontFeatures = {}; }
@@ -303,19 +303,19 @@ NameTable.process = function(stream) {
       records[key][language] = record.string;
     }
   }
-    
+
   this.records = records;
 };
 
 NameTable.preEncode = function() {
   if (Array.isArray(this.records)) return;
   this.version = 0;
-  
+
   let records = [];
   for (let key in this.records) {
     let val = this.records[key];
     if (key === 'fontFeatures') continue;
-    
+
     records.push({
       platformID: 3,
       encodingID: 1,
@@ -324,7 +324,7 @@ NameTable.preEncode = function() {
       length: Buffer.byteLength(val.English, 'utf16le'),
       string: val.English
     });
-      
+
     if (key === 'postscriptName') {
       records.push({
         platformID: 1,
@@ -336,7 +336,7 @@ NameTable.preEncode = function() {
       });
     }
   }
-      
+
   this.records = records;
   this.count = records.length;
   this.stringOffset = module.exports.size(this, null, false);

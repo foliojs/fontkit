@@ -8,7 +8,7 @@ export default class WOFF2Glyph extends TTFGlyph {
     // We have to decode in advance (in WOFF2Font), so just return the pre-decoded data.
     return this._font._transformedGlyphs[this.id];
   }
-    
+
   _getCBox() {
     return this.path.bbox;
   }

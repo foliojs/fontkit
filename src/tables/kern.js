@@ -5,20 +5,20 @@ let KernPair = new r.Struct({
   right:  r.uint16,
   value:  r.int16
 });
-  
+
 let ClassTable = new r.Struct({
   firstGlyph: r.uint16,
   nGlyphs: r.uint16,
   offsets: new r.Array(r.uint16, 'nGlyphs'),
   max: t => t.offsets.length && Math.max.apply(Math, t.offsets)
 });
-  
+
 let Kern2Array = new r.Struct({
   off: t => t._startOffset - t.parent.parent._startOffset,
   len: t => (((t.parent.leftTable.max - t.off) / t.parent.rowWidth) + 1) * (t.parent.rowWidth / 2),
   values: new r.LazyArray(r.int16, 'len')
 });
-  
+
 let KernSubtable = new r.VersionedStruct('format', {
   0: {
     nPairs:         r.uint16,
@@ -27,7 +27,7 @@ let KernSubtable = new r.VersionedStruct('format', {
     rangeShift:     r.uint16,
     pairs:          new r.Array(KernPair, 'nPairs')
   },
-  
+
   2: {
     rowWidth:   r.uint16,
     leftTable:  new r.Pointer(r.uint16, ClassTable, {type: 'parent'}),
@@ -82,7 +82,7 @@ export default new r.VersionedStruct(r.uint16, {
     nTables:    r.uint16,
     tables:     new r.Array(KernTable, 'nTables')
   },
-    
+
   1: { // Apple Version
     reserved:   new r.Reserved(r.uint16), // the other half of the version number
     nTables:    r.uint32,

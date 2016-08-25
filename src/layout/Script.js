@@ -3,7 +3,7 @@ import unicode from 'unicode-properties';
 // This maps the Unicode Script property to an OpenType script tag
 // Data from http://www.microsoft.com/typography/otspec/scripttags.htm
 // and http://www.unicode.org/Public/UNIDATA/PropertyValueAliases.txt.
-const UNICODE_SCRIPTS = { 
+const UNICODE_SCRIPTS = {
   Caucasian_Albanian: 'aghb',
   Arabic: 'arab',
   Imperial_Aramaic: 'armi',
@@ -132,37 +132,37 @@ const UNICODE_SCRIPTS = {
   Common: 'zyyy',
   Unknown: 'zzzz'
 };
-  
+
 export function fromUnicode(script) {
   return UNICODE_SCRIPTS[script];
 }
-  
+
 export function forString(string) {
   let len = string.length;
   let idx = 0;
   while (idx < len) {
     let code = string.charCodeAt(idx++);
-    
+
     // Check if this is a high surrogate
     if (0xd800 <= code && code <= 0xdbff && idx < len) {
       let next = string.charCodeAt(idx);
-      
+
       // Check if this is a low surrogate
       if (0xdc00 <= next && next <= 0xdfff) {
         idx++;
         code = ((code & 0x3FF) << 10) + (next & 0x3FF) + 0x10000;
       }
     }
-        
+
     let script = unicode.getScript(code);
     if (script !== 'Common' && script !== 'Inherited' && script !== 'Unknown') {
       return UNICODE_SCRIPTS[script];
     }
   }
-      
+
   return UNICODE_SCRIPTS.Unknown;
 }
-  
+
 export function forCodePoints(codePoints) {
   for (let i = 0; i < codePoints.length; i++) {
     let codePoint = codePoints[i];
@@ -171,10 +171,10 @@ export function forCodePoints(codePoints) {
       return UNICODE_SCRIPTS[script];
     }
   }
-    
+
   return UNICODE_SCRIPTS.Unknown;
 }
-  
+
 // The scripts in this map are written from right to left
 const RTL = {
   arab: true,   // Arabic
@@ -210,6 +210,6 @@ export function direction(script) {
   if (RTL[script]) {
     return 'rtl';
   }
-    
+
   return 'ltr';
 }

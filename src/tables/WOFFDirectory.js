@@ -25,13 +25,13 @@ let WOFFDirectory = new r.Struct({
   privLength:     r.uint32,
   tables:         new r.Array(WOFFDirectoryEntry, 'numTables')
 });
-  
+
 WOFFDirectory.process = function() {
   let tables = {};
   for (let table of this.tables) {
     tables[table.tag] = table;
   }
-  
+
   this.tables = tables;
 };
 

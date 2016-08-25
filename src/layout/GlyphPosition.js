@@ -8,19 +8,19 @@ export default class GlyphPosition {
      * @type {number}
      */
     this.xAdvance = xAdvance;
-    
+
     /**
      * The amount to move the virtual pen in the Y direction after rendering this glyph.
      * @type {number}
      */
     this.yAdvance = yAdvance;
-    
+
     /**
      * The offset from the pen position in the X direction at which to render this glyph.
      * @type {number}
      */
     this.xOffset = xOffset;
-    
+
     /**
      * The offset from the pen position in the Y direction at which to render this glyph.
      * @type {number}

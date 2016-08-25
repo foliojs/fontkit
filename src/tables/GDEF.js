@@ -7,36 +7,36 @@ let AttachList = new r.Struct({
   glyphCount:     r.uint16,
   attachPoints:   new r.Array(new r.Pointer(r.uint16, AttachPoint), 'glyphCount')
 });
-  
+
 let CaretValue = new r.VersionedStruct(r.uint16, {
   1: { // Design units only
     coordinate: r.int16
   },
-    
+
   2: { // Contour point
     caretValuePoint: r.uint16
   },
-    
+
   3: { // Design units plus Device table
     coordinate:     r.int16,
     deviceTable:    new r.Pointer(r.uint16, Device)
   }
 });
-  
+
 let LigGlyph = new r.Array(new r.Pointer(r.uint16, CaretValue), r.uint16);
-  
+
 let LigCaretList = new r.Struct({
   coverage:       new r.Pointer(r.uint16, Coverage),
   ligGlyphCount:  r.uint16,
   ligGlyphs:      new r.Array(new r.Pointer(r.uint16, LigGlyph), 'ligGlyphCount')
 });
-  
+
 let MarkGlyphSetsDef = new r.Struct({
   markSetTableFormat: r.uint16,
   markSetCount:       r.uint16,
   coverage:           new r.Array(new r.Pointer(r.uint32, Coverage), 'markSetCount')
 });
-  
+
 export default new r.VersionedStruct(r.uint32, {
   0x00010000: {
     glyphClassDef:      new r.Pointer(r.uint16, ClassDef),       // 1: base glyph, 2: ligature, 3: mark, 4: component

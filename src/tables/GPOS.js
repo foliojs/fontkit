@@ -23,64 +23,64 @@ class ValueRecord {
   constructor(key = 'valueFormat') {
     this.key = key;
   }
-        
+
   buildStruct(parent) {
     let struct = parent;
     while (!struct[this.key] && struct.parent) {
       struct = struct.parent;
     }
-      
+
     if (!struct[this.key]) return;
-        
+
     let fields = {};
     fields.rel = () => struct._startOffset;
-    
+
     let format = struct[this.key];
     for (let key in format) {
       if (format[key]) {
         fields[key] = types[key];
       }
     }
-        
+
     return new r.Struct(fields);
   }
-    
+
   size(val, ctx) {
     return this.buildStruct(ctx).size(val, ctx);
   }
-    
+
   decode(stream, parent) {
     let res = this.buildStruct(parent).decode(stream, parent);
     delete res.rel;
     return res;
   }
 }
-  
+
 let PairValueRecord = new r.Struct({
   secondGlyph:    r.uint16,
   value1:         new ValueRecord('valueFormat1'),
   value2:         new ValueRecord('valueFormat2')
 });
-  
+
 let PairSet = new r.Array(PairValueRecord, r.uint16);
 
 let Class2Record = new r.Struct({
   value1: new ValueRecord('valueFormat1'),
   value2: new ValueRecord('valueFormat2')
 });
-  
+
 let Anchor = new r.VersionedStruct(r.uint16, {
   1: { // Design units only
     xCoordinate:    r.int16,
     yCoordinate:    r.int16
   },
-    
+
   2: { // Design units plus contour point
     xCoordinate:    r.int16,
     yCoordinate:    r.int16,
     anchorPoint:    r.uint16
   },
-    
+
   3: { // Design units plus Device tables
     xCoordinate:    r.int16,
     yCoordinate:    r.int16,
@@ -88,19 +88,19 @@ let Anchor = new r.VersionedStruct(r.uint16, {
     yDeviceTable:   new r.Pointer(r.uint16, Device)
   }
 });
-  
+
 let EntryExitRecord = new r.Struct({
   entryAnchor:    new r.Pointer(r.uint16, Anchor, {type: 'parent'}),
   exitAnchor:     new r.Pointer(r.uint16, Anchor, {type: 'parent'})
 });
-  
+
 let MarkRecord = new r.Struct({
   class:      r.uint16,
   markAnchor: new r.Pointer(r.uint16, Anchor, {type: 'parent'})
 });
-  
+
 let MarkArray = new r.Array(MarkRecord, r.uint16);
-  
+
 let BaseRecord  = new r.Array(new r.Pointer(r.uint16, Anchor), t => t.parent.classCount);
 let BaseArray   = new r.Array(BaseRecord, r.uint16);
 
@@ -122,7 +122,7 @@ let GPOSLookup = new r.VersionedStruct('lookupType', {
       values:         new r.LazyArray(new ValueRecord(), 'valueCount')
     }
   }),
-  
+
   2: new r.VersionedStruct(r.uint16, { // Pair Adjustment Positioning
     1: { // Adjustments for glyph pairs
       coverage:       new r.Pointer(r.uint16, Coverage),
@@ -131,7 +131,7 @@ let GPOSLookup = new r.VersionedStruct('lookupType', {
       pairSetCount:   r.uint16,
       pairSets:       new r.LazyArray(new r.Pointer(r.uint16, PairSet), 'pairSetCount')
     },
-      
+
     2: { // Class pair adjustment
       coverage:       new r.Pointer(r.uint16, Coverage),
       valueFormat1:   ValueFormat,
@@ -143,14 +143,14 @@ let GPOSLookup = new r.VersionedStruct('lookupType', {
       classRecords:   new r.LazyArray(new r.LazyArray(Class2Record, 'class2Count'), 'class1Count')
     }
   }),
-  
+
   3: { // Cursive Attachment Positioning
     format:             r.uint16,
     coverage:           new r.Pointer(r.uint16, Coverage),
     entryExitCount:     r.uint16,
     entryExitRecords:   new r.Array(EntryExitRecord, 'entryExitCount')
   },
-    
+
   4: { // MarkToBase Attachment Positioning
     format:             r.uint16,
     markCoverage:       new r.Pointer(r.uint16, Coverage),
@@ -159,7 +159,7 @@ let GPOSLookup = new r.VersionedStruct('lookupType', {
     markArray:          new r.Pointer(r.uint16, MarkArray),
     baseArray:          new r.Pointer(r.uint16, BaseArray)
   },
-    
+
   5: { // MarkToLigature Attachment Positioning
     format:             r.uint16,
     markCoverage:       new r.Pointer(r.uint16, Coverage),
@@ -168,7 +168,7 @@ let GPOSLookup = new r.VersionedStruct('lookupType', {
     markArray:          new r.Pointer(r.uint16, MarkArray),
     ligatureArray:      new r.Pointer(r.uint16, LigatureArray)
   },
-    
+
   6: { // MarkToMark Attachment Positioning
     format:             r.uint16,
     mark1Coverage:      new r.Pointer(r.uint16, Coverage),
@@ -177,26 +177,26 @@ let GPOSLookup = new r.VersionedStruct('lookupType', {
     mark1Array:         new r.Pointer(r.uint16, MarkArray),
     mark2Array:         new r.Pointer(r.uint16, BaseArray)
   },
-    
+
   7: Context,          // Contextual positioning
   8: ChainingContext,  // Chaining contextual positioning
-    
+
   9: { // Extension Positioning
     posFormat:   r.uint16,
     lookupType:  r.uint16,   // cannot also be 9
     extension:   new r.Pointer(r.uint32, GPOSLookup)
   }
 });
-    
+
 // Fix circular reference
 GPOSLookup.versions[9].extension.type = GPOSLookup;
-  
+
 export default new r.Struct({
   version:        r.int32,
   scriptList:     new r.Pointer(r.uint16, ScriptList),
   featureList:    new r.Pointer(r.uint16, FeatureList),
   lookupList:     new r.Pointer(r.uint16, new LookupList(GPOSLookup))
 });
-  
+
 // export GPOSLookup for JSTF table
 export { GPOSLookup };

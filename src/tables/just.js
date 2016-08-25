@@ -7,7 +7,7 @@ let ClassTable = new r.Struct({
   subFeatureFlags: r.uint32,
   stateTable: new StateTable1
 });
-      
+
 let WidthDeltaRecord = new r.Struct({
   justClass: r.uint32,
   beforeGrowLimit: r.fixed32,
@@ -17,7 +17,7 @@ let WidthDeltaRecord = new r.Struct({
   growFlags: r.uint16,
   shrinkFlags: r.uint16
 });
-  
+
 let WidthDeltaCluster = new r.Array(WidthDeltaRecord, r.uint32);
 
 let ActionData = new r.VersionedStruct('actionType', {
@@ -27,26 +27,26 @@ let ActionData = new r.VersionedStruct('actionType', {
     order: r.uint16,
     glyphs: new r.Array(r.uint16, r.uint16)
   },
-    
+
   1: { // Unconditional add glyph action
     addGlyph: r.uint16
   },
-    
+
   2: { // Conditional add glyph action
     substThreshold: r.fixed32,
     addGlyph: r.uint16,
     substGlyph: r.uint16
   },
-  
+
   3: {}, // Stretch glyph action (no data, not supported by CoreText)
-  
+
   4: { // Ductile glyph action (not supported by CoreText)
     variationAxis: r.uint32,
     minimumLimit: r.fixed32,
     noStretchValue: r.fixed32,
     maximumLimit: r.fixed32
   },
-  
+
   5: { // Repeated add glyph action
     flags: r.uint16,
     glyph: r.uint16

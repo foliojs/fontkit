@@ -16,16 +16,16 @@ let Directory = new r.Struct({
   rangeShift:     r.uint16,
   tables:         new r.Array(TableEntry, 'numTables')
 });
-  
+
 Directory.process = function() {
   let tables = {};
   for (let table of this.tables) {
     tables[table.tag] = table;
   }
-    
+
   this.tables = tables;
 };
-  
+
 Directory.preEncode = function(stream) {
   let tables = [];
   for (let tag in this.tables) {
@@ -39,14 +39,14 @@ Directory.preEncode = function(stream) {
       });
     }
   }
-  
+
   this.tag = 'true';
   this.numTables = tables.length;
   this.tables = tables;
-  
+
   this.searchRange = Math.floor(Math.log(this.numTables) / Math.LN2) * 16;
   this.entrySelector = Math.floor(this.searchRange / Math.LN2);
   this.rangeShift = this.numTables * 16 - this.searchRange;
 };
-    
+
 export default Directory;

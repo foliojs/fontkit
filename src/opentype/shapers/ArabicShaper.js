@@ -6,7 +6,7 @@ import fs from 'fs';
 const trie = new UnicodeTrie(fs.readFileSync(__dirname + '/data.trie'));
 const FEATURES = ['isol', 'fina', 'fin2', 'fin3', 'medi', 'med2', 'init'];
 
-const ShapingClasses = { 
+const ShapingClasses = {
   Non_Joining: 0,
   Left_Joining: 1,
   Right_Joining: 2,
@@ -16,7 +16,7 @@ const ShapingClasses = {
   'DALATH RISH': 5,
   Transparent: 6
 };
-  
+
 const ISOL = 'isol';
 const FINA = 'fina';
 const FIN2 = 'fin2';
@@ -80,17 +80,17 @@ export default class ArabicShaper extends DefaultShaper {
       let feature = FEATURES[i];
       plan.addStage(feature, false);
     }
-      
+
     plan.addStage('mset');
   }
-    
+
   static assignFeatures(plan, glyphs) {
     super.assignFeatures(plan, glyphs);
-        
+
     let prev = -1;
     let state = 0;
     let actions = [];
-  
+
     // Apply the state machine to map glyphs to features
     for (let i = 0; i < glyphs.length; i++) {
       let curAction, prevAction;
@@ -100,17 +100,17 @@ export default class ArabicShaper extends DefaultShaper {
         actions[i] = NONE;
         continue;
       }
-      
+
       [prevAction, curAction, state] = STATE_TABLE[state][type];
-    
+
       if (prevAction !== NONE && prev !== -1) {
         actions[prev] = prevAction;
       }
-      
+
       actions[i] = curAction;
       prev = i;
     }
-  
+
     // Apply the chosen features to their respective glyphs
     for (let index = 0; index < glyphs.length; index++) {
       let feature;

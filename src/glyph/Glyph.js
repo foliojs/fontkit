@@ -4,11 +4,11 @@ import unicode from 'unicode-properties';
 import StandardNames from './StandardNames';
 
 /**
- * Glyph objects represent a glyph in the font. They have various properties for accessing metrics and 
+ * Glyph objects represent a glyph in the font. They have various properties for accessing metrics and
  * the actual vector path the glyph represents, and methods for rendering the glyph to a graphics context.
  *
  * You do not create glyph objects directly. They are created by various methods on the font object.
- * There are several subclasses of the base Glyph class internally that may be returned depending 
+ * There are several subclasses of the base Glyph class internally that may be returned depending
  * on the font format, but they all inherit from this class.
  */
 export default class Glyph {
@@ -18,7 +18,7 @@ export default class Glyph {
      * @type {number}
      */
     this.id = id;
-    
+
     /**
      * An array of unicode code points that are represented by this glyph.
      * There can be multiple code points in the case of ligatures and other glyphs
@@ -27,65 +27,65 @@ export default class Glyph {
      */
     this.codePoints = codePoints;
     this._font = font;
-    
+
     // TODO: get this info from GDEF if available
     this.isMark = this.codePoints.every(unicode.isMark);
     this.isLigature = this.codePoints.length > 1;
   }
-  
+
   _getPath() {
     return new Path();
   }
-  
+
   _getCBox() {
     return this.path.cbox;
   }
-  
+
   _getBBox() {
     return this.path.bbox;
   }
-  
+
   _getTableMetrics(table) {
     if (this.id < table.metrics.length) {
       return table.metrics.get(this.id);
     }
-    
+
     let metric = table.metrics.get(table.metrics.length - 1);
-    let res = { 
+    let res = {
       advance: metric ? metric.advance : 0,
       bearing: table.bearings.get(this.id - table.metrics.length) || 0
     };
-      
+
     return res;
   }
-  
+
   _getMetrics(cbox) {
     if (this._metrics) { return this._metrics; }
-      
+
     let {advance:advanceWidth, bearing:leftBearing} = this._getTableMetrics(this._font.hmtx);
-    
+
     // For vertical metrics, use vmtx if available, or fall back to global data from OS/2 or hhea
     if (this._font.vmtx) {
       var {advance:advanceHeight, bearing:topBearing} = this._getTableMetrics(this._font.vmtx);
-      
+
     } else {
       let os2;
       if (typeof cbox === 'undefined' || cbox === null) { ({ cbox } = this); }
-      
+
       if ((os2 = this._font['OS/2']) && os2.version > 0) {
         var advanceHeight = Math.abs(os2.typoAscender - os2.typoDescender);
         var topBearing = os2.typoAscender - cbox.maxY;
-    
+
       } else {
         let { hhea } = this._font;
         var advanceHeight = Math.abs(hhea.ascent - hhea.descent);
         var topBearing = hhea.ascent - cbox.maxY;
       }
     }
-    
+
     return this._metrics = { advanceWidth, advanceHeight, leftBearing, topBearing };
   }
-  
+
   /**
    * The glyph’s control box.
    * This is often the same as the bounding box, but is faster to compute.
@@ -101,9 +101,9 @@ export default class Glyph {
   get cbox() {
     return this._getCBox();
   }
-  
+
   /**
-   * The glyph’s bounding box, i.e. the rectangle that encloses the 
+   * The glyph’s bounding box, i.e. the rectangle that encloses the
    * glyph outline as tightly as possible.
    * @type {BBox}
    */
@@ -111,7 +111,7 @@ export default class Glyph {
   get bbox() {
     return this._getBBox();
   }
-  
+
   /**
    * A vector Path object representing the glyph outline.
    * @type {Path}
@@ -122,7 +122,7 @@ export default class Glyph {
     // Decoding is actually performed by subclasses
     return this._getPath();
   }
-  
+
   /**
    * The glyph's advance width.
    * @type {number}
@@ -131,7 +131,7 @@ export default class Glyph {
   get advanceWidth() {
     return this._getMetrics().advanceWidth;
   }
-  
+
   /**
    * The glyph's advance height.
    * @type {number}
@@ -140,35 +140,35 @@ export default class Glyph {
   get advanceHeight() {
     return this._getMetrics().advanceHeight;
   }
-  
+
   get ligatureCaretPositions() {}
-  
+
   _getName() {
     let { post } = this._font;
     if (!post) {
       return null;
     }
-    
+
     switch (post.version) {
       case 1:
         return StandardNames[this.id];
-        
+
       case 2:
         let id = post.glyphNameIndex[this.id];
         if (id < StandardNames.length) {
           return StandardNames[id];
         }
-        
+
         return post.names[id - StandardNames.length];
-          
+
       case 2.5:
         return StandardNames[this.id + post.offsets[this.id]];
-        
+
       case 4:
         return String.fromCharCode(post.map[this.id]);
     }
   }
-  
+
   /**
    * The glyph's name
    * @type {string}
@@ -177,7 +177,7 @@ export default class Glyph {
   get name() {
     return this._getName();
   }
-  
+
   /**
    * Renders the glyph to the given graphics context, at the specified font size.
    * @param {CanvasRenderingContext2d} ctx
@@ -185,14 +185,14 @@ export default class Glyph {
    */
   render(ctx, size) {
     ctx.save();
-    
+
     let scale = 1 / this._font.head.unitsPerEm * size;
     ctx.scale(scale, scale);
 
     let fn = this.path.toFunction();
     fn(ctx);
     ctx.fill();
-    
+
     ctx.restore();
   }
 }

@@ -14,36 +14,36 @@ let SBitLineMetrics = new r.Struct({
   minAfterBL: r.int8,
   pad: new r.Reserved(r.int8, 2)
 });
-  
+
 let CodeOffsetPair = new r.Struct({
   glyphCode: r.uint16,
   offset: r.uint16
 });
-  
+
 let IndexSubtable = new r.VersionedStruct(r.uint16, {
   header: {
     imageFormat: r.uint16,
     imageDataOffset: r.uint32
   },
-    
+
   1: {
     offsetArray: new r.Array(r.uint32, t => t.parent.lastGlyphIndex - t.parent.firstGlyphIndex + 1)
   },
-    
+
   2: {
     imageSize: r.uint32,
     bigMetrics: BigMetrics
   },
-    
+
   3: {
     offsetArray: new r.Array(r.uint16, t => t.parent.lastGlyphIndex - t.parent.firstGlyphIndex + 1)
   },
-    
+
   4: {
     numGlyphs: r.uint32,
     glyphArray: new r.Array(CodeOffsetPair, t => t.numGlyphs + 1)
   },
-    
+
   5: {
     imageSize: r.uint32,
     bigMetrics: BigMetrics,
@@ -51,7 +51,7 @@ let IndexSubtable = new r.VersionedStruct(r.uint16, {
     glyphCodeArray: new r.Array(r.uint16, 'numGlyphs')
   }
 });
-  
+
 let IndexSubtableArray = new r.Struct({
   firstGlyphIndex: r.uint16,
   lastGlyphIndex: r.uint16,

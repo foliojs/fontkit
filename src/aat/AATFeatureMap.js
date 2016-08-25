@@ -1,6 +1,6 @@
 // see https://developer.apple.com/fonts/TrueType-Reference-Manual/RM09/AppendixF.html
 // and /System/Library/Frameworks/CoreText.framework/Versions/A/Headers/SFNTLayoutTypes.h on a Mac
-const features = { 
+const features = {
   allTypographicFeatures: {
     code: 0,
     exclusive: false,
@@ -345,7 +345,7 @@ const features = {
     fullWidthCJKRoman: 3
   }
 };
-    
+
 const feature = (name, selector) => [features[name].code, features[name][selector]];
 
 const OTMapping = {
@@ -355,10 +355,10 @@ const OTMapping = {
   hlig: feature('ligatures', 'historicalLigatures'),
   liga: feature('ligatures', 'commonLigatures'),
   hist: feature('ligatures', 'historicalLigatures'), // ??
-  
+
   smcp: feature('lowerCase', 'lowerCaseSmallCaps'),
   pcap: feature('lowerCase', 'lowerCasePetiteCaps'),
-  
+
   frac: feature('fractions', 'diagonalFractions'),
   dnom: feature('fractions', 'diagonalFractions'), // ??
   numr: feature('fractions', 'diagonalFractions'), // ??
@@ -372,7 +372,7 @@ const OTMapping = {
   // lfbd + opbd + rtbd -> opbd table?
   // mark, mkmk -> acnt table?
   // locl -> languageTag + ltag table
-  
+
   case: feature('caseSensitiveLayout', 'caseSensitiveLayout'), // also caseSensitiveSpacing
   ccmp: feature('unicodeDecomposition', 'canonicalComposition'), // compatibilityComposition?
   cpct: feature('CJKVerticalRomanPlacement', 'CJKVerticalRomanCentered'), // guess..., probably not given below
@@ -382,30 +382,30 @@ const OTMapping = {
   curs: feature('cursiveConnection', 'cursive'), // ??
   c2pc: feature('upperCase', 'upperCasePetiteCaps'),
   c2sc: feature('upperCase', 'upperCaseSmallCaps'),
-  
+
   init: feature('smartSwash', 'wordInitialSwashes'), // ??
   fin2: feature('smartSwash', 'wordFinalSwashes'), // ??
   medi: feature('smartSwash', 'nonFinalSwashes'), // ??
   med2: feature('smartSwash', 'nonFinalSwashes'), // ??
   fin3: feature('smartSwash', 'wordFinalSwashes'), // ??
   fina: feature('smartSwash', 'wordFinalSwashes'), // ??
-  
+
   pkna: feature('kanaSpacing', 'proportionalKana'),
   half: feature('textSpacing', 'halfWidthText'), // also HalfWidthCJKRoman, HalfWidthIdeographs?
   halt: feature('textSpacing', 'altHalfWidthText'),
-  
+
   hkna: feature('alternateKana', 'alternateHorizKana'),
   vkna: feature('alternateKana', 'alternateVertKana'),
   // hngl: feature 'transliteration', 'hanjaToHangulSelector' # deprecated
-  
+
   ital: feature('italicCJKRoman', 'CJKItalicRoman'),
   lnum: feature('numberCase', 'upperCaseNumbers'),
   onum: feature('numberCase', 'lowerCaseNumbers'),
   mgrk: feature('mathematicalExtras', 'mathematicalGreek'),
-  
+
   // nalt: not enough info. what type of annotation?
   // ornm: ditto, which ornament style?
-  
+
   calt: feature('contextualAlternates', 'contextualAlternates'), // or more?
   vrt2: feature('verticalSubstitution', 'substituteVerticalForms'), // oh... below?
   vert: feature('verticalSubstitution', 'substituteVerticalForms'),
@@ -433,7 +433,7 @@ const OTMapping = {
   ruby: feature('rubyKana', 'rubyKana'),
   titl: feature('styleOptions', 'titlingCaps'),
   zero: feature('typographicExtras', 'slashedZero'),
-  
+
   ss01: feature('stylisticAlternatives', 'stylisticAltOne'),
   ss02: feature('stylisticAlternatives', 'stylisticAltTwo'),
   ss03: feature('stylisticAlternatives', 'stylisticAltThree'),
@@ -455,14 +455,14 @@ const OTMapping = {
   ss19: feature('stylisticAlternatives', 'stylisticAltNineteen'),
   ss20: feature('stylisticAlternatives', 'stylisticAltTwenty')
 };
-  
+
   // salt: feature 'stylisticAlternatives', 'stylisticAltOne' # hmm, which one to choose
-  
+
 // Add cv01-cv99 features
 for (let i = 1; i <= 99; i++) {
   OTMapping[`cv${`00${i}`.slice(-2)}`] = [features.characterAlternatives.code, i];
 }
-    
+
 // create inverse mapping
 let AATMapping = {};
 for (let ot in OTMapping) {
@@ -470,11 +470,11 @@ for (let ot in OTMapping) {
   if (AATMapping[aat[0]] == null) {
     AATMapping[aat[0]] = {};
   }
-  
+
   AATMapping[aat[0]][aat[1]] = ot;
 }
-        
-// Maps an array of OpenType features to AAT features 
+
+// Maps an array of OpenType features to AAT features
 // in the form of {featureType:{featureSetting:true}}
 export function mapOTToAAT(features) {
   let res = {};
@@ -484,15 +484,15 @@ export function mapOTToAAT(features) {
       if (res[r[0]] == null) {
         res[r[0]] = {};
       }
-      
+
       res[r[0]][r[1]] = true;
     }
   }
-      
+
   return res;
 }
-  
-// Maps strings in a [featureType, featureSetting] 
+
+// Maps strings in a [featureType, featureSetting]
 // to their equivalent number codes
 function mapFeatureStrings(f) {
   let [type, setting] = f;
@@ -501,13 +501,13 @@ function mapFeatureStrings(f) {
   } else {
     var typeCode = type;
   }
-    
+
   if (isNaN(setting)) {
     var settingCode = features[type] && features[type][setting];
   } else {
     var settingCode = setting;
   }
-    
+
   return [typeCode, settingCode];
 }
 
@@ -525,7 +525,7 @@ export function mapAATToOT(features) {
         res[r] = true;
       }
     }
-        
+
   } else if (typeof features === 'object') {
     for (let type in features) {
       let feature = features[type];
@@ -538,6 +538,6 @@ export function mapAATToOT(features) {
       }
     }
   }
-      
+
   return Object.keys(res);
 }

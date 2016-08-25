@@ -11,9 +11,9 @@ const SHAPERS = {
   mand: ArabicShaper,    // Mandaic
   mani: ArabicShaper,    // Manichaean
   phlp: ArabicShaper,    // Psalter Pahlavi
-  
+
   hang: HangulShaper,    // Hangul
-  
+
   latn: DefaultShaper,   // Latin
   DFLT: DefaultShaper   // Default
 };
@@ -21,6 +21,6 @@ const SHAPERS = {
 export function choose(script) {
   let shaper = SHAPERS[script];
   if (shaper) { return shaper; }
-  
+
   return DefaultShaper;
 }

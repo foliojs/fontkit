@@ -17,7 +17,7 @@ gvar.process = function(stream) {
   let type = this.flags === 1 ? r.uint32 : r.uint16;
   let ptr = new r.Pointer(type, 'void', { relativeTo: 'offsetToData', allowNull: false });
   this.offsets = new r.Array(ptr, this.glyphCount + 1).decode(stream, this);
-  
+
   if (this.flags === 0) {
     // In short format, offsets are multiplied by 2.
     // This doesn't seem to be documented by Apple, but it

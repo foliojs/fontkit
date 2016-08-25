@@ -17,7 +17,7 @@ const PERFORM_ACTION = 0x2000;
 const LAST_MASK   = 0x80000000;
 const STORE_MASK  = 0x40000000;
 const OFFSET_MASK = 0x3FFFFFFF;
-    
+
 const VERTICAL_ONLY           = 0x800000;
 const REVERSE_DIRECTION       = 0x400000;
 const HORIZONTAL_AND_VERTICAL = 0x200000;
@@ -40,13 +40,13 @@ export default class AATMorxProcessor {
     this.font = font;
     this.morx = font.morx;
   }
-    
+
   // Processes an array of glyphs and applies the specified features
   // Features should be in the form of {featureType:{featureSetting:true}}
   process(glyphs, features = {}) {
     for (let chain of this.morx.chains) {
       let flags = chain.defaultFlags;
-      
+
       // enable/disable the requested features
       for (let feature of chain.features) {
         let f;
@@ -55,14 +55,14 @@ export default class AATMorxProcessor {
           flags |= feature.enableFlags;
         }
       }
-      
+
       for (let subtable of chain.subtables) {
         if (subtable.subFeatureFlags & flags) {
           this.processSubtable(subtable, glyphs);
         }
       }
     }
-        
+
     // remove deleted glyphs
     let index = glyphs.length - 1;
     while (index >= 0) {
@@ -72,10 +72,10 @@ export default class AATMorxProcessor {
 
       index--;
     }
-    
+
     return glyphs;
   }
-  
+
   processSubtable(subtable, glyphs) {
     this.subtable = subtable;
     this.glyphs = glyphs;
@@ -83,20 +83,20 @@ export default class AATMorxProcessor {
       this.processNoncontextualSubstitutions(this.subtable, this.glyphs);
       return;
     }
-    
+
     this.ligatureStack = [];
     this.markedGlyph = null;
     this.firstGlyph = null;
     this.lastGlyph = null;
     this.markedIndex = null;
-    
+
     let stateMachine = new AATStateMachine(this.subtable.table.stateTable);
     let process = this.getProcessor();
-    
+
     let reverse = !!(this.subtable.coverage & REVERSE_DIRECTION);
     return stateMachine.process(this.glyphs, reverse, process);
   }
-  
+
   getProcessor() {
     switch (this.subtable.type) {
       case 0:
@@ -113,19 +113,19 @@ export default class AATMorxProcessor {
         throw new Error(`Invalid morx subtable type: ${this.subtable.type}`);
     }
   }
-  
+
   processIndicRearragement(glyph, entry, index) {
     if (entry.flags & MARK_FIRST) {
       this.firstGlyph = index;
     }
-      
+
     if (entry.flags & MARK_LAST) {
       this.lastGlyph = index;
     }
-      
+
     reorderGlyphs(this.glyphs, entry.flags & VERB, this.firstGlyph, this.lastGlyph);
   }
-  
+
   processContextualSubstitution(glyph, entry, index) {
     let subsitutions = this.subtable.table.substitutionTable.items;
     if (entry.markIndex !== 0xffff) {
@@ -137,7 +137,7 @@ export default class AATMorxProcessor {
         this.glyphs[this.markedGlyph] = this.font.getGlyph(gid, glyph.codePoints);
       }
     }
-      
+
     if (entry.currentIndex !== 0xffff) {
       let lookup = subsitutions.getItem(entry.currentIndex);
       let lookupTable = new AATLookupTable(lookup);
@@ -147,41 +147,41 @@ export default class AATMorxProcessor {
         this.glyphs[index] = this.font.getGlyph(gid, glyph.codePoints);
       }
     }
-      
+
     if (entry.flags & SET_MARK) {
       this.markedGlyph = index;
     }
   }
-  
-  processLigature(glyph, entry, index) {  
+
+  processLigature(glyph, entry, index) {
     if (entry.flags & SET_COMPONENT) {
       this.ligatureStack.push(index);
     }
-    
+
     if (entry.flags & PERFORM_ACTION) {
       let actions = this.subtable.table.ligatureActions;
       let components = this.subtable.table.components;
       let ligatureList = this.subtable.table.ligatureList;
-      
+
       let actionIndex = entry.action;
       let last = false;
       let ligatureIndex = 0;
       let codePoints = [];
       let ligatureGlyphs = [];
-      
+
       while (!last) {
         let componentGlyph = this.ligatureStack.pop();
         codePoints.unshift(...this.glyphs[componentGlyph].codePoints);
-        
+
         let action = actions.getItem(actionIndex++);
         last = !!(action & LAST_MASK);
         let store = !!(action & STORE_MASK);
         let offset = (action & OFFSET_MASK) << 2 >> 2; // sign extend 30 to 32 bits
         offset += this.glyphs[componentGlyph].id;
-        
+
         let component = components.getItem(offset);
         ligatureIndex += component;
-                          
+
         if (last || store) {
           let ligatureEntry = ligatureList.getItem(ligatureIndex);
           this.glyphs[componentGlyph] = this.font.getGlyph(ligatureEntry, codePoints);
@@ -192,15 +192,15 @@ export default class AATMorxProcessor {
           this.glyphs[componentGlyph] = this.font.getGlyph(0xffff);
         }
       }
-        
+
       // Put ligature glyph indexes back on the stack
       this.ligatureStack.push(...ligatureGlyphs);
     }
   }
-  
+
   processNoncontextualSubstitutions(subtable, glyphs, index) {
     let lookupTable = new AATLookupTable(subtable.table.lookupTable);
-    
+
     for (index = 0; index < glyphs.length; index++) {
       let glyph = glyphs[index];
       if (glyph.id !== 0xffff) {
@@ -211,39 +211,39 @@ export default class AATMorxProcessor {
       }
     }
   }
-    
+
   _insertGlyphs(glyphIndex, insertionActionIndex, count, isBefore) {
     let insertions = [];
     while (count--) {
       let gid = this.subtable.table.insertionActions.getItem(insertionActionIndex++);
       insertions.push(this.font.getGlyph(gid));
     }
-    
+
     if (!isBefore) {
       glyphIndex++;
     }
-      
+
     this.glyphs.splice(glyphIndex, 0, ...insertions);
   }
-        
-  processGlyphInsertion(glyph, entry, index) {    
+
+  processGlyphInsertion(glyph, entry, index) {
     if (entry.flags & SET_MARK) {
       this.markedIndex = index;
     }
-    
+
     if (entry.markedInsertIndex !== 0xffff) {
       let count = (entry.flags & MARKED_INSERT_COUNT) >>> 5;
       let isBefore = !!(entry.flags & MARKED_INSERT_BEFORE);
       this._insertGlyphs(this.markedIndex, entry.markedInsertIndex, count, isBefore);
     }
-      
+
     if (entry.currentInsertIndex !== 0xffff) {
       let count = (entry.flags & CURRENT_INSERT_COUNT) >>> 5;
       let isBefore = !!(entry.flags & CURRENT_INSERT_BEFORE);
       this._insertGlyphs(index, entry.currentInsertIndex, count, isBefore);
     }
   }
-    
+
   getSupportedFeatures() {
     let features = [];
     for (let chain of this.morx.chains) {
@@ -251,7 +251,7 @@ export default class AATMorxProcessor {
         features.push([feature.featureType, feature.featureSetting]);
       }
     }
-        
+
     return features;
   }
 }
@@ -264,67 +264,67 @@ function swap(glyphs, rangeA, rangeB, reverseA = false, reverseB = false) {
   if (reverseB) {
     end.reverse();
   }
-    
+
   let start = glyphs.splice(rangeA[0], rangeA[1], ...end);
   if (reverseA) {
     start.reverse();
   }
-    
+
   glyphs.splice(rangeB[0] - (rangeA[1] - 1), 0, ...start);
   return glyphs;
 }
-  
+
 function reorderGlyphs(glyphs, verb, firstGlyph, lastGlyph) {
   let length = lastGlyph - firstGlyph + 1;
   switch (verb) {
     case 0: // no change
       return glyphs;
-      
+
     case 1: // Ax => xA
       return swap(glyphs, [firstGlyph, 1], [lastGlyph, 0]);
-      
+
     case 2: // xD => Dx
       return swap(glyphs, [firstGlyph, 0], [lastGlyph, 1]);
-      
+
     case 3: // AxD => DxA
       return swap(glyphs, [firstGlyph, 1], [lastGlyph, 1]);
-      
+
     case 4: // ABx => xAB
       return swap(glyphs, [firstGlyph, 2], [lastGlyph, 0]);
-      
+
     case 5: // ABx => xBA
       return swap(glyphs, [firstGlyph, 2], [lastGlyph, 0], true, false);
-      
+
     case 6: // xCD => CDx
       return swap(glyphs, [firstGlyph, 0], [lastGlyph, 2]);
-      
+
     case 7: // xCD => DCx
       return swap(glyphs, [firstGlyph, 0], [lastGlyph, 2], false, true);
-      
+
     case 8: // AxCD => CDxA
       return swap(glyphs, [firstGlyph, 1], [lastGlyph, 2]);
-      
+
     case 9: // AxCD => DCxA
       return swap(glyphs, [firstGlyph, 1], [lastGlyph, 2], false, true);
-      
+
     case 10: // ABxD => DxAB
       return swap(glyphs, [firstGlyph, 2], [lastGlyph, 1]);
-      
+
     case 11: // ABxD => DxBA
       return swap(glyphs, [firstGlyph, 2], [lastGlyph, 1], true, false);
 
     case 12: // ABxCD => CDxAB
       return swap(glyphs, [firstGlyph, 2], [lastGlyph, 2]);
-      
+
     case 13: // ABxCD => CDxBA
       return swap(glyphs, [firstGlyph, 2], [lastGlyph, 2], true, false);
-      
+
     case 14: // ABxCD => DCxAB
       return swap(glyphs, [firstGlyph, 2], [lastGlyph, 2], false, true);
-      
+
     case 15: // ABxCD => DCxBA
       return swap(glyphs, [firstGlyph, 2], [lastGlyph, 2], true, true);
-      
+
     default:
       throw new Error(`Unknown verb: ${verb}`);
   }
