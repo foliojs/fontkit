@@ -184,5 +184,3 @@ for (let command of ['moveTo', 'lineTo', 'quadraticCurveTo', 'bezierCurveTo', 'c
     return this;
   };
 }
-
-export default Path;

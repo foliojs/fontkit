@@ -1,11 +1,13 @@
 import unicode from 'unicode-properties';
 
-// This class is used when GPOS does not define 'mark' or 'mkmk' features
-// for positioning marks relative to base glyphs. It uses the unicode
-// combining class property to position marks.
-//
-// Based on code from Harfbuzz, thanks!
-// https://github.com/behdad/harfbuzz/blob/master/src/hb-ot-shape-fallback.cc
+/**
+ * This class is used when GPOS does not define 'mark' or 'mkmk' features
+ * for positioning marks relative to base glyphs. It uses the unicode
+ * combining class property to position marks.
+ *
+ * Based on code from Harfbuzz, thanks!
+ * https://github.com/behdad/harfbuzz/blob/master/src/hb-ot-shape-fallback.cc
+ */
 export default class UnicodeLayoutEngine {
   constructor(font) {
     this.font = font;
