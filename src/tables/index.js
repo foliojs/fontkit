@@ -8,18 +8,18 @@ tables.hhea = require('./hhea');
 tables.hmtx = require('./hmtx');
 tables.maxp = require('./maxp');
 tables.name = require('./name');
-tables['OS/2']    = require('./OS2');
+tables['OS/2'] = require('./OS2');
 tables.post = require('./post');
 
 // TrueType Outlines
-tables['cvt ']    = require('./cvt');
+tables['cvt '] = require('./cvt');
 tables.fpgm = require('./fpgm');
 tables.loca = require('./loca');
 tables.prep = require('./prep');
 tables.glyf = require('./glyf');
 
 // PostScript Outlines
-tables['CFF ']    = require('../cff/CFFFont');
+tables['CFF '] = require('../cff/CFFFont');
 tables.VORG = require('./VORG');
 
 // Bitmap Glyphs

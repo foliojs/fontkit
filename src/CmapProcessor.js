@@ -7,9 +7,9 @@ export default class CmapProcessor {
     for (let cmap of cmapTable.tables) {
       // unicode or windows platform
       if ((cmap.platformID === 0 && (cmap.encodingID === 4 || cmap.encodingID === 6)) || (cmap.platformID === 3 && cmap.encodingID === 10)) {
-         this.cmap = cmap.table;
-         return;
-       }
+        this.cmap = cmap.table;
+        return;
+      }
     }
 
     // try "old" 16-bit cmap

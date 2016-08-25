@@ -1,6 +1,73 @@
 import DefaultShaper from './DefaultShaper';
 import GlyphInfo from '../GlyphInfo';
 
+/**
+ * This is a shaper for the Hangul script, used by the Korean language.
+ * It does the following:
+ *   - decompose if unsupported by the font:
+ *     <LV>   -> <L,V>
+ *     <LVT>  -> <L,V,T>
+ *     <LV,T> -> <L,V,T>
+ *
+ *   - compose if supported by the font:
+ *     <L,V>   -> <LV>
+ *     <L,V,T> -> <LVT>
+ *     <LV,T>  -> <LVT>
+ *
+ *   - reorder tone marks (S is any valid syllable):
+ *     <S, M> -> <M, S>
+ *
+ *   - apply ljmo, vjmo, and tjmo OpenType features to decomposed Jamo sequences.
+ *
+ * This logic is based on the following documents:
+ *   - http://www.microsoft.com/typography/OpenTypeDev/hangul/intro.htm
+ *   - http://ktug.org/~nomos/harfbuzz-hangul/hangulshaper.pdf
+ */
+export default class HangulShaper extends DefaultShaper {
+  static planFeatures(plan) {
+    plan.add(['ljmo', 'vjmo', 'tjmo'], false);
+  }
+
+  static assignFeatures(plan, glyphs) {
+    let state = 0;
+    let i = 0;
+    while (i < glyphs.length) {
+      let action;
+      let glyph = glyphs[i];
+      let code = glyph.codePoints[0];
+      let type = getType(code);
+
+      [ action, state ] = STATE_TABLE[state][type];
+
+      switch (action) {
+        case DECOMPOSE:
+          // Decompose the composed syllable if it is not supported by the font.
+          if (!plan.font.hasGlyphForCodePoint(code)) {
+            i = decompose(glyphs, i, plan.font);
+          }
+          break;
+
+        case COMPOSE:
+          // Found a decomposed syllable. Try to compose if supported by the font.
+          i = compose(glyphs, i, plan.font);
+          break;
+
+        case TONE_MARK:
+          // Got a valid syllable, followed by a tone mark. Move the tone mark to the beginning of the syllable.
+          reorderToneMark(glyphs, i, plan.font);
+          break;
+
+        case INVALID:
+          // Tone mark has no valid syllable to attach to, so insert a dotted circle
+          i = insertDottedCircle(glyphs, i, plan.font);
+          break;
+      }
+
+      i++;
+    }
+  }
+}
+
 const HANGUL_BASE  = 0xac00;
 const HANGUL_END   = 0xd7a4;
 const HANGUL_COUNT = HANGUL_END - HANGUL_BASE + 1;
@@ -15,16 +82,12 @@ const V_END   = V_BASE + V_COUNT - 1;
 const T_END   = T_BASE + T_COUNT - 1;
 const DOTTED_CIRCLE = 0x25cc;
 
-const isL = code => 0x1100 <= code && code <= 0x115f || 0xa960 <= code && code <= 0xa97c;
-const isV = code => 0x1160 <= code && code <= 0x11a7 || 0xd7b0 <= code && code <= 0xd7c6;
-const isT = code => 0x11a8 <= code && code <= 0x11ff || 0xd7cb <= code && code <= 0xd7fb;
+const isL    = code => 0x1100 <= code && code <= 0x115f || 0xa960 <= code && code <= 0xa97c;
+const isV    = code => 0x1160 <= code && code <= 0x11a7 || 0xd7b0 <= code && code <= 0xd7c6;
+const isT    = code => 0x11a8 <= code && code <= 0x11ff || 0xd7cb <= code && code <= 0xd7fb;
 const isTone = code => 0x302e <= code && code <= 0x302f;
-const isLVT = code => HANGUL_BASE <= code && code <= HANGUL_END;
-function isLV(c) {
-  c -= HANGUL_BASE;
-  return c < HANGUL_COUNT && c % T_COUNT === 0;
-}
-
+const isLVT  = code => HANGUL_BASE <= code && code <= HANGUL_END;
+const isLV   = code => (code - HANGUL_BASE) < HANGUL_COUNT && (code - HANGUL_BASE) % T_COUNT === 0;
 const isCombiningL = code => L_BASE <= code && code <= L_END;
 const isCombiningV = code => V_BASE <= code && code <= V_END;
 const isCombiningT = code => T_BASE + 1 && 1 <= code && code <= T_END;
@@ -218,71 +281,4 @@ function insertDottedCircle(glyphs, i, font) {
   }
 
   return i;
-}
-
-//
-// This is a shaper for the Hangul script, used by the Korean language.
-// It does the following:
-//   - decompose if unsupported by the font:
-//     <LV>   -> <L,V>
-//     <LVT>  -> <L,V,T>
-//     <LV,T> -> <L,V,T>
-//
-//   - compose if supported by the font:
-//     <L,V>   -> <LV>
-//     <L,V,T> -> <LVT>
-//     <LV,T>  -> <LVT>
-//
-//   - reorder tone marks (S is any valid syllable):
-//     <S, M> -> <M, S>
-//
-//   - apply ljmo, vjmo, and tjmo OpenType features to decomposed Jamo sequences.
-//
-// This logic is based on the following documents:
-//   - http://www.microsoft.com/typography/OpenTypeDev/hangul/intro.htm
-//   - http://ktug.org/~nomos/harfbuzz-hangul/hangulshaper.pdf
-//
-export default class HangulShaper extends DefaultShaper {
-  static planFeatures(plan) {
-    plan.add(['ljmo', 'vjmo', 'tjmo'], false);
-  }
-
-  static assignFeatures(plan, glyphs) {
-    let state = 0;
-    let i = 0;
-    while (i < glyphs.length) {
-      let action;
-      let glyph = glyphs[i];
-      let code = glyph.codePoints[0];
-      let type = getType(code);
-
-      [ action, state ] = STATE_TABLE[state][type];
-
-      switch (action) {
-        case DECOMPOSE:
-          // Decompose the composed syllable if it is not supported by the font.
-          if (!plan.font.hasGlyphForCodePoint(code)) {
-            i = decompose(glyphs, i, plan.font);
-          }
-          break;
-
-        case COMPOSE:
-          // Found a decomposed syllable. Try to compose if supported by the font.
-          i = compose(glyphs, i, plan.font);
-          break;
-
-        case TONE_MARK:
-          // Got a valid syllable, followed by a tone mark. Move the tone mark to the beginning of the syllable.
-          reorderToneMark(glyphs, i, plan.font);
-          break;
-
-        case INVALID:
-          // Tone mark has no valid syllable to attach to, so insert a dotted circle
-          i = insertDottedCircle(glyphs, i, plan.font);
-          break;
-      }
-
-      i++;
-    }
-  }
 }

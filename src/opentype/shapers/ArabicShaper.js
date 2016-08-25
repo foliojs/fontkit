@@ -51,28 +51,14 @@ const STATE_TABLE = [
   [ [ NONE, NONE, 0 ],  [ NONE, ISOL, 2 ],  [ NONE, ISOL, 1 ],  [ NONE, ISOL, 2 ],  [ NONE, FIN3, 5 ],  [ NONE, ISOL, 6 ] ]
 ];
 
-function getShapingClass(codePoint) {
-  let res = trie.get(codePoint);
-  if (res) {
-    return res - 1;
-  }
-
-  let category = unicode.getCategory(codePoint);
-  if (category === 'Mn' || category === 'Me' || category === 'Cf') {
-    return ShapingClasses.Transparent;
-  }
-
-  return ShapingClasses.Non_Joining;
-}
-
-//
-// This is a shaper for Arabic, and other cursive scripts.
-// It uses data from ArabicShaping.txt in the Unicode database,
-// compiled to a UnicodeTrie by generate-data.coffee.
-//
-// The shaping state machine was ported from Harfbuzz.
-// https://github.com/behdad/harfbuzz/blob/master/src/hb-ot-shape-complex-arabic.cc
-//
+/**
+ * This is a shaper for Arabic, and other cursive scripts.
+ * It uses data from ArabicShaping.txt in the Unicode database,
+ * compiled to a UnicodeTrie by generate-data.coffee.
+ *
+ * The shaping state machine was ported from Harfbuzz.
+ * https://github.com/behdad/harfbuzz/blob/master/src/hb-ot-shape-complex-arabic.cc
+ */
 export default class ArabicShaper extends DefaultShaper {
   static planFeatures(plan) {
     plan.add(['ccmp', 'locl']);
@@ -120,4 +106,18 @@ export default class ArabicShaper extends DefaultShaper {
       }
     }
   }
+}
+
+function getShapingClass(codePoint) {
+  let res = trie.get(codePoint);
+  if (res) {
+    return res - 1;
+  }
+
+  let category = unicode.getCategory(codePoint);
+  if (category === 'Mn' || category === 'Me' || category === 'Cf') {
+    return ShapingClasses.Transparent;
+  }
+
+  return ShapingClasses.Non_Joining;
 }
