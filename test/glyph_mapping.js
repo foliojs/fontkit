@@ -1,4 +1,4 @@
-import fontkit from '../';
+import fontkit from '../src';
 import assert from 'assert';
 
 describe('character to glyph mapping', function() {

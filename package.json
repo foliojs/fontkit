@@ -13,8 +13,16 @@
   ],
   "scripts": {
     "test": "mocha",
+    "prepublish": "make",
     "coverage": "babel-node ./node_modules/.bin/isparta cover ./node_modules/.bin/_mocha"
   },
+  "main": "index.js",
+  "jsnext:main": "src/index.js",
+  "files": [
+    "base.js",
+    "index.js",
+    "data.trie"
+  ],
   "author": "Devon Govett <devongovett@gmail.com>",
   "license": "MIT",
   "dependencies": {
@@ -34,12 +42,18 @@
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-polyfill": "^6.13.0",
     "babel-preset-es2015": "^6.14.0",
+    "babel-preset-es2015-rollup": "^1.2.0",
     "babel-register": "^6.14.0",
     "codepoints": "^1.2.0",
     "concat-stream": "^1.4.6",
+    "esdoc": "^0.4.8",
+    "esdoc-es7-plugin": "0.0.3",
     "iconv-lite": "^0.4.7",
     "isparta": "^3.5.3",
-    "mocha": "^2.0.1"
+    "mocha": "^2.0.1",
+    "rollup": "^0.34.10",
+    "rollup-plugin-babel": "^2.6.1",
+    "rollup-plugin-local-resolve": "^1.0.7"
   },
   "browserify": {
     "transform": [

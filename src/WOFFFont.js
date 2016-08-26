@@ -1,6 +1,6 @@
 import TTFFont from './TTFFont';
 import WOFFDirectory from './tables/WOFFDirectory';
-import tables from './tables/index';
+import tables from './tables';
 import inflate from 'tiny-inflate';
 import r from 'restructure';
 

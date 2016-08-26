@@ -3,7 +3,6 @@ import CFFIndex from './CFFIndex';
 import CFFTop from './CFFTop';
 import CFFPrivateDict from './CFFPrivateDict';
 import standardStrings from './CFFStandardStrings';
-import fs from 'fs';
 
 class CFFFont {
   constructor(stream) {
@@ -13,11 +12,6 @@ class CFFFont {
 
   static decode(stream) {
     return new CFFFont(stream);
-  }
-
-  static open(filename, name) {
-    let contents = fs.readFileSync(filename);
-    return new CFFFont(new r.DecodeStream(contents));
   }
 
   decode() {

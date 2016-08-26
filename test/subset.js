@@ -1,4 +1,4 @@
-import fontkit from '../';
+import fontkit from '../src';
 import assert from 'assert';
 import concat from 'concat-stream';
 import CFFFont from '../src/cff/CFFFont';

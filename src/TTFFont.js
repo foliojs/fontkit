@@ -1,6 +1,6 @@
 import r from 'restructure';
 import { cache } from './decorators';
-import fontkit from '../base';
+import fontkit from './base';
 import Directory from './tables/directory';
 import tables from './tables';
 import CmapProcessor from './CmapProcessor';

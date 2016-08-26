@@ -1,9 +1,9 @@
 import fontkit from './base';
-import TTFFont from './src/TTFFont';
-import WOFFFont from './src/WOFFFont';
-import WOFF2Font from './src/WOFF2Font';
-import TrueTypeCollection from './src/TrueTypeCollection';
-import DFont from './src/DFont';
+import TTFFont from './TTFFont';
+import WOFFFont from './WOFFFont';
+import WOFF2Font from './WOFF2Font';
+import TrueTypeCollection from './TrueTypeCollection';
+import DFont from './DFont';
 
 // Register font formats
 fontkit.registerFormat(TTFFont);
