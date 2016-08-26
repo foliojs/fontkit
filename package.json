@@ -31,7 +31,6 @@
     "brotli": "^1.2.0",
     "clone": "^1.0.1",
     "deep-equal": "^1.0.0",
-    "iconv-lite": "^0.4.11",
     "restructure": "^0.5.0",
     "tiny-inflate": "^1.0.2",
     "unicode-properties": "^1.0.0",
