@@ -1,5 +1,4 @@
 import unicode from 'unicode-properties';
-import assign from 'object-assign';
 
 export default class GlyphInfo {
   constructor(id, codePoints = [], features = []) {
@@ -17,7 +16,7 @@ export default class GlyphInfo {
         this.features[feature] = true;
       }
     } else if (typeof features === 'object') {
-      assign(this.features, features);
+      Object.assign(this.features, features);
     }
 
     this.ligatureID = null;

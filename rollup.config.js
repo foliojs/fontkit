@@ -8,7 +8,8 @@ export default {
     babel({
       babelrc: false,
       presets: ['es2015-rollup'],
-      plugins: ['transform-decorators-legacy']
+      plugins: ['transform-decorators-legacy', 'transform-runtime'],
+      runtimeHelpers: true
     })
   ]
 };

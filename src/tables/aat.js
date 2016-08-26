@@ -1,5 +1,4 @@
 import r from 'restructure';
-import assign from 'object-assign';
 
 class UnboundedArrayAccessor {
   constructor(type, stream, parent) {
@@ -111,7 +110,7 @@ export let LookupTable = function(ValueType = r.uint16) {
 };
 
 export function StateTable(entryData = {}, lookupType = r.uint16) {
-  let entry = assign({
+  let entry = Object.assign({
     newState: r.uint16,
     flags: r.uint16
   }, entryData);
@@ -137,7 +136,7 @@ export function StateTable1(entryData = {}, lookupType = r.uint16) {
     values: new r.Array(r.uint8, r.uint16)
   });
 
-  let entry = assign({
+  let entry = Object.assign({
     newStateOffset: r.uint16,
     // convert offset to stateArray index
     newState: t => (t.newStateOffset - (t.parent.stateArray.base - t.parent._startOffset)) / t.parent.nClasses,
