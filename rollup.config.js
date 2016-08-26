@@ -7,7 +7,7 @@ export default {
     localResolve(),
     babel({
       babelrc: false,
-      presets: ['es2015-rollup'],
+      presets: [['es2015', { modules: false }]],
       plugins: ['transform-decorators-legacy', 'transform-runtime'],
       runtimeHelpers: true
     })
