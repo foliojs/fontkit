@@ -1,7 +1,0 @@
-node_modules/
-playground/
-.DS_Store
-coverage.html
-test/
-*.coffee
-coverage.js

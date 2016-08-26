@@ -3,3 +3,7 @@ playground/
 .DS_Store
 coverage/
 coverage.html
+data.trie
+/index.js
+/base.js
+*.js.map
