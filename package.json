@@ -21,7 +21,9 @@
   "files": [
     "src",
     "base.js",
+    "base.js.map",
     "index.js",
+    "index.js.map",
     "data.trie"
   ],
   "author": "Devon Govett <devongovett@gmail.com>",
