@@ -140,8 +140,8 @@ export default class GlyphVariationProcessor {
       if (points.length === 0) { // all points
         for (let i = 0; i < glyphPoints.length; i++) {
           var point = glyphPoints[i];
-          point.x += xDeltas[i] * factor;
-          point.y += yDeltas[i] * factor;
+          point.x += Math.round(xDeltas[i] * factor);
+          point.y += Math.round(yDeltas[i] * factor);
         }
       } else {
         let origPoints = glyphPoints.slice();
@@ -154,8 +154,8 @@ export default class GlyphVariationProcessor {
             origPoints[idx] = point.copy();
             hasDelta[idx] = true;
 
-            point.x += xDeltas[i] * factor;
-            point.y += yDeltas[i] * factor;
+            point.x += Math.round(xDeltas[i] * factor);
+            point.y += Math.round(yDeltas[i] * factor);
           }
         }
 
