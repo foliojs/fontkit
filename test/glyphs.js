@@ -13,12 +13,12 @@ describe('glyphs', function() {
 
     it('should get a path for the glyph', function() {
       let glyph = font.getGlyph(39);
-      return assert.equal(glyph.path.toSVG(), 'M1368 745Q1368 383 1171.5 191.5Q975 0 606 0L201 0L201 1462L649 1462Q990 1462 1179 1273Q1368 1084 1368 745M1188 739Q1188 1025 1044.5 1170Q901 1315 618 1315L371 1315L371 147L578 147Q882 147 1035 296.5Q1188 446 1188 739Z');
+      return assert.equal(glyph.path.toSVG(), 'M1368 745Q1368 383 1171.5 191.5Q975 0 606 0L201 0L201 1462L649 1462Q990 1462 1179 1273Q1368 1084 1368 745ZM1188 739Q1188 1025 1044.5 1170Q901 1315 618 1315L371 1315L371 147L578 147Q882 147 1035 296.5Q1188 446 1188 739Z');
     });
 
     it('should get a composite glyph', function() {
       let glyph = font.getGlyph(171); // é
-      return assert.equal(glyph.path.toSVG(), 'M639 -20Q396 -20 255.5 128Q115 276 115 539Q115 804 245.5 960Q376 1116 596 1116Q802 1116 922 980.5Q1042 845 1042 623L1042 518L287 518Q292 325 384.5 225Q477 125 645 125Q822 125 995 199L995 51Q907 13 828.5 -3.5Q750 -20 639 -20M594 977Q462 977 383.5 891Q305 805 291 653L864 653Q864 810 794 893.5Q724 977 594 977M471 1266Q519 1328 574.5 1416Q630 1504 662 1569L864 1569L864 1548Q820 1483 733 1388Q646 1293 582 1241L471 1241L471 1266Z');
+      return assert.equal(glyph.path.toSVG(), 'M639 -20Q396 -20 255.5 128Q115 276 115 539Q115 804 245.5 960Q376 1116 596 1116Q802 1116 922 980.5Q1042 845 1042 623L1042 518L287 518Q292 325 384.5 225Q477 125 645 125Q822 125 995 199L995 51Q907 13 828.5 -3.5Q750 -20 639 -20ZM594 977Q462 977 383.5 891Q305 805 291 653L864 653Q864 810 794 893.5Q724 977 594 977ZM471 1266Q519 1328 574.5 1416Q630 1504 662 1569L864 1569L864 1548Q820 1483 733 1388Q646 1293 582 1241L471 1241Z');
     });
 
     it('should get the glyph cbox', function() {
@@ -81,7 +81,7 @@ describe('glyphs', function() {
 
     it('should have an empty path', function() {
       let glyph = font.glyphsForString('😜')[0];
-      return assert.equal(glyph.path.toSVG(), 'M0 2048M2055 -7Z');
+      return assert.equal(glyph.path.toSVG(), 'M0 2048ZM2055 -7Z');
     });
 
     it('should get an image', function() {
@@ -144,7 +144,7 @@ describe('glyphs', function() {
 
     it('should get a path for the glyph', function() {
       let glyph = font.glyphsForString('T')[0];
-      return assert.equal(glyph.path.toSVG(), 'M226 586L28 586L28 656L508 656L508 586L310 586L310 0L226 0L226 586Z');
+      return assert.equal(glyph.path.toSVG(), 'M226 586L28 586L28 656L508 656L508 586L310 586L310 0L226 0Z');
     });
 
     it('should get the glyph name', function() {
@@ -163,7 +163,7 @@ describe('glyphs', function() {
 
     it('should get a path for the glyph', function() {
       let glyph = font.glyphsForString('T')[0];
-      return assert.equal(glyph.path.toSVG(), 'M226 586L28 586L28 656L508 656L508 586L310 586L310 0L226 0L226 586Z');
+      return assert.equal(glyph.path.toSVG(), 'M226 586L28 586L28 656L508 656L508 586L310 586L310 0L226 0Z');
     });
 
     it('should get the glyph cbox', function() {

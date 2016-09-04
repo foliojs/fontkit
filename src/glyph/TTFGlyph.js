@@ -373,16 +373,13 @@ export default class TTFGlyph extends Glyph {
       }
 
       // Connect the first and last points
-      if (firstPt !== lastPt) {
-        if (curvePt) {
-          path.quadraticCurveTo(curvePt.x, curvePt.y, firstPt.x, firstPt.y);
-        } else {
-          path.lineTo(firstPt.x, firstPt.y);
-        }
+      if (curvePt) {
+        path.quadraticCurveTo(curvePt.x, curvePt.y, firstPt.x, firstPt.y);
       }
+      
+      path.closePath();
     }
 
-    path.closePath();
     return path;
   }
 }
