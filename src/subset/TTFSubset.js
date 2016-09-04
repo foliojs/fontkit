@@ -2,10 +2,17 @@ import cloneDeep from 'clone';
 import Subset from './Subset';
 import Directory from '../tables/directory';
 import Tables from '../tables';
+import TTFGlyphEncoder from '../glyph/TTFGlyphEncoder';
 
 export default class TTFSubset extends Subset {
+  constructor(font) {
+    super(font);
+    this.glyphEncoder = new TTFGlyphEncoder;
+  }
+  
   _addGlyph(gid) {
-    let glyf = this.font.getGlyph(gid)._decode();
+    let glyph = this.font.getGlyph(gid);
+    let glyf = glyph._decode();
 
     // get the offset to the glyph from the loca table
     let curOffset = this.font.loca.offsets[gid];
@@ -23,19 +30,18 @@ export default class TTFSubset extends Subset {
         gid = this.includeGlyph(component.glyphID);
         buffer.writeUInt16BE(gid, component.pos);
       }
+    } else if (glyf && this.font._variationProcessor) {
+      // If this is a TrueType variation glyph, re-encode the path
+      buffer = this.glyphEncoder.encodeSimple(glyph.path, glyf.instructions);
     }
 
     this.glyf.push(buffer);
     this.loca.offsets.push(this.offset);
-
-    if (gid < this.font.hmtx.metrics.length) {
-      this.hmtx.metrics.push(this.font.hmtx.metrics.get(gid));
-    } else {
-      this.hmtx.metrics.push({
-        advance: this.font.hmtx.metrics.get(this.font.hmtx.metrics.length - 1).advance,
-        bearing: this.font.hmtx.bearings.get(gid - this.font.hmtx.metrics.length)
-      });
-    }
+    
+    this.hmtx.metrics.push({
+      advance: glyph.advanceWidth,
+      bearing: glyph._getMetrics().leftBearing
+    });
 
     this.offset += buffer.length;
     return this.glyf.length - 1;
