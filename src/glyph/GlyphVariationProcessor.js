@@ -74,6 +74,9 @@ export default class GlyphVariationProcessor {
     // Read the gvar data for this glyph
     let { stream } = this.font;
     stream.pos = offset;
+    if (stream.pos >= stream.length) {
+      return;
+    }
 
     let tupleCount = stream.readUInt16BE();
     let offsetToData = offset + stream.readUInt16BE();
