@@ -129,7 +129,7 @@ export default class TTFGlyph extends Glyph {
     glyph.points = [];
 
     let endPtsOfContours = new r.Array(r.uint16, glyph.numberOfContours).decode(stream);
-    let instructions = new r.Array(r.uint8, r.uint16).decode(stream);
+    glyph.instructions = new r.Array(r.uint8, r.uint16).decode(stream);
 
     let flags = [];
     let numCoords = endPtsOfContours[endPtsOfContours.length - 1] + 1;

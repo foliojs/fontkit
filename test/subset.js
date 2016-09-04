@@ -4,6 +4,7 @@ import concat from 'concat-stream';
 import CFFFont from '../src/cff/CFFFont';
 import r from 'restructure';
 import CFFGlyph from '../src/glyph/CFFGlyph';
+import fs from 'fs';
 
 describe('font subsetting', function() {
   describe('truetype subsetting', function() {
@@ -11,22 +12,36 @@ describe('font subsetting', function() {
 
     it('should create a TTFSubset instance', function() {
       let subset = font.createSubset();
-      return assert.equal(subset.constructor.name, 'TTFSubset');
+      assert.equal(subset.constructor.name, 'TTFSubset');
     });
 
     it('should produce a subset', function(done) {
       let subset = font.createSubset();
-      let iterable = font.glyphsForString('hello');
-      for (let i = 0; i < iterable.length; i++) {
-        let glyph = iterable[i];
+      for (let glyph of font.glyphsForString('hello')) {
         subset.includeGlyph(glyph);
       }
 
-      return subset.encodeStream().pipe(concat(function(buf) {
+      subset.encodeStream().pipe(concat(function(buf) {
         let f = fontkit.create(buf);
         assert.equal(f.numGlyphs, 5);
         assert.equal(f.getGlyph(1).path.toSVG(), font.glyphsForString('h')[0].path.toSVG());
-        return done();
+        done();
+      }));
+    });
+    
+    it('should re-encode variation glyphs', function(done) {
+      if (!fs.existsSync('/Library/Fonts/Skia.ttf')) return done();
+      
+      let font = fontkit.openSync('/Library/Fonts/Skia.ttf', 'Bold');
+      let subset = font.createSubset();
+      for (let glyph of font.glyphsForString('e')) {
+        subset.includeGlyph(glyph);
+      }
+
+      subset.encodeStream().pipe(concat(function(buf) {
+        let f = fontkit.create(buf);
+        assert.equal(f.getGlyph(1).path.toSVG(), font.glyphsForString('e')[0].path.toSVG());
+        done();
       }));
     });
 
@@ -34,11 +49,11 @@ describe('font subsetting', function() {
       let subset = font.createSubset();
       subset.includeGlyph(font.glyphsForString('é')[0]);
 
-      return subset.encodeStream().pipe(concat(function(buf) {
+      subset.encodeStream().pipe(concat(function(buf) {
         let f = fontkit.create(buf);
         assert.equal(f.numGlyphs, 4);
         assert.equal(f.getGlyph(1).path.toSVG(), font.glyphsForString('é')[0].path.toSVG());
-        return done();
+        done();
       }));
     });
   });
