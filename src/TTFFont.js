@@ -286,22 +286,43 @@ export default class TTFFont {
    * @return {Glyph[]}
    */
   glyphsForString(string) {
-    // Map character codes to glyph ids
     let glyphs = [];
     let len = string.length;
     let idx = 0;
+    let last = -1;
+    let state = -1;
 
-    while (idx < len) {
-      let code = string.charCodeAt(idx++);
-      if (0xd800 <= code && code <= 0xdbff && idx < len) {
-        let next = string.charCodeAt(idx);
-        if (0xdc00 <= next && next <= 0xdfff) {
-          idx++;
-          code = ((code & 0x3FF) << 10) + (next & 0x3FF) + 0x10000;
+    while (idx <= len) {
+      let code = 0;
+      let nextState = 0;
+      
+      if (idx < len) {
+        // Decode the next codepoint from UTF 16
+        code = string.charCodeAt(idx++);
+        if (0xd800 <= code && code <= 0xdbff && idx < len) {
+          let next = string.charCodeAt(idx);
+          if (0xdc00 <= next && next <= 0xdfff) {
+            idx++;
+            code = ((code & 0x3ff) << 10) + (next & 0x3ff) + 0x10000;
+          }
         }
+      
+        // Compute the next state: 1 if the next codepoint is a variation selector, 0 otherwise.
+        nextState = ((0xfe00 <= code && code <= 0xfe0f) || (0xe0100 <= code && code <= 0xe01ef)) ? 1 : 0;
+      } else {
+        idx++;
       }
-
-      glyphs.push(this.glyphForCodePoint(code));
+      
+      if (state === 0 && nextState === 1) {
+        // Variation selector following normal codepoint.
+        glyphs.push(this.getGlyph(this._cmapProcessor.lookup(last, code), [last, code]));
+      } else if (state === 0 && nextState === 0) {
+        // Normal codepoint following normal codepoint.
+        glyphs.push(this.glyphForCodePoint(last));
+      }
+      
+      last = code;
+      state = nextState;
     }
 
     return glyphs;

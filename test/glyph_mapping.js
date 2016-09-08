@@ -28,6 +28,12 @@ describe('character to glyph mapping', function() {
       assert.deepEqual(glyphs.map(g => g.id), [75, 72, 79, 79, 82]);
       return assert.deepEqual(glyphs.map(g => g.codePoints), [[104], [101], [108], [108], [111]]);
     });
+    
+    it('should support unicode variation selectors', function() {
+      let font = fontkit.openSync(__dirname + '/data/fonttest/TestCMAP14.otf');
+      let glyphs = font.glyphsForString('\u{82a6}\u{82a6}\u{E0100}\u{82a6}\u{E0101}');
+      assert.deepEqual(glyphs.map(g => g.id), [1, 1, 2]);
+    });
   });
 
   describe('opentype features', function() {
