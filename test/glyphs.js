@@ -52,7 +52,7 @@ describe('glyphs', function() {
 
     it('should get a path for the glyph', function() {
       let glyph = font.getGlyph(5);
-      return assert.equal(glyph.path.toSVG(), 'M90 0L258 0C456 0 564 122 564 331C564 539 456 656 254 656L90 656M173 68L173 588L248 588C401 588 478 496 478 331C478 165 401 68 248 68Z');
+      return assert.equal(glyph.path.toSVG(), 'M90 0L258 0C456 0 564 122 564 331C564 539 456 656 254 656L90 656ZM173 68L173 588L248 588C401 588 478 496 478 331C478 165 401 68 248 68Z');
     });
 
     it('should get the glyph cbox', function() {

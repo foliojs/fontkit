@@ -37,6 +37,7 @@ export default class CFFGlyph extends Glyph {
     let x = 0, y = 0;
     let usedGsubrs;
     let usedSubrs;
+    let open = false;
 
     this._usedGsubrs = usedGsubrs = {};
     this._usedSubrs = usedSubrs = {};
@@ -48,7 +49,7 @@ export default class CFFGlyph extends Glyph {
     let subrs = privateDict.Subrs || [];
     let subrsBias = this.bias(subrs);
 
-    let parseStems = function() {
+    function parseStems() {
       if (stack.length % 2 !== 0) {
         if (width === null) {
           width = stack.shift() + privateDict.nominalWidthX;
@@ -57,14 +58,26 @@ export default class CFFGlyph extends Glyph {
 
       nStems += stack.length >> 1;
       return stack.length = 0;
-    };
+    }
+    
+    function moveTo(x, y) {
+      if (open) {
+        path.closePath();
+      }
+      
+      path.moveTo(x, y);
+      open = true;
+    }
 
     let parse = function() {
       while (stream.pos < end) {
         let op = stream.readUInt8();
         if (op < 32) {
           switch (op) {
-            case 1: case 3: case 18: case 23: // hstem, vstem, hstemhm, vstemhm
+            case 1:  // hstem
+            case 3:  // vstem
+            case 18: // hstemhm
+            case 23: // vstemhm
               parseStems();
               break;
 
@@ -74,7 +87,7 @@ export default class CFFGlyph extends Glyph {
               }
 
               y += stack.shift();
-              path.moveTo(x, y);
+              moveTo(x, y);
               break;
 
             case 5: // rlineto
@@ -85,7 +98,8 @@ export default class CFFGlyph extends Glyph {
               }
               break;
 
-            case 6: case 7: // hlineto, vlineto
+            case 6: // hlineto
+            case 7: // vlineto
               let phase = op === 6;
               while (stack.length >= 1) {
                 if (phase) {
@@ -128,7 +142,6 @@ export default class CFFGlyph extends Glyph {
 
             case 11: // return
               return;
-              break;
 
             case 14: // endchar
               if (stack.length > 0) {
@@ -136,9 +149,11 @@ export default class CFFGlyph extends Glyph {
               }
 
               path.closePath();
+              open = false;
               break;
 
-            case 19: case 20: // hintmask, cntrmask
+            case 19: // hintmask
+            case 20: // cntrmask
               parseStems();
               stream.pos += (nStems + 7) >> 3;
               break;
@@ -151,7 +166,7 @@ export default class CFFGlyph extends Glyph {
 
               x += stack.shift();
               y += stack.shift();
-              path.moveTo(x, y);
+              moveTo(x, y);
               break;
 
             case 22: // hmoveto
@@ -160,7 +175,7 @@ export default class CFFGlyph extends Glyph {
               }
 
               x += stack.shift();
-              path.moveTo(x, y);
+              moveTo(x, y);
               break;
 
             case 24: // rcurveline
@@ -246,7 +261,8 @@ export default class CFFGlyph extends Glyph {
               }
               break;
 
-            case 30: case 31: // vhcurveto, hvcurveto
+            case 30: // vhcurveto
+            case 31: // hvcurveto
               phase = op === 31;
               while (stack.length >= 4) {
                 if (phase) {
