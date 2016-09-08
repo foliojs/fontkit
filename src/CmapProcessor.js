@@ -1,29 +1,55 @@
+import {binarySearch} from './utils';
+
 export default class CmapProcessor {
   constructor(cmapTable) {
     this._characterSet = null;
 
     // find the unicode cmap
-    // check for a 32-bit cmap first
-    for (let cmap of cmapTable.tables) {
-      // unicode or windows platform
-      if ((cmap.platformID === 0 && (cmap.encodingID === 4 || cmap.encodingID === 6)) || (cmap.platformID === 3 && cmap.encodingID === 10)) {
-        this.cmap = cmap.table;
-        return;
+    this.cmap = this.findSubtable(cmapTable, [
+      // 32-bit subtables
+      [3, 10],
+      [0, 6],
+      [0, 4],
+
+      // 16-bit subtables
+      [3, 1],
+      [0, 3],
+      [0, 2],
+      [0, 1],
+      [0, 0],
+      [3, 0]
+    ]);
+    
+    if (!this.cmap) {
+      throw new Error("Could not find a unicode cmap");
+    }
+    
+    this.uvs = this.findSubtable(cmapTable, [[0, 5]]);
+    if (this.uvs && this.uvs.version !== 14) {
+      this.uvs = null;
+    }
+  }
+  
+  findSubtable(cmapTable, pairs) {
+    for (let [platformID, encodingID] of pairs) {
+      for (let cmap of cmapTable.tables) {
+        if (cmap.platformID === platformID && cmap.encodingID === encodingID) {
+          return cmap.table;
+        }
       }
     }
-
-    // try "old" 16-bit cmap
-    for (let cmap of cmapTable.tables) {
-      if (cmap.platformID === 0 || (cmap.platformID === 3 && cmap.encodingID === 1)) {
-        this.cmap = cmap.table;
-        return;
-      }
-    }
-
-    throw new Error("Could not find a unicode cmap");
+    
+    return null;
   }
 
-  lookup(codepoint) {
+  lookup(codepoint, variationSelector) {
+    if (variationSelector) {
+      let gid = this.getVariationSelector(codepoint, variationSelector);
+      if (gid) {
+        return gid;
+      }
+    }
+    
     let cmap = this.cmap;
     switch (cmap.version) {
       case 0:
@@ -97,6 +123,31 @@ export default class CmapProcessor {
       default:
         throw new Error(`Unknown cmap format ${cmap.version}`);
     }
+  }
+  
+  getVariationSelector(codepoint, variationSelector) {
+    if (!this.uvs) {
+      return 0;
+    }
+    
+    let selectors = this.uvs.varSelectors.toArray();
+    let i = binarySearch(selectors, x => variationSelector - x.varSelector);
+    let sel = selectors[i];
+    
+    if (i !== -1 && sel.defaultUVS) {
+      i = binarySearch(sel.defaultUVS, x => 
+        codepoint < x.startUnicodeValue ? -1 : codepoint > x.startUnicodeValue + x.additionalCount ? +1 : 0
+      );
+    }
+    
+    if (i !== -1 && sel.nonDefaultUVS) {
+      i = binarySearch(sel.nonDefaultUVS, x => codepoint - x.unicodeValue);
+      if (i !== -1) {
+        return sel.nonDefaultUVS[i].glyphID;
+      }
+    }
+    
+    return 0;
   }
 
   getCharacterSet() {
