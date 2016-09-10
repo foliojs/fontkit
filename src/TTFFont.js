@@ -97,9 +97,10 @@ export default class TTFFont {
 
   /**
    * Gets a string from the font's `name` table
+   * `lang` is a BCP-47 language code.
    * @return {string}
    */
-  getName(key, lang = 'English') {
+  getName(key, lang = 'en') {
     let record = this.name.records[key];
     if (record) {
       return record[lang];
@@ -423,7 +424,7 @@ export default class TTFFont {
 
     for (let axis of this.fvar.axis) {
       res[axis.axisTag] = {
-        name: axis.name,
+        name: axis.name.en,
         min: axis.minValue,
         default: axis.defaultValue,
         max: axis.maxValue
@@ -453,7 +454,7 @@ export default class TTFFont {
         settings[axis.axisTag] = instance.coord[i];
       }
 
-      res[instance.name] = settings;
+      res[instance.name.en] = settings;
     }
 
     return res;
