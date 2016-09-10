@@ -1,10 +1,5 @@
 import r from 'restructure';
 
-function getName() {
-  let features = this.parent.parent.name.records.fontFeatures;
-  return features && features.English && features.English[this.nameID];
-}
-
 let Axis = new r.Struct({
   axisTag: new r.String(4),
   minValue: r.fixed32,
@@ -12,12 +7,12 @@ let Axis = new r.Struct({
   maxValue: r.fixed32,
   flags: r.uint16,
   nameID: r.uint16,
-  name: getName
+  name: t => t.parent.parent.name.records.fontFeatures[t.nameID]
 });
 
 let Instance = new r.Struct({
   nameID: r.uint16,
-  name: getName,
+  name: t => t.parent.parent.name.records.fontFeatures[t.nameID],
   flags: r.uint16,
   coord: new r.Array(r.fixed32, t => t.parent.axisCount)
 });
