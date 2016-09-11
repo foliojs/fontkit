@@ -1,10 +1,17 @@
 import {binarySearch} from './utils';
+import {getEncoding} from './encodings';
+
+// iconv-lite is an optional dependency.
+try {
+  var iconv = require('iconv-lite');
+} catch (err) {}
 
 export default class CmapProcessor {
   constructor(cmapTable) {
     this._characterSet = null;
 
-    // find the unicode cmap
+    // Attempt to find a Unicode cmap first
+    this.encoding = null;
     this.cmap = this.findSubtable(cmapTable, [
       // 32-bit subtables
       [3, 10],
@@ -20,8 +27,20 @@ export default class CmapProcessor {
       [3, 0]
     ]);
     
+    // If not unicode cmap was found, and iconv-lite is installed,
+    // take the first table with a supported encoding.
+    if (!this.cmap && iconv) {
+      for (let cmap of cmapTable.tables) {
+        let encoding = getEncoding(cmap.platformID, cmap.encodingID, cmap.table.language - 1);
+        if (iconv.encodingExists(encoding)) {
+          this.cmap = cmap.table;
+          this.encoding = encoding;
+        }
+      }
+    }
+    
     if (!this.cmap) {
-      throw new Error("Could not find a unicode cmap");
+      throw new Error("Could not find a supported cmap table");
     }
     
     this.uvs = this.findSubtable(cmapTable, [[0, 5]]);
@@ -43,7 +62,17 @@ export default class CmapProcessor {
   }
 
   lookup(codepoint, variationSelector) {
-    if (variationSelector) {
+    // If there is no Unicode cmap in this font, we need to re-encode
+    // the codepoint in the encoding that the cmap supports.
+    if (this.encoding) {
+      let buf = iconv.encode(String.fromCodePoint(codepoint), this.encoding);
+      codepoint = 0;
+      for (let i = 0; i < buf.length; i++) {
+        codepoint = (codepoint << 8) | buf[i];
+      }
+      
+    // Otherwise, try to get a Unicode variation selector for this codepoint if one is provided.
+    } else if (variationSelector) {
       let gid = this.getVariationSelector(codepoint, variationSelector);
       if (gid) {
         return gid;

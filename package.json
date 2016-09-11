@@ -32,6 +32,7 @@
     "babel-runtime": "^6.11.6",
     "brfs": "^1.4.0",
     "brotli": "^1.2.0",
+    "browserify-optional": "^1.0.0",
     "clone": "^1.0.1",
     "deep-equal": "^1.0.0",
     "restructure": "^0.5.3",
@@ -49,6 +50,7 @@
     "concat-stream": "^1.4.6",
     "esdoc": "^0.4.8",
     "esdoc-es7-plugin": "0.0.3",
+    "iconv-lite": "^0.4.13",
     "isparta": "^3.5.3",
     "mocha": "^2.0.1",
     "rollup": "^0.34.10",
@@ -57,7 +59,8 @@
   },
   "browserify": {
     "transform": [
-      "brfs"
+      "brfs",
+      "browserify-optional"
     ]
   }
 }
