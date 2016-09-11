@@ -34,6 +34,12 @@ describe('character to glyph mapping', function() {
       let glyphs = font.glyphsForString('\u{82a6}\u{82a6}\u{E0100}\u{82a6}\u{E0101}');
       assert.deepEqual(glyphs.map(g => g.id), [1, 1, 2]);
     });
+    
+    it('should support legacy encodings when no unicode cmap is found', function() {
+      let font = fontkit.openSync(__dirname + '/data/fonttest/TestCMAPMacTurkish.ttf');
+      let glyphs = font.glyphsForString("“ABÇĞIİÖŞÜ”");
+      assert.deepEqual(glyphs.map(g => g.id), [200, 34, 35, 126, 176, 42, 178, 140, 181, 145, 201]);
+    });
   });
 
   describe('opentype features', function() {
