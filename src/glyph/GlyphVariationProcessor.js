@@ -85,8 +85,11 @@ export default class GlyphVariationProcessor {
       var here = stream.pos;
       stream.pos = offsetToData;
       var sharedPoints = this.decodePoints();
+      offsetToData = stream.pos;
       stream.pos = here;
     }
+
+    let origPoints = glyphPoints.map(pt => pt.copy());
 
     tupleCount &= TUPLE_COUNT_MASK;
     for (let i = 0; i < tupleCount; i++) {
@@ -127,9 +130,9 @@ export default class GlyphVariationProcessor {
       }
 
       var here = stream.pos;
+      stream.pos = offsetToData;
 
       if (tupleIndex & PRIVATE_POINT_NUMBERS) {
-        stream.pos = offsetToData;
         var points = this.decodePoints();
       } else {
         var points = sharedPoints;
@@ -147,14 +150,12 @@ export default class GlyphVariationProcessor {
           point.y += Math.round(yDeltas[i] * factor);
         }
       } else {
-        let origPoints = glyphPoints.slice();
         let hasDelta = glyphPoints.map(() => false);
 
         for (let i = 0; i < points.length; i++) {
           let idx = points[i];
           if (idx < glyphPoints.length) {
-            var point = glyphPoints[idx];
-            origPoints[idx] = point.copy();
+            let point = glyphPoints[idx];
             hasDelta[idx] = true;
 
             point.x += Math.round(xDeltas[i] * factor);
@@ -168,12 +169,10 @@ export default class GlyphVariationProcessor {
       offsetToData += tupleDataSize;
       stream.pos = here;
     }
-
-    return;
   }
 
   decodePoints() {
-    let { stream } = this.font;
+    let stream = this.font.stream;
     let count = stream.readUInt8();
 
     if (count & POINTS_ARE_WORDS) {
@@ -182,17 +181,13 @@ export default class GlyphVariationProcessor {
 
     let points = new Uint16Array(count);
     let i = 0;
+    let point = 0;
     while (i < count) {
       let run = stream.readUInt8();
       let runCount = (run & POINT_RUN_COUNT_MASK) + 1;
-      if (i + runCount > count) {
-        throw new Error('Bad point run length');
-      }
-
       let fn = run & POINTS_ARE_WORDS ? stream.readUInt16 : stream.readUInt8;
 
-      let point = 0;
-      for (let j = 0; j < runCount; j++) {
+      for (let j = 0; j < runCount && i < count; j++) {
         point += fn.call(stream);
         points[i++] = point;
       }
@@ -202,23 +197,20 @@ export default class GlyphVariationProcessor {
   }
 
   decodeDeltas(count) {
-    let { stream } = this.font;
+    let stream = this.font.stream;
     let i = 0;
     let deltas = new Int16Array(count);
 
     while (i < count) {
       let run = stream.readUInt8();
       let runCount = (run & DELTA_RUN_COUNT_MASK) + 1;
-      if (i + runCount > count) {
-        throw new Error('Bad delta run length');
-      }
 
       if (run & DELTAS_ARE_ZERO) {
         i += runCount;
 
       } else {
         let fn = run & DELTAS_ARE_WORDS ? stream.readInt16BE : stream.readInt8;
-        for (let j = 0; j < runCount; j++) {
+        for (let j = 0; j < runCount && i < count; j++) {
           deltas[i++] = fn.call(stream);
         }
       }
@@ -235,26 +227,30 @@ export default class GlyphVariationProcessor {
     for (let i = 0; i < gvar.axisCount; i++) {
       if (tupleCoords[i] === 0) {
         continue;
+      }
 
-      } else if (normalized[i] === 0) {
+      if (normalized[i] === 0) {
         return 0;
+      }
 
-      } else if ((normalized[i] < 0 && tupleCoords[i] > 0) ||
-                 (normalized[i] > 0 && tupleCoords[i] < 0)) {
-        return 0;
+      if ((tupleIndex & INTERMEDIATE_TUPLE) === 0) {
+        if ((normalized[i] < Math.min(0, tupleCoords[i])) ||
+            (normalized[i] > Math.max(0, tupleCoords[i]))) {
+          return 0;
+        }
 
-      } else if ((tupleIndex & INTERMEDIATE_TUPLE) === 0) {
-        factor *= Math.abs(normalized[i]);
-
-      } else if ((normalized[i] < startCoords[i]) ||
-                 (normalized[i] > endCoords[i])) {
-        return 0;
-
-      } else if (normalized[i] < tupleCoords[i]) {
-        factor = (factor * (normalized[i] - startCoords[i])) / (tupleCoords[i] - startCoords[i]);
-
+        factor = (factor * normalized[i]) / tupleCoords[i];
       } else {
-        factor = (factor * (endCoords[i] - normalized[i]) / (endCoords[i] - tupleCoords[i]));
+        if ((normalized[i] < startCoords[i]) ||
+            (normalized[i] > endCoords[i])) {
+          return 0;
+
+        } else if (normalized[i] < tupleCoords[i]) {
+          factor = (factor * (normalized[i] - startCoords[i])) / (tupleCoords[i] - startCoords[i]);
+
+        } else {
+          factor = (factor * (endCoords[i] - normalized[i]) / (endCoords[i] - tupleCoords[i]));
+        }
       }
     }
 
@@ -285,7 +281,9 @@ export default class GlyphVariationProcessor {
         point++;
       }
 
-      if (point > endPoint) { continue; }
+      if (point > endPoint) {
+        continue;
+      }
 
       let firstDelta = point;
       let curDelta = point;
@@ -315,8 +313,6 @@ export default class GlyphVariationProcessor {
 
       point = endPoint + 1;
     }
-
-    return;
   }
 
   deltaInterpolate(p1, p2, ref1, ref2, inPoints, outPoints) {
@@ -354,8 +350,6 @@ export default class GlyphVariationProcessor {
         outPoints[p][k] = out;
       }
     }
-
-    return;
   }
 
   deltaShift(p1, p2, ref, inPoints, outPoints) {
@@ -372,7 +366,5 @@ export default class GlyphVariationProcessor {
         outPoints[p].y += deltaY;
       }
     }
-
-    return;
   }
 }
