@@ -423,7 +423,7 @@ export default class TTFFont {
     }
 
     for (let axis of this.fvar.axis) {
-      res[axis.axisTag] = {
+      res[axis.axisTag.trim()] = {
         name: axis.name.en,
         min: axis.minValue,
         default: axis.defaultValue,
@@ -451,7 +451,7 @@ export default class TTFFont {
       let settings = {};
       for (let i = 0; i < this.fvar.axis.length; i++) {
         let axis = this.fvar.axis[i];
-        settings[axis.axisTag] = instance.coord[i];
+        settings[axis.axisTag.trim()] = instance.coord[i];
       }
 
       res[instance.name.en] = settings;
@@ -483,8 +483,9 @@ export default class TTFFont {
 
     // normalize the coordinates
     let coords = this.fvar.axis.map((axis, i) => {
-      if (axis.axisTag in settings) {
-        return Math.max(axis.minValue, Math.min(axis.maxValue, settings[axis.axisTag]));
+      let axisTag = axis.axisTag.trim();
+      if (axisTag in settings) {
+        return Math.max(axis.minValue, Math.min(axis.maxValue, settings[axisTag]));
       } else {
         return axis.defaultValue;
       }
