@@ -150,12 +150,13 @@ export default class GlyphVariationProcessor {
           point.y += Math.round(yDeltas[i] * factor);
         }
       } else {
+        let outPoints = origPoints.map(pt => pt.copy());
         let hasDelta = glyphPoints.map(() => false);
 
         for (let i = 0; i < points.length; i++) {
           let idx = points[i];
           if (idx < glyphPoints.length) {
-            let point = glyphPoints[idx];
+            let point = outPoints[idx];
             hasDelta[idx] = true;
 
             point.x += Math.round(xDeltas[i] * factor);
@@ -163,7 +164,15 @@ export default class GlyphVariationProcessor {
           }
         }
 
-        this.interpolateMissingDeltas(glyphPoints, origPoints, hasDelta);
+        this.interpolateMissingDeltas(outPoints, origPoints, hasDelta);
+
+        for (let i = 0; i < glyphPoints.length; i++) {
+          let deltaX = outPoints[i].x - origPoints[i].x;
+          let deltaY = outPoints[i].y - origPoints[i].y;
+
+          glyphPoints[i].x += deltaX;
+          glyphPoints[i].y += deltaY;
+        }
       }
 
       offsetToData += tupleDataSize;
