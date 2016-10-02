@@ -449,9 +449,8 @@ export default class CFFGlyph extends Glyph {
 
                 case 35: // flex
                   let pts = [];
-                  let iterable2 = [0, 1, 2, 3, 4, 5];
-                  for (let j1 = 0; j1 < iterable2.length; j1++) {
-                    i = iterable2[j1];
+                  
+                  for (let i = 0; i <= 5; i++) {
                     x += stack.shift();
                     y += stack.shift();
                     pts.push(x, y);
@@ -487,9 +486,7 @@ export default class CFFGlyph extends Glyph {
                   let starty = y;
 
                   pts = [];
-                  let iterable3 = [0, 1, 2, 3, 4];
-                  for (let k1 = 0; k1 < iterable3.length; k1++) {
-                    i = iterable3[k1];
+                  for (let i = 0; i <= 4; i++) {
                     x += stack.shift();
                     y += stack.shift();
                     pts.push(x, y);
