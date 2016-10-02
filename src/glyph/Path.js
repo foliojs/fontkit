@@ -117,7 +117,7 @@ export default class Path {
           var p2 = [cp2x, cp2y];
           var p3 = [p3x, p3y];
 
-          for (let i = 0; i <= 1; i++) {
+          for (var i = 0; i <= 1; i++) {
             let b = 6 * p0[i] - 12 * p1[i] + 6 * p2[i];
             let a = -3 * p0[i] + 9 * p1[i] - 9 * p2[i] + 3 * p3[i];
             c = 3 * p1[i] - 3 * p0[i];
