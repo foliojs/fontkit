@@ -170,6 +170,7 @@ export default class OTProcessor {
     }
 
     this.glyphIterator.index = glyphIndex;
+    return true;
   }
 
   coverageIndex(coverage, glyph) {
@@ -266,7 +267,7 @@ export default class OTProcessor {
       case 1:
         let index = this.coverageIndex(table.coverage);
         if (index === -1) {
-          return;
+          return false;
         }
 
         let set = table.ruleSets[index];
@@ -280,12 +281,12 @@ export default class OTProcessor {
 
       case 2:
         if (this.coverageIndex(table.coverage) === -1) {
-          return;
+          return false;
         }
 
         index = this.getClassID(this.glyphIterator.cur.id, table.classDef);
         if (index === -1) {
-          return;
+          return false;
         }
 
         set = table.classSet[index];
@@ -304,6 +305,8 @@ export default class OTProcessor {
 
         break;
     }
+
+    return false;
   }
 
   applyChainingContext(table) {
@@ -311,7 +314,7 @@ export default class OTProcessor {
       case 1:
         let index = this.coverageIndex(table.coverage);
         if (index === -1) {
-          return;
+          return false;
         }
 
         let set = table.chainRuleSets[index];
@@ -327,15 +330,15 @@ export default class OTProcessor {
 
       case 2:
         if (this.coverageIndex(table.coverage) === -1) {
-          return;
+          return false;
         }
 
         index = this.getClassID(this.glyphIterator.cur.id, table.inputClassDef);
-        if (index === -1) {
-          return;
+        let rules = table.chainClassSet[index];
+        if (!rules) {
+          return false;
         }
 
-        let rules = table.chainClassSet[index];
         for (let rule of rules) {
           if (this.classSequenceMatches(-rule.backtrack.length, rule.backtrack, table.backtrackClassDef) &&
               this.classSequenceMatches(1, rule.input, table.inputClassDef) &&
@@ -355,5 +358,7 @@ export default class OTProcessor {
 
         break;
     }
+
+    return false;
   }
 }

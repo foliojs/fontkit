@@ -237,16 +237,13 @@ export default class GPOSProcessor extends OTProcessor {
       }
 
       case 7: // Contextual positioning
-        this.applyContext(table);
-        return false;
+        return this.applyContext(table);
 
       case 8: // Chaining contextual positioning
-        this.applyChainingContext(table);
-        return false;
+        return this.applyChainingContext(table);
 
       case 9: // Extension positioning
-        this.applyLookup(table.lookupType, table.extension);
-        return false;
+        return this.applyLookup(table.lookupType, table.extension);
 
       default:
         throw new Error(`Unsupported GPOS table: ${lookupType}`);
