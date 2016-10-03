@@ -259,7 +259,7 @@ export default class GPOSProcessor extends OTProcessor {
 
     markPos.xOffset = baseCoords.x - markCoords.x;
     markPos.yOffset = baseCoords.y - markCoords.y;
-    return this.glyphIterator.cur.markAttachment = baseGlyphIndex;
+    this.glyphIterator.cur.markAttachment = baseGlyphIndex;
   }
 
   getAnchor(anchor) {
@@ -295,7 +295,7 @@ export default class GPOSProcessor extends OTProcessor {
   fixMarkAttachment() {
     for (let i = 0; i < this.glyphs.length; i++) {
       let glyph = this.glyphs[i];
-      if (glyph.markAttachment) {
+      if (glyph.markAttachment != null) {
         let j = glyph.markAttachment;
 
         this.positions[i].xOffset += this.positions[j].xOffset;
