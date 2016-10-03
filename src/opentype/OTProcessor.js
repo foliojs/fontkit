@@ -234,7 +234,7 @@ export default class OTProcessor {
   getClassID(glyph, classDef) {
     switch (classDef.version) {
       case 1: // Class array
-        let i = glyphId - classDef.startGlyph;
+        let i = glyph - classDef.startGlyph;
         if (i < classDef.classValueArray.length) {
           return classDef.classValueArray[i];
         }
