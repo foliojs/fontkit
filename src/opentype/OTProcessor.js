@@ -234,11 +234,9 @@ export default class OTProcessor {
   getClassID(glyph, classDef) {
     switch (classDef.version) {
       case 1: // Class array
-        let glyphID = classDef.startGlyph;
-        for (let classID of classDef.classValueArray) {
-          if (glyph === glyphID++) {
-            return classID;
-          }
+        let i = glyphId - classDef.startGlyph;
+        if (i < classDef.classValueArray.length) {
+          return classDef.classValueArray[i];
         }
 
         break;
@@ -253,7 +251,7 @@ export default class OTProcessor {
         break;
     }
 
-    return -1;
+    return 0;
   }
 
   classSequenceMatches(sequenceIndex, sequence, classDef) {
