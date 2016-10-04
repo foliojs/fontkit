@@ -16,7 +16,8 @@ export default class GlyphIterator {
   shouldIgnore(glyph, flags) {
     return ((flags.ignoreMarks && glyph.isMark) ||
            (flags.ignoreBaseGlyphs && !glyph.isMark) ||
-           (flags.ignoreLigatures && glyph.isLigature));}
+           (flags.ignoreLigatures && glyph.isLigature));
+  }
 
   move(dir) {
     this.index += dir;

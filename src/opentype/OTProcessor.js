@@ -137,7 +137,7 @@ export default class OTProcessor {
 
       while (this.glyphIterator.index < glyphs.length) {
         if (!(feature in this.glyphIterator.cur.features)) {
-          this.glyphIterator.index++;
+          this.glyphIterator.next();
           continue;
         }
 
@@ -148,7 +148,7 @@ export default class OTProcessor {
           }
         }
 
-        this.glyphIterator.index++;
+        this.glyphIterator.next();
       }
     }
   }
@@ -161,7 +161,8 @@ export default class OTProcessor {
     let glyphIndex = this.glyphIterator.index;
 
     for (let lookupRecord of lookupRecords) {
-      this.glyphIterator.index = glyphIndex + lookupRecord.sequenceIndex;
+      this.glyphIterator.index = glyphIndex;
+      this.glyphIterator.increment(lookupRecord.sequenceIndex);
 
       let lookup = this.table.lookupList.get(lookupRecord.lookupListIndex);
       for (let table of lookup.subTables) {
