@@ -32,7 +32,7 @@ class CFFFont {
   }
 
   string(sid) {
-    if (sid <= standardStrings.length) {
+    if (sid < standardStrings.length) {
       return standardStrings[sid];
     }
 
@@ -75,9 +75,9 @@ class CFFFont {
     switch (charset.version) {
       case 0:
         return this.string(charset.glyphs[gid]);
-        break;
 
-      case 1: case 2:
+      case 1:
+      case 2:
         for (let i = 0; i < charset.ranges.length; i++) {
           let range = charset.ranges[i];
           if (range.offset <= gid && gid <= range.offset + range.nLeft) {
