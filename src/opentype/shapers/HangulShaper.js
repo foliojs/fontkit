@@ -137,7 +137,7 @@ const STATE_TABLE = [
 ];
 
 function getGlyph(font, code, features) {
-  return new GlyphInfo(font.glyphForCodePoint(code).id, [code], Object.keys(features));
+  return new GlyphInfo(font, font.glyphForCodePoint(code).id, [code], features);
 }
 
 function decompose(glyphs, i, font) {

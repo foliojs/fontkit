@@ -24,7 +24,7 @@ export default class OTLayoutEngine {
   setup(glyphs, features, script, language) {
     // Map glyphs to GlyphInfo objects so data can be passed between
     // GSUB and GPOS without mutating the real (shared) Glyph objects.
-    this.glyphInfos = glyphs.map(glyph => new GlyphInfo(glyph.id, [...glyph.codePoints]));
+    this.glyphInfos = glyphs.map(glyph => new GlyphInfo(this.font, glyph.id, [...glyph.codePoints]));
 
     // Choose a shaper based on the script, and setup a shaping plan.
     // This determines which features to apply to which glyphs.

@@ -31,7 +31,12 @@ export default class GSUBProcessor extends OTProcessor {
           this.glyphIterator.cur.id = sequence[0];
 
           let features = this.glyphIterator.cur.features;
-          let replacement = sequence.slice(1).map(gid => new GlyphInfo(gid, undefined, features));
+          let curGlyph = this.glyphIterator.cur;
+          let replacement = sequence.slice(1).map((gid, i) => {
+            let glyph = new GlyphInfo(this.font, gid, undefined, features);
+            glyph.shaperInfo = curGlyph.shaperInfo;
+            return glyph;
+          });
 
           this.glyphs.splice(this.glyphIterator.index + 1, 0, ...replacement);
           return true;
@@ -72,8 +77,8 @@ export default class GSUBProcessor extends OTProcessor {
           }
 
           // Create the replacement ligature glyph
-          let ligatureGlyph = new GlyphInfo(ligature.glyph, characters);
-          ligatureGlyph.features = curGlyph.features;
+          let ligatureGlyph = new GlyphInfo(this.font, ligature.glyph, characters, curGlyph.features);
+          ligatureGlyph.shaperInfo = curGlyph.shaperInfo;
 
           // From Harfbuzz:
           // - If it *is* a mark ligature, we don't allocate a new ligature id, and leave

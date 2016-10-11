@@ -1,13 +1,11 @@
 import unicode from 'unicode-properties';
+import OTProcessor from './OTProcessor';
 
 export default class GlyphInfo {
-  constructor(id, codePoints = [], features = []) {
-    this.id = id;
+  constructor(font, id, codePoints = [], features = []) {
+    this._font = font;
     this.codePoints = codePoints;
-
-    // TODO: get this info from GDEF if available
-    this.isMark = this.codePoints.every(unicode.isMark);
-    this.isLigature = this.codePoints.length > 1;
+    this.id = id;
 
     this.features = {};
     if (Array.isArray(features)) {
@@ -24,5 +22,23 @@ export default class GlyphInfo {
     this.cursiveAttachment = null;
     this.markAttachment = null;
     this.shaperInfo = null;
+  }
+
+  get id() {
+    return this._id;
+  }
+
+  set id(id) {
+    this._id = id;
+
+    if (this._font.GDEF) {
+      // TODO: clean this up
+      let classID = OTProcessor.prototype.getClassID(id, this._font.GDEF.glyphClassDef);
+      this.isMark = classID === 3;
+      this.isLigature = classID === 2;
+    } else {
+      this.isMark = this.codePoints.every(unicode.isMark);
+      this.isLigature = this.codePoints.length > 1;
+    }
   }
 }
