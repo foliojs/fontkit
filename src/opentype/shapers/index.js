@@ -1,6 +1,7 @@
 import DefaultShaper from './DefaultShaper';
 import ArabicShaper from './ArabicShaper';
 import HangulShaper from './HangulShaper';
+import UniversalShaper from './UniversalShaper';
 
 const SHAPERS = {
   arab: ArabicShaper,    // Arabic
@@ -13,6 +14,8 @@ const SHAPERS = {
   phlp: ArabicShaper,    // Psalter Pahlavi
 
   hang: HangulShaper,    // Hangul
+
+  bali: UniversalShaper,
 
   latn: DefaultShaper,   // Latin
   DFLT: DefaultShaper   // Default
