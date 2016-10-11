@@ -34,6 +34,22 @@ export default class UniversalShaper extends DefaultShaper {
     // Standard topographic presentation and positional feature application
     plan.addStage(['abvs', 'blws', 'pres', 'psts', 'dist', 'abvm', 'blwm']);
   }
+
+  static assignFeatures(plan, glyphs) {
+    // Decompose split vowels
+    // TODO: do this in a more general unicode normalizer
+    for (let i = glyphs.length - 1; i >= 0; i--) {
+      let codepoint = glyphs[i].codePoints[0];
+      if (decompositions[codepoint]) {
+        let decomposed = decompositions[codepoint].map(c => {
+          let g = plan.font.glyphForCodePoint(c);
+          return new GlyphInfo(plan.font, g.id, [c], glyphs[i].features);
+        });
+
+        glyphs.splice(i, 1, ...decomposed);
+      }
+    }
+  }
 }
 
 function useCategory(glyph) {

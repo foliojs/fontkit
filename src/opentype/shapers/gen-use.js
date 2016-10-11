@@ -245,6 +245,7 @@ function getCategory(code) {
 let trie = new UnicodeTrieBuilder;
 let symbols = {};
 let numSymbols = 0;
+let decompositions = {};
 for (let i = 0; i < codepoints.length; i++) {
   let codepoint = codepoints[i];
   if (codepoint) {
@@ -254,14 +255,31 @@ for (let i = 0; i < codepoints.length; i++) {
     }
 
     trie.set(codepoint.code, symbols[category]);
+
+    if (codepoint.indicSyllabicCategory === 'Vowel_Dependent' && codepoint.decomposition.length > 0) {
+      decompositions[codepoint.code] = decompose(codepoint.code);
+    }
   }
+}
+
+function decompose(code) {
+  let decomposition = [];
+  let codepoint = codepoints[code];
+  for (let c of codepoint.decomposition) {
+    let codes = decompose(c);
+    codes = codes.length > 0 ? codes : [c];
+    decomposition.push(...codes);
+  }
+
+  return decomposition;
 }
 
 fs.writeFileSync(__dirname + '/use.trie', trie.toBuffer());
 
 let stateMachine = compile(fs.readFileSync(__dirname + '/use.machine', 'utf8'), symbols);
 let json = Object.assign({
-  categories: Object.keys(symbols)
+  categories: Object.keys(symbols),
+  decompositions: decompositions
 }, stateMachine);
 
 fs.writeFileSync(__dirname + '/use.json', JSON.stringify(json));
