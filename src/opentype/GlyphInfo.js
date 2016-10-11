@@ -23,5 +23,6 @@ export default class GlyphInfo {
     this.ligatureComponent = null;
     this.cursiveAttachment = null;
     this.markAttachment = null;
+    this.shaperInfo = null;
   }
 }
