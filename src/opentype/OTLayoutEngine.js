@@ -45,6 +45,15 @@ export default class OTLayoutEngine {
   }
 
   position(glyphs, positions) {
+    // Zero mark advances.
+    // TODO: make this configurable by the shaper
+    for (let i = 0; i < this.glyphInfos.length; i++) {
+      if (this.glyphInfos[i].isMark) {
+        positions[i].xAdvance = 0;
+        positions[i].yAdvance = 0;
+      }
+    }
+
     if (this.GPOSProcessor) {
       this.plan.process(this.GPOSProcessor, this.glyphInfos, positions);
     }
