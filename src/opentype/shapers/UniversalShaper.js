@@ -64,4 +64,69 @@ function setupSyllables(font, glyphs, positions) {
 function clearSubstitutionFlags() {}
 function recordRphf() {}
 function recordPref() {}
-function reorder() {}
+
+function reorder(font, glyphs, positions) {
+  // TODO: only call this function during substitution, not positioning
+  if (positions) return;
+
+  for (let start = 0, end = nextSyllable(glyphs, 0); start < glyphs.length; start = end, end = nextSyllable(glyphs, start)) {
+    let i, j;
+    let info = glyphs[start].shaperInfo;
+    let type = info.syllableType;
+
+    // Only a few syllable types need reordering.
+    if (type !== 'virama_terminated_cluster' && type !== 'standard_cluster' && type !== 'broken_cluster') {
+      continue;
+    }
+
+
+    // Move things forward.
+    if (info.category === 'R' && end - start > 1) {
+      // Got a repha. Reorder it to after first base, before first halant.
+      for (i = start + 1; i < end; i++) {
+        info = glyphs[i].shaperInfo;
+        if (info.category === 'B' || info.category === 'GB' || isHalant(glyphs[i])) {
+          // If we hit a halant, move before it; otherwise it's a base: move to it's
+          // place, and shift things in between backward.
+          if (isHalant(glyphs[i])) {
+            i--;
+          }
+
+          let g = glyphs[start];
+          glyphs.splice(start, 0, ...glyphs.splice(start + 1, i - start));
+          glyphs[i] = g;
+          break;
+        }
+      }
+    }
+
+    // Move things back.
+    for (i = start, j = end; i < end; i++) {
+      info = glyphs[i].shaperInfo;
+      if (info.category === 'B' || info.category === 'GB' || isHalant(glyphs[i])) {
+        // If we hit a halant, move after it; otherwise it's a base: move to it's
+        // place, and shift things in between backward.
+        if (isHalant(glyphs[i])) {
+          j = i + 1;
+        } else {
+          j = i;
+        }
+      } else if ((info.category === 'VPre' || info.category === 'VMPre') && j < i) {
+        let g = glyphs[i];
+        glyphs.splice(j + 1, 0, ...glyphs.splice(j, i - j));
+        glyphs[j] = g;
+      }
+    }
+  }
+}
+
+function nextSyllable(glyphs, start) {
+  if (start >= glyphs.length) return start;
+  let syllable = glyphs[start].shaperInfo.syllable;
+  while (++start < glyphs.length && glyphs[start].shaperInfo.syllable === syllable);
+  return start;
+}
+
+function isHalant(glyph) {
+  return glyph.shaperInfo.category === 'H' && !glyph.isLigated;
+}
