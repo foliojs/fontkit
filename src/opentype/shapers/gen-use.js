@@ -115,37 +115,37 @@ const CATEGORIES = {
 };
 
 const USE_POSITIONS = {
-	F: {
-		Abv: ['Top'],
-		Blw: ['Bottom'],
-		Pst: ['Right'],
-	},
-	M: {
-		Abv: ['Top'],
-		Blw: ['Bottom'],
-		Pst: ['Right'],
-		Pre: ['Left'],
-	},
-	CM: {
-		Abv: ['Top'],
-		Blw: ['Bottom'],
-	},
-	V: {
-		Abv: ['Top', 'Top_And_Bottom', 'Top_And_Bottom_And_Right', 'Top_And_Right'],
-		Blw: ['Bottom', 'Overstruck', 'Bottom_And_Right'],
-		Pst: ['Right'],
-		Pre: ['Left', 'Top_And_Left', 'Top_And_Left_And_Right', 'Left_And_Right'],
-	},
-	VM: {
-		Abv: ['Top'],
-		Blw: ['Bottom', 'Overstruck'],
-		Pst: ['Right'],
-		Pre: ['Left'],
-	},
-	SM: {
-		Abv: ['Top'],
-		Blw: ['Bottom'],
-	}
+  F: {
+    Abv: ['Top'],
+    Blw: ['Bottom'],
+    Pst: ['Right'],
+  },
+  M: {
+    Abv: ['Top'],
+    Blw: ['Bottom'],
+    Pst: ['Right'],
+    Pre: ['Left'],
+  },
+  CM: {
+    Abv: ['Top'],
+    Blw: ['Bottom'],
+  },
+  V: {
+    Abv: ['Top', 'Top_And_Bottom', 'Top_And_Bottom_And_Right', 'Top_And_Right'],
+    Blw: ['Bottom', 'Overstruck', 'Bottom_And_Right'],
+    Pst: ['Right'],
+    Pre: ['Left', 'Top_And_Left', 'Top_And_Left_And_Right', 'Left_And_Right'],
+  },
+  VM: {
+    Abv: ['Top'],
+    Blw: ['Bottom', 'Overstruck'],
+    Pst: ['Right'],
+    Pre: ['Left'],
+  },
+  SM: {
+    Abv: ['Top'],
+    Blw: ['Bottom'],
+  }
 };
 
 const UISC_OVERRIDE = {
