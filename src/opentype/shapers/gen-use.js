@@ -1,6 +1,7 @@
 import codepoints from 'codepoints';
 import fs from 'fs';
 import UnicodeTrieBuilder from 'unicode-trie/builder';
+import compile from '@devongovett/state-machine/compile';
 
 const CATEGORIES = {
   B: [
@@ -257,3 +258,10 @@ for (let i = 0; i < codepoints.length; i++) {
 }
 
 fs.writeFileSync(__dirname + '/use.trie', trie.toBuffer());
+
+let stateMachine = compile(fs.readFileSync(__dirname + '/use.machine', 'utf8'), symbols);
+let json = Object.assign({
+  categories: Object.keys(symbols)
+}, stateMachine);
+
+fs.writeFileSync(__dirname + '/use.json', JSON.stringify(json));

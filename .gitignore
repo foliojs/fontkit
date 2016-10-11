@@ -8,3 +8,4 @@ data.trie
 /base.js
 *.js.map
 use.trie
+use.json
