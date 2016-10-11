@@ -85,6 +85,8 @@ function reorder(font, glyphs, positions) {
   // TODO: only call this function during substitution, not positioning
   if (positions) return;
 
+  let dottedCircle = font.glyphForCodePoint(0x25cc).id;
+
   for (let start = 0, end = nextSyllable(glyphs, 0); start < glyphs.length; start = end, end = nextSyllable(glyphs, start)) {
     let i, j;
     let info = glyphs[start].shaperInfo;
@@ -95,6 +97,16 @@ function reorder(font, glyphs, positions) {
       continue;
     }
 
+    // Insert a dotted circle glyph in broken clusters.
+    if (type === 'broken_cluster' && dottedCircle) {
+      let g = new GlyphInfo(font, dottedCircle, [0x25cc]);
+      g.shaperInfo = info;
+
+      // Insert after possible Repha.
+      for (i = start; i < end && glyphs[i].shaperInfo.category === 'R'; i++);
+      glyphs.splice(++i, 0, g);
+      end++;
+    }
 
     // Move things forward.
     if (info.category === 'R' && end - start > 1) {
