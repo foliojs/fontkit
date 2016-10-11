@@ -29,12 +29,15 @@ export default class GSUBProcessor extends OTProcessor {
         if (index !== -1) {
           let sequence = table.sequences.get(index);
           this.glyphIterator.cur.id = sequence[0];
+          this.glyphIterator.cur.ligatureComponent = 0;
 
           let features = this.glyphIterator.cur.features;
           let curGlyph = this.glyphIterator.cur;
           let replacement = sequence.slice(1).map((gid, i) => {
             let glyph = new GlyphInfo(this.font, gid, undefined, features);
             glyph.shaperInfo = curGlyph.shaperInfo;
+            glyph.isLigated = curGlyph.isLigated;
+            glyph.ligatureComponent = i + 1;
             return glyph;
           });
 
@@ -79,6 +82,7 @@ export default class GSUBProcessor extends OTProcessor {
           // Create the replacement ligature glyph
           let ligatureGlyph = new GlyphInfo(this.font, ligature.glyph, characters, curGlyph.features);
           ligatureGlyph.shaperInfo = curGlyph.shaperInfo;
+          ligatureGlyph.isLigated = true;
 
           // From Harfbuzz:
           // - If it *is* a mark ligature, we don't allocate a new ligature id, and leave
@@ -104,7 +108,12 @@ export default class GSUBProcessor extends OTProcessor {
           //   the new ligature with a component value of 2.
           //
           //   This in fact happened to a font...  See https://bugzilla.gnome.org/show_bug.cgi?id=437633
-          ligatureGlyph.ligatureID = ligatureGlyph.isMark ? 0 : this.ligatureID++;
+          let isMarkLigature = curGlyph.isMark;
+          for (let i = 0; i < matched.length && isMarkLigature; i++) {
+            isMarkLigature = this.glyphs[matched[i]].isMark;
+          }
+
+          ligatureGlyph.ligatureID = isMarkLigature ? null : this.ligatureID++;
 
           let lastLigID = curGlyph.ligatureID;
           let lastNumComps = curGlyph.codePoints.length;
@@ -115,7 +124,7 @@ export default class GSUBProcessor extends OTProcessor {
           // This allows GPOS to attach marks to the correct ligature components.
           for (let matchIndex of matched) {
             // Don't assign new ligature components for mark ligatures (see above)
-            if (ligatureGlyph.isMark) {
+            if (isMarkLigature) {
               idx = matchIndex;
             } else {
               while (idx < matchIndex) {
@@ -133,7 +142,7 @@ export default class GSUBProcessor extends OTProcessor {
           }
 
           // Adjust ligature components for any marks following
-          if (lastLigID && !ligatureGlyph.isMark) {
+          if (lastLigID && !isMarkLigature) {
             for (let i = idx; i < this.glyphs.length; i++) {
               if (this.glyphs[i].ligatureID === lastLigID) {
                 var ligatureComponent = curComps - lastNumComps + Math.min(this.glyphs[i].ligatureComponent || 1, lastNumComps);
