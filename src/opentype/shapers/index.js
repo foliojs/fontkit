@@ -54,7 +54,7 @@ const SHAPERS = {
   tglg: UniversalShaper, // Tagalog
   tagb: UniversalShaper, // Tagbanwa
   tale: UniversalShaper, // Tai Le
-  lana: UniversalShaper, // *Tai Tham
+  lana: UniversalShaper, // Tai Tham
   tavt: UniversalShaper, // Tai Viet
   takr: UniversalShaper, // Takri
   tibt: UniversalShaper, // Tibetan

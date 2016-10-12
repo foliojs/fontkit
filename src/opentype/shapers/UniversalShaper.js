@@ -1,5 +1,5 @@
 import DefaultShaper from './DefaultShaper';
-import StateMachine from '@devongovett/state-machine';
+import StateMachine from 'dfa';
 import UnicodeTrie from 'unicode-trie';
 import fs from 'fs';
 import GlyphInfo from '../GlyphInfo';

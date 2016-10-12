@@ -1,7 +1,7 @@
 import codepoints from 'codepoints';
 import fs from 'fs';
 import UnicodeTrieBuilder from 'unicode-trie/builder';
-import compile from '@devongovett/state-machine/compile';
+import compile from 'dfa/compile';
 
 const CATEGORIES = {
   B: [
