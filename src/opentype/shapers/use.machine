@@ -5,27 +5,27 @@ vowel_modifiers = VMPre* VMAbv* VMBlw* VMPst*;
 final_consonants = FAbv* FBlw* FPst* FM?;
 
 virama_terminated_cluster =
-	R? (B | GB) VS?
-	consonant_modifiers
-	H
+  R? (B | GB) VS?
+  consonant_modifiers
+  H
 ;
 
 standard_cluster =
-	R? (B | GB) VS?
-	consonant_modifiers
-	medial_consonants
-	dependent_vowels
-	vowel_modifiers
-	final_consonants
+  R? (B | GB) VS?
+  consonant_modifiers
+  medial_consonants
+  dependent_vowels
+  vowel_modifiers
+  final_consonants
 ;
 
 broken_cluster =
-	R?
-	consonant_modifiers
-	medial_consonants
-	dependent_vowels
-	vowel_modifiers
-	final_consonants
+  R?
+  consonant_modifiers
+  medial_consonants
+  dependent_vowels
+  vowel_modifiers
+  final_consonants
 ;
 
 number_joiner_terminated_cluster = N VS? (HN N VS?)* HN;
