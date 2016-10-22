@@ -68,17 +68,43 @@ function setupSyllables(font, glyphs) {
   let syllable = 0;
   for (let [start, end, tags] of stateMachine.match(glyphs.map(useCategory))) {
     ++syllable;
+
+    // Create shaper info
     for (let i = start; i <= end; i++) {
       glyphs[i].shaperInfo = new USEInfo(categories[useCategory(glyphs[i])], tags[0], syllable);
+    }
+
+    // Assign rphf feature
+    let limit = glyphs[start].shaperInfo.category === 'R' ? 1 : Math.min(3, end - start);
+    for (let i = start; i < start + limit; i++) {
+      glyphs[i].features.rphf = true;
     }
   }
 }
 
-// TODO
-function clearSubstitutionFlags() {}
-function recordRphf() {}
-function recordPref() {}
+function clearSubstitutionFlags(font, glyphs) {
+  for (let glyph of glyphs) {
+    glyph.substituted = false;
+  }
+}
 
+function recordRphf(font, glyphs) {
+  for (let glyph of glyphs) {
+    if (glyph.substituted && glyph.features.rphf) {
+      // Mark a substituted repha.
+      glyph.shaperInfo.category = 'R';
+    }
+  }
+}
+
+function recordPref(font, glyphs) {
+  for (let glyph of glyphs) {
+    if (glyph.substituted) {
+      // Mark a substituted pref as VPre, as they behave the same way.
+      glyph.shaperInfo.category = 'VPre';
+    }
+  }
+}
 
 function reorder(font, glyphs) {
   let dottedCircle = font.glyphForCodePoint(0x25cc).id;
