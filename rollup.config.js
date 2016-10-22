@@ -10,7 +10,7 @@ export default {
     babel({
       babelrc: false,
       presets: [['es2015', { modules: false }]],
-      plugins: ['transform-decorators-legacy', 'transform-runtime'],
+      plugins: ['transform-decorators-legacy', 'transform-class-properties', 'transform-runtime'],
       runtimeHelpers: true
     })
   ]
