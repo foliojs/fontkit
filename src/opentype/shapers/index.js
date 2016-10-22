@@ -62,7 +62,7 @@ const SHAPERS = {
   tirh: UniversalShaper, // Tirhuta
 
   latn: DefaultShaper,   // Latin
-  DFLT: DefaultShaper   // Default
+  DFLT: DefaultShaper    // Default
 };
 
 export function choose(script) {

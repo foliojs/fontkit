@@ -9,6 +9,11 @@ const {categories, decompositions} = useData;
 const trie = new UnicodeTrie(fs.readFileSync(__dirname + '/use.trie'));
 const stateMachine = new StateMachine(useData);
 
+/**
+ * This shaper is an implementation of the Universal Shaping Engine, which
+ * uses Unicode data to shape a number of scripts without a dedicated shaping engine.
+ * See https://www.microsoft.com/typography/OpenTypeDev/USE/intro.htm.
+ */
 export default class UniversalShaper extends DefaultShaper {
   static planFeatures(plan) {
     plan.addStage(setupSyllables);
@@ -29,7 +34,8 @@ export default class UniversalShaper extends DefaultShaper {
     plan.addStage(reorder);
 
     // Topographical features
-    plan.addStage(['isol', 'init', 'medi', 'fina', 'med2', 'fin2', 'fin3'], false);
+    // Scripts that need this are handled by the Arabic shaper, not implemented here for now.
+    // plan.addStage(['isol', 'init', 'medi', 'fina', 'med2', 'fin2', 'fin3'], false);
 
     // Standard topographic presentation and positional feature application
     plan.addStage(['abvs', 'blws', 'pres', 'psts', 'dist', 'abvm', 'blwm']);
@@ -135,16 +141,14 @@ function reorder(font, glyphs) {
       // Got a repha. Reorder it to after first base, before first halant.
       for (i = start + 1; i < end; i++) {
         info = glyphs[i].shaperInfo;
-        if (info.category === 'B' || info.category === 'GB' || isHalant(glyphs[i])) {
+        if (isBase(info) || isHalant(glyphs[i])) {
           // If we hit a halant, move before it; otherwise it's a base: move to it's
           // place, and shift things in between backward.
           if (isHalant(glyphs[i])) {
             i--;
           }
 
-          let g = glyphs[start];
-          glyphs.splice(start, 0, ...glyphs.splice(start + 1, i - start));
-          glyphs[i] = g;
+          glyphs.splice(start, 0, ...glyphs.splice(start + 1, i - start), glyphs[i]);
           break;
         }
       }
@@ -153,18 +157,12 @@ function reorder(font, glyphs) {
     // Move things back.
     for (i = start, j = end; i < end; i++) {
       info = glyphs[i].shaperInfo;
-      if (info.category === 'B' || info.category === 'GB' || isHalant(glyphs[i])) {
+      if (isBase(info) || isHalant(glyphs[i])) {
         // If we hit a halant, move after it; otherwise it's a base: move to it's
         // place, and shift things in between backward.
-        if (isHalant(glyphs[i])) {
-          j = i + 1;
-        } else {
-          j = i;
-        }
+        j = isHalant(glyphs[i]) ? i + 1 : i;
       } else if ((info.category === 'VPre' || info.category === 'VMPre') && j < i) {
-        let g = glyphs[i];
-        glyphs.splice(j + 1, 0, ...glyphs.splice(j, i - j));
-        glyphs[j] = g;
+        glyphs.splice(j, 1, glyphs[i], ...glyphs.splice(j, i - j));
       }
     }
   }
@@ -179,4 +177,8 @@ function nextSyllable(glyphs, start) {
 
 function isHalant(glyph) {
   return glyph.shaperInfo.category === 'H' && !glyph.isLigated;
+}
+
+function isBase(info) {
+  return info.category === 'B' || info.category === 'GB';
 }
