@@ -64,9 +64,7 @@ class USEInfo {
   }
 }
 
-function setupSyllables(font, glyphs, positions) {
-  if (positions) return;
-
+function setupSyllables(font, glyphs) {
   let syllable = 0;
   for (let [start, end, tags] of stateMachine.match(glyphs.map(useCategory))) {
     ++syllable;
@@ -81,10 +79,8 @@ function clearSubstitutionFlags() {}
 function recordRphf() {}
 function recordPref() {}
 
-function reorder(font, glyphs, positions) {
-  // TODO: only call this function during substitution, not positioning
-  if (positions) return;
 
+function reorder(font, glyphs) {
   let dottedCircle = font.glyphForCodePoint(0x25cc).id;
 
   for (let start = 0, end = nextSyllable(glyphs, 0); start < glyphs.length; start = end, end = nextSyllable(glyphs, start)) {

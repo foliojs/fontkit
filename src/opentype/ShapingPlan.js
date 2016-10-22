@@ -102,7 +102,9 @@ export default class ShapingPlan {
 
     for (let stage of this.stages) {
       if (typeof stage === 'function') {
-        stage(this.font, glyphs, positions);
+        if (!positions) {
+          stage(this.font, glyphs, positions);
+        }
 
       } else if (stage.length > 0) {
         processor.applyFeatures(stage, glyphs, positions);
