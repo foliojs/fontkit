@@ -15,6 +15,7 @@ const stateMachine = new StateMachine(useData);
  * See https://www.microsoft.com/typography/OpenTypeDev/USE/intro.htm.
  */
 export default class UniversalShaper extends DefaultShaper {
+  static zeroMarkWidths = 'BEFORE_GPOS';
   static planFeatures(plan) {
     plan.addStage(setupSyllables);
 

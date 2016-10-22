@@ -28,9 +28,9 @@ export default class OTLayoutEngine {
 
     // Choose a shaper based on the script, and setup a shaping plan.
     // This determines which features to apply to which glyphs.
-    let shaper = Shapers.choose(script);
+    this.shaper = Shapers.choose(script);
     this.plan = new ShapingPlan(this.font, script, language);
-    return shaper.plan(this.plan, this.glyphInfos, features);
+    return this.shaper.plan(this.plan, this.glyphInfos, features);
   }
 
   substitute(glyphs) {
@@ -45,17 +45,16 @@ export default class OTLayoutEngine {
   }
 
   position(glyphs, positions) {
-    // Zero mark advances.
-    // TODO: make this configurable by the shaper
-    for (let i = 0; i < this.glyphInfos.length; i++) {
-      if (this.glyphInfos[i].isMark) {
-        positions[i].xAdvance = 0;
-        positions[i].yAdvance = 0;
-      }
+    if (this.shaper.zeroMarkWidths === 'BEFORE_GPOS') {
+      this.zeroMarkAdvances(positions);
     }
 
     if (this.GPOSProcessor) {
       this.plan.process(this.GPOSProcessor, this.glyphInfos, positions);
+    }
+
+    if (this.shaper.zeroMarkWidths === 'AFTER_GPOS') {
+      this.zeroMarkAdvances(positions);
     }
 
     // Reverse the glyphs and positions if the script is right-to-left
@@ -67,9 +66,19 @@ export default class OTLayoutEngine {
     return this.GPOSProcessor && this.GPOSProcessor.features;
   }
 
+  zeroMarkAdvances(positions) {
+    for (let i = 0; i < this.glyphInfos.length; i++) {
+      if (this.glyphInfos[i].isMark) {
+        positions[i].xAdvance = 0;
+        positions[i].yAdvance = 0;
+      }
+    }
+  }
+
   cleanup() {
     this.glyphInfos = null;
     this.plan = null;
+    this.shaper = null;
   }
 
   getAvailableFeatures(script, language) {
