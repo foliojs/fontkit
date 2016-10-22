@@ -23,6 +23,7 @@ export default class GlyphInfo {
     this.cursiveAttachment = null;
     this.markAttachment = null;
     this.shaperInfo = null;
+    this.substituted = false;
   }
 
   get id() {
@@ -31,6 +32,7 @@ export default class GlyphInfo {
 
   set id(id) {
     this._id = id;
+    this.substituted = true;
 
     if (this._font.GDEF) {
       // TODO: clean this up

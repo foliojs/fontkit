@@ -38,6 +38,7 @@ export default class GSUBProcessor extends OTProcessor {
             glyph.shaperInfo = curGlyph.shaperInfo;
             glyph.isLigated = curGlyph.isLigated;
             glyph.ligatureComponent = i + 1;
+            glyph.substituted = true;
             return glyph;
           });
 
@@ -83,6 +84,7 @@ export default class GSUBProcessor extends OTProcessor {
           let ligatureGlyph = new GlyphInfo(this.font, ligature.glyph, characters, curGlyph.features);
           ligatureGlyph.shaperInfo = curGlyph.shaperInfo;
           ligatureGlyph.isLigated = true;
+          ligatureGlyph.substituted = true;
 
           // From Harfbuzz:
           // - If it *is* a mark ligature, we don't allocate a new ligature id, and leave
