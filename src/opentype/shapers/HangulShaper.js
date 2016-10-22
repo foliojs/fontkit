@@ -24,6 +24,7 @@ import GlyphInfo from '../GlyphInfo';
  *   - http://ktug.org/~nomos/harfbuzz-hangul/hangulshaper.pdf
  */
 export default class HangulShaper extends DefaultShaper {
+  static zeroMarkWidths = 'NONE';
   static planFeatures(plan) {
     plan.add(['ljmo', 'vjmo', 'tjmo'], false);
   }
@@ -137,7 +138,7 @@ const STATE_TABLE = [
 ];
 
 function getGlyph(font, code, features) {
-  return new GlyphInfo(font.glyphForCodePoint(code).id, [code], Object.keys(features));
+  return new GlyphInfo(font, font.glyphForCodePoint(code).id, [code], features);
 }
 
 function decompose(glyphs, i, font) {

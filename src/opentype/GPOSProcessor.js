@@ -277,7 +277,7 @@ export default class GPOSProcessor extends OTProcessor {
       this.fixCursiveAttachment(i);
     }
 
-    this.fixMarkAttachment(i);
+    this.fixMarkAttachment();
   }
 
   fixCursiveAttachment(i) {
