@@ -1,5 +1,6 @@
 import AATStateMachine from './AATStateMachine';
 import AATLookupTable from './AATLookupTable';
+import {cache} from '../decorators';
 
 // indic replacement flags
 const MARK_FIRST = 0x8000;
@@ -90,11 +91,16 @@ export default class AATMorxProcessor {
     this.lastGlyph = null;
     this.markedIndex = null;
 
-    let stateMachine = new AATStateMachine(this.subtable.table.stateTable);
+    let stateMachine = this.getStateMachine(subtable);
     let process = this.getProcessor();
 
     let reverse = !!(this.subtable.coverage & REVERSE_DIRECTION);
     return stateMachine.process(this.glyphs, reverse, process);
+  }
+
+  @cache
+  getStateMachine(subtable) {
+    return new AATStateMachine(subtable.table.stateTable);
   }
 
   getProcessor() {
