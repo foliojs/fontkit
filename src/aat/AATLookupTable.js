@@ -1,3 +1,5 @@
+import {cache} from '../decorators';
+
 export default class AATLookupTable {
   constructor(table) {
     this.table = table;
@@ -70,4 +72,61 @@ export default class AATLookupTable {
         throw new Error(`Unknown lookup table format: ${this.table.version}`);
     }
   }
+
+  @cache
+  glyphsForValue(classValue) {
+    let res = [];
+
+    switch (this.table.version) {
+      case 2:
+      case 4: {
+        for (let segment of this.table.segments) {
+          if ((this.table.version === 2 && segment.value === classValue)) {
+            res.push(...range(segment.firstGlyph, segment.lastGlyph + 1));
+          } else {
+            for (let index = 0; index < segment.values.length; index++) {
+              if (segment.values[index] === classValue) {
+                res.push(segment.firstGlyph + index);
+              }
+            }
+          }
+        }
+
+        break;
+      }
+
+      case 6: {
+        for (let segment of this.table.segments) {
+          if (segment.value === classValue) {
+            res.push(segment.glyph);
+          }
+        }
+
+        break;
+      }
+
+      case 8: {
+        for (let i = 0; i < this.table.values.length; i++) {
+          if (this.table.values[i] === classValue) {
+            res.push(this.table.firstGlyph + i);
+          }
+        }
+
+        break;
+      }
+
+      default:
+        throw new Error(`Unknown lookup table format: ${this.table.version}`);
+    }
+
+    return res;
+  }
+}
+
+function range(index, end) {
+  let range = [];
+  while (index < end) {
+    range.push(index++);
+  }
+  return range;
 }

@@ -128,4 +128,19 @@ export default class LayoutEngine {
 
     return features;
   }
+
+  getStringsForGlyph(gid) {
+    let result = [];
+
+    let codePoints = this.font._cmapProcessor.codePointsForGlyph(gid);
+    for (let codePoint of codePoints) {
+      result.push(String.fromCodePoint(codePoint));
+    }
+
+    if (this.engine) {
+      result.push(...this.engine.getStringsForGlyph(gid));
+    }
+
+    return result;
+  }
 }

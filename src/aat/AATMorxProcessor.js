@@ -260,6 +260,91 @@ export default class AATMorxProcessor {
 
     return features;
   }
+
+  generateInputs(gid) {
+    let result = [];
+
+    for (let chain of this.morx.chains) {
+      let flags = chain.defaultFlags;
+
+      for (let subtable of chain.subtables) {
+        if (subtable.subFeatureFlags & flags) {
+          this.generateInputsForSubtable(subtable, gid, result);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  generateInputsForSubtable(subtable, gid, result) {
+    // Currently, only supporting ligature subtables.
+    if (subtable.type !== 2) {
+      return;
+    }
+
+    let reverse = !!(subtable.coverage & REVERSE_DIRECTION);
+    if (reverse) {
+      throw new Error('Reverse subtable, not supported.');
+    }
+
+    this.subtable = subtable;
+    this.ligatureStack = [];
+
+    // Optimization: check if the glyph appears in the ligature list.
+    // If not, we can skip the subtable all together.
+    let found = false;
+    let ligatureList = subtable.table.ligatureList;
+    for (let i = 0; ; i++) {
+      let lig = ligatureList.getItem(i);
+
+      // Detect the end of the list.
+      if (lig >= this.font.numGlyphs) {
+        break;
+      }
+
+      if (lig === gid) {
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      return;
+    }
+
+    let stateMachine = this.getStateMachine(subtable);
+    let process = this.getProcessor();
+
+    let input = [];
+    let stack = [];
+    this.glyphs = [];
+
+    stateMachine.traverse({
+      enter: (glyph, entry) => {
+        stack.push({
+          glyphs: this.glyphs.slice(),
+          ligatureStack: this.ligatureStack.slice()
+        });
+
+        let g = this.font.getGlyph(glyph);
+        input.push(g);
+        this.glyphs.push(input[input.length - 1]);
+
+        process(this.glyphs[this.glyphs.length - 1], entry, this.glyphs.length - 1);
+
+        let res = this.glyphs.filter(g => g.id !== 0xffff);
+        if (res.length === 1 && res[0].id === gid) {
+          result.push(input.slice());
+        }
+      },
+
+      exit: () => {
+        ({glyphs: this.glyphs, ligatureStack: this.ligatureStack} = stack.pop());
+        input.pop();
+      }
+    });
+  }
 }
 
 // swaps the glyphs in rangeA with those in rangeB

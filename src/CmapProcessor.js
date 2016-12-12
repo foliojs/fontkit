@@ -221,6 +221,40 @@ export default class CmapProcessor {
         throw new Error(`Unknown cmap format ${cmap.version}`);
     }
   }
+
+  @cache
+  codePointsForGlyph(gid) {
+    let cmap = this.cmap;
+    switch (cmap.version) {
+      case 0:
+        return cmap.codeMap.indexOf(gid);
+
+      case 12: {
+        let res = [];
+        for (let group of cmap.groups.toArray()) {
+          if (gid >= group.glyphID && gid <= group.glyphID + (group.endCharCode - group.startCharCode)) {
+            res.push(group.startCharCode + (gid - group.glyphID));
+          }
+        }
+
+        return res;
+      }
+
+      case 13: {
+        let res = [];
+        for (let group of cmap.groups.toArray()) {
+          if (gid === group.glyphID) {
+            res.push(...range(group.startCharCode, group.endCharCode + 1));
+          }
+        }
+
+        return res;
+      }
+
+      default:
+        throw new Error(`Unknown cmap format ${cmap.version}`);
+    }
+  }
 }
 
 function range(index, end) {
