@@ -1,5 +1,6 @@
 import {binarySearch} from './utils';
 import {getEncoding} from './encodings';
+import {cache} from './decorators';
 
 // iconv-lite is an optional dependency.
 try {
@@ -8,8 +9,6 @@ try {
 
 export default class CmapProcessor {
   constructor(cmapTable) {
-    this._characterSet = null;
-
     // Attempt to find a Unicode cmap first
     this.encoding = null;
     this.cmap = this.findSubtable(cmapTable, [
@@ -26,7 +25,7 @@ export default class CmapProcessor {
       [0, 0],
       [3, 0]
     ]);
-    
+
     // If not unicode cmap was found, and iconv-lite is installed,
     // take the first table with a supported encoding.
     if (!this.cmap && iconv) {
@@ -38,17 +37,17 @@ export default class CmapProcessor {
         }
       }
     }
-    
+
     if (!this.cmap) {
       throw new Error("Could not find a supported cmap table");
     }
-    
+
     this.uvs = this.findSubtable(cmapTable, [[0, 5]]);
     if (this.uvs && this.uvs.version !== 14) {
       this.uvs = null;
     }
   }
-  
+
   findSubtable(cmapTable, pairs) {
     for (let [platformID, encodingID] of pairs) {
       for (let cmap of cmapTable.tables) {
@@ -57,7 +56,7 @@ export default class CmapProcessor {
         }
       }
     }
-    
+
     return null;
   }
 
@@ -70,7 +69,7 @@ export default class CmapProcessor {
       for (let i = 0; i < buf.length; i++) {
         codepoint = (codepoint << 8) | buf[i];
       }
-      
+
     // Otherwise, try to get a Unicode variation selector for this codepoint if one is provided.
     } else if (variationSelector) {
       let gid = this.getVariationSelector(codepoint, variationSelector);
@@ -78,7 +77,7 @@ export default class CmapProcessor {
         return gid;
       }
     }
-    
+
     let cmap = this.cmap;
     switch (cmap.version) {
       case 0:
@@ -153,41 +152,38 @@ export default class CmapProcessor {
         throw new Error(`Unknown cmap format ${cmap.version}`);
     }
   }
-  
+
   getVariationSelector(codepoint, variationSelector) {
     if (!this.uvs) {
       return 0;
     }
-    
+
     let selectors = this.uvs.varSelectors.toArray();
     let i = binarySearch(selectors, x => variationSelector - x.varSelector);
     let sel = selectors[i];
-    
+
     if (i !== -1 && sel.defaultUVS) {
-      i = binarySearch(sel.defaultUVS, x => 
+      i = binarySearch(sel.defaultUVS, x =>
         codepoint < x.startUnicodeValue ? -1 : codepoint > x.startUnicodeValue + x.additionalCount ? +1 : 0
       );
     }
-    
+
     if (i !== -1 && sel.nonDefaultUVS) {
       i = binarySearch(sel.nonDefaultUVS, x => codepoint - x.unicodeValue);
       if (i !== -1) {
         return sel.nonDefaultUVS[i].glyphID;
       }
     }
-    
+
     return 0;
   }
 
+  @cache
   getCharacterSet() {
-    if (this._characterSet) {
-      return this._characterSet;
-    }
-
     let cmap = this.cmap;
     switch (cmap.version) {
       case 0:
-        return this._characterSet = range(0, cmap.codeMap.length);
+        return range(0, cmap.codeMap.length);
 
       case 4: {
         let res = [];
@@ -198,7 +194,7 @@ export default class CmapProcessor {
           res.push(...range(start, tail));
         }
 
-        return this._characterSet = res;
+        return res;
       }
 
       case 8:
@@ -206,7 +202,7 @@ export default class CmapProcessor {
 
       case 6:
       case 10:
-        return this._characterSet = range(cmap.firstCode, cmap.firstCode + cmap.glyphIndices.length);
+        return range(cmap.firstCode, cmap.firstCode + cmap.glyphIndices.length);
 
       case 12:
       case 13: {
@@ -215,7 +211,7 @@ export default class CmapProcessor {
           res.push(...range(group.startCharCode, group.endCharCode + 1));
         }
 
-        return this._characterSet = res;
+        return res;
       }
 
       case 14:
