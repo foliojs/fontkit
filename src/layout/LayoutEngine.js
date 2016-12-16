@@ -130,17 +130,19 @@ export default class LayoutEngine {
   }
 
   getStringsForGlyph(gid) {
-    let result = [];
+    let result = new Set;
 
     let codePoints = this.font._cmapProcessor.codePointsForGlyph(gid);
     for (let codePoint of codePoints) {
-      result.push(String.fromCodePoint(codePoint));
+      result.add(String.fromCodePoint(codePoint));
     }
 
     if (this.engine) {
-      result.push(...this.engine.getStringsForGlyph(gid));
+      for (let string of this.engine.getStringsForGlyph(gid)) {
+        result.add(string);
+      }
     }
 
-    return result;
+    return Array.from(result);
   }
 }
