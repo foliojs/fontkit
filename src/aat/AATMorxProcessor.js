@@ -322,19 +322,32 @@ export default class AATMorxProcessor {
 
     stateMachine.traverse({
       enter: (glyph, entry) => {
+        let glyphs = this.glyphs;
         stack.push({
-          glyphs: this.glyphs.slice(),
+          glyphs: glyphs.slice(),
           ligatureStack: this.ligatureStack.slice()
         });
 
+        // Add glyph to input and glyphs to process.
         let g = this.font.getGlyph(glyph);
         input.push(g);
-        this.glyphs.push(input[input.length - 1]);
+        glyphs.push(input[input.length - 1]);
 
-        process(this.glyphs[this.glyphs.length - 1], entry, this.glyphs.length - 1);
+        // Process ligature substitution
+        process(glyphs[glyphs.length - 1], entry, glyphs.length - 1);
 
-        let res = this.glyphs.filter(g => g.id !== 0xffff);
-        if (res.length === 1 && res[0].id === gid) {
+        // Add input to result if only one matching (non-deleted) glyph remains.
+        let match = false;
+        for (let i = 0; i < glyphs.length; i++) {
+          if (glyphs[i].id === gid) {
+            match = true;
+          } else if (glyphs[i].id !== 0xffff) {
+            match = false;
+            break;
+          }
+        }
+
+        if (match) {
           result.push(input.slice());
         }
       },
