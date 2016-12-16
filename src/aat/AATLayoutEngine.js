@@ -24,7 +24,7 @@ export default class AATLayoutEngine {
     return AATFeatureMap.mapAATToOT(this.morxProcessor.getSupportedFeatures());
   }
 
-  getStringsForGlyph(gid) {
+  stringsForGlyph(gid) {
     let glyphStrings = this.morxProcessor.generateInputs(gid);
     let result = new Set;
 

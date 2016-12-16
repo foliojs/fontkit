@@ -129,7 +129,7 @@ export default class LayoutEngine {
     return features;
   }
 
-  getStringsForGlyph(gid) {
+  stringsForGlyph(gid) {
     let result = new Set;
 
     let codePoints = this.font._cmapProcessor.codePointsForGlyph(gid);
@@ -138,7 +138,7 @@ export default class LayoutEngine {
     }
 
     if (this.engine) {
-      for (let string of this.engine.getStringsForGlyph(gid)) {
+      for (let string of this.engine.stringsForGlyph(gid)) {
         result.add(string);
       }
     }
