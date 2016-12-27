@@ -40,6 +40,7 @@ export default class AATMorxProcessor {
     this.processGlyphInsertion = this.processGlyphInsertion.bind(this);
     this.font = font;
     this.morx = font.morx;
+    this.inputCache = null;
   }
 
   // Processes an array of glyphs and applies the specified features
@@ -262,22 +263,28 @@ export default class AATMorxProcessor {
   }
 
   generateInputs(gid) {
-    let result = [];
+    if (!this.inputCache) {
+      this.generateInputCache();
+    }
+
+    return this.inputCache[gid] || [];
+  }
+
+  generateInputCache() {
+    this.inputCache = {};
 
     for (let chain of this.morx.chains) {
       let flags = chain.defaultFlags;
 
       for (let subtable of chain.subtables) {
         if (subtable.subFeatureFlags & flags) {
-          this.generateInputsForSubtable(subtable, gid, result);
+          this.generateInputsForSubtable(subtable);
         }
       }
     }
-
-    return result;
   }
 
-  generateInputsForSubtable(subtable, gid, result) {
+  generateInputsForSubtable(subtable) {
     // Currently, only supporting ligature subtables.
     if (subtable.type !== 2) {
       return;
@@ -290,28 +297,6 @@ export default class AATMorxProcessor {
 
     this.subtable = subtable;
     this.ligatureStack = [];
-
-    // Optimization: check if the glyph appears in the ligature list.
-    // If not, we can skip the subtable all together.
-    let found = false;
-    let ligatureList = subtable.table.ligatureList;
-    for (let i = 0; ; i++) {
-      let lig = ligatureList.getItem(i);
-
-      // Detect the end of the list.
-      if (lig >= this.font.numGlyphs) {
-        break;
-      }
-
-      if (lig === gid) {
-        found = true;
-        break;
-      }
-    }
-
-    if (!found) {
-      return;
-    }
 
     let stateMachine = this.getStateMachine(subtable);
     let process = this.getProcessor();
@@ -337,18 +322,22 @@ export default class AATMorxProcessor {
         process(glyphs[glyphs.length - 1], entry, glyphs.length - 1);
 
         // Add input to result if only one matching (non-deleted) glyph remains.
-        let match = false;
-        for (let i = 0; i < glyphs.length; i++) {
-          if (glyphs[i].id === gid) {
-            match = true;
-          } else if (glyphs[i].id !== 0xffff) {
-            match = false;
-            break;
+        let count = 0;
+        let found = 0;
+        for (let i = 0; i < glyphs.length && count <= 1; i++) {
+          if (glyphs[i].id !== 0xffff) {
+            count++;
+            found = glyphs[i].id;
           }
         }
 
-        if (match) {
-          result.push(input.slice());
+        if (count === 1) {
+          let cache = this.inputCache[found];
+          if (cache) {
+            cache.push(input.slice());
+          } else {
+            this.inputCache[found] = [input.slice()];
+          }
         }
       },
 
