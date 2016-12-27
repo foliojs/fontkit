@@ -57,4 +57,40 @@ export default class AATStateMachine {
 
     return glyphs;
   }
+
+  /**
+   * Performs a depth-first traversal of the glyph strings
+   * represented by the state machine.
+   */
+  traverse(opts, state = 0, visited = new Set) {
+    if (visited.has(state)) {
+      return;
+    }
+
+    visited.add(state);
+
+    let {nClasses, stateArray, entryTable} = this.stateTable;
+    let row = stateArray.getItem(state);
+
+    // Skip predefined classes
+    for (let classCode = 4; classCode < nClasses; classCode++) {
+      let entryIndex = row[classCode];
+      let entry = entryTable.getItem(entryIndex);
+
+      // Try all glyphs in the class
+      for (let glyph of this.lookupTable.glyphsForValue(classCode)) {
+        if (opts.enter) {
+          opts.enter(glyph, entry);
+        }
+
+        if (entry.newState !== 0) {
+          this.traverse(opts, entry.newState, visited);
+        }
+
+        if (opts.exit) {
+          opts.exit(glyph, entry);
+        }
+      }
+    }
+  }
 }

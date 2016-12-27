@@ -55,7 +55,8 @@ class Component {
     this.dx = dx;
     this.dy = dy;
     this.pos = 0;
-    this.scale = this.xScale = this.yScale = this.scale01 = this.scale10 = null;
+    this.scaleX = this.scaleY = 1;
+    this.scale01 = this.scale10 = 0;
   }
 }
 
@@ -200,8 +201,6 @@ export default class TTFGlyph extends Glyph {
 
       var component = new Component(glyphID, dx, dy);
       component.pos = gPos;
-      component.scaleX = component.scaleY = 1;
-      component.scale01 = component.scale10 = 0;
 
       if (flags & WE_HAVE_A_SCALE) {
         // fixed number with 14 bits of fraction
@@ -276,7 +275,7 @@ export default class TTFGlyph extends Glyph {
         }
       }
     } else {
-      var { points } = glyph;
+      var points = glyph.points || [];
     }
 
     // Recompute and cache metrics if we performed variation processing

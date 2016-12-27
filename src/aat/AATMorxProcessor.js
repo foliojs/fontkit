@@ -1,5 +1,6 @@
 import AATStateMachine from './AATStateMachine';
 import AATLookupTable from './AATLookupTable';
+import {cache} from '../decorators';
 
 // indic replacement flags
 const MARK_FIRST = 0x8000;
@@ -39,6 +40,7 @@ export default class AATMorxProcessor {
     this.processGlyphInsertion = this.processGlyphInsertion.bind(this);
     this.font = font;
     this.morx = font.morx;
+    this.inputCache = null;
   }
 
   // Processes an array of glyphs and applies the specified features
@@ -90,11 +92,16 @@ export default class AATMorxProcessor {
     this.lastGlyph = null;
     this.markedIndex = null;
 
-    let stateMachine = new AATStateMachine(this.subtable.table.stateTable);
+    let stateMachine = this.getStateMachine(subtable);
     let process = this.getProcessor();
 
     let reverse = !!(this.subtable.coverage & REVERSE_DIRECTION);
     return stateMachine.process(this.glyphs, reverse, process);
+  }
+
+  @cache
+  getStateMachine(subtable) {
+    return new AATStateMachine(subtable.table.stateTable);
   }
 
   getProcessor() {
@@ -253,6 +260,93 @@ export default class AATMorxProcessor {
     }
 
     return features;
+  }
+
+  generateInputs(gid) {
+    if (!this.inputCache) {
+      this.generateInputCache();
+    }
+
+    return this.inputCache[gid] || [];
+  }
+
+  generateInputCache() {
+    this.inputCache = {};
+
+    for (let chain of this.morx.chains) {
+      let flags = chain.defaultFlags;
+
+      for (let subtable of chain.subtables) {
+        if (subtable.subFeatureFlags & flags) {
+          this.generateInputsForSubtable(subtable);
+        }
+      }
+    }
+  }
+
+  generateInputsForSubtable(subtable) {
+    // Currently, only supporting ligature subtables.
+    if (subtable.type !== 2) {
+      return;
+    }
+
+    let reverse = !!(subtable.coverage & REVERSE_DIRECTION);
+    if (reverse) {
+      throw new Error('Reverse subtable, not supported.');
+    }
+
+    this.subtable = subtable;
+    this.ligatureStack = [];
+
+    let stateMachine = this.getStateMachine(subtable);
+    let process = this.getProcessor();
+
+    let input = [];
+    let stack = [];
+    this.glyphs = [];
+
+    stateMachine.traverse({
+      enter: (glyph, entry) => {
+        let glyphs = this.glyphs;
+        stack.push({
+          glyphs: glyphs.slice(),
+          ligatureStack: this.ligatureStack.slice()
+        });
+
+        // Add glyph to input and glyphs to process.
+        let g = this.font.getGlyph(glyph);
+        input.push(g);
+        glyphs.push(input[input.length - 1]);
+
+        // Process ligature substitution
+        process(glyphs[glyphs.length - 1], entry, glyphs.length - 1);
+
+        // Add input to result if only one matching (non-deleted) glyph remains.
+        let count = 0;
+        let found = 0;
+        for (let i = 0; i < glyphs.length && count <= 1; i++) {
+          if (glyphs[i].id !== 0xffff) {
+            count++;
+            found = glyphs[i].id;
+          }
+        }
+
+        if (count === 1) {
+          let result = input.map(g => g.id);
+          let cache = this.inputCache[found];
+          if (cache) {
+            cache.push(result);
+          } else {
+            this.inputCache[found] = [result];
+          }
+        }
+      },
+
+      exit: () => {
+        ({glyphs: this.glyphs, ligatureStack: this.ligatureStack} = stack.pop());
+        input.pop();
+      }
+    });
   }
 }
 

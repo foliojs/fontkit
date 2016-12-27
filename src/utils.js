@@ -13,6 +13,14 @@ export function binarySearch(arr, cmp) {
       return mid;
     }
   }
-  
+
   return -1;
+}
+
+export function range(index, end) {
+  let range = [];
+  while (index < end) {
+    range.push(index++);
+  }
+  return range;
 }

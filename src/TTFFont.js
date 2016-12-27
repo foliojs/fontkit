@@ -296,7 +296,7 @@ export default class TTFFont {
     while (idx <= len) {
       let code = 0;
       let nextState = 0;
-      
+
       if (idx < len) {
         // Decode the next codepoint from UTF 16
         code = string.charCodeAt(idx++);
@@ -307,13 +307,13 @@ export default class TTFFont {
             code = ((code & 0x3ff) << 10) + (next & 0x3ff) + 0x10000;
           }
         }
-      
+
         // Compute the next state: 1 if the next codepoint is a variation selector, 0 otherwise.
         nextState = ((0xfe00 <= code && code <= 0xfe0f) || (0xe0100 <= code && code <= 0xe01ef)) ? 1 : 0;
       } else {
         idx++;
       }
-      
+
       if (state === 0 && nextState === 1) {
         // Variation selector following normal codepoint.
         glyphs.push(this.getGlyph(this._cmapProcessor.lookup(last, code), [last, code]));
@@ -321,7 +321,7 @@ export default class TTFFont {
         // Normal codepoint following normal codepoint.
         glyphs.push(this.glyphForCodePoint(last));
       }
-      
+
       last = code;
       state = nextState;
     }
@@ -343,8 +343,16 @@ export default class TTFFont {
    * @param {string} [language]
    * @return {GlyphRun}
    */
-  layout(string, userFeatures , script, language) {
+  layout(string, userFeatures, script, language) {
     return this._layoutEngine.layout(string, userFeatures, script, language);
+  }
+
+  /**
+   * Returns an array of strings that map to the given glyph id.
+   * @param {number} gid - glyph id
+   */
+  stringsForGlyph(gid) {
+    return this._layoutEngine.stringsForGlyph(gid);
   }
 
   /**
