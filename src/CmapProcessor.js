@@ -226,8 +226,45 @@ export default class CmapProcessor {
   codePointsForGlyph(gid) {
     let cmap = this.cmap;
     switch (cmap.version) {
-      case 0:
-        return cmap.codeMap.indexOf(gid);
+      case 0: {
+        let res = [];
+        for (let i = 0; i < 256; i++) {
+          if (cmap.codeMap.get(i) === gid) {
+            res.push(i);
+          }
+        }
+
+        return res;
+      }
+
+      case 4: {
+        let res = [];
+        for (let i = 0; i < cmap.segCount; i++) {
+          let end = cmap.endCode.get(i);
+          let start = cmap.startCode.get(i);
+          let rangeOffset = cmap.idRangeOffset.get(i);
+          let delta = cmap.idDelta.get(i);
+
+          for (var c = start; c <= end; c++) {
+            let g = 0;
+            if (rangeOffset === 0) {
+              g = c + delta;
+            } else {
+              let index = rangeOffset / 2 + (c - start) - (cmap.segCount - i);
+              g = cmap.glyphIndexArray.get(index) || 0;
+              if (g !== 0) {
+                g += delta;
+              }
+            }
+
+            if (g === gid) {
+              res.push(c);
+            }
+          }
+        }
+
+        return res;
+      }
 
       case 12: {
         let res = [];
