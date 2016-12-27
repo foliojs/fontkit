@@ -24,7 +24,8 @@
     "base.js.map",
     "index.js",
     "index.js.map",
-    "data.trie"
+    "data.trie",
+    "use.trie"
   ],
   "author": "Devon Govett <devongovett@gmail.com>",
   "license": "MIT",
