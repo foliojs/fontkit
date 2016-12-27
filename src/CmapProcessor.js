@@ -1,6 +1,7 @@
 import {binarySearch} from './utils';
 import {getEncoding} from './encodings';
 import {cache} from './decorators';
+import {range} from './utils';
 
 // iconv-lite is an optional dependency.
 try {
@@ -292,12 +293,4 @@ export default class CmapProcessor {
         throw new Error(`Unknown cmap format ${cmap.version}`);
     }
   }
-}
-
-function range(index, end) {
-  let range = [];
-  while (index < end) {
-    range.push(index++);
-  }
-  return range;
 }

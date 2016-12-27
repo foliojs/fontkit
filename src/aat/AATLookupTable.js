@@ -1,4 +1,5 @@
 import {cache} from '../decorators';
+import {range} from '../utils';
 
 export default class AATLookupTable {
   constructor(table) {
@@ -78,7 +79,7 @@ export default class AATLookupTable {
     let res = [];
 
     switch (this.table.version) {
-      case 2:
+      case 2: // segment format
       case 4: {
         for (let segment of this.table.segments) {
           if ((this.table.version === 2 && segment.value === classValue)) {
@@ -95,7 +96,7 @@ export default class AATLookupTable {
         break;
       }
 
-      case 6: {
+      case 6: { // lookup single
         for (let segment of this.table.segments) {
           if (segment.value === classValue) {
             res.push(segment.glyph);
@@ -105,7 +106,7 @@ export default class AATLookupTable {
         break;
       }
 
-      case 8: {
+      case 8: { // lookup trimmed
         for (let i = 0; i < this.table.values.length; i++) {
           if (this.table.values[i] === classValue) {
             res.push(this.table.firstGlyph + i);
@@ -121,12 +122,4 @@ export default class AATLookupTable {
 
     return res;
   }
-}
-
-function range(index, end) {
-  let range = [];
-  while (index < end) {
-    range.push(index++);
-  }
-  return range;
 }
