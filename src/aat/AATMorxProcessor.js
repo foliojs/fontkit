@@ -332,11 +332,12 @@ export default class AATMorxProcessor {
         }
 
         if (count === 1) {
+          let result = input.map(g => g.id);
           let cache = this.inputCache[found];
           if (cache) {
-            cache.push(input.slice());
+            cache.push(result);
           } else {
-            this.inputCache[found] = [input.slice()];
+            this.inputCache[found] = [result];
           }
         }
       },

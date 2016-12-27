@@ -36,7 +36,7 @@ export default class AATLayoutEngine {
   }
 
   _addStrings(glyphs, index, strings, string) {
-    let codePoints = this.font._cmapProcessor.codePointsForGlyph(glyphs[index].id);
+    let codePoints = this.font._cmapProcessor.codePointsForGlyph(glyphs[index]);
 
     for (let codePoint of codePoints) {
       let s = string + String.fromCodePoint(codePoint);
