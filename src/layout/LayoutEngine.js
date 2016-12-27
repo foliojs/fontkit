@@ -137,7 +137,7 @@ export default class LayoutEngine {
       result.add(String.fromCodePoint(codePoint));
     }
 
-    if (this.engine) {
+    if (this.engine && this.engine.stringsForGlyph) {
       for (let string of this.engine.stringsForGlyph(gid)) {
         result.add(string);
       }

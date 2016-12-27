@@ -28,13 +28,13 @@ describe('character to glyph mapping', function() {
       assert.deepEqual(glyphs.map(g => g.id), [75, 72, 79, 79, 82]);
       return assert.deepEqual(glyphs.map(g => g.codePoints), [[104], [101], [108], [108], [111]]);
     });
-    
+
     it('should support unicode variation selectors', function() {
       let font = fontkit.openSync(__dirname + '/data/fonttest/TestCMAP14.otf');
       let glyphs = font.glyphsForString('\u{82a6}\u{82a6}\u{E0100}\u{82a6}\u{E0101}');
       assert.deepEqual(glyphs.map(g => g.id), [1, 1, 2]);
     });
-    
+
     it('should support legacy encodings when no unicode cmap is found', function() {
       let font = fontkit.openSync(__dirname + '/data/fonttest/TestCMAPMacTurkish.ttf');
       let glyphs = font.glyphsForString("“ABÇĞIİÖŞÜ”");
@@ -101,6 +101,20 @@ describe('character to glyph mapping', function() {
         [ 6041 ], [ 6018 ], [ 6098, 6040 ], [ 6070 ], [ 6035 ], [ 6036 ], [ 6025 ],
         [ 6098, 6048 ], [ 6070 ]
       ]);
+    });
+  });
+
+  describe('glyph id to strings', function () {
+    it('should return strings from cmap that map to a given glyph', function () {
+      let font = fontkit.openSync(__dirname + '/data/OpenSans/OpenSans-Regular.ttf');
+      let strings = font.stringsForGlyph(68);
+      assert.deepEqual(strings, ['a']);
+    });
+
+    it('should return strings from AAT morx table that map to the given glyph', function () {
+      let font = fontkit.openSync(__dirname + '/data/Play/Play-Regular.ttf');
+      let strings = font.stringsForGlyph(767);
+      assert.deepEqual(strings, ['ffi']);
     });
   });
 });
