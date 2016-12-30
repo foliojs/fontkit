@@ -1,12 +1,11 @@
 import DefaultShaper from './DefaultShaper';
 import StateMachine from 'dfa';
 import UnicodeTrie from 'unicode-trie';
-import fs from 'fs';
 import GlyphInfo from '../GlyphInfo';
 import useData from './use.json';
 
 const {categories, decompositions} = useData;
-const trie = new UnicodeTrie(fs.readFileSync(__dirname + '/use.trie'));
+const trie = new UnicodeTrie(require('fs').readFileSync(__dirname + '/use.trie'));
 const stateMachine = new StateMachine(useData);
 
 /**
