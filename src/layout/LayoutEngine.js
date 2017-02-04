@@ -31,6 +31,7 @@ export default class LayoutEngine {
       features = [];
     }
 
+    console.log({ string, script, scriptNull: script == null });
     // Map string to glyphs if needed
     if (typeof string === 'string') {
       // Attempt to detect the script from the string if not provided.
@@ -53,6 +54,8 @@ export default class LayoutEngine {
       var glyphs = string;
     }
 
+    console.log({ glyphs })
+
     // Return early if there are no glyphs
     if (glyphs.length === 0) {
       return new GlyphRun(glyphs, []);
@@ -65,6 +68,9 @@ export default class LayoutEngine {
 
     // Substitute and position the glyphs
     glyphs = this.substitute(glyphs, features, script, language);
+
+    console.log('substitute', { glyphs })
+
     let positions = this.position(glyphs, features, script, language);
 
     // Let the layout engine clean up any state it might have

@@ -42,6 +42,19 @@ describe('character to glyph mapping', function() {
     });
   });
 
+  describe.only('layout bug', function() {
+    let font = fontkit.openSync(__dirname + '/data/OpenSans/OpenSans-Regular.ttf');
+    it('should return the right glyfs for "f i"', function() {
+      let {glyphs} = font.layout('f i');
+      return assert.deepEqual(glyphs.map(g => g.id), [ 73, 3, 76 ]);
+    });
+
+    it('should return the right glyfs for "fi"', function() {
+      let {glyphs} = font.layout('fi');
+      return assert.deepEqual(glyphs.map(g => g.id), [ 73, 76 ]);
+    });
+  });
+
   describe('opentype features', function() {
     let font = fontkit.openSync(__dirname + '/data/SourceSansPro/SourceSansPro-Regular.otf');
 
