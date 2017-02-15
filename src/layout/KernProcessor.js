@@ -14,7 +14,9 @@ export default class KernProcessor {
   getKerning(left, right) {
     let res = 0;
 
-    for (let table of this.kern.tables) {
+    for (let i = 0; i < this.kern.tables.length; i += 1) {
+      let table = this.kern.tables[i];
+
       if (table.coverage.crossStream) {
         continue;
       }
@@ -41,7 +43,9 @@ export default class KernProcessor {
       switch (table.format) {
         case 0:
           // TODO: binary search
-          for (let pair of s.pairs) {
+          for (let j = 0; j < s.pairs.length; j += 1) {
+            let pair = s.pairs[j];
+
             if (pair.left === left && pair.right === right) {
               val = pair.value;
               break;
