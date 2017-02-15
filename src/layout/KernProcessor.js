@@ -43,27 +43,27 @@ export default class KernProcessor {
       switch (table.format) {
         case 0:
           let minIndex = 0;
-            let maxIndex = s.pairs.length - 1;
-            let currentIndex;
-            let currentPair;
+          let maxIndex = s.pairs.length - 1;
+          let currentIndex;
+          let currentPair;
 
-            while (minIndex <= maxIndex) {
-              currentIndex = (minIndex + maxIndex) / 2 | 0;
-              currentPair = s.pairs[currentIndex];
+          while (minIndex <= maxIndex) {
+            currentIndex = (minIndex + maxIndex) / 2 | 0;
+            currentPair = s.pairs[currentIndex];
 
-              if (currentPair.left < left) {
-                minIndex = currentIndex + 1;
-              } else if (currentPair.left > left) {
-                maxIndex = currentIndex - 1;
-              } else if (currentPair.right < right) {
-                minIndex = currentIndex + 1;
-              } else if (currentPair.right > right) {
-                maxIndex = currentIndex - 1;
-              } else {
-                val = currentPair.value;
-                break;
-              }
+            if (currentPair.left < left) {
+              minIndex = currentIndex + 1;
+            } else if (currentPair.left > left) {
+              maxIndex = currentIndex - 1;
+            } else if (currentPair.right < right) {
+              minIndex = currentIndex + 1;
+            } else if (currentPair.right > right) {
+              maxIndex = currentIndex - 1;
+            } else {
+              val = currentPair.value;
+              break;
             }
+          }
 
           break;
 
