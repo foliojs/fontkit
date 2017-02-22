@@ -1,3 +1,5 @@
+import {binarySearch} from '../utils';
+
 export default class KernProcessor {
   constructor(font) {
     this.kern = font.kern;
@@ -14,9 +16,7 @@ export default class KernProcessor {
   getKerning(left, right) {
     let res = 0;
 
-    for (let i = 0, end = this.kern.tables.length; i < end; i++) {
-      let table = this.kern.tables[i];
-
+    for (let table of this.kern.tables) {
       if (table.coverage.crossStream) {
         continue;
       }
@@ -42,27 +42,12 @@ export default class KernProcessor {
       let s = table.subtable;
       switch (table.format) {
         case 0:
-          let minIndex = 0;
-          let maxIndex = s.pairs.length - 1;
-          let currentIndex;
-          let currentPair;
+          let pairIdx = binarySearch(s.pairs, function (pair) {
+            return (left - pair.left) || (right - pair.right);
+          });
 
-          while (minIndex <= maxIndex) {
-            currentIndex = (minIndex + maxIndex) / 2 | 0;
-            currentPair = s.pairs[currentIndex];
-
-            if (currentPair.left < left) {
-              minIndex = currentIndex + 1;
-            } else if (currentPair.left > left) {
-              maxIndex = currentIndex - 1;
-            } else if (currentPair.right < right) {
-              minIndex = currentIndex + 1;
-            } else if (currentPair.right > right) {
-              maxIndex = currentIndex - 1;
-            } else {
-              val = currentPair.value;
-              break;
-            }
+          if (pairIdx >= 0) {
+            val = s.pairs[pairIdx].value;
           }
 
           break;
