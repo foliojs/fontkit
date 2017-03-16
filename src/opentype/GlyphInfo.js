@@ -34,7 +34,7 @@ export default class GlyphInfo {
     this._id = id;
     this.substituted = true;
 
-    if (this._font.GDEF) {
+    if (this._font.GDEF && this._font.GDEF.glyphClassDef) {
       // TODO: clean this up
       let classID = OTProcessor.prototype.getClassID(id, this._font.GDEF.glyphClassDef);
       this.isMark = classID === 3;
