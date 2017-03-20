@@ -1,3 +1,5 @@
+import {binarySearch} from '../utils';
+
 export default class KernProcessor {
   constructor(font) {
     this.kern = font.kern;
@@ -40,12 +42,12 @@ export default class KernProcessor {
       let s = table.subtable;
       switch (table.format) {
         case 0:
-          // TODO: binary search
-          for (let pair of s.pairs) {
-            if (pair.left === left && pair.right === right) {
-              val = pair.value;
-              break;
-            }
+          let pairIdx = binarySearch(s.pairs, function (pair) {
+            return (left - pair.left) || (right - pair.right);
+          });
+
+          if (pairIdx >= 0) {
+            val = s.pairs[pairIdx].value;
           }
 
           break;
