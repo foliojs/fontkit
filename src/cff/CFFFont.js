@@ -61,6 +61,11 @@ class CFFFont {
   }
 
   getGlyphName(gid) {
+    // CID-keyed fonts don't have glyph names
+    if (this.isCIDFont) {
+      return null;
+    }
+
     let { charset } = this.topDict;
     if (Array.isArray(charset)) {
       return charset[gid];
