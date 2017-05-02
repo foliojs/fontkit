@@ -124,6 +124,16 @@ export default class Glyph {
   }
 
   /**
+   * Returns a path scaled to the given font size.
+   * @param {number} size
+   * @return {Path}
+   */
+  getScaledPath(size) {
+    let scale = 1 / this._font.unitsPerEm * size;
+    return this.path.scale(scale);
+  }
+
+  /**
    * The glyph's advance width.
    * @type {number}
    */
