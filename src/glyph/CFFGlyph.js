@@ -59,12 +59,12 @@ export default class CFFGlyph extends Glyph {
       nStems += stack.length >> 1;
       return stack.length = 0;
     }
-    
+
     function moveTo(x, y) {
       if (open) {
         path.closePath();
       }
-      
+
       path.moveTo(x, y);
       open = true;
     }
@@ -148,8 +148,10 @@ export default class CFFGlyph extends Glyph {
                 if (typeof width === 'undefined' || width === null) { width = stack.shift() + privateDict.nominalWidthX; }
               }
 
-              path.closePath();
-              open = false;
+              if (open) {
+                path.closePath();
+                open = false;
+              }
               break;
 
             case 19: // hintmask
@@ -449,7 +451,7 @@ export default class CFFGlyph extends Glyph {
 
                 case 35: // flex
                   let pts = [];
-                  
+
                   for (let i = 0; i <= 5; i++) {
                     x += stack.shift();
                     y += stack.shift();
