@@ -34,9 +34,9 @@ export default class GlyphVariationProcessor {
     for (var i = 0; i < this.font.fvar.axis.length; i++) {
       let axis = this.font.fvar.axis[i];
       if (coords[i] < axis.defaultValue) {
-        normalized.push((coords[i] - axis.defaultValue) / (axis.defaultValue - axis.minValue));
+        normalized.push((coords[i] - axis.defaultValue + Number.EPSILON) / (axis.defaultValue - axis.minValue + Number.EPSILON));
       } else {
-        normalized.push((coords[i] - axis.defaultValue) / (axis.maxValue - axis.defaultValue));
+        normalized.push((coords[i] - axis.defaultValue + Number.EPSILON) / (axis.maxValue - axis.defaultValue + Number.EPSILON));
       }
     }
 
@@ -49,8 +49,8 @@ export default class GlyphVariationProcessor {
           let pair = segment.correspondence[j];
           if (j >= 1 && normalized[i] < pair.fromCoord) {
             let prev = segment.correspondence[j - 1];
-            normalized[i] = (normalized[i] - prev.fromCoord) *
-              (pair.toCoord - prev.toCoord) / (pair.fromCoord - prev.fromCoord) +
+            normalized[i] = ((normalized[i] - prev.fromCoord) * (pair.toCoord - prev.toCoord) + Number.EPSILON) /
+              (pair.fromCoord - prev.fromCoord + Number.EPSILON) +
               prev.toCoord;
 
             break;
@@ -248,17 +248,17 @@ export default class GlyphVariationProcessor {
           return 0;
         }
 
-        factor = (factor * normalized[i]) / tupleCoords[i];
+        factor = (factor * normalized[i] + Number.EPSILON) / (tupleCoords[i] + Number.EPSILON);
       } else {
         if ((normalized[i] < startCoords[i]) ||
             (normalized[i] > endCoords[i])) {
           return 0;
 
         } else if (normalized[i] < tupleCoords[i]) {
-          factor = (factor * (normalized[i] - startCoords[i])) / (tupleCoords[i] - startCoords[i]);
+          factor = factor * (normalized[i] - startCoords[i] + Number.EPSILON) / (tupleCoords[i] - startCoords[i] + Number.EPSILON);
 
         } else {
-          factor = (factor * (endCoords[i] - normalized[i]) / (endCoords[i] - tupleCoords[i]));
+          factor = factor * (endCoords[i] - normalized[i] + Number.EPSILON) / (endCoords[i] - tupleCoords[i] + Number.EPSILON);
         }
       }
     }
