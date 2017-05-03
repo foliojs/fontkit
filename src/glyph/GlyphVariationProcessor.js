@@ -343,20 +343,24 @@ export default class GlyphVariationProcessor {
       let out1 = outPoints[ref1][k];
       let out2 = outPoints[ref2][k];
 
-      let scale = in1 === in2 ? 0 : (out2 - out1) / (in2 - in1);
+      // If the reference points have the same coordinate but different
+      // delta, inferred delta is zero.  Otherwise interpolate.
+      if (in1 !== in2 || out1 === out2) {
+        let scale = in1 === in2 ? 0 : (out2 - out1) / (in2 - in1);
 
-      for (let p = p1; p <= p2; p++) {
-        let out = inPoints[p][k];
+        for (let p = p1; p <= p2; p++) {
+          let out = inPoints[p][k];
 
-        if (out <= in1) {
-          out += out1 - in1;
-        } else if (out >= in2) {
-          out += out2 - in2;
-        } else {
-          out = out1 + (out - in1) * scale;
+          if (out <= in1) {
+            out += out1 - in1;
+          } else if (out >= in2) {
+            out += out2 - in2;
+          } else {
+            out = out1 + (out - in1) * scale;
+          }
+
+          outPoints[p][k] = out;
         }
-
-        outPoints[p][k] = out;
       }
     }
   }
