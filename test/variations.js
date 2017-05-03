@@ -96,5 +96,14 @@ describe('variations', function() {
       706
     );
   });
+
+  it('should fall back to the last entry in an HVAR table', function () {
+    let font = fontkit.openSync(__dirname + '/data/fonttest/TestHVARTwo.ttf');
+
+    assert.equal(
+      Math.round(font.getVariation({wght: 400}).glyphsForString('A')[0].advanceWidth),
+      584
+    );
+  });
 });
 
