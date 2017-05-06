@@ -83,6 +83,10 @@ export default class Glyph {
       }
     }
 
+    if (this._font._variationProcessor && this._font.HVAR) {
+      advanceWidth += this._font._variationProcessor.getAdvanceAdjustment(this.id, this._font.HVAR);
+    }
+
     return this._metrics = { advanceWidth, advanceHeight, leftBearing, topBearing };
   }
 
