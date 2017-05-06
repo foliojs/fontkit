@@ -308,15 +308,9 @@ export default class TTFGlyph extends Glyph {
     let cbox = this._getCBox(true);
     super._getMetrics(cbox);
 
-    if (this._font._variationProcessor) {
-      // If we have an HVAR table, use that, otherwise decode
-      // the glyph. This triggers recomputation of metrics.
-      if (this._font.HVAR) {
-        let delta = this._font._variationProcessor.getAdvanceAdjustment(this.id, this._font.HVAR);
-        this._metrics.advanceWidth += delta;
-      } else {
-        this.path;
-      }
+    if (this._font._variationProcessor && !this._font.HVAR) {
+      // No HVAR table, decode the glyph. This triggers recomputation of metrics.
+      this.path;
     }
 
     return this._metrics;
@@ -380,7 +374,7 @@ export default class TTFGlyph extends Glyph {
       if (curvePt) {
         path.quadraticCurveTo(curvePt.x, curvePt.y, firstPt.x, firstPt.y);
       }
-      
+
       path.closePath();
     }
 

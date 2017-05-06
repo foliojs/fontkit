@@ -26,6 +26,8 @@ export default class TTFFont {
 
   constructor(stream, variationCoords = null) {
     this.stream = stream;
+    this.variationCoords = variationCoords;
+
     this._directoryPos = this.stream.pos;
     this._tables = {};
     this._glyphs = {};
@@ -39,10 +41,6 @@ export default class TTFFont {
           get: this._getTable.bind(this, table)
         });
       }
-    }
-
-    if (variationCoords) {
-      this._variationProcessor = new GlyphVariationProcessor(this, variationCoords);
     }
   }
 
@@ -372,7 +370,7 @@ export default class TTFFont {
       if (this.directory.tables.glyf) {
         this._glyphs[glyph] = new TTFGlyph(glyph, characters, this);
 
-      } else if (this.directory.tables['CFF ']) {
+      } else if (this.directory.tables['CFF '] || this.directory.tables.CFF2) {
         this._glyphs[glyph] = new CFFGlyph(glyph, characters, this);
       }
     }
@@ -424,6 +422,7 @@ export default class TTFFont {
    *
    * @type {object}
    */
+  @cache
   get variationAxes() {
     let res = {};
     if (!this.fvar) {
@@ -449,6 +448,7 @@ export default class TTFFont {
    *
    * @type {object}
    */
+  @cache
   get namedVariations() {
     let res = {};
     if (!this.fvar) {
@@ -477,8 +477,8 @@ export default class TTFFont {
    * @return {TTFFont}
    */
   getVariation(settings) {
-    if (!this.directory.tables.fvar || !this.directory.tables.gvar || !this.directory.tables.glyf) {
-      throw new Error('Variations require a font with the fvar, gvar, and glyf tables.');
+    if (!(this.directory.tables.fvar && ((this.directory.tables.gvar && this.directory.tables.glyf) || this.directory.tables.CFF2))) {
+      throw new Error('Variations require a font with the fvar, gvar and glyf, or CFF2 tables.');
     }
 
     if (typeof settings === 'string') {
@@ -506,6 +506,26 @@ export default class TTFFont {
     font._tables = this._tables;
 
     return font;
+  }
+
+  @cache
+  get _variationProcessor() {
+    if (!this.fvar) {
+      return null;
+    }
+
+    let variationCoords = this.variationCoords;
+
+    // Ignore if no variation coords and not CFF2
+    if (!variationCoords && !this.CFF2) {
+      return null;
+    }
+
+    if (!variationCoords) {
+      variationCoords = this.fvar.axis.map(axis => axis.defaultValue);
+    }
+
+    return new GlyphVariationProcessor(this, variationCoords);
   }
 
   // Standardized format plugin API

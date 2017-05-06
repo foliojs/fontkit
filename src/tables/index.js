@@ -40,6 +40,7 @@ import CFFFont from '../cff/CFFFont';
 import VORG from './VORG';
 
 tables['CFF '] = CFFFont;
+tables['CFF2'] = CFFFont;
 tables.VORG = VORG;
 
 
