@@ -278,8 +278,8 @@ export default class TTFGlyph extends Glyph {
       var points = glyph.points || [];
     }
 
-    // Recompute and cache metrics if we performed variation processing
-    if (glyph.phantomPoints) {
+    // Recompute and cache metrics if we performed variation processing, and don't have an HVAR table
+    if (glyph.phantomPoints && !this._font.directory.tables.HVAR) {
       this._metrics.advanceWidth  = glyph.phantomPoints[1].x - glyph.phantomPoints[0].x;
       this._metrics.advanceHeight = glyph.phantomPoints[3].y - glyph.phantomPoints[2].y;
       this._metrics.leftBearing   = glyph.xMin - glyph.phantomPoints[0].x;
@@ -309,9 +309,14 @@ export default class TTFGlyph extends Glyph {
     super._getMetrics(cbox);
 
     if (this._font._variationProcessor) {
-      // Decode the font data (and cache for later).
-      // This triggers recomputation of metrics
-      this.path;
+      // If we have an HVAR table, use that, otherwise decode
+      // the glyph. This triggers recomputation of metrics.
+      if (this._font.HVAR) {
+        let delta = this._font._variationProcessor.getAdvanceAdjustment(this.id, this._font.HVAR);
+        this._metrics.advanceWidth += delta;
+      } else {
+        this.path;
+      }
     }
 
     return this._metrics;
