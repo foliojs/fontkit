@@ -153,9 +153,16 @@ export default class CFFGlyph extends Glyph {
               break;
 
             case 11: // return
+              if (cff.version >= 2) {
+                break;
+              }
               return;
 
             case 14: // endchar
+              if (cff.version >= 2) {
+                break;
+              }
+
               if (stack.length > 0) {
                 checkWidth();
               }
