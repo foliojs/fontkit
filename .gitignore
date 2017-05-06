@@ -9,3 +9,4 @@ data.trie
 *.js.map
 use.trie
 use.json
+.nyc_output
