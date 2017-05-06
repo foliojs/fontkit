@@ -7,6 +7,7 @@ import CFFPrivateDict from './CFFPrivateDict';
 import StandardStrings from './CFFStandardStrings';
 import { StandardEncoding, ExpertEncoding } from './CFFEncodings';
 import { ISOAdobeCharset, ExpertCharset, ExpertSubsetCharset } from './CFFCharsets';
+import { ItemVariationStore } from '../tables/variations';
 
 // Checks if an operand is an index of a predefined value,
 // otherwise delegates to the provided type.
@@ -199,12 +200,17 @@ let CFFTopDict = new CFFDict([
   [[12, 38],  'FontName',             'sid',                                  null]
 ]);
 
+let VariationStore = new r.Struct({
+  length: r.uint16,
+  itemVariationStore: ItemVariationStore
+})
+
 let CFF2TopDict = new CFFDict([
   [[12, 7],   'FontMatrix',           'array',                                [0.001, 0, 0, 0.001, 0, 0]],
   [17,        'CharStrings',          new CFFPointer(new CFFIndex),           null],
   [[12, 37],  'FDSelect',             new CFFPointer(FDSelect),               null],
   [[12, 36],  'FDArray',              new CFFPointer(new CFFIndex(FontDict)), null],
-  [24,        'vstore',               'number',                               null],
+  [24,        'vstore',               new CFFPointer(VariationStore),     null],
   [25,        'maxstack',             'number',                               193]
 ]);
 
