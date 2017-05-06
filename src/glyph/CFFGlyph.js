@@ -27,7 +27,7 @@ export default class CFFGlyph extends Glyph {
     let { stream } = this._font;
     let { pos } = stream;
 
-    let cff = this._font['CFF '];
+    let cff = this._font.CFF2 || this._font['CFF '];
     let str = cff.topDict.CharStrings[this.id];
     let end = str.offset + str.length;
     stream.pos = str.offset;
@@ -56,11 +56,16 @@ export default class CFFGlyph extends Glyph {
     let vstore = cff.topDict.vstore && cff.topDict.vstore.itemVariationStore;
     let vsindex = privateDict.vsindex;
     let variationProcessor = this._font._variationProcessor;
+
+    function checkWidth() {
+      if (width == null) {
+        width = stack.shift() + privateDict.nominalWidthX;
+      }
+    }
+
     function parseStems() {
       if (stack.length % 2 !== 0) {
-        if (width === null) {
-          width = stack.shift() + privateDict.nominalWidthX;
-        }
+        checkWidth();
       }
 
       nStems += stack.length >> 1;
@@ -90,7 +95,7 @@ export default class CFFGlyph extends Glyph {
 
             case 4: // vmoveto
               if (stack.length > 1) {
-                if (typeof width === 'undefined' || width === null) { width = stack.shift() + privateDict.nominalWidthX; }
+                checkWidth();
               }
 
               y += stack.shift();
@@ -152,7 +157,7 @@ export default class CFFGlyph extends Glyph {
 
             case 14: // endchar
               if (stack.length > 0) {
-                if (typeof width === 'undefined' || width === null) { width = stack.shift() + privateDict.nominalWidthX; }
+                checkWidth();
               }
 
               if (open) {
@@ -205,8 +210,7 @@ export default class CFFGlyph extends Glyph {
 
             case 21: // rmoveto
               if (stack.length > 2) {
-                if (typeof width === 'undefined' || width === null) { width = stack.shift() + privateDict.nominalWidthX; }
-                let haveWidth = true;
+                checkWidth();
               }
 
               x += stack.shift();
@@ -216,7 +220,7 @@ export default class CFFGlyph extends Glyph {
 
             case 22: // hmoveto
               if (stack.length > 1) {
-                if (typeof width === 'undefined' || width === null) { width = stack.shift() + privateDict.nominalWidthX; }
+                checkWidth();
               }
 
               x += stack.shift();
@@ -574,6 +578,11 @@ export default class CFFGlyph extends Glyph {
     };
 
     parse();
+
+    if (open) {
+      path.closePath();
+    }
+
     return path;
   }
 }
