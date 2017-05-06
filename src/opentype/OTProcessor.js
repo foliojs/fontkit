@@ -17,6 +17,11 @@ export default class OTProcessor {
     this.features = {};
     this.lookups = {};
 
+    // Setup variation substitutions
+    this.variationsIndex = font._variationProcessor
+      ? this.findVariationsIndex(font._variationProcessor.normalizedCoords)
+      : -1;
+
     // initialize to default script + language
     this.selectScript();
 
@@ -91,7 +96,8 @@ export default class OTProcessor {
       if (this.language) {
         for (let featureIndex of this.language.featureIndexes) {
           let record = this.table.featureList[featureIndex];
-          this.features[record.tag] = record.feature;
+          let substituteFeature = this.substituteFeatureForVariations(featureIndex);
+          this.features[record.tag] = substituteFeature || record.feature;
         }
       }
     }
@@ -120,6 +126,46 @@ export default class OTProcessor {
 
     lookups.sort((a, b) => a.index - b.index);
     return lookups;
+  }
+
+  substituteFeatureForVariations(featureIndex) {
+    if (this.variationsIndex === -1) {
+      return null;
+    }
+
+    let record = this.table.featureVariations.featureVariationRecords[this.variationsIndex];
+    let substitutions = record.featureTableSubstitution.substitutions;
+    for (let substitution of substitutions) {
+      if (substitution.featureIndex === featureIndex) {
+        return substitution.alternateFeatureTable;
+      }
+    }
+
+    return null;
+  }
+
+  findVariationsIndex(coords) {
+    let variations = this.table.featureVariations;
+    if (!variations) {
+      return -1;
+    }
+
+    let records = variations.featureVariationRecords;
+    for (let i = 0; i < records.length; i++) {
+      let conditions = records[i].conditionSet.conditionTable;
+      if (this.variationConditionsMatch(conditions, coords)) {
+        return i;
+      }
+    }
+
+    return -1;
+  }
+
+  variationConditionsMatch(conditions, coords) {
+    return conditions.every(condition => {
+      let coord = condition.axisIndex < coords.length ? coords[condition.axisIndex] : 0;
+      return condition.filterRangeMinValue <= coord && coord <= condition.filterRangeMaxValue;
+    });
   }
 
   applyFeatures(userFeatures, glyphs, advances) {

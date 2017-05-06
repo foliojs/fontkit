@@ -33,7 +33,7 @@ export let ScriptList = new r.Array(ScriptRecord, r.uint16);
 // Features and Lookups #
 //#######################
 
-let Feature = new r.Struct({
+export let Feature = new r.Struct({
   featureParams:      r.uint16, // pointer
   lookupCount:        r.uint16,
   lookupListIndexes:  new r.Array(r.uint16, 'lookupCount')
