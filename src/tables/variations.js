@@ -1,4 +1,9 @@
+import {Feature} from './opentype';
 import r from 'restructure';
+
+/*******************
+ * Variation Store *
+ *******************/
 
 let F2DOT14 = new r.Fixed(16, 'BE', 14);
 let RegionAxisCoordinates = new r.Struct({
@@ -32,4 +37,45 @@ export let ItemVariationStore = new r.Struct({
   variationRegionList: new r.Pointer(r.uint32, VariationRegionList),
   variationDataCount: r.uint16,
   itemVariationData: new r.Array(new r.Pointer(r.uint32, ItemVariationData), 'variationDataCount')
+});
+
+/**********************
+ * Feature Variations *
+ **********************/
+
+let ConditionTable = new r.VersionedStruct(r.uint16, {
+  1: {
+    axisIndex: r.uint16,
+    axisIndex: r.uint16,
+    filterRangeMinValue: F2DOT14,
+    filterRangeMaxValue: F2DOT14
+  }
+});
+
+let ConditionSet = new r.Struct({
+  conditionCount: r.uint16,
+  conditionTable: new r.Array(new r.Pointer(r.uint32, ConditionTable), 'conditionCount')
+});
+
+let FeatureTableSubstitutionRecord = new r.Struct({
+  featureIndex: r.uint16,
+  alternateFeatureTable: new r.Pointer(r.uint32, Feature, {type: 'parent'})
+});
+
+let FeatureTableSubstitution = new r.Struct({
+  version: r.fixed32,
+  substitutionCount: r.uint16,
+  substitutions: new r.Array(FeatureTableSubstitutionRecord, 'substitutionCount')
+});
+
+let FeatureVariationRecord = new r.Struct({
+  conditionSet: new r.Pointer(r.uint32, ConditionSet, {type: 'parent'}),
+  featureTableSubstitution: new r.Pointer(r.uint32, FeatureTableSubstitution, {type: 'parent'})
+});
+
+export let FeatureVariations = new r.Struct({
+  majorVersion: r.uint16,
+  minorVersion: r.uint16,
+  featureVariationRecordCount: r.uint32,
+  featureVariationRecords: new r.Array(FeatureVariationRecord, 'featureVariationRecordCount')
 });
