@@ -210,7 +210,7 @@ let CFF2TopDict = new CFFDict([
   [17,        'CharStrings',          new CFFPointer(new CFFIndex),           null],
   [[12, 37],  'FDSelect',             new CFFPointer(FDSelect),               null],
   [[12, 36],  'FDArray',              new CFFPointer(new CFFIndex(FontDict)), null],
-  [24,        'vstore',               new CFFPointer(VariationStore),     null],
+  [24,        'vstore',               new CFFPointer(VariationStore),         null],
   [25,        'maxstack',             'number',                               193]
 ]);
 
