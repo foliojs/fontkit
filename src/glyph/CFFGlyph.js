@@ -187,6 +187,10 @@ export default class CFFGlyph extends Glyph {
                 throw new Error('blend operator not supported in CFF v1');
               }
 
+              if (!variationProcessor) {
+                throw new Error('blend operator in non-variation font');
+              }
+
               let blendVector = variationProcessor.getBlendVector(vstore, vsindex);
               let numBlends = stack.pop();
               let numOperands = numBlends * blendVector.length;

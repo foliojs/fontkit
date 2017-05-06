@@ -26,6 +26,8 @@ export default class TTFFont {
 
   constructor(stream, variationCoords = null) {
     this.stream = stream;
+    this.variationCoords = variationCoords;
+
     this._directoryPos = this.stream.pos;
     this._tables = {};
     this._glyphs = {};
@@ -39,10 +41,6 @@ export default class TTFFont {
           get: this._getTable.bind(this, table)
         });
       }
-    }
-
-    if (variationCoords) {
-      this._variationProcessor = new GlyphVariationProcessor(this, variationCoords);
     }
   }
 
@@ -424,6 +422,7 @@ export default class TTFFont {
    *
    * @type {object}
    */
+  @cache
   get variationAxes() {
     let res = {};
     if (!this.fvar) {
@@ -449,6 +448,7 @@ export default class TTFFont {
    *
    * @type {object}
    */
+  @cache
   get namedVariations() {
     let res = {};
     if (!this.fvar) {
@@ -506,6 +506,26 @@ export default class TTFFont {
     font._tables = this._tables;
 
     return font;
+  }
+
+  @cache
+  get _variationProcessor() {
+    if (!this.fvar) {
+      return null;
+    }
+
+    let variationCoords = this.variationCoords;
+
+    // Ignore if no variation coords and not CFF2
+    if (!variationCoords && !this.CFF2) {
+      return null;
+    }
+
+    if (!variationCoords) {
+      variationCoords = this.fvar.axis.map(axis => axis.defaultValue);
+    }
+
+    return new GlyphVariationProcessor(this, variationCoords);
   }
 
   // Standardized format plugin API

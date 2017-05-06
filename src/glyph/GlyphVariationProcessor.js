@@ -461,7 +461,7 @@ export default class GlyphVariationProcessor {
               (axis.peakCoord - axis.startCoord + Number.EPSILON);
           } else {
             axisScalar = (axis.endCoord - normalizedCoords[j] + Number.EPSILON) /
-              (axis.endCoord - axis.peakCoord + Number.EPSILON)
+              (axis.endCoord - axis.peakCoord + Number.EPSILON);
           }
         }
 
