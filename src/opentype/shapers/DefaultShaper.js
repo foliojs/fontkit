@@ -1,5 +1,6 @@
 import unicode from 'unicode-properties';
 
+const VARIATION_FEATURES = ['rvrn'];
 const COMMON_FEATURES = ['ccmp', 'locl', 'rlig', 'mark', 'mkmk'];
 const FRACTIONAL_FEATURES = ['frac', 'numr', 'dnom'];
 const HORIZONTAL_FEATURES = ['calt', 'clig', 'liga', 'rclt', 'curs', 'kern'];
@@ -26,7 +27,7 @@ export default class DefaultShaper {
 
   static planPreprocessing(plan) {
     plan.add({
-      global: DIRECTIONAL_FEATURES[plan.direction],
+      global: [...VARIATION_FEATURES, ...DIRECTIONAL_FEATURES[plan.direction]],
       local: FRACTIONAL_FEATURES
     });
   }
