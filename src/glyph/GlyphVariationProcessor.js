@@ -380,4 +380,86 @@ export default class GlyphVariationProcessor {
       }
     }
   }
+
+  getAdvanceAdjustment(gid, table) {
+    let outerIndex, innerIndex;
+
+    if (table.advanceWidthMapping) {
+      let idx = gid;
+      if (idx >= table.advanceWidthMapping.mapCount) {
+        idx = table.advanceWidthMapping.mapCount - 1;
+      }
+
+      let entryFormat = table.advanceWidthMapping.entryFormat;
+      ({outerIndex, innerIndex} = table.advanceWidthMapping.mapData[idx]);
+    } else {
+      outerIndex = 0;
+      innerIndex = gid;
+    }
+
+    return this.getMetricDelta(table.itemVariationStore, outerIndex, innerIndex);
+  }
+
+  // See pseudo code from `Font Variations Overview'
+  // in the OpenType specification.
+  getMetricDelta(itemStore, outerIndex, innerIndex) {
+    let varData = itemStore.itemVariationData[outerIndex];
+    let deltaSet = varData.deltaSets[innerIndex];
+    let normalizedCoords = this.normalizedCoords;
+    let netAdjustment = 0;
+
+    // outer loop steps through master designs to be blended
+    for (let master = 0; master < varData.regionIndexCount; master++) {
+      let scalar = 1;
+      let regionIndex = varData.regionIndexes[master];
+      let axes = itemStore.variationRegionList.variationRegions[regionIndex];
+
+      // inner loop steps through axes in this region
+      for (let j = 0; j < axes.length; j++) {
+        let axis = axes[j];
+        let axisScalar;
+
+        // compute the scalar contribution of this axis
+        // ignore invalid ranges
+        if (axis.startCoord > axis.peakCoord || axis.peakCoord > axis.endCoord) {
+          axisScalar = 1;
+
+        } else if (axis.startCoord < 0 && axis.endCoord > 0 && axis.peakCoord !== 0) {
+          axisScalar = 1;
+
+        // peak of 0 means ignore this axis
+        } else if (axis.peakCoord === 0) {
+          axisScalar = 1;
+
+        // ignore this region if coords are out of range
+        } else if (normalizedCoords[j] < axis.startCoord || normalizedCoords[j] > axis.endCoord) {
+          axisScalar = 0;
+
+        // calculate a proportional factor
+        } else {
+          if (normalizedCoords[j] === axis.peakCoord) {
+            axisScalar = 1;
+          } else if (normalizedCoords[j] < axis.peakCoord) {
+            axisScalar = (normalizedCoords[j] - axis.startCoord + Number.EPSILON) /
+              (axis.peakCoord - axis.startCoord + Number.EPSILON);
+          } else {
+            axisScalar = (axis.endCoord - normalizedCoords[j] + Number.EPSILON) /
+              (axis.endCoord - axis.peakCoord + Number.EPSILON)
+          }
+        }
+
+        // take product of all the axis scalars
+        scalar *= axisScalar;
+      }
+
+      // get the scaled delta for this region
+      let delta = deltaSet.deltas[master];
+      let scaledDelta = delta * scalar;
+
+      // accumulate the adjustments from each region
+      netAdjustment += scaledDelta;
+    }
+
+    return netAdjustment;
+  }
 }

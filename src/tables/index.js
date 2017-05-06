@@ -70,6 +70,10 @@ tables.GPOS = GPOS;
 tables.GSUB = GSUB;
 tables.JSTF = JSTF;
 
+// OpenType variations tables
+import HVAR from './HVAR';
+
+tables.HVAR = HVAR;
 
 // Other OpenType Tables
 import DSIG from './DSIG';
