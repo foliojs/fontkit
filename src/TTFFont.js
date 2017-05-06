@@ -372,7 +372,7 @@ export default class TTFFont {
       if (this.directory.tables.glyf) {
         this._glyphs[glyph] = new TTFGlyph(glyph, characters, this);
 
-      } else if (this.directory.tables['CFF ']) {
+      } else if (this.directory.tables['CFF '] || this.directory.tables.CFF2) {
         this._glyphs[glyph] = new CFFGlyph(glyph, characters, this);
       }
     }
@@ -477,8 +477,8 @@ export default class TTFFont {
    * @return {TTFFont}
    */
   getVariation(settings) {
-    if (!this.directory.tables.fvar || !this.directory.tables.gvar || !this.directory.tables.glyf) {
-      throw new Error('Variations require a font with the fvar, gvar, and glyf tables.');
+    if (!(this.directory.tables.fvar && ((this.directory.tables.gvar && this.directory.tables.glyf) || this.directory.tables.CFF2))) {
+      throw new Error('Variations require a font with the fvar, gvar and glyf, or CFF2 tables.');
     }
 
     if (typeof settings === 'string') {

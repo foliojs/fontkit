@@ -49,6 +49,9 @@ export default class CFFGlyph extends Glyph {
     let subrs = privateDict.Subrs || [];
     let subrsBias = this.bias(subrs);
 
+    let vstore = cff.topDict.vstore && cff.topDict.vstore.itemVariationStore;
+    let vsindex = privateDict.vsindex;
+    let variationProcessor = this._font._variationProcessor;
     function parseStems() {
       if (stack.length % 2 !== 0) {
         if (width === null) {
@@ -153,6 +156,42 @@ export default class CFFGlyph extends Glyph {
                 open = false;
               }
               break;
+
+            case 15: { // vsindex
+              if (cff.version < 2) {
+                throw new Error('vsindex operator not supported in CFF v1');
+              }
+
+              vsindex = stack.pop();
+              break;
+            }
+
+            case 16: { // blend
+              if (cff.version < 2) {
+                throw new Error('blend operator not supported in CFF v1');
+              }
+
+              let blendVector = variationProcessor.getBlendVector(vstore, vsindex);
+              let numBlends = stack.pop();
+              let numOperands = numBlends * blendVector.length;
+              let delta = stack.length - numOperands;
+              let base = delta - numBlends;
+
+              for (let i = 0; i < numBlends; i++) {
+                let sum = stack[base + i];
+                for (let j = 0; j < blendVector.length; j++) {
+                  sum += blendVector[j] * stack[delta++];
+                }
+
+                stack[base + i] = sum;
+              }
+
+              while (numOperands--) {
+                stack.pop();
+              }
+
+              break;
+            }
 
             case 19: // hintmask
             case 20: // cntrmask
