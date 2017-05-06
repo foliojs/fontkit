@@ -25,6 +25,7 @@ export default class GlyphVariationProcessor {
   constructor(font, coords) {
     this.font = font;
     this.normalizedCoords = this.normalizeCoords(coords);
+    this.blendVectors = new Map;
   }
 
   normalizeCoords(coords) {
@@ -405,8 +406,24 @@ export default class GlyphVariationProcessor {
   getMetricDelta(itemStore, outerIndex, innerIndex) {
     let varData = itemStore.itemVariationData[outerIndex];
     let deltaSet = varData.deltaSets[innerIndex];
-    let normalizedCoords = this.normalizedCoords;
+    let blendVector = this.getBlendVector(itemStore, outerIndex);
     let netAdjustment = 0;
+
+    for (let master = 0; master < varData.regionIndexCount; master++) {
+      netAdjustment += deltaSet.deltas[master] * blendVector[master];
+    }
+
+    return netAdjustment;
+  }
+
+  getBlendVector(itemStore, outerIndex) {
+    let varData = itemStore.itemVariationData[outerIndex];
+    if (this.blendVectors.has(varData)) {
+      return this.blendVectors.get(varData);
+    }
+
+    let normalizedCoords = this.normalizedCoords;
+    let blendVector = [];
 
     // outer loop steps through master designs to be blended
     for (let master = 0; master < varData.regionIndexCount; master++) {
@@ -452,14 +469,10 @@ export default class GlyphVariationProcessor {
         scalar *= axisScalar;
       }
 
-      // get the scaled delta for this region
-      let delta = deltaSet.deltas[master];
-      let scaledDelta = delta * scalar;
-
-      // accumulate the adjustments from each region
-      netAdjustment += scaledDelta;
+      blendVector[master] = scalar;
     }
 
-    return netAdjustment;
+    this.blendVectors.set(varData, blendVector);
+    return blendVector;
   }
 }
