@@ -109,6 +109,10 @@ class CFFFont {
 
   fdForGlyph(gid) {
     if (!this.topDict.FDSelect) {
+      if (this.topDict.FDArray) {
+        return 0;
+      }
+
       return null;
     }
 
@@ -139,8 +143,8 @@ class CFFFont {
   }
 
   privateDictForGlyph(gid) {
-    if (this.topDict.FDSelect) {
-      let fd = this.fdForGlyph(gid);
+    let fd = this.fdForGlyph(gid);
+    if (fd != null) {
       if (this.topDict.FDArray[fd]) {
         return this.topDict.FDArray[fd].Private;
       }
@@ -148,11 +152,7 @@ class CFFFont {
       return null;
     }
 
-    if (this.version < 2) {
-      return this.topDict.Private;
-    }
-
-    return this.topDict.FDArray[0].Private;
+    return this.topDict.Private;
   }
 }
 
