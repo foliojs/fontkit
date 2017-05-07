@@ -25,6 +25,10 @@ export default class CFFOperand {
       return -(value - 251) * 256 - stream.readUInt8() - 108;
     }
 
+    if (value === 255) {
+      return stream.readInt32BE() / 65536;
+    }
+
     if (value === 28) {
       return stream.readInt16BE();
     }
@@ -78,16 +82,16 @@ export default class CFFOperand {
     }
   }
 
-  static encode(stream, value) {
+  static encode(stream, value, isCharString = false) {
     // if the value needs to be forced to the largest size (32 bit)
     // e.g. for unknown pointers, save the old value and set to 32768
     let val = Number(value);
 
-    if (value.forceLarge) {
+    if (value.forceLarge && !isCharString) {
       stream.writeUInt8(29);
       return stream.writeInt32BE(val);
 
-    } else if ((val | 0) !== val) { // floating point
+    } else if ((val | 0) !== val && !isCharString) { // floating point
       stream.writeUInt8(30);
 
       let str = '' + val;
@@ -125,6 +129,10 @@ export default class CFFOperand {
     } else if (-32768 <= val && val <= 32767) {
       stream.writeUInt8(28);
       return stream.writeInt16BE(val);
+
+    } else if (isCharString) {
+      stream.writeUInt8(255);
+      stream.writeInt32BE(val) * 65536;
 
     } else {
       stream.writeUInt8(29);
