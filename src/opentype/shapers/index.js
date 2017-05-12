@@ -1,6 +1,7 @@
 import DefaultShaper from './DefaultShaper';
 import ArabicShaper from './ArabicShaper';
 import HangulShaper from './HangulShaper';
+import IndicShaper from './IndicShaper';
 import UniversalShaper from './UniversalShaper';
 
 const SHAPERS = {
@@ -14,6 +15,9 @@ const SHAPERS = {
   phlp: ArabicShaper,    // Psalter Pahlavi
 
   hang: HangulShaper,    // Hangul
+
+  knda: IndicShaper,     // Kannada
+  knd2: IndicShaper,     // Kannada
 
   bali: UniversalShaper, // Balinese
   batk: UniversalShaper, // Batak
