@@ -95,7 +95,7 @@ export default class LayoutEngine {
     }
 
     // if there is no GPOS table, use unicode properties to position marks.
-    if (!positioned) {
+    if (!positioned && (!this.engine || this.engine.fallbackPosition)) {
       if (!this.unicodeLayoutEngine) {
         this.unicodeLayoutEngine = new UnicodeLayoutEngine(this.font);
       }

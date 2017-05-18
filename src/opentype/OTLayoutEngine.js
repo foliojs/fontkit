@@ -11,6 +11,7 @@ export default class OTLayoutEngine {
     this.plan = null;
     this.GSUBProcessor = null;
     this.GPOSProcessor = null;
+    this.fallbackPosition = true;
 
     if (font.GSUB) {
       this.GSUBProcessor = new GSUBProcessor(font, font.GSUB);

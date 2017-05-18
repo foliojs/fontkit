@@ -6,6 +6,7 @@ export default class AATLayoutEngine {
   constructor(font) {
     this.font = font;
     this.morxProcessor = new AATMorxProcessor(font);
+    this.fallbackPosition = false;
   }
 
   substitute(glyphs, features, script, language) {
