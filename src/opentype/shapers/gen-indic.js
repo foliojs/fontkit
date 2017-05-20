@@ -2,7 +2,7 @@ import codepoints from 'codepoints';
 import fs from 'fs';
 import UnicodeTrieBuilder from 'unicode-trie/builder';
 import compile from 'dfa/compile';
-import {POSITIONS, IS_CONSONANT} from './IndicShaper';
+import {POSITIONS, IS_CONSONANT} from './indic-data';
 
 const CATEGORIES = {
   Avagraha: 'Symbol',
