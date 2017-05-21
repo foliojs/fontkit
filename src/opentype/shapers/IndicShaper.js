@@ -201,6 +201,12 @@ function initialReordering(font, glyphs) {
     if (start + 3 <= end && !isJoiner(glyphs[start + 2])) {
       if (category === 'Ra' && glyphs[start + 1].shaperInfo.category === 'H') {
         console.log("HERE")
+        limit += 2;
+        while (limit < end && isJoiner(glyphs[limit])) {
+          limit++;
+        }
+        base = start;
+        hasReph = true;
       }
     }
 
@@ -270,7 +276,29 @@ function initialReordering(font, glyphs) {
     // Attach misc marks to previous char to move with them.
     let lastPos = POSITIONS.Start;
     for (let i = start; i < end; i++) {
-      // if ()
+      let info = glyphs[i].shaperInfo;
+      if (['ZWJ', 'ZWNJ', 'N', 'RS', 'CM', 'H', 'Coeng'].includes(info.category)) {
+        info.position = lastPos;
+        if (info.category === 'H' && info.position === POSITIONS.Pre_M) {
+      	  /*
+      	   * Uniscribe doesn't move the Halant with Left Matra.
+      	   * TEST: U+092B,U+093F,U+094DE
+      	   * We follow.  This is important for the Sinhala
+      	   * U+0DDA split matra since it decomposes to U+0DD9,U+0DCA
+      	   * where U+0DD9 is a left matra and U+0DCA is the virama.
+      	   * We don't want to move the virama with the left matra.
+      	   * TEST: U+0D9A,U+0DDA
+      	   */
+          for (let j = i; j > start; j--) {
+            if (glyphs[j - 1].shaperInfo.position !== POSITIONS.Pre_M) {
+              info.position = glyphs[j - 1].shaperInfo.position;
+              break;
+            }
+          }
+        }
+      } else if (info.position !== POSITIONS.SMVD) {
+        lastPos = info.position;
+      }
     }
 
     // For post-base consonants let them own anything before them
@@ -347,18 +375,23 @@ function initialReordering(font, glyphs) {
 
         	/* A ZWNJ disables HALF. */
           if (nonJoiner) {
-            glyphs[i].features.half = false;
+            console.log("ZWNJ");
+            delete glyphs[j].features.half;
           }
         } while (j > start && !isConsonant(glyphs[j]));
       }
     }
 
-    console.log(base, start, end, glyphs.slice(start, end).map(g => [g.id, g.shaperInfo.category, g.shaperInfo.position]))
+    console.log(base, start, end, glyphs.slice(start, end).map(g => [g.id, g.shaperInfo.category, g.shaperInfo.position, Object.keys(g.features).filter(f => !g._font._layoutEngine.engine.plan.globalFeatures[f] && g._font.availableFeatures.includes(f))]))
   }
 }
 
 function finalReordering(font, glyphs) {
   for (let start = 0, end = nextSyllable(glyphs, 0); start < glyphs.length; start = end, end = nextSyllable(glyphs, start)) {
+    console.log('final_reordering');
+    console.log(start, end, glyphs.slice(start, end).map(g => [g.id, g.shaperInfo.category, g.shaperInfo.position]))
+    console.log('----');
+
     // TODO: virama
 
     /* 4. Final reordering:
@@ -369,7 +402,7 @@ function finalReordering(font, glyphs) {
      * cluster.
      */
 
-    console.log(font.availableFeatures);
+    // console.log(font._layoutEngine.engine.getAvailableFeatures('knd2'));
 
     let tryPref = false; // TODO
 
@@ -389,7 +422,7 @@ function finalReordering(font, glyphs) {
       }
     }
 
-    if (base === end && start < base && glyphs[base].shaperInfo.category === 'ZWJ') {
+    if (base === end && start < base && glyphs[base - 1].shaperInfo.category === 'ZWJ') {
       base--;
     }
 
@@ -478,7 +511,30 @@ function finalReordering(font, glyphs) {
        *          proceed to step 5.
        */
       if (rephPos === POSITIONS.After_Post) {
+        newRephPos = start + 1;
+        while (newRephPos < base && ['H', 'Coeng'].includes(glyphs[newRephPos].shaperInfo.category)) {
+          newRephPos++;
+        }
 
+        if (newRephPos < base && ['H', 'Coeng'].includes(glyphs[newRephPos].shaperInfo.category)) {
+          // If ZWJ or ZWNJ are following this halant, position is moved after it.
+          if (newRephPos + 1 < base && isJoiner(glyphs[newRephPos + 1])) {
+            newRephPos++;
+          }
+        } else {
+          newRephPos = end - 1;
+          while (newRephPos > start && glyphs[newRephPos].shaperInfo.position === POSITIONS.SVMD) {
+            newRephPos--;
+          }
+        }
+      }
+
+      let reph = glyphs[start];
+      glyphs.splice(start, 0, ...glyphs.splice(start + 1, newRephPos - start));
+      glyphs[newRephPos] = reph;
+
+      if (start < base && base <= newRephPos) {
+        base--;
       }
 
       console.log("REPH")
@@ -498,6 +554,8 @@ function finalReordering(font, glyphs) {
       console.log('init');
       glyphs[start].features.init = true;
     }
+
+    console.log(start, end, glyphs.slice(start, end).map(g => [g.id, g.shaperInfo.category, g.shaperInfo.position]))
   }
 }
 
