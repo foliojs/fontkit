@@ -1,6 +1,7 @@
 import DefaultShaper from './DefaultShaper';
 import StateMachine from 'dfa';
 import UnicodeTrie from 'unicode-trie';
+import unicode from 'unicode-properties';
 import GlyphInfo from '../GlyphInfo';
 import indicData from './indic.json';
 import {POSITIONS, IS_CONSONANT} from './indic-data';
@@ -18,23 +19,25 @@ export default class IndicShaper extends DefaultShaper {
 
     plan.addStage(initialReordering);
 
-    plan.addStage(['nukt']);
-    plan.addStage(['akhn']);
-    plan.addStage(['rphf'], false);
-    plan.addStage(['rkrf']);
-    plan.addStage(['pref'], false);
-    plan.addStage(['blwf'], false);
-    plan.addStage(['abvf'], false);
-    plan.addStage(['half'], false);
-    plan.addStage(['pstf'], false);
-    plan.addStage(['vatu']);
-    plan.addStage(['cjct']);
-    plan.addStage(['cfar'], false);
+    plan.addStage('nukt');
+    plan.addStage('akhn');
+    plan.addStage('rphf', false);
+    plan.addStage('rkrf');
+    plan.addStage('pref', false);
+    plan.addStage('blwf', false);
+    plan.addStage('abvf', false);
+    plan.addStage('half', false);
+    plan.addStage('pstf', false);
+    plan.addStage('vatu');
+    plan.addStage('cjct');
+    plan.addStage('cfar', false);
 
     plan.addStage(finalReordering);
 
-    plan.addStage(['init'], false);
-    plan.addStage(['pres', 'abvs', 'blws', 'psts', 'haln', 'dist', 'abvm', 'blwm', 'calt', 'clig']);
+    plan.addStage({
+      local: ['init'],
+      global: ['pres', 'abvs', 'blws', 'psts', 'haln', 'dist', 'abvm', 'blwm', 'calt', 'clig']
+    });
 
     // TODO: turn off kern (Khmer) and liga features.
   }
@@ -281,18 +284,148 @@ function initialReordering(font, glyphs) {
   }
 }
 
-function finalReordering() {
-  // TODO: virama
+function finalReordering(font, glyphs) {
+  for (let start = 0, end = nextSyllable(glyphs, 0); start < glyphs.length; start = end, end = nextSyllable(glyphs, start)) {
+    // TODO: virama
 
-  /* 4. Final reordering:
-   *
-   * After the localized forms and basic shaping forms GSUB features have been
-   * applied (see below), the shaping engine performs some final glyph
-   * reordering before applying all the remaining font features to the entire
-   * cluster.
-   */
+    /* 4. Final reordering:
+     *
+     * After the localized forms and basic shaping forms GSUB features have been
+     * applied (see below), the shaping engine performs some final glyph
+     * reordering before applying all the remaining font features to the entire
+     * cluster.
+     */
 
+    console.log(font.availableFeatures);
 
+    let tryPref = false; // TODO
+
+    // Find base again
+    let base = start;
+    for (; base < end; base++) {
+      if (glyphs[base].shaperInfo.position === POSITIONS.Base_C) {
+        if (tryPref && base + 1 < end) {
+          // TODO
+        }
+
+        if (start < base && glyphs[base].shaperInfo.position > POSITIONS.Base_C) {
+          base--;
+        }
+
+        break;
+      }
+    }
+
+    if (base === end && start < base && glyphs[base].shaperInfo.category === 'ZWJ') {
+      base--;
+    }
+
+    if (base < end) {
+      while (start < base && (glyphs[base].shaperInfo.category === 'N' || glyphs[base].shaperInfo.category === 'H' || glyphs[base].shaperInfo.category === 'Coeng')) {
+        base--;
+      }
+    }
+
+    /*   o Reorder matras:
+     *
+     *     If a pre-base matra character had been reordered before applying basic
+     *     features, the glyph can be moved closer to the main consonant based on
+     *     whether half-forms had been formed. Actual position for the matra is
+     *     defined as “after last standalone halant glyph, after initial matra
+     *     position and before the main consonant”. If ZWJ or ZWNJ follow this
+     *     halant, position is moved after it.
+     */
+
+    if (start + 1 < end && start < base) { // Otherwise there can't be any pre-base matra characters.
+      // If we lost track of base, alas, position before last thingy.
+      let newPos = base === end ? base - 2 : base - 1;
+
+      if (true) { // script != Malayalam && script != Tamil
+        while (newPos > start && glyphs[newPos].shaperInfo.category !== 'M' && glyphs[newPos].shaperInfo.category !== 'H' && glyphs[newPos].shaperInfo.category !== 'Coeng') {
+          newPos--;
+        }
+
+        /* If we found no Halant we are done.
+         * Otherwise only proceed if the Halant does
+         * not belong to the Matra itself! */
+        if ((glyphs[newPos].shaperInfo.category === 'H' || glyphs[newPos].shaperInfo.category === 'Coeng') && glyphs[newPos].shaperInfo.position !== POSITIONS.Pre_M) {
+          // If ZWJ or ZWNJ follow this halant, position is moved after it.
+          if (newPos + 1 < end && isJoiner(glyphs[newPos + 1])) {
+            newPos++;
+          }
+        } else {
+          newPos = start; // No move.
+        }
+      }
+
+      if (start < newPos && glyphs[newPos].shaperInfo.position !== POSITIONS.Pre_M) {
+        // Now go see if there's actually any matras...
+        for (let i = newPos; i > start; i--) {
+          if (glyphs[i - 1].shaperInfo.position === POSITIONS.Pre_M) {
+            let oldPos = i - 1;
+            if (oldPos < base && base <= newPos) {
+              base--;
+            }
+
+            let tmp = glyphs[oldPos];
+            glyph.splice(oldPos, 0, ...glyphs.splice(oldPos + 1, newPos - oldPos));
+            glyphs[newPos] = tmp;
+
+            newPos--;
+          }
+        }
+      } else {
+        // TODO
+      }
+    }
+
+    /*   o Reorder reph:
+     *
+     *     Reph’s original position is always at the beginning of the syllable,
+     *     (i.e. it is not reordered at the character reordering stage). However,
+     *     it will be reordered according to the basic-forms shaping results.
+     *     Possible positions for reph, depending on the script, are; after main,
+     *     before post-base consonant forms, and after post-base consonant forms.
+     */
+
+    /* Two cases:
+     *
+     * - If repha is encoded as a sequence of characters (Ra,H or Ra,H,ZWJ), then
+     *   we should only move it if the sequence ligated to the repha form.
+     *
+     * - If repha is encoded separately and in the logical position, we should only
+     *   move it if it did NOT ligate.  If it ligated, it's probably the font trying
+     *   to make it work without the reordering.
+     */
+    if (start + 1 < end && glyphs[start].shaperInfo.position === POSITIONS.Ra_To_Become_Reph && (glyphs[start].shaperInfo.category === 'Repha') !== glyphs[start].isLigated) {
+      let newRephPos;
+      let rephPos = POSITIONS.After_Post; // TODO: config
+
+      /*       1. If reph should be positioned after post-base consonant forms,
+       *          proceed to step 5.
+       */
+      if (rephPos === POSITIONS.After_Post) {
+
+      }
+
+      console.log("REPH")
+    }
+
+    /*   o Reorder pre-base reordering consonants:
+     *
+     *     If a pre-base reordering consonant is found, reorder it according to
+     *     the following rules:
+     */
+    if (tryPref && base + 1 < end) {
+      // TODO
+    }
+
+    // Apply 'init' to the Left Matra if it's a word start.
+    if (glyphs[start].shaperInfo.position === POSITIONS.Pre_M && (!start || !['Cf', 'Mn'].includes(unicode.getCategory(glyphs[start - 1].codePoints[0])))) {
+      console.log('init');
+      glyphs[start].features.init = true;
+    }
+  }
 }
 
 function nextSyllable(glyphs, start) {
