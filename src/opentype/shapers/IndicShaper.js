@@ -122,16 +122,45 @@ function isJoiner(glyph) {
   return c === 'ZWJ' || c === 'ZWNJ';
 }
 
+function wouldSubstitute(glyphs, feature) {
+  for (let glyph of glyphs) {
+    glyph.features = {[feature]: true};
+  }
+
+  let GSUB = glyphs[0]._font._layoutEngine.engine.GSUBProcessor;
+  GSUB.applyFeatures([feature], glyphs);
+
+  return glyphs.length === 1;
+}
+
+function consonantPosition(font, consonant, virama) {
+  let glyphs = [virama, consonant, virama];
+  if (wouldSubstitute(glyphs.slice(0, 2), 'blwf') || wouldSubstitute(glyphs.slice(1, 3), 'blwf')) {
+    console.log('blwf Below_C');
+    return POSITIONS.Below_C;
+  } else if (wouldSubstitute(glyphs.slice(0, 2), 'pstf') || wouldSubstitute(glyphs.slice(1, 3), 'pstf')) {
+    console.log('pstf Post_C')
+    return POSITIONS.Post_C;
+  } else if (wouldSubstitute(glyphs.slice(0, 2), 'pref') || wouldSubstitute(glyphs.slice(1, 3), 'pref')) {
+    console.log('pref Post_C');
+    return POSITIONS.Post_C;
+  }
+
+  console.log('Base_C')
+  return POSITIONS.Base_C;
+}
+
 function initialReordering(font, glyphs) {
+  let dottedCircle = font.glyphForCodePoint(0x25cc).id;
   let virama = font.glyphForCodePoint(0x0CCD).id;
   if (virama) {
-    // let info = new GlyphInfo(font, virama, [0x0CCD]);
+    let info = new GlyphInfo(font, virama, [0x0CCD]);
     // info.
     for (let i = 0; i < glyphs.length; i++) {
       if (glyphs[i].shaperInfo.position === POSITIONS.Base_C) {
-        let consonant = glyphs[i].id;
+        let consonant = new GlyphInfo(font, glyphs[i].id);
         // TODO: consonant_position_from_face
-        glyphs[i].shaperInfo.position = POSITIONS.Below_C;
+        glyphs[i].shaperInfo.position = consonantPosition(font, consonant, info);
       }
     }
   }
