@@ -70,8 +70,16 @@ const SHAPERS = {
 };
 
 export function choose(script) {
-  let shaper = SHAPERS[script];
-  if (shaper) { return shaper; }
+  if (!Array.isArray(script)) {
+    script = [script];
+  }
+
+  for (let s of script) {
+    let shaper = SHAPERS[s];
+    if (shaper) {
+      return shaper;
+    }
+  }
 
   return DefaultShaper;
 }
