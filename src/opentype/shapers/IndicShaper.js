@@ -167,10 +167,24 @@ function initialReordering(font, glyphs) {
 
   for (let start = 0, end = nextSyllable(glyphs, 0); start < glyphs.length; start = end, end = nextSyllable(glyphs, start)) {
     let {category, syllableType} = glyphs[start].shaperInfo;
-    console.log(start, end, category, syllableType)
+    console.log(start, end, glyphs.length, category, syllableType)
 
-    if (syllableType === 'symbol_cluster') {
+    if (syllableType === 'symbol_cluster' || syllableType === 'non_indic_cluster') {
       continue;
+    }
+
+    if (syllableType === 'broken_cluster' && dottedCircle) {
+      let g = new GlyphInfo(font, dottedCircle, [0x25cc]);
+      g.shaperInfo = glyphs[start].shaperInfo;
+
+      // Insert after possible Repha.
+      let i = start;
+      while (i < end && glyphs[i].shaperInfo.category === 'Repha') {
+        i++;
+      }
+
+      glyphs.splice(++i, 0, g);
+      end++;
     }
 
     console.log(start, end, glyphs.slice(start, end).map(g => [g.id, g.shaperInfo.category, g.shaperInfo.position]))
