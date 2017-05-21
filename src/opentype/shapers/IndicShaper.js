@@ -80,7 +80,15 @@ class IndicInfo {
 
 function setupSyllables(font, glyphs) {
   let syllable = 0;
+  let last = 0;
   for (let [start, end, tags] of stateMachine.match(glyphs.map(indicCategory))) {
+    if (start > last) {
+      ++syllable;
+      for (let i = last; i < start; i++) {
+        glyphs[i].shaperInfo = new IndicInfo('X', POSITIONS.End, 'non_indic_cluster', syllable);
+      }
+    }
+
     ++syllable;
 
     // Create shaper info
@@ -93,7 +101,15 @@ function setupSyllables(font, glyphs) {
       );
     }
 
-    console.log(start, end, tags, syllable, glyphs.slice(start, end + 1).map(g => g.shaperInfo));
+    last = end + 1;
+    // console.log(start, end, tags, syllable, glyphs.slice(start, end + 1).map(g => g.shaperInfo));
+  }
+
+  if (last < glyphs.length) {
+    ++syllable;
+    for (let i = last; i < glyphs.length; i++) {
+      glyphs[i].shaperInfo = new IndicInfo('X', POSITIONS.End, 'non_indic_cluster', syllable);
+    }
   }
 }
 
