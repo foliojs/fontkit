@@ -101,9 +101,99 @@ describe('shaping', function() {
     });
   });
 
+
+  describe('indic shaper', function () {
+    describe('shapes Kannada text', function () {
+      // Tests from https://github.com/unicode-org/text-rendering-tests
+      test('SHKNDA-1/1', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಲ್ಲಿ', '250+1550|126+0');
+      test('SHKNDA-1/2', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಟ್ಸ್', '194+2092|130+96');
+      test('SHKNDA-1/3', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಳಿ', '257+1441');
+      test('SHKNDA-1/4', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಡಿ', '235+1565');
+      test('SHKNDA-1/5', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಮೆ', '295+2196');
+      test('SHKNDA-1/6', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ರಿ', '249+1289');
+      test('SHKNDA-1/7', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಖ್ಯೆ', '272+1733|124+164');
+      test('SHKNDA-1/8', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಫ್ರಿ', '244+1505|125+170');
+      test('SHKNDA-1/9', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ನೆ', '290+1422');
+      test('SHKNDA-1/10', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಗಿ', '225+1271');
+      test('SHKNDA-1/11', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಷ್ಟಿ', '253+1528|109+141');
+      test('SHKNDA-1/12', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಯಿಂ', '248+2564|73+1205');
+      test('SHKNDA-1/13', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಚೀ', '228+1569|35+845');
+      test('SHKNDA-1/14', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ನಿ', '242+1389');
+      test('SHKNDA-1/15', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಗ್ಲಿ', '225+1271|126+0');
+      test('SHKNDA-1/16', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಷಿ', '253+1528');
+      test('SHKNDA-1/17', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಗೆ', '273+1276');
+      test('SHKNDA-1/18', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ದ್ವಿ', '240+1516|127+57');
+      test('SHKNDA-1/19', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ತೀ', '238+1255|35+845');
+      test('SHKNDA-1/20', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಮಿ', '247+2186');
+      test('SHKNDA-1/21', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಲಿ', '250+1550');
+      test('SHKNDA-1/22', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಗಿ', '225+1271');
+      test('SHKNDA-1/23', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ನ್', '203+1911');
+      test('SHKNDA-1/24', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಬಿ', '245+1579');
+      test('SHKNDA-1/25', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಲಿ', '250+1550');
+      test('SHKNDA-1/26', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ನ್ನಿಂ', '242+1389|118+158|73+1205');
+      test('SHKNDA-1/27', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಲ್ಲಿ', '250+1550|126+0');
+      test('SHKNDA-1/28', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಧಿ', '241+1516');
+      test('SHKNDA-1/29', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಪೌ', '168+1514|34+773');
+      test('SHKNDA-1/30', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ವಿಂ', '251+1533|73+1205');
+      test('SHKNDA-1/31', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಡಿ', '235+1565');
+      test('SHKNDA-1/32', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಟಿ', '233+1621');
+      test('SHKNDA-1/33', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ನಿ', '242+1389');
+      test('SHKNDA-1/34', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಧಿ', '241+1516');
+
+      test('SHKNDA-2/1', 'NotoSans/NotoSansKannada-Regular.ttf', 'ನ್ನಾ', '150+1456|57+919|116+215');
+      test('SHKNDA-2/2', 'NotoSans/NotoSansKannada-Regular.ttf', 'ನ್ನಾ', '150+1456|57+919|116+215');
+      test('SHKNDA-2/3', 'NotoSans/NotoSansKannada-Regular.ttf', 'ತ್ತಾ', '146+1275|57+919|112+133');
+      test('SHKNDA-2/4', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಟ್ಟಾ', '141+1669|57+919|107+277');
+      test('SHKNDA-2/5', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಡೋಂಗಿ', '249+1573|61+1526|71+843|4+1127|207+1327');
+      test('SHKNDA-2/6', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಜಿ಼ೕಬೆನ್', '211+1590|55@-254,0+0|71+843|259+1651|186+2096');
+      test('SHKNDA-2/7', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಜಾ಼ಕಿರ್', '139+1590|57+919|55@-1173,0+0|205+1176|193+1974');
+      test('SHKNDA-2/8', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಇನ್ಫ್ಲೆಕ್ಷನಲ್', '8+1457|256+1456|118+346|335+791|282+1176|39+1456|195+2234');
+      test('SHKNDA-2/9', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಇನ್ಫ್ಲೆಕ್ಷನ್', '8+1457|256+1456|118+346|335+791|282+1176|186+2096');
+      test('SHKNDA-2/10', 'NotoSans/NotoSansKannada-Regular.ttf', 'ದಟ್ಸ್', '37+1566|177+2150|130+245');
+      test('SHKNDA-2/11', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಎಕ್ಸ್', '14+1612|167+1656|130+245');
+      test('SHKNDA-2/12', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಮಾರ್ಚ್', '155+2367|57+919|172+2281|94+1161');
+      test('SHKNDA-2/13', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಟೆಕ್ಸ್ಟ್', '247+1669|167+1656|130+346|317+970');
+      test('SHKNDA-2/14', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಬುಕ್ಸ್', '42+1641|60+745|167+1656|130+245');
+      test('SHKNDA-2/15', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಸಾಫ್ಟ್', '163+1452|57+919|188+2101|107+277');
+      test('SHKNDA-2/16', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಜಸ್ಟ್', '27+1590|200+1932|107+277');
+
+      test('SHKNDA-3/1', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಕೋಂ', '239+1176|61+1526|71+843|4+1127');
+      test('SHKNDA-3/2', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಖೋಂ', '240+1772|61+1526|71+843|4+1127');
+      test('SHKNDA-3/3', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಗೋಂ', '241+1327|61+1526|71+843|4+1127');
+      test('SHKNDA-3/4', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಘೋಂ', '242+2041|279+1526|71+843|4+1127');
+      test('SHKNDA-3/5', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಙೋಂ', '24+1510|67+2009|71+843|4+1127');
+      test('SHKNDA-3/6', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಚೋಂ', '243+1628|61+1526|71+843|4+1127');
+      test('SHKNDA-3/7', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಛೋಂ', '244+1727|61+1526|71+843|4+1127');
+      test('SHKNDA-3/8', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಜೋಂ', '245+1590|61+1526|71+843|4+1127');
+      test('SHKNDA-3/9', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಝೋಂ', '246+2824|61+1526|71+843|4+1127');
+      test('SHKNDA-3/10', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಞೋಂ', '29+1982|67+2009|71+843|4+1127');
+      test('SHKNDA-3/11', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಟೋಂ', '247+1669|61+1526|71+843|4+1127');
+      test('SHKNDA-3/12', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಠೋಂ', '248+1334|61+1526|71+843|4+1127');
+      test('SHKNDA-3/13', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಡೋಂ', '249+1573|61+1526|71+843|4+1127');
+      test('SHKNDA-3/14', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಢೋಂ', '250+1573|61+1526|71+843|4+1127');
+      test('SHKNDA-3/15', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಣೋಂ', '251+1775|61+1526|71+843|4+1127');
+      test('SHKNDA-3/16', 'NotoSans/NotoSansKannada-Regular.ttf', 'ತೋಂ', '252+1275|61+1526|71+843|4+1127');
+      test('SHKNDA-3/17', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಥೋಂ', '253+1566|61+1526|71+843|4+1127');
+      test('SHKNDA-3/18', 'NotoSans/NotoSansKannada-Regular.ttf', 'ದೋಂ', '254+1566|61+1526|71+843|4+1127');
+      test('SHKNDA-3/19', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಧೋಂ ', '255+1566|61+1526|71+843|4+1127|3+590');
+      test('SHKNDA-3/20', 'NotoSans/NotoSansKannada-Regular.ttf', 'ನೋಂ', '256+1456|61+1526|71+843|4+1127');
+      test('SHKNDA-3/21', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಪೋಂ', '257+1621|275+1316|71+843|4+1127');
+      test('SHKNDA-3/22', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಫೋಂ', '258+1621|277+1316|71+843|4+1127');
+      test('SHKNDA-3/23', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಬೋಂ', '259+1651|61+1526|71+843|4+1127');
+      test('SHKNDA-3/24', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಭೋಂ', '260+1651|61+1526|71+843|4+1127');
+      test('SHKNDA-3/25', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಮೋಂ', '280+3152|71+843|4+1127');
+      test('SHKNDA-3/26', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಯೋಂ', '281+3506|71+843|4+1127');
+      test('SHKNDA-3/27', 'NotoSans/NotoSansKannada-Regular.ttf', 'ರೋಂ', '263+1334|61+1526|71+843|4+1127');
+      test('SHKNDA-3/28', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಱೋಂ', '47+1701|67+2009|71+843|4+1127');
+      test('SHKNDA-3/29', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಲೋಂ', '264+1574|61+1526|71+843|4+1127');
+      test('SHKNDA-3/30', 'NotoSans/NotoSansKannada-Regular.ttf', 'ವೋಂ', '266+1626|275+1316|71+843|4+1127');
+      test('SHKNDA-3/31', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಆ್ಯಕ್ಷಿಸ್‌', '7+1717|122+532|285+1176|200+2092|3+0');
+    });
+  });
+
   describe('universal shaping engine', function() {
     describe('shapes balinese text', function() {
-      // Tests from https://github.com/icu-project/text-rendering-tests
+      // Tests from https://github.com/unicode-org/text-rendering-tests
       test('SHBALI-1/1', 'NotoSans/NotoSansBalinese-Regular.ttf', "ᬓᬸᬀ", '23+2275|60@5,0+0|4@-95,0+0');
       test('SHBALI-1/2', 'NotoSans/NotoSansBalinese-Regular.ttf', "ᬕ᭄ᬖᬂ", '25+2237|132+0|6@-307,0+0');
       test('SHBALI-1/3', 'NotoSans/NotoSansBalinese-Regular.ttf', "ᬘᬻ", '28+1627|62@3,0+0|57+916');
