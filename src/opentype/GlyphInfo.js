@@ -34,14 +34,19 @@ export default class GlyphInfo {
     this._id = id;
     this.substituted = true;
 
-    if (this._font.GDEF && this._font.GDEF.glyphClassDef) {
+    let GDEF = this._font.GDEF;
+    if (GDEF && GDEF.glyphClassDef) {
       // TODO: clean this up
-      let classID = OTProcessor.prototype.getClassID(id, this._font.GDEF.glyphClassDef);
-      this.isMark = classID === 3;
+      let classID = OTProcessor.prototype.getClassID(id, GDEF.glyphClassDef);
+      this.isBase = classID === 1;
       this.isLigature = classID === 2;
+      this.isMark = classID === 3;
+      this.markAttachmentType = GDEF.markAttachClassDef ? OTProcessor.prototype.getClassID(id, GDEF.markAttachClassDef) : 0;
     } else {
       this.isMark = this.codePoints.every(unicode.isMark);
+      this.isBase = !this.isMark;
       this.isLigature = this.codePoints.length > 1;
+      this.markAttachmentType = 0;
     }
   }
 }

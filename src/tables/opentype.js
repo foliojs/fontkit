@@ -46,10 +46,13 @@ let FeatureRecord = new r.Struct({
 
 export let FeatureList = new r.Array(FeatureRecord, r.uint16);
 
-let LookupFlags = new r.Bitfield(r.uint16, [
-  'rightToLeft', 'ignoreBaseGlyphs', 'ignoreLigatures',
-  'ignoreMarks', 'useMarkFilteringSet', null, 'markAttachmentType'
-]);
+let LookupFlags = new r.Struct({
+  markAttachmentType: r.uint8,
+  flags: new r.Bitfield(r.uint8, [
+    'rightToLeft', 'ignoreBaseGlyphs', 'ignoreLigatures',
+    'ignoreMarks', 'useMarkFilteringSet'
+  ])
+});
 
 export function LookupList(SubTable) {
   let Lookup = new r.Struct({
@@ -57,7 +60,7 @@ export function LookupList(SubTable) {
     flags:              LookupFlags,
     subTableCount:      r.uint16,
     subTables:          new r.Array(new r.Pointer(r.uint16, SubTable), 'subTableCount'),
-    markFilteringSet:   r.uint16 // TODO: only present when flags says so...
+    markFilteringSet:   new r.Optional(r.uint16, t => t.flags.flags.useMarkFilteringSet)
   });
 
   return new r.LazyArray(new r.Pointer(r.uint16, Lookup), r.uint16);
