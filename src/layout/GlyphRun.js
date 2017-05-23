@@ -20,26 +20,26 @@ export default class GlyphRun {
     this.positions = null;
 
     /**
-     * The script that was used for shaping. This was either passed in or detected automatically.
+     * The script that was requested for shaping. This was either passed in or detected automatically.
      * @type {string}
      */
     this.script = script;
 
     /**
-     * The language used for shaping, as passed in. If `null`, the default language for the
+     * The language requested for shaping, as passed in. If `null`, the default language for the
      * script was used.
      * @type {string}
      */
     this.language = language || null;
 
     /**
-     * The directionality of the script (either ltr or rtl).
+     * The directionality of the requested script (either ltr or rtl).
      * @type {string}
      */
     this.direction = Script.direction(script);
 
     /**
-     * The features applied during shaping. This is a combination of user
+     * The features requested during shaping. This is a combination of user
      * specified features and features chosen by the shaper.
      * @type {object}
      */
