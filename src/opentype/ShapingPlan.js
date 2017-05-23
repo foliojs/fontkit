@@ -24,22 +24,18 @@ export default class ShapingPlan {
    * Adds the given features to the last stage.
    * Ignores features that have already been applied.
    */
-  _addFeatures(features) {
-    let stage = this.stages[this.stages.length - 1];
+  _addFeatures(features, global) {
+    let stageIndex = this.stages.length - 1;
+    let stage = this.stages[stageIndex];
     for (let feature of features) {
-      if (!this.allFeatures[feature]) {
+      if (this.allFeatures[feature] == null) {
         stage.push(feature);
-        this.allFeatures[feature] = true;
+        this.allFeatures[feature] = stageIndex;
       }
-    }
-  }
 
-  /**
-   * Adds the given features to the global list
-   */
-  _addGlobal(features) {
-    for (let feature of features) {
-      this.globalFeatures[feature] = true;
+      if (global) {
+        this.globalFeatures[feature] = true;
+      }
     }
   }
 
@@ -56,16 +52,10 @@ export default class ShapingPlan {
     }
 
     if (Array.isArray(arg)) {
-      this._addFeatures(arg);
-      if (global) {
-        this._addGlobal(arg);
-      }
+      this._addFeatures(arg, global);
     } else if (typeof arg === 'object') {
-      let features = (arg.global || []).concat(arg.local || []);
-      this._addFeatures(features);
-      if (arg.global) {
-        this._addGlobal(arg.global);
-      }
+      this._addFeatures(arg.global || [], true);
+      this._addFeatures(arg.local || [], false);
     } else {
       throw new Error("Unsupported argument to ShapingPlan#add");
     }
@@ -80,6 +70,23 @@ export default class ShapingPlan {
     } else {
       this.stages.push([]);
       this.add(arg, global);
+    }
+  }
+
+  setFeatureOverrides(features) {
+    if (Array.isArray(features)) {
+      this.add(features);
+    } else if (typeof features === 'object') {
+      for (let tag in features) {
+        if (features[tag]) {
+          this.add(tag);
+        } else if (this.allFeatures[tag] != null) {
+          let stage = this.stages[this.allFeatures[tag]];
+          stage.splice(stage.indexOf(tag), 1);
+          delete this.allFeatures[tag];
+          delete this.globalFeatures[tag];
+        }
+      }
     }
   }
 
