@@ -55,10 +55,10 @@ describe('character to glyph mapping', function() {
     );
 
     it('should apply opentype GSUB features', function() {
-      let {glyphs} = font.layout('ffi 1/2', ['liga', 'dlig', 'frac']);
-      assert.equal(glyphs.length, 6);
-      assert.deepEqual(glyphs.map(g => g.id), [ 514, 36, 1, 1617, 1726, 1604 ]);
-      return assert.deepEqual(glyphs.map(g => g.codePoints), [[102, 102], [105], [32], [49], [47], [50]]);
+      let {glyphs} = font.layout('ffi', ['dlig']);
+      assert.equal(glyphs.length, 2);
+      assert.deepEqual(glyphs.map(g => g.id), [ 514, 36 ]);
+      return assert.deepEqual(glyphs.map(g => g.codePoints), [[102, 102], [105]]);
     });
 
     it('should enable fractions when using fraction slash', function() {

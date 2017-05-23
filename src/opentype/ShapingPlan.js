@@ -31,10 +31,10 @@ export default class ShapingPlan {
       if (this.allFeatures[feature] == null) {
         stage.push(feature);
         this.allFeatures[feature] = stageIndex;
-      }
 
-      if (global) {
-        this.globalFeatures[feature] = true;
+        if (global) {
+          this.globalFeatures[feature] = true;
+        }
       }
     }
   }
