@@ -365,6 +365,10 @@ export default class TTFFont {
     return this._layoutEngine.getAvailableFeatures();
   }
 
+  getAvailableFeatures(script, language) {
+    return this._layoutEngine.getAvailableFeatures(script, language);
+  }
+
   _getBaseGlyph(glyph, characters = []) {
     if (!this._glyphs[glyph]) {
       if (this.directory.tables.glyf) {

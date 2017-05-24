@@ -37,7 +37,8 @@ export default class DefaultShaper {
   }
 
   static planPostprocessing(plan, userFeatures) {
-    plan.add([...COMMON_FEATURES, ...HORIZONTAL_FEATURES, ...userFeatures]);
+    plan.add([...COMMON_FEATURES, ...HORIZONTAL_FEATURES]);
+    plan.setFeatureOverrides(userFeatures);
   }
 
   static assignFeatures(plan, glyphs) {

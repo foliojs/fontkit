@@ -22,46 +22,49 @@ export default class OTLayoutEngine {
     }
   }
 
-  setup(glyphs, features, script, language) {
+  setup(glyphRun) {
     // Map glyphs to GlyphInfo objects so data can be passed between
     // GSUB and GPOS without mutating the real (shared) Glyph objects.
-    this.glyphInfos = glyphs.map(glyph => new GlyphInfo(this.font, glyph.id, [...glyph.codePoints]));
+    this.glyphInfos = glyphRun.glyphs.map(glyph => new GlyphInfo(this.font, glyph.id, [...glyph.codePoints]));
 
     // Choose a shaper based on the script, and setup a shaping plan.
     // This determines which features to apply to which glyphs.
-    this.shaper = Shapers.choose(script);
-    this.plan = new ShapingPlan(this.font, script, language);
-    return this.shaper.plan(this.plan, this.glyphInfos, features);
+    this.shaper = Shapers.choose(glyphRun.script);
+    this.plan = new ShapingPlan(this.font, glyphRun.script, glyphRun.language);
+    this.shaper.plan(this.plan, this.glyphInfos, glyphRun.features);
+
+    // Assign chosen features to output glyph run
+    for (let key in this.plan.allFeatures) {
+      glyphRun.features[key] = true;
+    }
   }
 
-  substitute(glyphs) {
+  substitute(glyphRun) {
     if (this.GSUBProcessor) {
       this.plan.process(this.GSUBProcessor, this.glyphInfos);
 
       // Map glyph infos back to normal Glyph objects
-      glyphs = this.glyphInfos.map(glyphInfo => this.font.getGlyph(glyphInfo.id, glyphInfo.codePoints));
+      glyphRun.glyphs = this.glyphInfos.map(glyphInfo => this.font.getGlyph(glyphInfo.id, glyphInfo.codePoints));
     }
-
-    return glyphs;
   }
 
-  position(glyphs, positions) {
+  position(glyphRun) {
     if (this.shaper.zeroMarkWidths === 'BEFORE_GPOS') {
-      this.zeroMarkAdvances(positions);
+      this.zeroMarkAdvances(glyphRun.positions);
     }
 
     if (this.GPOSProcessor) {
-      this.plan.process(this.GPOSProcessor, this.glyphInfos, positions);
+      this.plan.process(this.GPOSProcessor, this.glyphInfos, glyphRun.positions);
     }
 
     if (this.shaper.zeroMarkWidths === 'AFTER_GPOS') {
-      this.zeroMarkAdvances(positions);
+      this.zeroMarkAdvances(glyphRun.positions);
     }
 
     // Reverse the glyphs and positions if the script is right-to-left
-    if (this.plan.direction === 'rtl') {
-      glyphs.reverse();
-      positions.reverse();
+    if (glyphRun.direction === 'rtl') {
+      glyphRun.glyphs.reverse();
+      glyphRun.positions.reverse();
     }
 
     return this.GPOSProcessor && this.GPOSProcessor.features;
