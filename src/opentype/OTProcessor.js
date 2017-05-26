@@ -61,7 +61,7 @@ export default class OTProcessor {
       }
 
       if (!entry) {
-        return;
+        return this.scriptTag;
       }
 
       this.scriptTag = entry.tag;
@@ -102,6 +102,8 @@ export default class OTProcessor {
         }
       }
     }
+
+    return this.scriptTag;
   }
 
   lookupsForFeatures(userFeatures = [], exclude) {
