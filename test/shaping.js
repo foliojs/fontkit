@@ -105,7 +105,7 @@ describe('shaping', function() {
     test('thai', 'THSarabunNew.ttf', 'ดีปี ด่ ป่ ดู ฤู', '233+391|266+0|240+428|344+0|496+216|233+391|352+0|496+216|240+428|347+0|496+216|233+391|270+0|496+216|249+378|367+0');
   });
 
-  describe.only('indic shaper', function () {
+  describe('indic shaper', function () {
     describe('shapes Kannada text', function () {
       // Tests from https://github.com/unicode-org/text-rendering-tests
       test('SHKNDA-1/1', 'NotoSans/NotoSerifKannada-Regular.ttf', 'ಲ್ಲಿ', '250+1550|126+0');
@@ -191,6 +191,67 @@ describe('shaping', function() {
       test('SHKNDA-3/29', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಲೋಂ', '264+1574|61+1526|71+843|4+1127');
       test('SHKNDA-3/30', 'NotoSans/NotoSansKannada-Regular.ttf', 'ವೋಂ', '266+1626|275+1316|71+843|4+1127');
       test('SHKNDA-3/31', 'NotoSans/NotoSansKannada-Regular.ttf', 'ಆ್ಯಕ್ಷಿಸ್‌', '7+1717|122+532|285+1176|200+2092|3+0');
+    });
+
+    describe('shapes Telugu text', function () {
+      test('HB-TELU-1', 'NotoSans/NotoSansTelugu-Regular.ttf', 'కై', '326+1065');
+      test('HB-TELU-2', 'NotoSans/NotoSansTelugu-Regular.ttf', 'క్', '102+1065');
+      test('HB-TELU-3', 'NotoSans/NotoSansTelugu-Regular.ttf', 'క్కై', '326+1065|511+1079');
+      test('HB-TELU-4', 'NotoSans/NotoSansTelugu-Regular.ttf', 'క్ర', '21+1065|549+0');
+      test('HB-TELU-5', 'NotoSans/NotoSansTelugu-Regular.ttf', 'క్రి', '174+1065|549+0');
+      test('HB-TELU-6', 'NotoSans/NotoSansTelugu-Regular.ttf', 'క్రై', '326+1065|496+860');
+      test('HB-TELU-7', 'NotoSans/NotoSansTelugu-Regular.ttf', 'క్ర్', '102+1065|549+0');
+      test('HB-TELU-8', 'NotoSans/NotoSansTelugu-Regular.ttf', 'క్ర్క', '21+1065|549+0|511+1079');
+      test('HB-TELU-9', 'NotoSans/NotoSansTelugu-Regular.ttf', 'క్ష', '101+1065');
+      test('HB-TELU-10', 'NotoSans/NotoSansTelugu-Regular.ttf', 'క్ష్', '137+1065');
+      test('HB-TELU-11', 'NotoSans/NotoSansTelugu-Regular.ttf', 'క్ష్ణ', '21+1065|605+0');
+      test('HB-TELU-12', 'NotoSans/NotoSansTelugu-Regular.ttf', 'ఽం', '56+1208|5+1038');
+    });
+
+    describe('shapes Tamil text', function () {
+      test('HB-TAML-1', 'NotoSans/NotoSansTamil-Regular.ttf', 'தமிழ்நாடு', '25+1689|29+1762|42+537|94+1762|26+1616|41+1311|112+2078');
+      test('HB-TAML-2', 'NotoSans/NotoSansTamil-Regular.ttf', 'ஓர்', '16+2018|90+1311');
+      test('HB-TAML-3', 'NotoSans/NotoSansTamil-Regular.ttf', 'இந்திய', '8+2306|85+1616|25+1689|149+537|30+1972');
+      test('HB-TAML-4', 'NotoSans/NotoSansTamil-Regular.ttf', 'மாநிலமாகும்.', '29+1762|41+1311|26+1616|149+537|33+2075|29+1762|41+1311|101+2175|88+1762|164+549');
+      test('HB-TAML-5', 'NotoSans/NotoSansTamil-Regular.ttf', 'தமிழ்நாடு,', '25+1689|29+1762|42+537|94+1762|26+1616|41+1311|112+2078|162+512');
+      test('HB-TAML-6', 'NotoSans/NotoSansTamil-Regular.ttf', 'தமிழகம்', '25+1689|29+1762|42+537|35+1762|18+1689|88+1762');
+      test('HB-TAML-7', 'NotoSans/NotoSansTamil-Regular.ttf', 'என்றும்', '12+1640|86+2528|132+2329|88+1762');
+      test('HB-TAML-8', 'NotoSans/NotoSansTamil-Regular.ttf', 'பரவலாக', '28+1593|31+1311|36+2139|33+2075|41+1311|18+1689');
+      test('HB-TAML-9', 'NotoSans/NotoSansTamil-Regular.ttf', 'அழைக்கப்படுகிறது.', '6+2295|48+2384|35+1762|77+1689|18+1689|87+1593|28+1593|112+2078|18+1689|149+537|32+1792|116+2234|164+549');
+      test('HB-TAML-10', 'NotoSans/NotoSansTamil-Regular.ttf', 'ஆங்கிலத்தில்', '7+2690|78+2139|18+1689|149+537|33+2075|84+1689|25+1689|149+537|92+2075');
+      test('HB-TAML-11', 'NotoSans/NotoSansTamil-Regular.ttf', 'மெட்ராஸ்', '46+1846|29+1762|82+1419|31+1311|41+1311|98+2631');
+      test('HB-TAML-12', 'NotoSans/NotoSansTamil-Regular.ttf', 'ஸ்டேட்', '98+2631|47+1491|23+1419|82+1419');
+      test('HB-TAML-13', 'NotoSans/NotoSansTamil-Regular.ttf', 'என்றும்', '12+1640|86+2528|132+2329|88+1762');
+      test('HB-TAML-14', 'NotoSans/NotoSansTamil-Regular.ttf', 'தமிழில்', '25+1689|29+1762|42+537|35+1762|42+537|92+2075');
+      test('HB-TAML-15', 'NotoSans/NotoSansTamil-Regular.ttf', 'சென்னை', '46+1846|20+1481|86+2528|48+2384|27+2528');
+      test('HB-TAML-16', 'NotoSans/NotoSansTamil-Regular.ttf', 'ராஜ்ஜியம்', '31+1311|41+1311|80+2094|21+2094|42+537|30+1972|88+1762');
+      test('HB-TAML-17', 'NotoSans/NotoSansTamil-Regular.ttf', 'என்றும்', '12+1640|86+2528|132+2329|88+1762');
+      test('HB-TAML-18', 'NotoSans/NotoSansTamil-Regular.ttf', 'அழைக்கப்பெற்றது.', '6+2295|48+2384|35+1762|77+1689|18+1689|87+1593|46+1846|28+1593|91+1788|32+1792|116+2234|164+549');
+      test('HB-TAML-19', 'NotoSans/NotoSansTamil-Regular.ttf', 'இதனை', '8+2306|25+1689|48+2384|27+2528');
+      test('HB-TAML-20', 'NotoSans/NotoSansTamil-Regular.ttf', 'தமிழ்நாடு', '25+1689|29+1762|42+537|94+1762|26+1616|41+1311|112+2078');
+      test('HB-TAML-21', 'NotoSans/NotoSansTamil-Regular.ttf', 'என்று', '12+1640|86+2528|132+2329');
+      test('HB-TAML-22', 'NotoSans/NotoSansTamil-Regular.ttf', 'மாற்றக்கோரி', '29+1762|41+1311|91+1788|32+1792|77+1689|47+1491|18+1689|41+1311|31+1311|42+537');
+      test('HB-TAML-23', 'NotoSans/NotoSansTamil-Regular.ttf', 'போராட்டங்கள்', '47+1491|28+1593|41+1311|31+1311|41+1311|82+1419|23+1419|78+2139|18+1689|93+2192');
+      test('HB-TAML-24', 'NotoSans/NotoSansTamil-Regular.ttf', 'நடைபெற்றன.', '26+1616|48+2384|23+1419|46+1846|28+1593|91+1788|32+1792|27+2528|164+549');
+      test('HB-TAML-25', 'NotoSans/NotoSansTamil-Regular.ttf', 'சங்கரலிங்கனார்', '20+1481|78+2139|18+1689|31+1311|134+2603|78+2139|18+1689|27+2528|41+1311|90+1311');
+      test('HB-TAML-26', 'NotoSans/NotoSansTamil-Regular.ttf', 'என்பவர்', '12+1640|86+2528|28+1593|36+2139|90+1311');
+      test('HB-TAML-27', 'NotoSans/NotoSansTamil-Regular.ttf', 'நாட்கள்', '26+1616|41+1311|82+1419|18+1689|93+2192');
+      test('HB-TAML-28', 'NotoSans/NotoSansTamil-Regular.ttf', 'உண்ணாவிரதம்', '10+2185|83+3377|24+3377|41+1311|36+2139|148+537|31+1311|25+1689|88+1762');
+      test('HB-TAML-29', 'NotoSans/NotoSansTamil-Regular.ttf', 'இருந்து', '8+2306|130+2153|85+1616|116+2234');
+      test('HB-TAML-30', 'NotoSans/NotoSansTamil-Regular.ttf', 'உயிர்துறந்தார்.', '10+2185|30+1972|148+537|90+1311|116+2234|32+1792|85+1616|25+1689|41+1311|90+1311|164+549');
+      test('HB-TAML-31', 'NotoSans/NotoSansTamil-Regular.ttf', 'பின்னர்', '28+1593|148+537|86+2528|27+2528|90+1311');
+      test('HB-TAML-32', 'NotoSans/NotoSansTamil-Regular.ttf', 'மதராசு', '29+1762|25+1689|31+1311|41+1311|106+1776');
+      test('HB-TAML-33', 'NotoSans/NotoSansTamil-Regular.ttf', 'ஸ்டேட்', '98+2631|47+1491|23+1419|82+1419');
+      test('HB-TAML-34', 'NotoSans/NotoSansTamil-Regular.ttf', 'என்று', '12+1640|86+2528|132+2329');
+      test('HB-TAML-35', 'NotoSans/NotoSansTamil-Regular.ttf', 'இருந்த', '8+2306|130+2153|85+1616|25+1689');
+      test('HB-TAML-36', 'NotoSans/NotoSansTamil-Regular.ttf', 'பெயர்', '46+1846|28+1593|30+1972|90+1311');
+      test('HB-TAML-37', 'NotoSans/NotoSansTamil-Regular.ttf', 'ஆம்', '7+2690|88+1762');
+      test('HB-TAML-38', 'NotoSans/NotoSansTamil-Regular.ttf', 'ஆண்டு', '7+2690|83+3377|112+2078');
+      test('HB-TAML-39', 'NotoSans/NotoSansTamil-Regular.ttf', 'தமிழ்நாடு', '25+1689|29+1762|42+537|94+1762|26+1616|41+1311|112+2078');
+      test('HB-TAML-40', 'NotoSans/NotoSansTamil-Regular.ttf', 'என்று', '12+1640|86+2528|132+2329');
+      test('HB-TAML-41', 'NotoSans/NotoSansTamil-Regular.ttf', 'மாற்றப்பட்டது.', '29+1762|41+1311|91+1788|32+1792|87+1593|28+1593|82+1419|23+1419|116+2234|164+549');
+      test('HB-TAML-42', 'NotoSans/NotoSansTamil-Regular.ttf', 'ஸ்ரீ', '147+3100');
+      test('HB-TAML-43', 'NotoSans/NotoSansTamil-Regular.ttf', 'க்ஷ', '76+3795');
     });
   });
 

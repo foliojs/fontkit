@@ -18,6 +18,10 @@ const SHAPERS = {
 
   knda: IndicShaper,     // Kannada
   knd2: IndicShaper,     // Kannada
+  telu: IndicShaper,     // Telugu
+  tel2: IndicShaper,     // Telugu
+  taml: IndicShaper,     // Tamil
+  tml2: IndicShaper,     // Tamil
 
   bali: UniversalShaper, // Balinese
   batk: UniversalShaper, // Batak
