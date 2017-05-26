@@ -22,6 +22,8 @@ const SHAPERS = {
   tel2: IndicShaper,     // Telugu
   taml: IndicShaper,     // Tamil
   tml2: IndicShaper,     // Tamil
+  dev2: IndicShaper,
+  deva: IndicShaper,
 
   bali: UniversalShaper, // Balinese
   batk: UniversalShaper, // Batak

@@ -253,6 +253,86 @@ describe('shaping', function() {
       test('HB-TAML-42', 'NotoSans/NotoSansTamil-Regular.ttf', 'ஸ்ரீ', '147+3100');
       test('HB-TAML-43', 'NotoSans/NotoSansTamil-Regular.ttf', 'க்ஷ', '76+3795');
     });
+
+    describe('shapes Devanagari text', function () {
+      describe('joiners', function () {
+        test('HB-DEVA-joiners-1', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्ह', '61+1088|181+0');
+        test('HB-DEVA-joiners-2', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्‌ह', '52+838|81@-48,0+0|3+0|61+1088');
+        test('HB-DEVA-joiners-3', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्‍ह', '209+818|61+1088');
+        test('HB-DEVA-joiners-4', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'ऱ्ह', '209+818|61+1088');
+        test('HB-DEVA-joiners-5', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'ऱ्‌ह', '53+838|81@-48,0+0|3+0|61+1088');
+        test('HB-DEVA-joiners-6', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'ऱ्‍ह', '209+818|3+0|61+1088');
+        test('HB-DEVA-joiners-7', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्क', '183+1104|25+1561');
+        test('HB-DEVA-joiners-8', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्‍', '183+1204|3+0');
+        test('HB-DEVA-joiners-9', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्‌क', '25+1561|81@-454,0+0|3+0|25+1561');
+        test('HB-DEVA-joiners-10', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्‍क', '183+1104|3+0|25+1561');
+        test('HB-DEVA-joiners-11', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्कि', '558+530|183+1104|25+1561');
+        test('HB-DEVA-joiners-12', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्‌कि', '25+1561|81@-454,0+0|3+0|561+530|25+1561');
+        test('HB-DEVA-joiners-13', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्‍कि', '558+530|183+1104|3+0|25+1561');
+        test('HB-DEVA-joiners-14', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्ष', '179+1458');
+        test('HB-DEVA-joiners-15', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्‌ष', '25+1561|81@-454,0+0|3+0|59+1184');
+        test('HB-DEVA-joiners-16', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्‍ष', '183+1204|3+0|59+1184');
+        test('HB-DEVA-joiners-17', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'द्सि', '42+1064|81@96,0+0|563+530|60+1375');
+        test('HB-DEVA-joiners-18', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'द्‌सि', '42+1064|81@96,0+0|3+0|563+530|60+1375');
+        test('HB-DEVA-joiners-19', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'द्‍सि', '558+530|200+1064|60+1375');
+      });
+
+      describe('misc', function () {
+        test('HB-DEVA-misc-1', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क', '25+1561');
+        test('HB-DEVA-misc-2', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क़', '92+1561');
+        test('HB-DEVA-misc-3', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'कि', '561+530|25+1561');
+        test('HB-DEVA-misc-4', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्', '25+1561|81@-454,0+0');
+        test('HB-DEVA-misc-5', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्क', '183+1104|25+1561');
+        test('HB-DEVA-misc-6', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्र', '254+1561');
+        test('HB-DEVA-misc-7', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्र्क', '327+1204|25+1561');
+        test('HB-DEVA-misc-8', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्र्‍', '327+1204|3+0');
+        test('HB-DEVA-misc-9', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्ष', '179+1458');
+        test('HB-DEVA-misc-10', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्ष्', '179+1458|81+0');
+        test('HB-DEVA-misc-11', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्‌ष', '25+1561|81@-454,0+0|3+0|59+1184');
+        test('HB-DEVA-misc-12', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्‍', '183+1204|3+0');
+        test('HB-DEVA-misc-13', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्‍ष', '183+1204|3+0|59+1184');
+        test('HB-DEVA-misc-14', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'छ्र्क', '334+1435|25+1561');
+        test('HB-DEVA-misc-15', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'ज्ञ्', '180+1313|81+0');
+        test('HB-DEVA-misc-16', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'ट्रु', '35+1032|657@-10,0+0');
+        test('HB-DEVA-misc-17', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्क', '25+1561|181@-454,0+0');
+        test('HB-DEVA-misc-18', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्कि', '585+530|25+1561|606+0');
+        test('HB-DEVA-misc-20', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्क्रि', '585+530|254+1561|606+0');
+        test('HB-DEVA-misc-21', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्‍', '209+818');
+        test('HB-DEVA-misc-22', 'NotoSans/NotoSansDevanagari-Regular.ttf', ' ि', '67+530|135+1044');
+        test('HB-DEVA-misc-23', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'फ़्र', '314+1579');
+        test('HB-DEVA-misc-24', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'फ्र', '275+1579');
+        test('HB-DEVA-misc-25', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'द्दि', '560+530|511+1105');
+        test('HB-DEVA-misc-26', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्ष', '179+1458');
+        test('HB-DEVA-misc-27', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्‌ष', '25+1561|81@-454,0+0|3+0|59+1184');
+        test('HB-DEVA-misc-28', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क्‍ष', '183+1204|3+0|59+1184');
+        test('HB-DEVA-misc-29', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्अ्', '9+1565|81+0|181+0');
+        test('HB-DEVA-misc-30', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्अ्‌', '9+1565|81+0|3+0|181+0');
+        test('HB-DEVA-misc-31', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्अ्‍', '52+838|81@-48,0+0|9+1565|81+0|3+0');
+        test('HB-DEVA-misc-32', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्आ्र्', '10+2095|81+0|181+0|52+838|81@-48,0+0');
+        test('HB-DEVA-misc-33', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'क‌ि', '561+530|25+1561|3+0');
+        test('HB-DEVA-misc-34', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'ऽं', '65+957|6+0');
+        test('HB-DEVA-misc-35', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'रुँः', '413+1152|5@-314,0+0|7+558');
+        test('HB-DEVA-misc-36', 'NotoSans/NotoSansDevanagari-Regular.ttf', '1ि', '558+530|748+1128');
+        test('HB-DEVA-misc-37', 'NotoSans/NotoSansDevanagari-Regular.ttf', '१॑', '107+1128|85@-298,0+0');
+      });
+
+      describe('dotted circle', function () {
+        test('HB-DEVA-dottedcircle-1', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्◌', '135+1044|181+0');
+        test('HB-DEVA-dottedcircle-2', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्◌्च', '135+1044|81+0|181+0|30+1299');
+        test('HB-DEVA-dottedcircle-3', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्◌्च्छे', '135+1044|81+0|181+0|188+810|31+1435|75@-156,0+0');
+        test('HB-DEVA-dottedcircle-4', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्◌ि', '67+530|135+1044|181+0');
+        test('HB-DEVA-dottedcircle-5', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्◌्', '135+1044|81+0|181+0');
+        test('HB-DEVA-dottedcircle-6', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र्◌़', '135+1044|64+0|181+0');
+        test('HB-DEVA-dottedcircle-7', 'NotoSans/NotoSansDevanagari-Regular.ttf', '◌्च्छे', '135+1044|81+0|188+810|31+1435|75@-156,0+0');
+        test('HB-DEVA-dottedcircle-8', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'र् ', '52+838|81@-48,0+0|3+532');
+      });
+
+      describe('eyelash', function () {
+        test('HB-DEVA-eyelash-1', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'त्र्क', '347+782|25+1561');
+        test('HB-DEVA-eyelash-2', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'त्र्‍क', '347+782|3+0|25+1561');
+        test('HB-DEVA-eyelash-3', 'NotoSans/NotoSansDevanagari-Regular.ttf', 'त्र्‌क', '269+1130|81+0|3+0|25+1561');
+      });
+    });
   });
 
   describe('universal shaping engine', function() {
