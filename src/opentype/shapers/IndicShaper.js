@@ -673,7 +673,103 @@ function finalReordering(font, glyphs, plan) {
           }
         }
       } else {
-        throw new Error('Unsupported rephPos config');
+        /*       2. If the reph repositioning class is not after post-base: target
+         *          position is after the first explicit halant glyph between the
+         *          first post-reph consonant and last main consonant. If ZWJ or ZWNJ
+         *          are following this halant, position is moved after it. If such
+         *          position is found, this is the target position. Otherwise,
+         *          proceed to the next step.
+         *
+         *          Note: in old-implementation fonts, where classifications were
+         *          fixed in shaping engine, there was no case where reph position
+         *          will be found on this step.
+         */
+        newRephPos = start + 1;
+        while (newRephPos < base && !(glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS)) {
+          newRephPos++;
+        }
+
+        let found = false;
+        if (newRephPos < base && glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
+          // ->If ZWJ or ZWNJ are following this halant, position is moved after it.
+          if (newRephPos + 1 < base && isJoiner(glyphs[newRephPos + 1])) {
+            newRephPos++;
+          }
+
+          found = true;
+        }
+
+        /*       3. If reph should be repositioned after the main consonant: find the
+         *          first consonant not ligated with main, or find the first
+         *          consonant that is not a potential pre-base reordering Ra.
+         */
+        if (!found && rephPos === POSITIONS.After_Main) {
+          newRephPos = base;
+          while (newRephPos + 1 < end && glyphs[newRephPos + 1].shaperInfo.position <= POSITIONS.After_Main) {
+            newRephPos++;
+          }
+
+          found = newRephPos < end;
+        }
+
+        /*       4. If reph should be positioned before post-base consonant, find
+         *          first post-base classified consonant not ligated with main. If no
+         *          consonant is found, the target position should be before the
+         *          first matra, syllable modifier sign or vedic sign.
+         */
+        /* This is our take on what step 4 is trying to say (and failing, BADLY). */
+        // if (!found && rephPos === POSITIONS.After_Sub) {
+        //   newRephPos = base;
+        //   while (newRephPos + 1 < end && (glyphs[newRephPos + 1].shaperInfo.position === ))
+        // }
+
+        /*       5. If no consonant is found in steps 3 or 4, move reph to a position
+         *          immediately before the first post-base matra, syllable modifier
+         *          sign or vedic sign that has a reordering class after the intended
+         *          reph position. For example, if the reordering position for reph
+         *          is post-main, it will skip above-base matras that also have a
+         *          post-main position.
+         */
+        if (!found) {
+          // Copied from step 2.
+          newRephPos = start + 1;
+          while (newRephPos < base && !(glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS)) {
+            newRephPos++;
+          }
+
+          if (newRephPos < base && glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
+            // ->If ZWJ or ZWNJ are following this halant, position is moved after it.
+            if (newRephPos + 1 < base && isJoiner(glyphs[newRephPos + 1])) {
+              newRephPos++;
+            }
+
+            found = true;
+          }
+        }
+
+        /*       6. Otherwise, reorder reph to the end of the syllable.
+         */
+        if (!found) {
+          newRephPos = end - 1;
+          while (newRephPos > start && glyphs[newRephPos].shaperInfo.position === POSITIONS.SMVD) {
+            newRephPos--;
+          }
+
+          /*
+           * If the Reph is to be ending up after a Matra,Halant sequence,
+           * position it before that Halant so it can interact with the Matra.
+           * However, if it's a plain Consonant,Halant we shouldn't do that.
+           * Uniscribe doesn't do this.
+           * TEST: U+0930,U+094D,U+0915,U+094B,U+094D
+           */
+          if (glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
+            for (let i = base + 1; i < newRephPos; i++) {
+              if (glyphs[i].shaperInfo.category === CATEGORIES.M) {
+                newRephPos--;
+              }
+            }
+          }
+        }
       }
 
       let reph = glyphs[start];
