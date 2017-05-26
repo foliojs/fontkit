@@ -23,7 +23,7 @@ export default class LayoutEngine {
     }
   }
 
-  layout(string, features = [], script, language) {
+  layout(string, features, script, language) {
     // Make the features parameter optional
     if (typeof features === 'string') {
       script = features;
@@ -53,19 +53,21 @@ export default class LayoutEngine {
       var glyphs = string;
     }
 
+    let glyphRun = new GlyphRun(glyphs, features, script, language);
+
     // Return early if there are no glyphs
     if (glyphs.length === 0) {
-      return new GlyphRun(glyphs, []);
+      return glyphRun;
     }
 
     // Setup the advanced layout engine
     if (this.engine && this.engine.setup) {
-      this.engine.setup(glyphs, features, script, language);
+      this.engine.setup(glyphRun);
     }
 
     // Substitute and position the glyphs
-    glyphs = this.substitute(glyphs, features, script, language);
-    let positions = this.position(glyphs, features, script, language);
+    this.substitute(glyphRun);
+    this.position(glyphRun);
 
     this.hideDefaultIgnorables(glyphs, positions);
 
@@ -74,47 +76,44 @@ export default class LayoutEngine {
       this.engine.cleanup();
     }
 
-    return new GlyphRun(glyphs, positions);
+    return glyphRun;
   }
 
-  substitute(glyphs, features, script, language) {
+  substitute(glyphRun) {
     // Call the advanced layout engine to make substitutions
     if (this.engine && this.engine.substitute) {
-      glyphs = this.engine.substitute(glyphs, features, script, language);
+      this.engine.substitute(glyphRun);
     }
-
-    return glyphs;
   }
 
-  position(glyphs, features, script, language) {
+  position(glyphRun) {
     // Get initial glyph positions
-    let positions = glyphs.map(glyph => new GlyphPosition(glyph.advanceWidth));
+    glyphRun.positions = glyphRun.glyphs.map(glyph => new GlyphPosition(glyph.advanceWidth));
     let positioned = null;
 
     // Call the advanced layout engine. Returns the features applied.
     if (this.engine && this.engine.position) {
-      positioned = this.engine.position(glyphs, positions, features, script, language);
+      positioned = this.engine.position(glyphRun);
     }
 
     // if there is no GPOS table, use unicode properties to position marks.
-    if (!positioned) {
+    if (!positioned && (!this.engine || this.engine.fallbackPosition)) {
       if (!this.unicodeLayoutEngine) {
         this.unicodeLayoutEngine = new UnicodeLayoutEngine(this.font);
       }
 
-      this.unicodeLayoutEngine.positionGlyphs(glyphs, positions);
+      this.unicodeLayoutEngine.positionGlyphs(glyphRun.glyphs, glyphRun.positions);
     }
 
     // if kerning is not supported by GPOS, do kerning with the TrueType/AAT kern table
-    if ((!positioned || !positioned.kern) && this.font.kern) {
+    if ((!positioned || !positioned.kern) && glyphRun.features.kern !== false && this.font.kern) {
       if (!this.kernProcessor) {
         this.kernProcessor = new KernProcessor(this.font);
       }
 
-      this.kernProcessor.process(glyphs, positions);
+      this.kernProcessor.process(glyphRun.glyphs, glyphRun.positions);
+      glyphRun.features.kern = true;
     }
-
-    return positions;
   }
 
   hideDefaultIgnorables(glyphs, positions) {

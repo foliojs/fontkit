@@ -56,10 +56,6 @@ export default class OTProcessor {
     let entry;
     if (!this.script || script !== this.scriptTag) {
       entry = this.findScript(script);
-      if (script) {
-        entry = this.findScript(script);
-      }
-
       if (!entry) {
         entry = this.findScript(DEFAULT_SCRIPTS);
       }
@@ -72,22 +68,27 @@ export default class OTProcessor {
       this.script = entry.script;
       this.direction = Script.direction(script);
       this.language = null;
+      this.languageTag = null;
       changed = true;
     }
 
-    if (!language && language !== this.langugeTag) {
+    if (!language || language !== this.languageTag) {
+      this.language = null;
+
       for (let lang of this.script.langSysRecords) {
         if (lang.tag === language) {
           this.language = lang.langSys;
-          this.langugeTag = lang.tag;
-          changed = true;
+          this.languageTag = lang.tag;
           break;
         }
       }
-    }
 
-    if (!this.language) {
-      this.language = this.script.defaultLangSys;
+      if (!this.language) {
+        this.language = this.script.defaultLangSys;
+        this.languageTag = null;
+      }
+
+      changed = true;
     }
 
     // Build a feature lookup table
