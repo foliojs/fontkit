@@ -2,9 +2,9 @@ import codepoints from 'codepoints';
 import fs from 'fs';
 import UnicodeTrieBuilder from 'unicode-trie/builder';
 import compile from 'dfa/compile';
-import {POSITIONS, IS_CONSONANT} from './indic-data';
+import {CATEGORIES, POSITIONS, IS_CONSONANT} from './indic-data';
 
-const CATEGORIES = {
+const CATEGORY_MAP = {
   Avagraha: 'Symbol',
   Bindu: 'SM',
   Brahmi_Joining_Number: 'Placeholder',
@@ -184,28 +184,23 @@ function getPosition(codepoint, category) {
   return POSITIONS[position];
 }
 
+let symbols = {};
+for (let c in CATEGORIES) {
+  symbols[c] = Math.log2(CATEGORIES[c]);
+}
+
 let trie = new UnicodeTrieBuilder;
-let categories = {};
-let numCategories = 0;
-let decompositions = {};
 for (let i = 0; i < codepoints.length; i++) {
   let codepoint = codepoints[i];
   if (codepoint) {
-    let category = OVERRIDES[codepoint.code] || CATEGORIES[codepoint.indicSyllabicCategory] || 'X';
+    let category = OVERRIDES[codepoint.code] || CATEGORY_MAP[codepoint.indicSyllabicCategory] || 'X';
     let position = getPosition(codepoint, category);
-    if (!(category in categories)) {
-      categories[category] = numCategories++;
-    }
 
-    trie.set(codepoint.code, (categories[category] << 8) | position);
+    trie.set(codepoint.code, (symbols[category] << 8) | position);
   }
 }
 
 fs.writeFileSync(__dirname + '/indic.trie', trie.toBuffer());
 
-let stateMachine = compile(fs.readFileSync(__dirname + '/indic.machine', 'utf8'), categories);
-let json = Object.assign({
-  categories: Object.keys(categories)
-}, stateMachine);
-
-fs.writeFileSync(__dirname + '/indic.json', JSON.stringify(json));
+let stateMachine = compile(fs.readFileSync(__dirname + '/indic.machine', 'utf8'), symbols);
+fs.writeFileSync(__dirname + '/indic.json', JSON.stringify(stateMachine));

@@ -2,7 +2,7 @@ import unicode from 'unicode-properties';
 import OTProcessor from './OTProcessor';
 
 export default class GlyphInfo {
-  constructor(font, id, codePoints = [], features = []) {
+  constructor(font, id, codePoints = [], features) {
     this._font = font;
     this.codePoints = codePoints;
     this.id = id;
@@ -48,5 +48,9 @@ export default class GlyphInfo {
       this.isLigature = this.codePoints.length > 1;
       this.markAttachmentType = 0;
     }
+  }
+
+  copy() {
+    return new GlyphInfo(this._font, this.id, this.codePoints, this.features);
   }
 }

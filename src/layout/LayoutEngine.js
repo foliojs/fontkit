@@ -69,7 +69,7 @@ export default class LayoutEngine {
     this.substitute(glyphRun);
     this.position(glyphRun);
 
-    this.hideDefaultIgnorables(glyphs, positions);
+    this.hideDefaultIgnorables(glyphRun.glyphs, glyphRun.positions);
 
     // Let the layout engine clean up any state it might have
     if (this.engine && this.engine.cleanup) {
