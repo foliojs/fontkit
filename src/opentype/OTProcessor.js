@@ -207,19 +207,22 @@ export default class OTProcessor {
   }
 
   applyLookupList(lookupRecords) {
-    let glyphIndex = this.glyphIterator.index;
+    let g = this.glyphIterator;
+    this.glyphIterator = new GlyphIterator(this.glyphs);
 
     for (let lookupRecord of lookupRecords) {
-      this.glyphIterator.index = glyphIndex;
+      let lookup = this.table.lookupList.get(lookupRecord.lookupListIndex);
+      this.glyphIterator.reset(lookup.flags, g.index);
       this.glyphIterator.increment(lookupRecord.sequenceIndex);
 
-      let lookup = this.table.lookupList.get(lookupRecord.lookupListIndex);
       for (let table of lookup.subTables) {
-        this.applyLookup(lookup.lookupType, table);
+        if (this.applyLookup(lookup.lookupType, table)) {
+          break;
+        }
       }
     }
 
-    this.glyphIterator.index = glyphIndex;
+    this.glyphIterator = g;
     return true;
   }
 

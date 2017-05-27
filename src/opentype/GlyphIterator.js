@@ -4,10 +4,10 @@ export default class GlyphIterator {
     this.reset(options);
   }
 
-  reset(options = {}) {
+  reset(options = {}, index = 0) {
     this.flags = options.flags || {};
     this.markAttachmentType = options.markAttachmentType || 0;
-    this.index = 0;
+    this.index = index;
   }
 
   get cur() {
