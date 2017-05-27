@@ -40,8 +40,8 @@ export default class OTProcessor {
       script = [ script ];
     }
 
-    for (let entry of this.table.scriptList) {
-      for (let s of script) {
+    for (let s of script) {
+      for (let entry of this.table.scriptList) {
         if (entry.tag === s) {
           return entry;
         }
