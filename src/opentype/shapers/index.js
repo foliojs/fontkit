@@ -16,21 +16,25 @@ const SHAPERS = {
 
   hang: HangulShaper,    // Hangul
 
+  bng2: IndicShaper,     // Bengali
+  beng: IndicShaper,     // Bengali
+  dev2: IndicShaper,     // Devanagari
+  deva: IndicShaper,     // Devanagari
+  gjr2: IndicShaper,     // Gujarati
+  gujr: IndicShaper,     // Gujarati
+  guru: IndicShaper,     // Gurmukhi
+  gur2: IndicShaper,     // Gurmukhi
   knda: IndicShaper,     // Kannada
   knd2: IndicShaper,     // Kannada
-  telu: IndicShaper,     // Telugu
-  tel2: IndicShaper,     // Telugu
+  mlm2: IndicShaper,     // Malayalam
+  mlym: IndicShaper,     // Malayalam
+  ory2: IndicShaper,     // Oriya
+  orya: IndicShaper,     // Oriya
   taml: IndicShaper,     // Tamil
   tml2: IndicShaper,     // Tamil
-  dev2: IndicShaper,
-  deva: IndicShaper,
-  bng2: IndicShaper,
-  beng: IndicShaper,
-  guru: IndicShaper,
-  gur2: IndicShaper,
-  khmr: IndicShaper,
-  mlm2: IndicShaper,
-  mlym: IndicShaper,
+  telu: IndicShaper,     // Telugu
+  tel2: IndicShaper,     // Telugu
+  khmr: IndicShaper,     // Khmer
 
   bali: UniversalShaper, // Balinese
   batk: UniversalShaper, // Batak

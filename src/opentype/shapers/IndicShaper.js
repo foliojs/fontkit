@@ -4,13 +4,13 @@ import UnicodeTrie from 'unicode-trie';
 import unicode from 'unicode-properties';
 import * as Script from '../../layout/Script';
 import GlyphInfo from '../GlyphInfo';
-import indicData from './indic.json';
+import indicMachine from './indic.json';
 import useData from './use.json';
 import {CATEGORIES, POSITIONS, CONSONANT_FLAGS, JOINER_FLAGS, HALANT_OR_COENG_FLAGS, INDIC_CONFIGS} from './indic-data';
 
 const {decompositions} = useData;
 const trie = new UnicodeTrie(require('fs').readFileSync(__dirname + '/indic.trie'));
-const stateMachine = new StateMachine(indicData);
+const stateMachine = new StateMachine(indicMachine);
 
 export default class IndicShaper extends DefaultShaper {
   static zeroMarkWidths = 'NONE';
@@ -54,10 +54,6 @@ export default class IndicShaper extends DefaultShaper {
     // TODO: do this in a more general unicode normalizer
     for (let i = glyphs.length - 1; i >= 0; i--) {
       let codepoint = glyphs[i].codePoints[0];
-      if ([0x0931, 0x0B94, 0x17BE, 0x17BF, 0x17C0, 0x17C4, 0x17C5, 0x09AF, 0x09BC].includes(codepoint)) {
-        console.log("YOOOOOPPOO", codepoint.toString(16), decompositions[codepoint])
-      }
-
       let d = decompositions[codepoint];
       if (codepoint === 0x17C0) {
         d = [0x17C1, 0x17C0];
@@ -74,18 +70,6 @@ export default class IndicShaper extends DefaultShaper {
         });
 
         glyphs.splice(i, 1, ...decomposed);
-      }
-    }
-
-    for (let i = 0; i < glyphs.length - 1; i++) {
-      let a = glyphs[i].codePoints[0];
-      let b = glyphs[i + 1].codePoints[0];
-      if (a === 0x09AF && b === 0x09BC) {
-        let g = plan.font.glyphForCodePoint(0x09DF);
-        console.log("COMPOSE", g.id)
-        glyphs.splice(i, 2, new GlyphInfo(plan.font, g.id, [0x09DF], glyphs[i.features]));
-        i++;
-        continue;
       }
     }
   }
@@ -132,7 +116,6 @@ function setupSyllables(font, glyphs) {
     }
 
     last = end + 1;
-    // console.log(start, end, tags, syllable, glyphs.slice(start, end + 1).map(g => g.shaperInfo));
   }
 
   if (last < glyphs.length) {
@@ -165,17 +148,13 @@ function wouldSubstitute(glyphs, feature) {
 function consonantPosition(font, consonant, virama) {
   let glyphs = [virama, consonant, virama];
   if (wouldSubstitute(glyphs.slice(0, 2), 'blwf') || wouldSubstitute(glyphs.slice(1, 3), 'blwf')) {
-    // console.log('blwf Below_C');
     return POSITIONS.Below_C;
   } else if (wouldSubstitute(glyphs.slice(0, 2), 'pstf') || wouldSubstitute(glyphs.slice(1, 3), 'pstf')) {
-    // console.log('pstf Post_C')
     return POSITIONS.Post_C;
   } else if (wouldSubstitute(glyphs.slice(0, 2), 'pref') || wouldSubstitute(glyphs.slice(1, 3), 'pref')) {
-    // console.log('pref Post_C');
     return POSITIONS.Post_C;
   }
 
-  // console.log('Base_C')
   return POSITIONS.Base_C;
 }
 
@@ -196,7 +175,6 @@ function initialReordering(font, glyphs, plan) {
 
   for (let start = 0, end = nextSyllable(glyphs, 0); start < glyphs.length; start = end, end = nextSyllable(glyphs, start)) {
     let {category, syllableType} = glyphs[start].shaperInfo;
-    // console.log(start, end, glyphs.length, category, syllableType)
 
     if (syllableType === 'symbol_cluster' || syllableType === 'non_indic_cluster') {
       continue;
@@ -217,13 +195,9 @@ function initialReordering(font, glyphs, plan) {
         i++;
       }
 
-      console.log('DOTTED_CIRCLE')
-
       glyphs.splice(i++, 0, g);
       end++;
     }
-
-    // console.log(start, end, glyphs.slice(start, end).map(g => [g.id, g.shaperInfo.category, g.shaperInfo.position]))
 
     /* 1. Find base consonant:
      *
@@ -425,7 +399,6 @@ function initialReordering(font, glyphs, plan) {
 
           if (glyphs[j].shaperInfo.category !== CATEGORIES.H && j > i) {
             // Move Halant to after last consonant.
-            console.log("HERE");
             let t = glyphs[i];
             glyphs.splice(i, 0, ...glyphs.splice(i + 1, j - i));
             glyphs[j] = t;
@@ -561,7 +534,6 @@ function initialReordering(font, glyphs, plan) {
 
         	/* A ZWNJ disables HALF. */
           if (nonJoiner) {
-            // console.log("ZWNJ");
             delete glyphs[j].features.half;
           }
         } while (j > start && !isConsonant(glyphs[j]));
@@ -575,9 +547,6 @@ function finalReordering(font, glyphs, plan) {
   let features = font._layoutEngine.engine.GSUBProcessor.features;
 
   for (let start = 0, end = nextSyllable(glyphs, 0); start < glyphs.length; start = end, end = nextSyllable(glyphs, start)) {
-    // console.log('final_reordering');
-    // console.log(start, end, glyphs.slice(start, end).map(g => [g.id, g.shaperInfo.category, g.shaperInfo.position]))
-    // console.log('----');
 
     // TODO: virama
 
@@ -588,8 +557,6 @@ function finalReordering(font, glyphs, plan) {
      * reordering before applying all the remaining font features to the entire
      * cluster.
      */
-
-    // console.log(font._layoutEngine.engine.getAvailableFeatures('knd2'));
 
     let tryPref = !!features.pref;
 
@@ -701,7 +668,6 @@ function finalReordering(font, glyphs, plan) {
               base--;
             }
 
-            console.log('MOVE 3', oldPos, newPos);
             let tmp = glyphs[oldPos];
             glyphs.splice(oldPos, 0, ...glyphs.splice(oldPos + 1, newPos - oldPos));
             glyphs[newPos] = tmp;
@@ -851,8 +817,6 @@ function finalReordering(font, glyphs, plan) {
       if (start < base && base <= newRephPos) {
         base--;
       }
-
-      // console.log("REPH")
     }
 
     /*   o Reorder pre-base reordering consonants:
@@ -910,7 +874,6 @@ function finalReordering(font, glyphs, plan) {
               }
             }
 
-            console.log('MOVE 8', oldPos, newPos)
             let oldPos = i;
             let tmp = glyphs[oldPos];
             glyphs.splice(newPos + 1, 0, ...glyphs.splice(newPos, oldPos - newPos));
@@ -928,11 +891,8 @@ function finalReordering(font, glyphs, plan) {
 
     // Apply 'init' to the Left Matra if it's a word start.
     if (glyphs[start].shaperInfo.position === POSITIONS.Pre_M && (!start || !/Cf|Mn/.test(unicode.getCategory(glyphs[start - 1].codePoints[0])))) {
-      // console.log('init');
       glyphs[start].features.init = true;
     }
-
-    console.log(start, end, glyphs.slice(start, end).map(g => [g.id, Math.log2(g.shaperInfo.category), g.shaperInfo.position]))
   }
 }
 

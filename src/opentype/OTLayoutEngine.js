@@ -27,8 +27,10 @@ export default class OTLayoutEngine {
     // GSUB and GPOS without mutating the real (shared) Glyph objects.
     this.glyphInfos = glyphRun.glyphs.map(glyph => new GlyphInfo(this.font, glyph.id, [...glyph.codePoints]));
 
-    // Select a script based on what is available in GSUB.
-    let script = this.GSUBProcessor.selectScript(glyphRun.script, glyphRun.language);
+    // Select a script based on what is available in GSUB/GPOS.
+    let script = this.GSUBProcessor
+      ? this.GSUBProcessor.selectScript(glyphRun.script, glyphRun.language)
+      : this.GPOSProcessor.selectScript(glyphRun.script, glyphRun.language);
 
     // Choose a shaper based on the script, and setup a shaping plan.
     // This determines which features to apply to which glyphs.
