@@ -54,13 +54,38 @@ export default class IndicShaper extends DefaultShaper {
     // TODO: do this in a more general unicode normalizer
     for (let i = glyphs.length - 1; i >= 0; i--) {
       let codepoint = glyphs[i].codePoints[0];
-      if (decompositions[codepoint]) {
-        let decomposed = decompositions[codepoint].map(c => {
+      if ([0x0931, 0x0B94, 0x17BE, 0x17BF, 0x17C0, 0x17C4, 0x17C5, 0x09AF, 0x09BC].includes(codepoint)) {
+        console.log("YOOOOOPPOO", codepoint.toString(16), decompositions[codepoint])
+      }
+
+      let d = decompositions[codepoint];
+      if (codepoint === 0x17C0) {
+        d = [0x17C1, 0x17C0];
+      } else if (codepoint === 0x17C4) {
+        d = [0x17C1, 0x17C4];
+      } else if (codepoint === 0x17C5) {
+        d = [0x17C1, 0x17C5];
+      }
+
+      if (d) {
+        let decomposed = d.map(c => {
           let g = plan.font.glyphForCodePoint(c);
           return new GlyphInfo(plan.font, g.id, [c], glyphs[i].features);
         });
 
         glyphs.splice(i, 1, ...decomposed);
+      }
+    }
+
+    for (let i = 0; i < glyphs.length - 1; i++) {
+      let a = glyphs[i].codePoints[0];
+      let b = glyphs[i + 1].codePoints[0];
+      if (a === 0x09AF && b === 0x09BC) {
+        let g = plan.font.glyphForCodePoint(0x09DF);
+        console.log("COMPOSE", g.id)
+        glyphs.splice(i, 2, new GlyphInfo(plan.font, g.id, [0x09DF], glyphs[i.features]));
+        i++;
+        continue;
       }
     }
   }
