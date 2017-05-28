@@ -569,9 +569,6 @@ function finalReordering(font, glyphs, plan) {
   let features = font._layoutEngine.engine.GSUBProcessor.features;
 
   for (let start = 0, end = nextSyllable(glyphs, 0); start < glyphs.length; start = end, end = nextSyllable(glyphs, start)) {
-
-    // TODO: virama
-
     // 4. Final reordering:
     //
     // After the localized forms and basic shaping forms GSUB features have been

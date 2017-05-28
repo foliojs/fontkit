@@ -101,10 +101,6 @@ describe('shaping', function() {
     });
   });
 
-  describe.skip('thai shaper', function () {
-    test('thai', 'THSarabunNew.ttf', 'ดีปี ด่ ป่ ดู ฤู', '233+391|266+0|240+428|344+0|496+216|233+391|352+0|496+216|240+428|347+0|496+216|233+391|270+0|496+216|249+378|367+0');
-  });
-
   describe('indic shaper', function () {
     describe('shapes Kannada text', function () {
       // Tests from https://github.com/unicode-org/text-rendering-tests

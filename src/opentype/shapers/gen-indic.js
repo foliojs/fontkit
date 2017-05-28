@@ -76,18 +76,18 @@ const OVERRIDES = {
   0x25CC: 'Dotted_Circle',
 
   // Ra
-  0x0930: 'Ra', /* Devanagari */
-  0x09B0: 'Ra', /* Bengali */
-  0x09F0: 'Ra', /* Bengali */
-  0x0A30: 'Ra', /* Gurmukhi */	/* No Reph */
-  0x0AB0: 'Ra', /* Gujarati */
-  0x0B30: 'Ra', /* Oriya */
-  0x0BB0: 'Ra', /* Tamil */		/* No Reph */
-  0x0C30: 'Ra', /* Telugu */		/* Reph formed only with ZWJ */
-  0x0CB0: 'Ra', /* Kannada */
-  0x0D30: 'Ra', /* Malayalam */	/* No Reph, Logical Repha */
-  0x0DBB: 'Ra', /* Sinhala */		/* Reph formed only with ZWJ */
-  0x179A: 'Ra', /* Khmer */		/* No Reph, Visual Repha */
+  0x0930: 'Ra', // Devanagari
+  0x09B0: 'Ra', // Bengali
+  0x09F0: 'Ra', // Bengali
+  0x0A30: 'Ra', // Gurmukhi - No Reph
+  0x0AB0: 'Ra', // Gujarati
+  0x0B30: 'Ra', // Oriya
+  0x0BB0: 'Ra', // Tamil - No Reph
+  0x0C30: 'Ra', // Telugu - Reph formed only with ZWJ
+  0x0CB0: 'Ra', // Kannada
+  0x0D30: 'Ra', // Malayalam - No Reph, Logical Repha
+  0x0DBB: 'Ra', // Sinhala - Reph formed only with ZWJ
+  0x179A: 'Ra', // Khmer - No Reph, Visual Repha
 };
 
 const POSITION_MAP = {
