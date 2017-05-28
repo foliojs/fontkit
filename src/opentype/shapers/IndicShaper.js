@@ -44,6 +44,7 @@ export default class IndicShaper extends DefaultShaper {
     // Setup the indic config for the selected script
     plan.unicodeScript = Script.fromOpenType(plan.script);
     plan.indicConfig = INDIC_CONFIGS[plan.unicodeScript] || INDIC_CONFIGS.Default;
+    plan.isOldSpec = plan.indicConfig.hasOldSpec && plan.script[plan.script.length - 1] !== '2';
 
     // TODO: turn off kern (Khmer) and liga features.
   }
@@ -379,8 +380,28 @@ function initialReordering(font, glyphs, plan) {
     * U+0D38,U+0D4D,U+0D31,U+0D4D,U+0D31,U+0D4D
     * With lohit-ttf-20121122/Lohit-Malayalam.ttf
     */
-    if (false) {
-      // TODO
+    if (plan.isOldSpec) {
+      let disallowDoubleHalants = plan.unicodeScript !== 'Malayalam';
+      for (let i = base + 1; i < end; i++) {
+        if (glyphs[i].shaperInfo.category === CATEGORIES.H) {
+          let j;
+          for (j = end - 1; j > i; j--) {
+            if (isConsonant(glyphs[j]) || (disallowDoubleHalants && glyphs[j].shaperInfo.category === CATEGORIES.H)) {
+              break;
+            }
+          }
+
+          if (glyphs[j].shaperInfo.category !== CATEGORIES.H && j > i) {
+            // Move Halant to after last consonant.
+            console.log("HERE");
+            let t = glyphs[i];
+            glyphs.splice(i, 0, ...glyphs.splice(i + 1, j - i));
+            glyphs[j] = t;
+          }
+
+          break;
+        }
+      }
     }
 
     // Attach misc marks to previous char to move with them.
@@ -447,7 +468,7 @@ function initialReordering(font, glyphs, plan) {
     }
 
     // Pre-base
-    let blwf = indicConfig.blwfMode === 'Pre_And_Post';
+    let blwf = !plan.isOldSpec && indicConfig.blwfMode === 'Pre_And_Post';
     for (let i = start; i < base; i++) {
       glyphs[i].features.half = true;
       if (blwf) {
@@ -460,6 +481,10 @@ function initialReordering(font, glyphs, plan) {
       glyphs[i].features.abvf = true;
       glyphs[i].features.pstf = true;
       glyphs[i].features.blwf = true;
+    }
+
+    if (plan.isOldSpec && plan.unicodeScript === 'Devanagari') {
+      throw new Error("TODO");
     }
 
     let prefLen = 2;
