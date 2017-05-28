@@ -260,27 +260,27 @@ function initialReordering(font, glyphs, plan) {
               break;
             }
 
-       	    // or that is not a pre-base reordering Ra,
-       	    //
-       	    // IMPLEMENTATION NOTES:
-       	    //
-       	    // Our pre-base reordering Ra's are marked POS_POST_C, so will be skipped
-       	    // by the logic above already.
-       	    //
+            // or that is not a pre-base reordering Ra,
+            //
+            // IMPLEMENTATION NOTES:
+            //
+            // Our pre-base reordering Ra's are marked POS_POST_C, so will be skipped
+            // by the logic above already.
+            //
 
-       	    // or arrive at the first consonant. The consonant stopped at will
-       	    // be the base.
+            // or arrive at the first consonant. The consonant stopped at will
+            // be the base.
             if (info.position === POSITIONS.Below_C) {
               seenBelow = true;
             }
 
             base = i;
           } else if (start < i && info.category === CATEGORIES.ZWJ && glyphs[i - 1].shaperInfo.category === CATEGORIES.H) {
-      	    // A ZWJ after a Halant stops the base search, and requests an explicit
-      	    // half form.
-      	    // A ZWJ before a Halant, requests a subjoined form instead, and hence
-      	    // search continues.  This is particularly important for Bengali
-      	    // sequence Ra,H,Ya that should form Ya-Phalaa by subjoining Ya.
+            // A ZWJ after a Halant stops the base search, and requests an explicit
+            // half form.
+            // A ZWJ before a Halant, requests a subjoined form instead, and hence
+            // search continues.  This is particularly important for Bengali
+            // sequence Ra,H,Ya that should form Ya-Phalaa by subjoining Ya.
             break;
           }
         } while (i > limit);
@@ -416,15 +416,15 @@ function initialReordering(font, glyphs, plan) {
       if (info.category & (JOINER_FLAGS | CATEGORIES.N | CATEGORIES.RS | CATEGORIES.CM | HALANT_OR_COENG_FLAGS & info.category)) {
         info.position = lastPos;
         if (info.category === CATEGORIES.H && info.position === POSITIONS.Pre_M) {
-      	  /*
-      	   * Uniscribe doesn't move the Halant with Left Matra.
-      	   * TEST: U+092B,U+093F,U+094DE
-      	   * We follow.  This is important for the Sinhala
-      	   * U+0DDA split matra since it decomposes to U+0DD9,U+0DCA
-      	   * where U+0DD9 is a left matra and U+0DCA is the virama.
-      	   * We don't want to move the virama with the left matra.
-      	   * TEST: U+0D9A,U+0DDA
-      	   */
+          /*
+           * Uniscribe doesn't move the Halant with Left Matra.
+           * TEST: U+092B,U+093F,U+094DE
+           * We follow.  This is important for the Sinhala
+           * U+0DDA split matra since it decomposes to U+0DD9,U+0DCA
+           * where U+0DD9 is a left matra and U+0DCA is the virama.
+           * We don't want to move the virama with the left matra.
+           * TEST: U+0D9A,U+0DDA
+           */
           for (let j = i; j > start; j--) {
             if (glyphs[j - 1].shaperInfo.position !== POSITIONS.Pre_M) {
               info.position = glyphs[j - 1].shaperInfo.position;
@@ -502,12 +502,12 @@ function initialReordering(font, glyphs, plan) {
             glyphs[i++].features.pref = true;
           }
 
-         	/* Mark the subsequent stuff with 'cfar'.  Used in Khmer.
-         	 * Read the feature spec.
-         	 * This allows distinguishing the following cases with MS Khmer fonts:
-         	 * U+1784,U+17D2,U+179A,U+17D2,U+1782
-         	 * U+1784,U+17D2,U+1782,U+17D2,U+179A
-         	 */
+          /* Mark the subsequent stuff with 'cfar'.  Used in Khmer.
+           * Read the feature spec.
+           * This allows distinguishing the following cases with MS Khmer fonts:
+           * U+1784,U+17D2,U+179A,U+17D2,U+1782
+           * U+1784,U+17D2,U+1782,U+17D2,U+179A
+           */
           if (features.cfar) {
             for (; i < end; i++) {
               glyphs[i].features.cfar = true;
@@ -528,11 +528,11 @@ function initialReordering(font, glyphs, plan) {
         do {
           j--;
 
-        	/* ZWJ/ZWNJ should disable CJCT.  They do that by simply
-        	 * being there, since we don't skip them for the CJCT
-        	 * feature (ie. F_MANUAL_ZWJ) */
+          /* ZWJ/ZWNJ should disable CJCT.  They do that by simply
+           * being there, since we don't skip them for the CJCT
+           * feature (ie. F_MANUAL_ZWJ) */
 
-        	/* A ZWNJ disables HALF. */
+          /* A ZWNJ disables HALF. */
           if (nonJoiner) {
             delete glyphs[j].features.half;
           }
@@ -827,35 +827,35 @@ function finalReordering(font, glyphs, plan) {
     if (tryPref && base + 1 < end) {
       for (let i = base + 1; i < end; i++) {
         if (glyphs[i].features.pref) {
-       	  /*       1. Only reorder a glyph produced by substitution during application
-       	   *          of the <pref> feature. (Note that a font may shape a Ra consonant with
-       	   *          the feature generally but block it in certain contexts.)
-       	   */
+          /*       1. Only reorder a glyph produced by substitution during application
+           *          of the <pref> feature. (Note that a font may shape a Ra consonant with
+           *          the feature generally but block it in certain contexts.)
+           */
                  /* Note: We just check that something got substituted.  We don't check that
-       	   * the <pref> feature actually did it...
-       	   *
-       	   * Reorder pref only if it ligated. */
+           * the <pref> feature actually did it...
+           *
+           * Reorder pref only if it ligated. */
           if (glyphs[i].isLigated && !glyphs[i].isMultiplied) {
-        	  /*
-        	   *       2. Try to find a target position the same way as for pre-base matra.
-        	   *          If it is found, reorder pre-base consonant glyph.
-        	   *
-        	   *       3. If position is not found, reorder immediately before main
-        	   *          consonant.
-        	   */
+            /*
+             *       2. Try to find a target position the same way as for pre-base matra.
+             *          If it is found, reorder pre-base consonant glyph.
+             *
+             *       3. If position is not found, reorder immediately before main
+             *          consonant.
+             */
             let newPos = base;
 
-      	    /* Malayalam / Tamil do not have "half" forms or explicit virama forms.
-      	     * The glyphs formed by 'half' are Chillus or ligated explicit viramas.
-      	     * We want to position matra after them.
-      	     */
+            /* Malayalam / Tamil do not have "half" forms or explicit virama forms.
+             * The glyphs formed by 'half' are Chillus or ligated explicit viramas.
+             * We want to position matra after them.
+             */
             if (plan.unicodeScript !== 'Malayalam' && plan.unicodeScript !== 'Tamil') {
               while (newPos > start && !(glyphs[newPos - 1].shaperInfo.category & (CATEGORIES.M | HALANT_OR_COENG_FLAGS))) {
                 newPos--;
               }
 
-        	    /* In Khmer coeng model, a H,Ra can go *after* matras.  If it goes after a
-        	     * split matra, it should be reordered to *before* the left part of such matra. */
+              /* In Khmer coeng model, a H,Ra can go *after* matras.  If it goes after a
+               * split matra, it should be reordered to *before* the left part of such matra. */
               if (newPos > start && glyphs[newPos - 1].shaperInfo.category === CATEGORIES.M) {
                 let oldPos = i;
                 for (let j = base + 1; j < oldPos; j++) {
