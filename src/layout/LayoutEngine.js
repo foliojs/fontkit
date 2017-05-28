@@ -57,6 +57,7 @@ export default class LayoutEngine {
 
     // Return early if there are no glyphs
     if (glyphs.length === 0) {
+      glyphRun.positions = [];
       return glyphRun;
     }
 
