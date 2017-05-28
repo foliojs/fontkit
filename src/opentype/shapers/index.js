@@ -26,6 +26,11 @@ const SHAPERS = {
   deva: IndicShaper,
   bng2: IndicShaper,
   beng: IndicShaper,
+  guru: IndicShaper,
+  gur2: IndicShaper,
+  khmr: IndicShaper,
+  mlm2: IndicShaper,
+  mlym: IndicShaper,
 
   bali: UniversalShaper, // Balinese
   batk: UniversalShaper, // Batak
