@@ -12,6 +12,10 @@ const {decompositions} = useData;
 const trie = new UnicodeTrie(require('fs').readFileSync(__dirname + '/indic.trie'));
 const stateMachine = new StateMachine(indicMachine);
 
+/**
+ * The IndicShaper supports indic scripts e.g. Devanagari, Kannada, etc.
+ * Based on code from Harfbuzz: https://github.com/behdad/harfbuzz/blob/master/src/hb-ot-shape-complex-indic.cc
+ */
 export default class IndicShaper extends DefaultShaper {
   static zeroMarkWidths = 'NONE';
   static planFeatures(plan) {
