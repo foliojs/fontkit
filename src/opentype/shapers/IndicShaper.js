@@ -615,6 +615,29 @@ function finalReordering(font, glyphs, plan) {
           }
         }
 
+        // For Malayalam, skip over unformed below- (but NOT post-) forms.
+        if (plan.unicodeScript === 'Malayalam') {
+          for (let i = base + 1; i < end; i++) {
+            while (i < end && isJoiner(glyphs[i])) {
+              i++;
+            }
+
+            if (i === end || !(glyphs[i].shaperInfo.category & HALANT_OR_COENG_FLAGS)) {
+              break;
+            }
+
+            i++; // Skip halant.
+            while (i < end && isJoiner(glyphs[i])) {
+              i++;
+            }
+
+            if (i < end && isConsonant(glyphs[i]) && glyphs[i].shaperInfo.position === POSITIONS.Below_C) {
+              base = i;
+              glyphs[base].shaperInfo.position = POSITIONS.Base_C;
+            }
+          }
+        }
+
         if (start < base && glyphs[base].shaperInfo.position > POSITIONS.Base_C) {
           base--;
         }
@@ -646,6 +669,10 @@ function finalReordering(font, glyphs, plan) {
       // If we lost track of base, alas, position before last thingy.
       let newPos = base === end ? base - 2 : base - 1;
 
+      /* Malayalam / Tamil do not have "half" forms or explicit virama forms.
+       * The glyphs formed by 'half' are Chillus or ligated explicit viramas.
+       * We want to position matra after them.
+       */
       if (plan.unicodeScript !== 'Malayalam' && plan.unicodeScript !== 'Tamil') {
         while (newPos > start && !(glyphs[newPos].shaperInfo.category & (CATEGORIES.M | HALANT_OR_COENG_FLAGS))) {
           newPos--;
