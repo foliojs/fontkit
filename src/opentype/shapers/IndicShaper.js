@@ -6,7 +6,14 @@ import * as Script from '../../layout/Script';
 import GlyphInfo from '../GlyphInfo';
 import indicMachine from './indic.json';
 import useData from './use.json';
-import {CATEGORIES, POSITIONS, CONSONANT_FLAGS, JOINER_FLAGS, HALANT_OR_COENG_FLAGS, INDIC_CONFIGS} from './indic-data';
+import {
+  CATEGORIES,
+  POSITIONS,
+  CONSONANT_FLAGS,
+  JOINER_FLAGS,
+  HALANT_OR_COENG_FLAGS, INDIC_CONFIGS,
+  INDIC_DECOMPOSITIONS
+} from './indic-data';
 
 const {decompositions} = useData;
 const trie = new UnicodeTrie(require('fs').readFileSync(__dirname + '/indic.trie'));
@@ -58,15 +65,7 @@ export default class IndicShaper extends DefaultShaper {
     // TODO: do this in a more general unicode normalizer
     for (let i = glyphs.length - 1; i >= 0; i--) {
       let codepoint = glyphs[i].codePoints[0];
-      let d = decompositions[codepoint];
-      if (codepoint === 0x17C0) {
-        d = [0x17C1, 0x17C0];
-      } else if (codepoint === 0x17C4) {
-        d = [0x17C1, 0x17C4];
-      } else if (codepoint === 0x17C5) {
-        d = [0x17C1, 0x17C5];
-      }
-
+      let d = INDIC_DECOMPOSITIONS[codepoint] || decompositions[codepoint];
       if (d) {
         let decomposed = d.map(c => {
           let g = plan.font.glyphForCodePoint(c);

@@ -163,3 +163,13 @@ export const INDIC_CONFIGS = {
     blwfMode: 'Pre_And_Post'
   }
 };
+
+// Additional decompositions that aren't in Unicode
+export const INDIC_DECOMPOSITIONS = {
+  // Khmer
+  0x17BE: [0x17C1, 0x17BE],
+  0x17BF: [0x17C1, 0x17BF],
+  0x17C0: [0x17C1, 0x17C0],
+  0x17C4: [0x17C1, 0x17C4],
+  0x17C5: [0x17C1, 0x17C5]
+};
