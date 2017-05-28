@@ -600,7 +600,7 @@ function finalReordering(font, glyphs, plan) {
         if (tryPref && base + 1 < end) {
           for (let i = base + 1; i < end; i++) {
             if (glyphs[i].features.pref) {
-              if (!(glyphs[i].substituted && glyphs[i].ligated)) {
+              if (!(glyphs[i].substituted && glyphs[i].isLigated && !glyphs[i].isMultiplied)) {
                 // Ok, this was a 'pref' candidate but didn't form any.
                 // Base is around here...
                 base = i;
@@ -701,6 +701,7 @@ function finalReordering(font, glyphs, plan) {
               base--;
             }
 
+            console.log('MOVE 3', oldPos, newPos);
             let tmp = glyphs[oldPos];
             glyphs.splice(oldPos, 0, ...glyphs.splice(oldPos + 1, newPos - oldPos));
             glyphs[newPos] = tmp;
@@ -731,32 +732,16 @@ function finalReordering(font, glyphs, plan) {
      */
     if (start + 1 < end &&
       glyphs[start].shaperInfo.position === POSITIONS.Ra_To_Become_Reph &&
-      (glyphs[start].shaperInfo.category === CATEGORIES.Repha) !== glyphs[start].isLigated
+      (glyphs[start].shaperInfo.category === CATEGORIES.Repha) !== (glyphs[start].isLigated && !glyphs[start].isMultiplied)
     ) {
       let newRephPos;
       let rephPos = indicConfig.rephPos;
+      let found = false;
 
       /* 1. If reph should be positioned after post-base consonant forms,
        *    proceed to step 5.
        */
-      if (rephPos === POSITIONS.After_Post) {
-        newRephPos = start + 1;
-        while (newRephPos < base && glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
-          newRephPos++;
-        }
-
-        if (newRephPos < base && glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
-          // If ZWJ or ZWNJ are following this halant, position is moved after it.
-          if (newRephPos + 1 < base && isJoiner(glyphs[newRephPos + 1])) {
-            newRephPos++;
-          }
-        } else {
-          newRephPos = end - 1;
-          while (newRephPos > start && glyphs[newRephPos].shaperInfo.position === POSITIONS.SVMD) {
-            newRephPos--;
-          }
-        }
-      } else {
+      if (rephPos !== POSITIONS.After_Post) {
         /*       2. If the reph repositioning class is not after post-base: target
          *          position is after the first explicit halant glyph between the
          *          first post-reph consonant and last main consonant. If ZWJ or ZWNJ
@@ -773,7 +758,6 @@ function finalReordering(font, glyphs, plan) {
           newRephPos++;
         }
 
-        let found = false;
         if (newRephPos < base && glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
           // ->If ZWJ or ZWNJ are following this halant, position is moved after it.
           if (newRephPos + 1 < base && isJoiner(glyphs[newRephPos + 1])) {
@@ -802,55 +786,59 @@ function finalReordering(font, glyphs, plan) {
          *          first matra, syllable modifier sign or vedic sign.
          */
         /* This is our take on what step 4 is trying to say (and failing, BADLY). */
-        // if (!found && rephPos === POSITIONS.After_Sub) {
-        //   newRephPos = base;
-        //   while (newRephPos + 1 < end && (glyphs[newRephPos + 1].shaperInfo.position === ))
-        // }
-
-        /*       5. If no consonant is found in steps 3 or 4, move reph to a position
-         *          immediately before the first post-base matra, syllable modifier
-         *          sign or vedic sign that has a reordering class after the intended
-         *          reph position. For example, if the reordering position for reph
-         *          is post-main, it will skip above-base matras that also have a
-         *          post-main position.
-         */
-        if (!found) {
-          // Copied from step 2.
-          newRephPos = start + 1;
-          while (newRephPos < base && !(glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS)) {
+        if (!found && rephPos === POSITIONS.After_Sub) {
+          newRephPos = base;
+          while (newRephPos + 1 < end && ![POSITIONS.Post_C, POSITIONS.After_Post, POSITIONS.SMVD].includes(glyphs[newRephPos + 1].shaperInfo.position)) {
             newRephPos++;
           }
 
-          if (newRephPos < base && glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
-            // ->If ZWJ or ZWNJ are following this halant, position is moved after it.
-            if (newRephPos + 1 < base && isJoiner(glyphs[newRephPos + 1])) {
-              newRephPos++;
-            }
+          found = newRephPos < end;
+        }
+      }
 
-            found = true;
-          }
+      /*       5. If no consonant is found in steps 3 or 4, move reph to a position
+       *          immediately before the first post-base matra, syllable modifier
+       *          sign or vedic sign that has a reordering class after the intended
+       *          reph position. For example, if the reordering position for reph
+       *          is post-main, it will skip above-base matras that also have a
+       *          post-main position.
+       */
+      if (!found) {
+        // Copied from step 2.
+        newRephPos = start + 1;
+        while (newRephPos < base && !(glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS)) {
+          newRephPos++;
         }
 
-        /*       6. Otherwise, reorder reph to the end of the syllable.
-         */
-        if (!found) {
-          newRephPos = end - 1;
-          while (newRephPos > start && glyphs[newRephPos].shaperInfo.position === POSITIONS.SMVD) {
-            newRephPos--;
+        if (newRephPos < base && glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
+          // ->If ZWJ or ZWNJ are following this halant, position is moved after it.
+          if (newRephPos + 1 < base && isJoiner(glyphs[newRephPos + 1])) {
+            newRephPos++;
           }
 
-          /*
-           * If the Reph is to be ending up after a Matra,Halant sequence,
-           * position it before that Halant so it can interact with the Matra.
-           * However, if it's a plain Consonant,Halant we shouldn't do that.
-           * Uniscribe doesn't do this.
-           * TEST: U+0930,U+094D,U+0915,U+094B,U+094D
-           */
-          if (glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
-            for (let i = base + 1; i < newRephPos; i++) {
-              if (glyphs[i].shaperInfo.category === CATEGORIES.M) {
-                newRephPos--;
-              }
+          found = true;
+        }
+      }
+
+      /*       6. Otherwise, reorder reph to the end of the syllable.
+       */
+      if (!found) {
+        newRephPos = end - 1;
+        while (newRephPos > start && glyphs[newRephPos].shaperInfo.position === POSITIONS.SMVD) {
+          newRephPos--;
+        }
+
+        /*
+         * If the Reph is to be ending up after a Matra,Halant sequence,
+         * position it before that Halant so it can interact with the Matra.
+         * However, if it's a plain Consonant,Halant we shouldn't do that.
+         * Uniscribe doesn't do this.
+         * TEST: U+0930,U+094D,U+0915,U+094B,U+094D
+         */
+        if (glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
+          for (let i = base + 1; i < newRephPos; i++) {
+            if (glyphs[i].shaperInfo.category === CATEGORIES.M) {
+              newRephPos--;
             }
           }
         }
@@ -883,7 +871,7 @@ function finalReordering(font, glyphs, plan) {
        	   * the <pref> feature actually did it...
        	   *
        	   * Reorder pref only if it ligated. */
-          if (glyphs[i].ligated) {
+          if (glyphs[i].isLigated && !glyphs[i].isMultiplied) {
         	  /*
         	   *       2. Try to find a target position the same way as for pre-base matra.
         	   *          If it is found, reorder pre-base consonant glyph.
@@ -912,22 +900,24 @@ function finalReordering(font, glyphs, plan) {
                     break;
                   }
                 }
-
-                if (newPos > start && glyphs[newPos - 1].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
-                  /* -> If ZWJ or ZWNJ follow this halant, position is moved after it. */
-                  if (newPos < end && isJoiner(glyphs[newPos])) {
-                    newPos++;
-                  }
-                }
-
-                let tmp = glyphs[oldPos];
-                glyphs.splice(newPos + 1, 0, ...glyphs.splice(newPos, oldPos - newPos));
-                glyphs[newPos] = tmp;
-
-                if (newPos <= base && base < oldPos) {
-                  base++;
-                }
               }
+            }
+
+            if (newPos > start && glyphs[newPos - 1].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
+              /* -> If ZWJ or ZWNJ follow this halant, position is moved after it. */
+              if (newPos < end && isJoiner(glyphs[newPos])) {
+                newPos++;
+              }
+            }
+
+            console.log('MOVE 8', oldPos, newPos)
+            let oldPos = i;
+            let tmp = glyphs[oldPos];
+            glyphs.splice(newPos + 1, 0, ...glyphs.splice(newPos, oldPos - newPos));
+            glyphs[newPos] = tmp;
+
+            if (newPos <= base && base < oldPos) {
+              base++;
             }
           }
 
@@ -942,7 +932,7 @@ function finalReordering(font, glyphs, plan) {
       glyphs[start].features.init = true;
     }
 
-    // console.log(start, end, glyphs.slice(start, end).map(g => [g.id, g.shaperInfo.category, g.shaperInfo.position]))
+    console.log(start, end, glyphs.slice(start, end).map(g => [g.id, Math.log2(g.shaperInfo.category), g.shaperInfo.position]))
   }
 }
 

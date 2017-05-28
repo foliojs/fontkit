@@ -2,7 +2,7 @@ import codepoints from 'codepoints';
 import fs from 'fs';
 import UnicodeTrieBuilder from 'unicode-trie/builder';
 import compile from 'dfa/compile';
-import {CATEGORIES, POSITIONS, IS_CONSONANT} from './indic-data';
+import {CATEGORIES, POSITIONS, CONSONANT_FLAGS} from './indic-data';
 
 const CATEGORY_MAP = {
   Avagraha: 'Symbol',
@@ -168,7 +168,7 @@ function matraPosition(c, pos) {
 function getPosition(codepoint, category) {
   let position = POSITION_MAP[codepoint.indicPositionalCategory] || 'End';
 
-  if (IS_CONSONANT[category]) {
+  if (CATEGORIES[category] & CONSONANT_FLAGS) {
     position = 'Base_C';
   } else if (category === 'M') {
     position = matraPosition(codepoint, position);

@@ -19,11 +19,12 @@ export default class GlyphInfo {
 
     this.ligatureID = null;
     this.ligatureComponent = null;
-    this.ligated = false;
+    this.isLigated = false;
     this.cursiveAttachment = null;
     this.markAttachment = null;
     this.shaperInfo = null;
     this.substituted = false;
+    this.isMultiplied = false;
   }
 
   get id() {
