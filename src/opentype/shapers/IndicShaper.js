@@ -96,7 +96,7 @@ function indicCategory(glyph) {
 }
 
 function indicPosition(glyph) {
-  return trie.get(glyph.codePoints[0]) & 0xff;
+  return 1 << (trie.get(glyph.codePoints[0]) & 0xff);
 }
 
 class IndicInfo {
@@ -788,7 +788,7 @@ function finalReordering(font, glyphs, plan) {
         /* This is our take on what step 4 is trying to say (and failing, BADLY). */
         if (!found && rephPos === POSITIONS.After_Sub) {
           newRephPos = base;
-          while (newRephPos + 1 < end && ![POSITIONS.Post_C, POSITIONS.After_Post, POSITIONS.SMVD].includes(glyphs[newRephPos + 1].shaperInfo.position)) {
+          while (newRephPos + 1 < end && !(glyphs[newRephPos + 1].shaperInfo.position & (POSITIONS.Post_C | POSITIONS.After_Post | POSITIONS.SMVD))) {
             newRephPos++;
           }
 

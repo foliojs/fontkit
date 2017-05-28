@@ -181,7 +181,7 @@ function getPosition(codepoint, category) {
     position = 'Before_Sub';
   }
 
-  return POSITIONS[position];
+  return Math.log2(POSITIONS[position]);
 }
 
 let symbols = {};

@@ -24,29 +24,29 @@ export const CATEGORIES = {
 
 // Visual positions in a syllable from left to right.
 export const POSITIONS = {
-  Start: 0,
+  Start: 1 << 0,
 
-  Ra_To_Become_Reph: 1,
-  Pre_M: 2,
-  Pre_C: 3,
+  Ra_To_Become_Reph: 1 << 1,
+  Pre_M: 1 << 2,
+  Pre_C: 1 << 3,
 
-  Base_C: 4,
-  After_Main: 5,
+  Base_C: 1 << 4,
+  After_Main: 1 << 5,
 
-  Above_C: 6,
+  Above_C: 1 << 6,
 
-  Before_Sub: 7,
-  Below_C: 8,
-  After_Sub: 9,
+  Before_Sub: 1 << 7,
+  Below_C: 1 << 8,
+  After_Sub: 1 << 9,
 
-  Before_Post: 10,
-  Post_C: 11,
-  After_Post: 12,
+  Before_Post: 1 << 10,
+  Post_C: 1 << 11,
+  After_Post: 1 << 12,
 
-  Final_C: 13,
-  SMVD: 14,
+  Final_C: 1 << 13,
+  SMVD: 1 << 14,
 
-  End: 15
+  End: 1 << 15
 };
 
 export const CONSONANT_FLAGS = CATEGORIES.C | CATEGORIES.Ra | CATEGORIES.CM | CATEGORIES.V | CATEGORIES.Placeholder | CATEGORIES.Dotted_Circle;
