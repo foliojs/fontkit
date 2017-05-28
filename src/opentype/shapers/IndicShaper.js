@@ -134,6 +134,10 @@ function isJoiner(glyph) {
   return glyph.shaperInfo.category & JOINER_FLAGS;
 }
 
+function isHalantOrCoeng(glyph) {
+  return glyph.shaperInfo.category & HALANT_OR_COENG_FLAGS;
+}
+
 function wouldSubstitute(glyphs, feature) {
   for (let glyph of glyphs) {
     glyph.features = {[feature]: true};
@@ -563,7 +567,7 @@ function finalReordering(font, glyphs, plan) {
                 // Ok, this was a 'pref' candidate but didn't form any.
                 // Base is around here...
                 base = i;
-                while (base < end && glyphs[base].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
+                while (base < end && isHalantOrCoeng(glyphs[base])) {
                   base++;
                 }
                 glyphs[base].shaperInfo.position = POSITIONS.BASE_C;
@@ -581,7 +585,7 @@ function finalReordering(font, glyphs, plan) {
               i++;
             }
 
-            if (i === end || !(glyphs[i].shaperInfo.category & HALANT_OR_COENG_FLAGS)) {
+            if (i === end || !isHalantOrCoeng(glyphs[i])) {
               break;
             }
 
@@ -639,8 +643,7 @@ function finalReordering(font, glyphs, plan) {
         // If we found no Halant we are done.
         // Otherwise only proceed if the Halant does
         // not belong to the Matra itself!
-        let info = glyphs[newPos].shaperInfo;
-        if (info.category & HALANT_OR_COENG_FLAGS && info.position !== POSITIONS.Pre_M) {
+        if (isHalantOrCoeng(glyphs[newPos]) && glyphs[newPos].shaperInfo.position !== POSITIONS.Pre_M) {
           // If ZWJ or ZWNJ follow this halant, position is moved after it.
           if (newPos + 1 < end && isJoiner(glyphs[newPos + 1])) {
             newPos++;
@@ -707,11 +710,11 @@ function finalReordering(font, glyphs, plan) {
         //     fixed in shaping engine, there was no case where reph position
         //     will be found on this step.
         newRephPos = start + 1;
-        while (newRephPos < base && !(glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS)) {
+        while (newRephPos < base && !isHalantOrCoeng(glyphs[newRephPos])) {
           newRephPos++;
         }
 
-        if (newRephPos < base && glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
+        if (newRephPos < base && isHalantOrCoeng(glyphs[newRephPos])) {
           // ->If ZWJ or ZWNJ are following this halant, position is moved after it.
           if (newRephPos + 1 < base && isJoiner(glyphs[newRephPos + 1])) {
             newRephPos++;
@@ -757,11 +760,11 @@ function finalReordering(font, glyphs, plan) {
       if (!found) {
         // Copied from step 2.
         newRephPos = start + 1;
-        while (newRephPos < base && !(glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS)) {
+        while (newRephPos < base && !isHalantOrCoeng(glyphs[newRephPos])) {
           newRephPos++;
         }
 
-        if (newRephPos < base && glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
+        if (newRephPos < base && isHalantOrCoeng(glyphs[newRephPos])) {
           // ->If ZWJ or ZWNJ are following this halant, position is moved after it.
           if (newRephPos + 1 < base && isJoiner(glyphs[newRephPos + 1])) {
             newRephPos++;
@@ -783,7 +786,7 @@ function finalReordering(font, glyphs, plan) {
         // However, if it's a plain Consonant,Halant we shouldn't do that.
         // Uniscribe doesn't do this.
         // TEST: U+0930,U+094D,U+0915,U+094B,U+094D
-        if (glyphs[newRephPos].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
+        if (isHalantOrCoeng(glyphs[newRephPos])) {
           for (let i = base + 1; i < newRephPos; i++) {
             if (glyphs[i].shaperInfo.category === CATEGORIES.M) {
               newRephPos--;
@@ -845,7 +848,7 @@ function finalReordering(font, glyphs, plan) {
               }
             }
 
-            if (newPos > start && glyphs[newPos - 1].shaperInfo.category & HALANT_OR_COENG_FLAGS) {
+            if (newPos > start && isHalantOrCoeng(glyphs[newPos - 1])) {
               // -> If ZWJ or ZWNJ follow this halant, position is moved after it.
               if (newPos < end && isJoiner(glyphs[newPos])) {
                 newPos++;
