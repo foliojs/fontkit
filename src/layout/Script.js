@@ -84,7 +84,7 @@ const UNICODE_SCRIPTS = {
   Ogham: 'ogam',
   Ol_Chiki: 'olck',
   Old_Turkic: 'orkh',
-  Oriya: 'orya',
+  Oriya: ['ory2', 'orya'],
   Osmanya: 'osma',
   Palmyrene: 'palm',
   Pau_Cin_Hau: 'pauc',

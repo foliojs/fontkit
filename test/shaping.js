@@ -395,6 +395,30 @@ describe('shaping', function() {
       test('HB-GURU-2', 'NotoSans/NotoSansGurmukhi-Regular.ttf', 'ਤ੍ਯੋ', '32+1110|175+1363|58+0');
     });
 
+    describe('shapes Gujarati text', function () {
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ગ્ષ', '132+839|52+1183');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ગ્સ', '132+839|53+1457');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ગ્હ', '132+839|54+1296');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્ક', '133+899|21+1047');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્ખ', '133+899|22+1528');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્ગ', '133+899|23+1339');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્ઘ', '133+729|24+1271');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્ઙ', '133+899|25+1004');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્ચ', '133+899|26+1353');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્છ', '133+899|27+1512');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્જ', '133+899|28+1786');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્ઝ', '133+899|29+1430');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્ઞ', '133+899|30+1417');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્ટ', '133+899|31+923');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્ઠ', '133+899|32+1059');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્ડ', '133+899|33+986');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્ઢ', '133+899|34+1056');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્ણ', '133+899|35+1683');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્ત', '133+899|36+1173');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્થ', '133+899|37+1280');
+      test('HB-GURU-1', 'NotoSans/NotoSansGujarati-Regular.ttf', 'ઘ્દ', '133+899|38+956');
+    });
+
     describe('shapes Malayalam text', function () {
       test('HB-MLYM-1', 'NotoSans/NotoSansMalayalam-Regular.ttf', 'അൎത്ഥം', '6+3058|180+3448|73@-2606,0+0|4+927');
       test('HB-MLYM-2', 'NotoSans/NotoSansMalayalam-Regular.ttf', 'അഥൎവ്വം', '6+3058|36+1835|208+1963|73@-1864,0+0|4+927');
@@ -463,36 +487,16 @@ describe('shaping', function() {
       test('HB-MLYM-65', 'NotoSans/NotoSansMalayalam-Regular.ttf', 'സ്റ്റ്', '214+2505|72+0');
     });
 
-    // describe('shapes Oriya text', function () {
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'ஃ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'ஃக', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'கூ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'கெ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'கொ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'கொ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'க்ஷ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'க்ஷொ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'க்ஷொ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'ஙூ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'சூ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'டி', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'டீ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'டூ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'தூ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'மூ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'ரி', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'ரீ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'ரூ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'ர்', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'லி', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'லீ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'କ୍ତ୍ର', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'ତ୍ତ୍ବ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'ନ୍ତ୍ବ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'ନ୍ତ୍ର', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'ନ୍ତ୍ର୍ଯ', '');
-    //   test('HB-BENG-1', 'NotoSans/NotoSansBengali-Regular.ttf', 'ସ୍ତ୍ର', '');
-    // });
+    describe('shapes Oriya text', function () {
+      test('HB-ORYA-1', 'NotoSans/NotoSansOriya-Regular.ttf', 'କ୍ତ୍ର', '165+1354|527@-225,0+0');
+      test('HB-ORYA-2', 'NotoSans/NotoSansOriya-Regular.ttf', 'ତ୍ତ୍ବ', '195+1397|150@-333,0+0');
+      test('HB-ORYA-3', 'NotoSans/NotoSansOriya-Regular.ttf', 'ନ୍ତ୍ବ', '206+1298|525@-280,0+0');
+      test('HB-ORYA-4', 'NotoSans/NotoSansOriya-Regular.ttf', 'ନ୍ତ୍ର', '38+1298|161@-280,0+0');
+      test('HB-ORYA-5', 'NotoSans/NotoSansOriya-Regular.ttf', 'ନ୍ତ୍ର୍ଯ', '38+1298|161@-280,0+0|162+768');
+      test('HB-ORYA-6', 'NotoSans/NotoSansOriya-Regular.ttf', 'ସ୍ତ୍ର', '51+1317|161+0');
+      test('HB-ORYA-7', 'NotoSans/NotoSansOriya-Regular.ttf', 'ମୁଁ', '43+1327|4+0|58+0');
+      test('HB-ORYA-8', 'NotoSans/NotoSansOriya-Regular.ttf', 'ମୁଂ', '43+1327|58+0|5+618');
+    });
 
     describe('shapes Khmer text', function () {
       test('HB-KHMR-1', 'NotoSans/NotoSansKhmer-Regular.ttf', 'ខ្មែ', '108+588|45+1300|169+0');
