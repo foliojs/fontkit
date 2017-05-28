@@ -209,14 +209,19 @@ export default class OTProcessor {
   }
 
   applyLookupList(lookupRecords) {
-    let g = this.glyphIterator;
-    this.glyphIterator = new GlyphIterator(this.glyphs);
+    let options = this.glyphIterator.options;
+    let glyphIndex = this.glyphIterator.index;
 
     for (let lookupRecord of lookupRecords) {
-      let lookup = this.table.lookupList.get(lookupRecord.lookupListIndex);
-      this.glyphIterator.reset(lookup.flags, g.index);
+      // Reset flags and find glyph index for this lookup record
+      this.glyphIterator.reset(options, glyphIndex);
       this.glyphIterator.increment(lookupRecord.sequenceIndex);
 
+      // Get the lookup and setup flags for subtables
+      let lookup = this.table.lookupList.get(lookupRecord.lookupListIndex);
+      this.glyphIterator.reset(lookup.flags, this.glyphIterator.index);
+
+      // Apply lookup subtables until one matches
       for (let table of lookup.subTables) {
         if (this.applyLookup(lookup.lookupType, table)) {
           break;
@@ -224,7 +229,7 @@ export default class OTProcessor {
       }
     }
 
-    this.glyphIterator = g;
+    this.glyphIterator.reset(options, glyphIndex);
     return true;
   }
 

@@ -5,6 +5,7 @@ export default class GlyphIterator {
   }
 
   reset(options = {}, index = 0) {
+    this.options = options;
     this.flags = options.flags || {};
     this.markAttachmentType = options.markAttachmentType || 0;
     this.index = index;
