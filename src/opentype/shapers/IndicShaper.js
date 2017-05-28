@@ -487,7 +487,32 @@ function initialReordering(font, glyphs, plan) {
     }
 
     if (plan.isOldSpec && plan.unicodeScript === 'Devanagari') {
-      throw new Error("TODO");
+      // Old-spec eye-lash Ra needs special handling.  From the
+      // spec:
+      //
+      // "The feature 'below-base form' is applied to consonants
+      // having below-base forms and following the base consonant.
+      // The exception is vattu, which may appear below half forms
+      // as well as below the base glyph. The feature 'below-base
+      // form' will be applied to all such occurrences of Ra as well."
+      //
+      // Test case: U+0924,U+094D,U+0930,U+094d,U+0915
+      // with Sanskrit 2003 font.
+      //
+      // However, note that Ra,Halant,ZWJ is the correct way to
+      // request eyelash form of Ra, so we wouldbn't inhibit it
+      // in that sequence.
+      //
+      // Test case: U+0924,U+094D,U+0930,U+094d,U+200D,U+0915
+      for (let i = start; i + 1 < base; i++) {
+        if (glyphs[i].shaperInfo.category === CATEGORIES.Ra &&
+          glyphs[i + 1].shaperInfo.category === CATEGORIES.H &&
+          (i + 1 === base || glyphs[i + 2].shaperInfo.category === CATEGORIES.ZWJ)
+        ) {
+          glyphs[i].features.blwf = true;
+          glyphs[i + 1].features.blwf = true;
+        }
+      }
     }
 
     let prefLen = 2;
