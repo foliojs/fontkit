@@ -29,6 +29,7 @@ export default class OTProcessor {
     this.glyphs = [];
     this.positions = []; // only used by GPOS
     this.ligatureID = 1;
+    this.currentFeature = null;
   }
 
   findScript(script) {
@@ -182,6 +183,7 @@ export default class OTProcessor {
     this.glyphIterator = new GlyphIterator(glyphs);
 
     for (let {feature, lookup} of lookups) {
+      this.currentFeature = feature;
       this.glyphIterator.reset(lookup.flags);
 
       while (this.glyphIterator.index < glyphs.length) {
@@ -253,7 +255,7 @@ export default class OTProcessor {
     let glyph = this.glyphIterator.increment(sequenceIndex);
     let idx = 0;
 
-    while (idx < sequence.length && glyph && fn(sequence[idx], glyph.id)) {
+    while (idx < sequence.length && glyph && fn(sequence[idx], glyph)) {
       if (matched) {
         matched.push(this.glyphIterator.index);
       }
@@ -271,16 +273,23 @@ export default class OTProcessor {
   }
 
   sequenceMatches(sequenceIndex, sequence) {
-    return this.match(sequenceIndex, sequence, (component, glyph) => component === glyph);
+    return this.match(sequenceIndex, sequence, (component, glyph) => component === glyph.id);
   }
 
   sequenceMatchIndices(sequenceIndex, sequence) {
-    return this.match(sequenceIndex, sequence, (component, glyph) => component === glyph, []);
+    return this.match(sequenceIndex, sequence, (component, glyph) => {
+      // If the current feature doesn't apply to this glyph,
+      if (!(this.currentFeature in glyph.features)) {
+        return false;
+      }
+
+      return component === glyph.id;
+    }, []);
   }
 
   coverageSequenceMatches(sequenceIndex, sequence) {
     return this.match(sequenceIndex, sequence, (coverage, glyph) =>
-      this.coverageIndex(coverage, glyph) >= 0
+      this.coverageIndex(coverage, glyph.id) >= 0
     );
   }
 
@@ -309,7 +318,7 @@ export default class OTProcessor {
 
   classSequenceMatches(sequenceIndex, sequence, classDef) {
     return this.match(sequenceIndex, sequence, (classID, glyph) =>
-      classID === this.getClassID(glyph, classDef)
+      classID === this.getClassID(glyph.id, classDef)
     );
   }
 
