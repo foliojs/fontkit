@@ -204,7 +204,12 @@ function initialReordering(font, glyphs, plan) {
 
     if (syllableType === 'broken_cluster' && dottedCircle) {
       let g = new GlyphInfo(font, dottedCircle, [0x25cc]);
-      g.shaperInfo = glyphs[start].shaperInfo;
+      g.shaperInfo = new IndicInfo(
+        1 << indicCategory(g),
+        indicPosition(g),
+        glyphs[start].shaperInfo.syllableType,
+        glyphs[start].shaperInfo.syllable
+      );
 
       // Insert after possible Repha.
       let i = start;
@@ -212,7 +217,9 @@ function initialReordering(font, glyphs, plan) {
         i++;
       }
 
-      glyphs.splice(++i, 0, g);
+      console.log('DOTTED_CIRCLE')
+
+      glyphs.splice(i++, 0, g);
       end++;
     }
 
