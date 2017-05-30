@@ -30,4 +30,4 @@ base.js: $(SOURCES) data.trie use.trie indic.trie
 	rollup -c -m -i src/base.js -o base.js
 
 clean:
-	rm -f index.js base.js data.trie src/opentype/shapers/data.trie src/opentype/shapers/use.trie src/opentype/shapers/use.json
+	rm -f index.js base.js data.trie indic.trie use.trie src/opentype/shapers/data.trie src/opentype/shapers/use.trie src/opentype/shapers/use.json src/opentype/shapers/indic.trie src/opentype/shapers/indic.json
