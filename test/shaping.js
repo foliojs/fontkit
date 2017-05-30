@@ -2,9 +2,10 @@ import fontkit from '../src';
 import assert from 'assert';
 
 describe('shaping', function() {
+  let fontCache = {};
   let test = (description, font, text, output) => {
     it(description, function() {
-      let f = fontkit.openSync(__dirname + '/data/' + font);
+      let f = fontCache[font] || (fontCache[font] = fontkit.openSync(__dirname + '/data/' + font));
       let {glyphs, positions} = f.layout(text);
 
       // Generate a compact string representation of the results
