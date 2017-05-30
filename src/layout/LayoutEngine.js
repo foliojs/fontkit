@@ -57,6 +57,7 @@ export default class LayoutEngine {
 
     // Return early if there are no glyphs
     if (glyphs.length === 0) {
+      glyphRun.positions = [];
       return glyphRun;
     }
 
@@ -68,6 +69,8 @@ export default class LayoutEngine {
     // Substitute and position the glyphs
     this.substitute(glyphRun);
     this.position(glyphRun);
+
+    this.hideDefaultIgnorables(glyphRun.glyphs, glyphRun.positions);
 
     // Let the layout engine clean up any state it might have
     if (this.engine && this.engine.cleanup) {
@@ -111,6 +114,45 @@ export default class LayoutEngine {
 
       this.kernProcessor.process(glyphRun.glyphs, glyphRun.positions);
       glyphRun.features.kern = true;
+    }
+  }
+
+  hideDefaultIgnorables(glyphs, positions) {
+    let space = this.font.glyphForCodePoint(0x20);
+    for (let i = 0; i < glyphs.length; i++) {
+      if (this.isDefaultIgnorable(glyphs[i].codePoints[0])) {
+        glyphs[i] = space;
+        positions[i].xAdvance = 0;
+        positions[i].yAdvance = 0;
+      }
+    }
+  }
+
+  isDefaultIgnorable(ch) {
+    // From DerivedCoreProperties.txt in the Unicode database,
+    // minus U+115F, U+1160, U+3164 and U+FFA0, which is what
+    // Harfbuzz and Uniscribe do.
+    let plane = ch >> 16;
+    if (plane === 0) {
+      // BMP
+      switch (ch >> 8) {
+      	case 0x00: return ch === 0x00AD;
+      	case 0x03: return ch === 0x034F;
+      	case 0x06: return ch === 0x061C;
+      	case 0x17: return 0x17B4 <= ch && ch <= 0x17B5;
+      	case 0x18: return 0x180B <= ch && ch <= 0x180E;
+      	case 0x20: return (0x200B <= ch && ch <= 0x200F) || (0x202A <= ch && ch <= 0x202E) || (0x2060 <= ch && ch <= 0x206F);
+      	case 0xFE: return (0xFE00 <= ch && ch <= 0xFE0F) || ch === 0xFEFF;
+      	case 0xFF: return 0xFFF0 <= ch && ch <= 0xFFF8;
+      	default:   return false;
+      }
+    } else {
+      // Other planes
+      switch (plane) {
+      	case 0x01: return (0x1BCA0 <= ch && ch <= 0x1BCA3) || (0x1D173 <= ch && ch <= 0x1D17A);
+      	case 0x0E: return 0xE0000 <= ch && ch <= 0xE0FFF;
+      	default:   return false;
+      }
     }
   }
 

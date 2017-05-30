@@ -29,6 +29,7 @@ export default class OTProcessor {
     this.glyphs = [];
     this.positions = []; // only used by GPOS
     this.ligatureID = 1;
+    this.currentFeature = null;
   }
 
   findScript(script) {
@@ -40,8 +41,8 @@ export default class OTProcessor {
       script = [ script ];
     }
 
-    for (let entry of this.table.scriptList) {
-      for (let s of script) {
+    for (let s of script) {
+      for (let entry of this.table.scriptList) {
         if (entry.tag === s) {
           return entry;
         }
@@ -61,7 +62,7 @@ export default class OTProcessor {
       }
 
       if (!entry) {
-        return;
+        return this.scriptTag;
       }
 
       this.scriptTag = entry.tag;
@@ -102,6 +103,8 @@ export default class OTProcessor {
         }
       }
     }
+
+    return this.scriptTag;
   }
 
   lookupsForFeatures(userFeatures = [], exclude) {
@@ -180,6 +183,7 @@ export default class OTProcessor {
     this.glyphIterator = new GlyphIterator(glyphs);
 
     for (let {feature, lookup} of lookups) {
+      this.currentFeature = feature;
       this.glyphIterator.reset(lookup.flags);
 
       while (this.glyphIterator.index < glyphs.length) {
@@ -205,19 +209,27 @@ export default class OTProcessor {
   }
 
   applyLookupList(lookupRecords) {
+    let options = this.glyphIterator.options;
     let glyphIndex = this.glyphIterator.index;
 
     for (let lookupRecord of lookupRecords) {
-      this.glyphIterator.index = glyphIndex;
+      // Reset flags and find glyph index for this lookup record
+      this.glyphIterator.reset(options, glyphIndex);
       this.glyphIterator.increment(lookupRecord.sequenceIndex);
 
+      // Get the lookup and setup flags for subtables
       let lookup = this.table.lookupList.get(lookupRecord.lookupListIndex);
+      this.glyphIterator.reset(lookup.flags, this.glyphIterator.index);
+
+      // Apply lookup subtables until one matches
       for (let table of lookup.subTables) {
-        this.applyLookup(lookup.lookupType, table);
+        if (this.applyLookup(lookup.lookupType, table)) {
+          break;
+        }
       }
     }
 
-    this.glyphIterator.index = glyphIndex;
+    this.glyphIterator.reset(options, glyphIndex);
     return true;
   }
 
@@ -248,7 +260,7 @@ export default class OTProcessor {
     let glyph = this.glyphIterator.increment(sequenceIndex);
     let idx = 0;
 
-    while (idx < sequence.length && glyph && fn(sequence[idx], glyph.id)) {
+    while (idx < sequence.length && glyph && fn(sequence[idx], glyph)) {
       if (matched) {
         matched.push(this.glyphIterator.index);
       }
@@ -266,16 +278,23 @@ export default class OTProcessor {
   }
 
   sequenceMatches(sequenceIndex, sequence) {
-    return this.match(sequenceIndex, sequence, (component, glyph) => component === glyph);
+    return this.match(sequenceIndex, sequence, (component, glyph) => component === glyph.id);
   }
 
   sequenceMatchIndices(sequenceIndex, sequence) {
-    return this.match(sequenceIndex, sequence, (component, glyph) => component === glyph, []);
+    return this.match(sequenceIndex, sequence, (component, glyph) => {
+      // If the current feature doesn't apply to this glyph,
+      if (!(this.currentFeature in glyph.features)) {
+        return false;
+      }
+
+      return component === glyph.id;
+    }, []);
   }
 
   coverageSequenceMatches(sequenceIndex, sequence) {
     return this.match(sequenceIndex, sequence, (coverage, glyph) =>
-      this.coverageIndex(coverage, glyph) >= 0
+      this.coverageIndex(coverage, glyph.id) >= 0
     );
   }
 
@@ -304,7 +323,7 @@ export default class OTProcessor {
 
   classSequenceMatches(sequenceIndex, sequence, classDef) {
     return this.match(sequenceIndex, sequence, (classID, glyph) =>
-      classID === this.getClassID(glyph, classDef)
+      classID === this.getClassID(glyph.id, classDef)
     );
   }
 

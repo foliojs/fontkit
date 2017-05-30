@@ -10,3 +10,5 @@ data.trie
 use.trie
 use.json
 .nyc_output
+indic.trie
+indic.json

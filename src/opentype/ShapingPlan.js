@@ -10,10 +10,9 @@ import * as Script from '../layout/Script';
  * @private
  */
 export default class ShapingPlan {
-  constructor(font, script, language) {
+  constructor(font, script) {
     this.font = font;
     this.script = script;
-    this.language = language;
     this.direction = Script.direction(script);
     this.stages = [];
     this.globalFeatures = {};
@@ -110,7 +109,7 @@ export default class ShapingPlan {
     for (let stage of this.stages) {
       if (typeof stage === 'function') {
         if (!positions) {
-          stage(this.font, glyphs, positions);
+          stage(this.font, glyphs, this);
         }
 
       } else if (stage.length > 0) {
