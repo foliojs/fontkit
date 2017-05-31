@@ -19,6 +19,27 @@ export default class GPOSProcessor extends OTProcessor {
       position.yOffset += value.yPlacement;
     }
 
+    // Adjustments for font variations
+    let variationProcessor = this.font._variationProcessor;
+    let variationStore = this.font.GDEF && this.font.GDEF.itemVariationStore;
+    if (variationProcessor && variationStore) {
+      if (value.xPlaDevice) {
+        position.xOffset += variationProcessor.getDelta(variationStore, value.xPlaDevice.a, value.xPlaDevice.b);
+      }
+
+      if (value.yPlaDevice) {
+        position.yOffset += variationProcessor.getDelta(variationStore, value.yPlaDevice.a, value.yPlaDevice.b);
+      }
+
+      if (value.xAdvDevice) {
+        position.xAdvance += variationProcessor.getDelta(variationStore, value.xAdvDevice.a, value.xAdvDevice.b);
+      }
+
+      if (value.yAdvDevice) {
+        position.yAdvance += variationProcessor.getDelta(variationStore, value.yAdvDevice.a, value.yAdvDevice.b);
+      }
+    }
+
     // TODO: device tables
   }
 
@@ -264,10 +285,23 @@ export default class GPOSProcessor extends OTProcessor {
 
   getAnchor(anchor) {
     // TODO: contour point, device tables
-    return {
-      x: anchor.xCoordinate,
-      y: anchor.yCoordinate
-    };
+    let x = anchor.xCoordinate;
+    let y = anchor.yCoordinate;
+
+    // Adjustments for font variations
+    let variationProcessor = this.font._variationProcessor;
+    let variationStore = this.font.GDEF && this.font.GDEF.itemVariationStore;
+    if (variationProcessor && variationStore) {
+      if (anchor.xDeviceTable) {
+        x += variationProcessor.getDelta(variationStore, anchor.xDeviceTable.a, anchor.xDeviceTable.b);
+      }
+
+      if (anchor.yDeviceTable) {
+        y += variationProcessor.getDelta(variationStore, anchor.yDeviceTable.a, anchor.yDeviceTable.b);
+      }
+    }
+
+    return {x, y};
   }
 
   applyFeatures(userFeatures, glyphs, advances) {

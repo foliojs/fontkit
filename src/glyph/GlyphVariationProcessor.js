@@ -398,13 +398,21 @@ export default class GlyphVariationProcessor {
       innerIndex = gid;
     }
 
-    return this.getMetricDelta(table.itemVariationStore, outerIndex, innerIndex);
+    return this.getDelta(table.itemVariationStore, outerIndex, innerIndex);
   }
 
   // See pseudo code from `Font Variations Overview'
   // in the OpenType specification.
-  getMetricDelta(itemStore, outerIndex, innerIndex) {
+  getDelta(itemStore, outerIndex, innerIndex) {
+    if (outerIndex >= itemStore.itemVariationData.length) {
+      return 0;
+    }
+
     let varData = itemStore.itemVariationData[outerIndex];
+    if (innerIndex >= varData.deltaSets.length) {
+      return 0;
+    }
+
     let deltaSet = varData.deltaSets[innerIndex];
     let blendVector = this.getBlendVector(itemStore, outerIndex);
     let netAdjustment = 0;

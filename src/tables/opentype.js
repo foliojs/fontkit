@@ -114,9 +114,9 @@ export let ClassDef = new r.VersionedStruct(r.uint16, {
 //###############
 
 export let Device = new r.Struct({
-  startSize:    r.uint16,
-  endSize:      r.uint16,
-  deltaFormat:  r.uint16
+  a: r.uint16, // startSize for hinting Device, outerIndex for VariationIndex
+  b: r.uint16, // endSize for Device, innerIndex for VariationIndex
+  deltaFormat: r.uint16
 });
 
 //#############################################
