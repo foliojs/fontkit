@@ -262,20 +262,28 @@ export default class TTFGlyph extends Glyph {
   // Decodes font data, resolves composite glyphs, and returns an array of contours
   _getContours() {
     let glyph = this._decode();
-    if (!glyph) { return []; }
+    if (!glyph) {
+      return [];
+    }
+
+    let points = [];
 
     if (glyph.numberOfContours < 0) {
       // resolve composite glyphs
-      var points = [];
       for (let component of glyph.components) {
-        glyph = this._font.getGlyph(component.glyphID)._decode();
-        // TODO transform
-        for (let point of glyph.points) {
-          points.push(new Point(point.onCurve, point.endContour, point.x + component.dx, point.y + component.dy));
+        let contours = this._font.getGlyph(component.glyphID)._getContours();
+        for (let i = 0; i < contours.length; i++) {
+          let contour = contours[i];
+          for (let j = 0; j < contour.length; j++) {
+            let point = contour[j];
+            let x = point.x * component.scaleX + point.y * component.scale01 + component.dx;
+            let y = point.y * component.scaleY + point.x * component.scale10 + component.dy;
+            points.push(new Point(point.onCurve, point.endContour, x, y));
+          }
         }
       }
     } else {
-      var points = glyph.points || [];
+      points = glyph.points || [];
     }
 
     // Recompute and cache metrics if we performed variation processing, and don't have an HVAR table
