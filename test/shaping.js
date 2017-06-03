@@ -49,6 +49,8 @@ describe('shaping', function() {
     test('should shape Phags Pa text', 'NotoSans/NotoSansPhagsPa-Regular.ttf', 'ꡀꡁꡂꡃ ꡄꡅꡆꡇ ꡈꡉꡊꡋ ꡌꡍꡎꡏ',
       '100+1491|212+1462|217+1462|87+1386|3+532|161+1677|168+1427|148+1532|329+1122|3+532|112+1614' +
       '|153+1491|158+1073|107+1231|3+532|171+1686|178+1542|313+1542|115+1231');
+
+    test('should attach marks to the first base of a multiple substitution', 'amiri/amiri-regular.ttf', 'الله', '1824+721|461@-267,-162+0|430@-277,-440+0|6714+0|1823+473|1822+319|388+446');
   });
 
   describe('hangul shaper', function() {

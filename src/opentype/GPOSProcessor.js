@@ -162,7 +162,7 @@ export default class GPOSProcessor extends OTProcessor {
 
         // search backward for a base glyph
         let baseGlyphIndex = this.glyphIterator.index;
-        while (--baseGlyphIndex >= 0 && this.glyphs[baseGlyphIndex].isMark);
+        while (--baseGlyphIndex >= 0 && (this.glyphs[baseGlyphIndex].isMark || this.glyphs[baseGlyphIndex].ligatureComponent > 0));
 
         if (baseGlyphIndex < 0) {
           return false;
@@ -201,7 +201,7 @@ export default class GPOSProcessor extends OTProcessor {
         let ligAttach = table.ligatureArray[ligIndex];
         let markGlyph = this.glyphIterator.cur;
         let ligGlyph = this.glyphs[baseGlyphIndex];
-        let compIndex = ligGlyph.ligatureID && ligGlyph.ligatureID === markGlyph.ligatureID && (markGlyph.ligatureComponent != null)
+        let compIndex = ligGlyph.ligatureID && ligGlyph.ligatureID === markGlyph.ligatureID && (markGlyph.ligatureComponent > 0)
           ? Math.min(markGlyph.ligatureComponent, ligGlyph.codePoints.length) - 1
           : ligGlyph.codePoints.length - 1;
 
