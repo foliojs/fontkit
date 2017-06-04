@@ -10,10 +10,10 @@ import * as Script from '../layout/Script';
  * @private
  */
 export default class ShapingPlan {
-  constructor(font, script) {
+  constructor(font, script, direction) {
     this.font = font;
     this.script = script;
-    this.direction = Script.direction(script);
+    this.direction = direction;
     this.stages = [];
     this.globalFeatures = {};
     this.allFeatures = {};
@@ -104,8 +104,6 @@ export default class ShapingPlan {
    * Executes the planned stages using the given OTProcessor
    */
   process(processor, glyphs, positions) {
-    processor.selectScript(this.script, this.language);
-
     for (let stage of this.stages) {
       if (typeof stage === 'function') {
         if (!positions) {

@@ -23,11 +23,12 @@ export default class LayoutEngine {
     }
   }
 
-  layout(string, features, script, language) {
+  layout(string, features, script, language, direction) {
     // Make the features parameter optional
     if (typeof features === 'string') {
-      script = features;
+      direction = language;
       language = script;
+      script = features;
       features = [];
     }
 
@@ -53,7 +54,7 @@ export default class LayoutEngine {
       var glyphs = string;
     }
 
-    let glyphRun = new GlyphRun(glyphs, features, script, language);
+    let glyphRun = new GlyphRun(glyphs, features, script, language, direction);
 
     // Return early if there are no glyphs
     if (glyphs.length === 0) {

@@ -339,10 +339,11 @@ export default class TTFFont {
    * @param {string[]} [userFeatures]
    * @param {string} [script]
    * @param {string} [language]
+   * @param {string} [direction]
    * @return {GlyphRun}
    */
-  layout(string, userFeatures, script, language) {
-    return this._layoutEngine.layout(string, userFeatures, script, language);
+  layout(string, userFeatures, script, language, direction) {
+    return this._layoutEngine.layout(string, userFeatures, script, language, direction);
   }
 
   /**
