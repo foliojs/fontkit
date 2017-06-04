@@ -340,6 +340,11 @@ export default class GPOSProcessor extends OTProcessor {
             this.positions[i].xOffset -= this.positions[k].xAdvance;
             this.positions[i].yOffset -= this.positions[k].yAdvance;
           }
+        } else {
+          for (let k = j + 1; k < i + 1; k++) {
+            this.positions[i].xOffset += this.positions[k].xAdvance;
+            this.positions[i].yOffset += this.positions[k].yAdvance;
+          }
         }
       }
     }

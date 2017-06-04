@@ -51,6 +51,8 @@ describe('shaping', function() {
       '|153+1491|158+1073|107+1231|3+532|171+1686|178+1542|313+1542|115+1231');
 
     test('should attach marks to the first base of a multiple substitution', 'amiri/amiri-regular.ttf', 'الله', '1824+721|461@-267,-162+0|430@-277,-440+0|6714+0|1823+473|1822+319|388+446');
+
+    test('should adjust attached marks if base is adjusted', 'amiri/amiri-regular.ttf', 'لَكنت' ,'2054+1810|2133+500|2300+1206|427@-96,0+0|5988+380|2322+360');
   });
 
   describe('hangul shaper', function() {
