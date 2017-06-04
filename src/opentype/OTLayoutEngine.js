@@ -95,16 +95,16 @@ export default class OTLayoutEngine {
     this.shaper = null;
   }
 
-  getAvailableFeatures(script, language, direction) {
+  getAvailableFeatures(script, language) {
     let features = [];
 
     if (this.GSUBProcessor) {
-      this.GSUBProcessor.selectScript(script, language, direction);
+      this.GSUBProcessor.selectScript(script, language);
       features.push(...Object.keys(this.GSUBProcessor.features));
     }
 
     if (this.GPOSProcessor) {
-      this.GPOSProcessor.selectScript(script, language, direction);
+      this.GPOSProcessor.selectScript(script, language);
       features.push(...Object.keys(this.GPOSProcessor.features));
     }
 
