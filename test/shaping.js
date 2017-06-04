@@ -34,6 +34,11 @@ describe('shaping', function() {
       let {glyphs} = font.layout('۴', 'arab', 'URD');
       return assert.deepEqual(glyphs.map(g => g.id), [ 1940 ]);
     });
+
+    it('should use specified left-to-right direction', function() {
+      let {glyphs} = font.layout('١٢٣', 'arab', 'ar', 'ltr');
+      return assert.deepEqual(glyphs.map(g => g.id), [ 446, 447, 448 ]);
+    });
   });
 
   describe('arabic shaper', function() {

@@ -6,7 +6,7 @@ import * as Script from '../layout/Script';
  * Returned by the font layout method.
  */
 export default class GlyphRun {
-  constructor(glyphs, features, script, language) {
+  constructor(glyphs, features, script, language, direction) {
     /**
      * An array of Glyph objects in the run
      * @type {Glyph[]}
@@ -33,10 +33,11 @@ export default class GlyphRun {
     this.language = language || null;
 
     /**
-     * The directionality of the requested script (either ltr or rtl).
+     * The direction requested for shaping, as passed in (either ltr or rtl).
+     * If `null`, the default direction of the script is used.
      * @type {string}
      */
-    this.direction = Script.direction(script);
+    this.direction = direction || Script.direction(script);
 
     /**
      * The features requested during shaping. This is a combination of user

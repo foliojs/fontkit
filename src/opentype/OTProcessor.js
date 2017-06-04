@@ -52,7 +52,7 @@ export default class OTProcessor {
     return null;
   }
 
-  selectScript(script, language) {
+  selectScript(script, language, direction) {
     let changed = false;
     let entry;
     if (!this.script || script !== this.scriptTag) {
@@ -67,7 +67,7 @@ export default class OTProcessor {
 
       this.scriptTag = entry.tag;
       this.script = entry.script;
-      this.direction = Script.direction(script);
+      this.direction = direction || Script.direction(script);
       this.language = null;
       this.languageTag = null;
       changed = true;
