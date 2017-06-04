@@ -27,6 +27,15 @@ describe('shaping', function() {
     })
   };
 
+  describe('general shaping tests', function() {
+    let font = fontkit.openSync(__dirname + '/data/amiri/amiri-regular.ttf');
+
+    it('should use correct script and language when features are not specified', function() {
+      let {glyphs} = font.layout('۴', 'arab', 'URD');
+      return assert.deepEqual(glyphs.map(g => g.id), [ 1940 ]);
+    });
+  });
+
   describe('arabic shaper', function() {
     test('should shape Arabic text', 'NotoSans/NotoKufiArabic-Regular.ttf', 'سُلَّاِّمتی',
       '223+1974|143+801|39+1176|270@180,80+0|268@1060,50+0|51+1452|101@900,-600+0|15+1798');

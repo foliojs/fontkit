@@ -26,8 +26,8 @@ export default class LayoutEngine {
   layout(string, features, script, language) {
     // Make the features parameter optional
     if (typeof features === 'string') {
-      script = features;
       language = script;
+      script = features;
       features = [];
     }
 
