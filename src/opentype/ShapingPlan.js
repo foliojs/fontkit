@@ -104,8 +104,6 @@ export default class ShapingPlan {
    * Executes the planned stages using the given OTProcessor
    */
   process(processor, glyphs, positions) {
-    processor.selectScript(this.script, this.language, this.direction);
-
     for (let stage of this.stages) {
       if (typeof stage === 'function') {
         if (!positions) {
