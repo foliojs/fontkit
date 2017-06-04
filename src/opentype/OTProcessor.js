@@ -67,10 +67,13 @@ export default class OTProcessor {
 
       this.scriptTag = entry.tag;
       this.script = entry.script;
-      this.direction = direction || Script.direction(script);
       this.language = null;
       this.languageTag = null;
       changed = true;
+    }
+
+    if (!direction || direction !== this.direction) {
+      this.direction = direction || Script.direction(script);
     }
 
     if (!language || language !== this.languageTag) {
