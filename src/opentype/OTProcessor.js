@@ -76,6 +76,10 @@ export default class OTProcessor {
       this.direction = direction || Script.direction(script);
     }
 
+    if (language && language.length < 4) {
+      language += ' '.repeat(4 - language.length);
+    }
+
     if (!language || language !== this.languageTag) {
       this.language = null;
 
