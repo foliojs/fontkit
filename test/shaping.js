@@ -31,12 +31,12 @@ describe('shaping', function() {
     let font = fontkit.openSync(__dirname + '/data/amiri/amiri-regular.ttf');
 
     it('should use correct script and language when features are not specified', function() {
-      let {glyphs} = font.layout('۴', 'arab', 'URD ');
+      let {glyphs} = font.layout('۴', 'arab', 'URD');
       return assert.deepEqual(glyphs.map(g => g.id), [ 1940 ]);
     });
 
     it('should use specified left-to-right direction', function() {
-      let {glyphs} = font.layout('١٢٣', 'arab', 'ar', 'ltr');
+      let {glyphs} = font.layout('١٢٣', 'arab', 'ARA ', 'ltr');
       return assert.deepEqual(glyphs.map(g => g.id), [ 446, 447, 448 ]);
     });
   });
