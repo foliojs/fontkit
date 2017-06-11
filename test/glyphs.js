@@ -182,6 +182,11 @@ describe('glyphs', function() {
       return assert.equal(glyph.path.toSVG(), 'M226 586L28 586L28 656L508 656L508 586L310 586L310 0L226 0Z');
     });
 
+    it('should get a correct path for all contours', function() {
+      let glyph = font.glyphsForString('o')[0];
+      return assert.equal(glyph.path.toSVG(), 'M271 -12Q226 -12 185.5 5Q145 22 114 54.5Q83 87 64.5 134.5Q46 182 46 242Q46 303 64.5 350.5Q83 398 114 431Q145 464 185.5 481Q226 498 271 498Q316 498 356.5 481Q397 464 428 431Q459 398 477.5 350.5Q496 303 496 242Q496 182 477.5 134.5Q459 87 428 54.5Q397 22 356.5 5Q316 -12 271 -12ZM271 56Q302 56 328 69.5Q354 83 372.5 107.5Q391 132 401 166Q411 200 411 242Q411 284 401 318.5Q391 353 372.5 378Q354 403 328 416.5Q302 430 271 430Q240 430 214 416.5Q188 403 169.5 378Q151 353 141 318.5Q131 284 131 242Q131 200 141 166Q151 132 169.5 107.5Q188 83 214 69.5Q240 56 271 56Z');
+    });
+
     it('should get the glyph cbox', function() {
       let glyph = font.glyphsForString('T')[0];
       return assert.deepEqual(glyph.cbox, new BBox(28, 0, 508, 656));
