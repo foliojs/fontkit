@@ -51,6 +51,10 @@ export default class GlyphInfo {
     }
   }
 
+  get advanceWidth() {
+    return this._font.getGlyph(this.id).advanceWidth;
+  }
+
   copy() {
     return new GlyphInfo(this._font, this.id, this.codePoints, this.features);
   }

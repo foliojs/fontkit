@@ -91,17 +91,17 @@ describe('glyphs', function() {
     let font = fontkit.openSync(__dirname + '/data/ss-emoji/ss-emoji-apple.ttf');
 
     it('should get an SBIXGlyph', function() {
-      let glyph = font.glyphsForString('😜')[0];
+      let glyph = font.layout('😜').glyphs[0];
       return assert.equal(glyph.constructor.name, 'SBIXGlyph');
     });
 
     it('should have an empty path', function() {
-      let glyph = font.glyphsForString('😜')[0];
+      let glyph = font.layout('😜').glyphs[0];
       return assert.equal(glyph.path.toSVG(), 'M0 2048ZM2055 -7Z');
     });
 
     it('should get an image', function() {
-      let glyph = font.glyphsForString('😜')[0];
+      let glyph = font.layout('😜').glyphs[0];
       let image = glyph.getImageForSize(32);
       return assert.deepEqual(image, {
         originX: 0,
@@ -112,7 +112,7 @@ describe('glyphs', function() {
     });
 
     it('should get the glyph name', function() {
-      let glyph = font.glyphsForString('😜')[0];
+      let glyph = font.layout('😜').glyphs[0];
       return assert.equal(glyph.name, 'stuckouttonguewinkingeye');
     });
   });
@@ -121,12 +121,12 @@ describe('glyphs', function() {
     let font = fontkit.openSync(__dirname + '/data/ss-emoji/ss-emoji-microsoft.ttf');
 
     it('should get an SBIXGlyph', function() {
-      let glyph = font.glyphsForString('😜')[0];
+      let glyph = font.layout('😜').glyphs[0];
       return assert.equal(glyph.constructor.name, 'COLRGlyph');
     });
 
     it('should get layers', function() {
-      let glyph = font.glyphsForString('😜')[0];
+      let glyph = font.layout('😜').glyphs[0];
       return assert.deepEqual(glyph.layers, [
         { glyph: font.getGlyph(247), color: { red: 252, green: 194, blue: 0, alpha: 255 }},
         { glyph: font.getGlyph(248), color: { red: 159, green: 79, blue: 0, alpha: 255 }},
@@ -135,17 +135,17 @@ describe('glyphs', function() {
     });
 
     it('should get empty path', function() {
-      let glyph = font.glyphsForString('😜')[0];
+      let glyph = font.layout('😜').glyphs[0];
       return assert.equal(glyph.path.toSVG(), '');
     });
 
     it('should get bbox', function() {
-      let glyph = font.glyphsForString('😜')[0];
+      let glyph = font.layout('😜').glyphs[0];
       return assert.deepEqual(glyph.bbox, new BBox(0, 0, 2048, 2048));
     });
 
     it('should get the glyph name', function() {
-      let glyph = font.glyphsForString('😜')[0];
+      let glyph = font.layout('😜').glyphs[0];
       return assert.equal(glyph.name, 'stuckouttonguewinkingeye');
     });
   });
@@ -154,17 +154,17 @@ describe('glyphs', function() {
     let font = fontkit.openSync(__dirname + '/data/SourceSansPro/SourceSansPro-Regular.woff');
 
     it('should get a TTFGlyph', function() {
-      let glyph = font.glyphsForString('T')[0];
+      let glyph = font.layout('T').glyphs[0];
       return assert.equal(glyph.constructor.name, 'TTFGlyph');
     });
 
     it('should get a path for the glyph', function() {
-      let glyph = font.glyphsForString('T')[0];
+      let glyph = font.layout('T').glyphs[0];
       return assert.equal(glyph.path.toSVG(), 'M226 586L28 586L28 656L508 656L508 586L310 586L310 0L226 0Z');
     });
 
     it('should get the glyph name', function() {
-      let glyph = font.glyphsForString('T')[0];
+      let glyph = font.layout('T').glyphs[0];
       return assert.equal(glyph.name, 'T');
     });
   });
@@ -173,27 +173,27 @@ describe('glyphs', function() {
     let font = fontkit.openSync(__dirname + '/data/SourceSansPro/SourceSansPro-Regular.woff2');
 
     it('should get a WOFF2Glyph', function() {
-      let glyph = font.glyphsForString('T')[0];
+      let glyph = font.layout('T').glyphs[0];
       return assert.equal(glyph.constructor.name, 'WOFF2Glyph');
     });
 
     it('should get a path for the glyph', function() {
-      let glyph = font.glyphsForString('T')[0];
+      let glyph = font.layout('T').glyphs[0];
       return assert.equal(glyph.path.toSVG(), 'M226 586L28 586L28 656L508 656L508 586L310 586L310 0L226 0Z');
     });
 
     it('should get the glyph cbox', function() {
-      let glyph = font.glyphsForString('T')[0];
+      let glyph = font.layout('T').glyphs[0];
       return assert.deepEqual(glyph.cbox, new BBox(28, 0, 508, 656));
     });
 
     it('should get the glyph bbox', function() {
-      let glyph = font.glyphsForString('T')[0];
+      let glyph = font.layout('T').glyphs[0];
       return assert.deepEqual(glyph.bbox, new BBox(28, 0, 508, 656));
     });
 
     it('should get the glyph name', function() {
-      let glyph = font.glyphsForString('T')[0];
+      let glyph = font.layout('T').glyphs[0];
       return assert.equal(glyph.name, 'T');
     });
   });

@@ -106,19 +106,9 @@ Maps a single unicode code point (number) to a Glyph object. Does not perform an
 
 Returns whether there is glyph in the font for the given unicode code point.
 
-#### `font.glyphsForString(string)`
-
-This method returns an array of Glyph objects for the given string. This is only a one-to-one mapping from characters
-to glyphs. For most uses, you should use `font.layout` (described below), which provides a much more advanced mapping
-supporting AAT and OpenType shaping.
-
 ### Glyph metrics and layout
 
 Fontkit includes several methods for accessing glyph metrics and performing layout, including support for kerning and other advanced OpenType positioning adjustments.
-
-#### `font.widthOfGlyph(glyph_id)`
-
-Returns the advance width (described above) for a single glyph id.
 
 #### `font.layout(string, features = [])`
 
@@ -154,9 +144,9 @@ have axis names as keys, and numbers as values (should be in the range specified
 
 ### Other methods
 
-#### `font.getGlyph(glyph_id, codePoints = [])`
+#### `font.getGlyph(glyph_id)`
 
-Returns a glyph object for the given glyph id. You can pass the array of code points this glyph represents for your use later, and it will be stored in the glyph object.
+Returns a glyph object for the given glyph id.
 
 #### `font.createSubset()`
 

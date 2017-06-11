@@ -275,58 +275,6 @@ export default class TTFFont {
     return this.getGlyph(this._cmapProcessor.lookup(codePoint), [codePoint]);
   }
 
-  /**
-   * Returns an array of Glyph objects for the given string.
-   * This is only a one-to-one mapping from characters to glyphs.
-   * For most uses, you should use font.layout (described below), which
-   * provides a much more advanced mapping supporting AAT and OpenType shaping.
-   *
-   * @param {string} string
-   * @return {Glyph[]}
-   */
-  glyphsForString(string) {
-    let glyphs = [];
-    let len = string.length;
-    let idx = 0;
-    let last = -1;
-    let state = -1;
-
-    while (idx <= len) {
-      let code = 0;
-      let nextState = 0;
-
-      if (idx < len) {
-        // Decode the next codepoint from UTF 16
-        code = string.charCodeAt(idx++);
-        if (0xd800 <= code && code <= 0xdbff && idx < len) {
-          let next = string.charCodeAt(idx);
-          if (0xdc00 <= next && next <= 0xdfff) {
-            idx++;
-            code = ((code & 0x3ff) << 10) + (next & 0x3ff) + 0x10000;
-          }
-        }
-
-        // Compute the next state: 1 if the next codepoint is a variation selector, 0 otherwise.
-        nextState = ((0xfe00 <= code && code <= 0xfe0f) || (0xe0100 <= code && code <= 0xe01ef)) ? 1 : 0;
-      } else {
-        idx++;
-      }
-
-      if (state === 0 && nextState === 1) {
-        // Variation selector following normal codepoint.
-        glyphs.push(this.getGlyph(this._cmapProcessor.lookup(last, code), [last, code]));
-      } else if (state === 0 && nextState === 0) {
-        // Normal codepoint following normal codepoint.
-        glyphs.push(this.glyphForCodePoint(last));
-      }
-
-      last = code;
-      state = nextState;
-    }
-
-    return glyphs;
-  }
-
   @cache
   get _layoutEngine() {
     return new LayoutEngine(this);
@@ -370,13 +318,13 @@ export default class TTFFont {
     return this._layoutEngine.getAvailableFeatures(script, language);
   }
 
-  _getBaseGlyph(glyph, characters = []) {
+  _getBaseGlyph(glyph) {
     if (!this._glyphs[glyph]) {
       if (this.directory.tables.glyf) {
-        this._glyphs[glyph] = new TTFGlyph(glyph, characters, this);
+        this._glyphs[glyph] = new TTFGlyph(glyph, this);
 
       } else if (this.directory.tables['CFF '] || this.directory.tables.CFF2) {
-        this._glyphs[glyph] = new CFFGlyph(glyph, characters, this);
+        this._glyphs[glyph] = new CFFGlyph(glyph, this);
       }
     }
 
@@ -392,16 +340,16 @@ export default class TTFFont {
    * @param {number[]} characters
    * @return {Glyph}
    */
-  getGlyph(glyph, characters = []) {
+  getGlyph(glyph) {
     if (!this._glyphs[glyph]) {
       if (this.directory.tables.sbix) {
-        this._glyphs[glyph] = new SBIXGlyph(glyph, characters, this);
+        this._glyphs[glyph] = new SBIXGlyph(glyph, this);
 
       } else if ((this.directory.tables.COLR) && (this.directory.tables.CPAL)) {
-        this._glyphs[glyph] = new COLRGlyph(glyph, characters, this);
+        this._glyphs[glyph] = new COLRGlyph(glyph, this);
 
       } else {
-        this._getBaseGlyph(glyph, characters);
+        this._getBaseGlyph(glyph);
       }
     }
 
