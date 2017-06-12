@@ -69,7 +69,7 @@ export default class IndicShaper extends DefaultShaper {
       if (d) {
         let decomposed = d.map(c => {
           let g = plan.font.glyphForCodePoint(c);
-          return new GlyphInfo(plan.font, g.id, [c], glyphs[i].features);
+          return new GlyphInfo(plan.font, g.id, [c], glyphs[i].stringIndex, glyphs[i].features);
         });
 
         glyphs.splice(i, 1, ...decomposed);
@@ -202,6 +202,7 @@ function initialReordering(font, glyphs, plan) {
         i++;
       }
 
+      g.stringIndex = glyphs[i].stringIndex;
       glyphs.splice(i++, 0, g);
       end++;
     }

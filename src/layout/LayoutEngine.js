@@ -64,6 +64,7 @@ export default class LayoutEngine {
     }
 
     // Map glyph infos back to normal Glyph objects
+    glyphRun.stringIndices = glyphRun.glyphs.map(glyphInfo => glyphInfo.stringIndex);
     glyphRun.glyphs = glyphRun.glyphs.map(glyphInfo => this.font.getGlyph(glyphInfo.id));
     return glyphRun;
   }
@@ -87,6 +88,7 @@ export default class LayoutEngine {
     while (idx <= len) {
       let code = 0;
       let nextState = 0;
+      let stringIndex = idx - 1;
 
       if (idx < len) {
         // Decode the next codepoint from UTF 16
@@ -107,10 +109,10 @@ export default class LayoutEngine {
 
       if (state === 0 && nextState === 1) {
         // Variation selector following normal codepoint.
-        glyphs.push(new GlyphInfo(this.font, this.font._cmapProcessor.lookup(last, code), [last, code]));
+        glyphs.push(new GlyphInfo(this.font, this.font._cmapProcessor.lookup(last, code), [last, code], stringIndex));
       } else if (state === 0 && nextState === 0) {
         // Normal codepoint following normal codepoint.
-        glyphs.push(new GlyphInfo(this.font, this.font._cmapProcessor.lookup(last), [last]));
+        glyphs.push(new GlyphInfo(this.font, this.font._cmapProcessor.lookup(last), [last], stringIndex));
       }
 
       last = code;

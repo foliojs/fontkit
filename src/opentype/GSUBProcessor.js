@@ -31,10 +31,9 @@ export default class GSUBProcessor extends OTProcessor {
           this.glyphIterator.cur.id = sequence[0];
           this.glyphIterator.cur.ligatureComponent = 0;
 
-          let features = this.glyphIterator.cur.features;
           let curGlyph = this.glyphIterator.cur;
           let replacement = sequence.slice(1).map((gid, i) => {
-            let glyph = new GlyphInfo(this.font, gid, undefined, features);
+            let glyph = new GlyphInfo(this.font, gid, undefined, curGlyph.stringIndex, curGlyph.features);
             glyph.shaperInfo = curGlyph.shaperInfo;
             glyph.isLigated = curGlyph.isLigated;
             glyph.ligatureComponent = i + 1;
@@ -82,7 +81,7 @@ export default class GSUBProcessor extends OTProcessor {
           }
 
           // Create the replacement ligature glyph
-          let ligatureGlyph = new GlyphInfo(this.font, ligature.glyph, characters, curGlyph.features);
+          let ligatureGlyph = new GlyphInfo(this.font, ligature.glyph, characters, curGlyph.stringIndex, curGlyph.features);
           ligatureGlyph.shaperInfo = curGlyph.shaperInfo;
           ligatureGlyph.isLigated = true;
           ligatureGlyph.substituted = true;

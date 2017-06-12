@@ -83,11 +83,13 @@ describe('character to glyph mapping', function() {
 
     it('should apply indic reordering features', function() {
       let f = fontkit.openSync(__dirname + '/data/Khmer/Khmer.ttf');
-      let {glyphs} = f.layout('ខ្ញុំអាចញ៉ាំកញ្ចក់បាន ដោយគ្មានបញ្ហា');
+      let {glyphs, stringIndices} = f.layout('ខ្ញុំអាចញ៉ាំកញ្ចក់បាន ដោយគ្មានបញ្ហា');
       assert.deepEqual(glyphs.map(g => g.id), [
         45, 153, 177, 112, 248, 188, 49, 296, 44, 187, 149, 44, 117, 236, 188, 63, 3, 107,
         226, 188, 69, 218, 169, 188, 63, 64, 255, 175, 188
       ]);
+
+      assert.deepEqual(stringIndices, [0, 1, 3, 4, 5, 6, 7, 8, 12, 13, 14, 16, 17, 18, 19, 20, 21, 23, 22, 23, 24, 25, 26, 28, 29, 30, 31, 32, 34]);
     });
   });
 

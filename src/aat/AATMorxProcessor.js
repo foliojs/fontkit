@@ -142,7 +142,7 @@ export default class AATMorxProcessor {
       glyph = this.glyphs[this.markedGlyph];
       var gid = lookupTable.lookup(glyph.id);
       if (gid) {
-        this.glyphs[this.markedGlyph] = new GlyphInfo(this.font, gid, glyph.codePoints);
+        glyph.id = gid;
       }
     }
 
@@ -152,7 +152,7 @@ export default class AATMorxProcessor {
       glyph = this.glyphs[index];
       var gid = lookupTable.lookup(glyph.id);
       if (gid) {
-        this.glyphs[index] = new GlyphInfo(this.font, gid, glyph.codePoints);
+        glyph.id = gid;
       }
     }
 
@@ -192,7 +192,7 @@ export default class AATMorxProcessor {
 
         if (last || store) {
           let ligatureEntry = ligatureList.getItem(ligatureIndex);
-          this.glyphs[componentGlyph] = new GlyphInfo(this.font, ligatureEntry, codePoints);
+          this.glyphs[componentGlyph] = new GlyphInfo(this.font, ligatureEntry, codePoints, this.glyphs[componentGlyph].stringIndex);
           ligatureGlyphs.push(componentGlyph);
           ligatureIndex = 0;
           codePoints = [];
@@ -214,17 +214,18 @@ export default class AATMorxProcessor {
       if (glyph.id !== 0xffff) {
         let gid = lookupTable.lookup(glyph.id);
         if (gid) { // 0 means do nothing
-          glyphs[index] = new GlyphInfo(this.font, gid, glyph.codePoints);
+          glyph.id = gid;
         }
       }
     }
   }
 
   _insertGlyphs(glyphIndex, insertionActionIndex, count, isBefore) {
+    let stringIndex = this.glyphs[glyphIndex].stringIndex;
     let insertions = [];
     while (count--) {
       let gid = this.subtable.table.insertionActions.getItem(insertionActionIndex++);
-      insertions.push(new GlyphInfo(this.font, gid));
+      insertions.push(new GlyphInfo(this.font, gid, undefined, stringIndex));
     }
 
     if (!isBefore) {

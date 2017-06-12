@@ -49,7 +49,7 @@ export default class UniversalShaper extends DefaultShaper {
       if (decompositions[codepoint]) {
         let decomposed = decompositions[codepoint].map(c => {
           let g = plan.font.glyphForCodePoint(c);
-          return new GlyphInfo(plan.font, g.id, [c], glyphs[i].features);
+          return new GlyphInfo(plan.font, g.id, [c], glyphs[i].stringIndex, glyphs[i].features);
         });
 
         glyphs.splice(i, 1, ...decomposed);
@@ -132,6 +132,7 @@ function reorder(font, glyphs) {
 
       // Insert after possible Repha.
       for (i = start; i < end && glyphs[i].shaperInfo.category === 'R'; i++);
+      g.stringIndex = glyphs[i].stringIndex;
       glyphs.splice(++i, 0, g);
       end++;
     }
