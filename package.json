@@ -20,6 +20,7 @@
   "jsnext:main": "src/index.js",
   "files": [
     "src",
+    "util",
     "base.js",
     "base.js.map",
     "index.js",
@@ -28,6 +29,9 @@
     "use.trie",
     "indic.trie"
   ],
+  "bin": {
+    "fk-shape": "uil/shape.js"
+  },
   "author": "Devon Govett <devongovett@gmail.com>",
   "license": "MIT",
   "dependencies": {
@@ -41,7 +45,8 @@
     "restructure": "^0.5.3",
     "tiny-inflate": "^1.0.2",
     "unicode-properties": "^1.0.0",
-    "unicode-trie": "^0.3.0"
+    "unicode-trie": "^0.3.0",
+    "minimist": "^1.2.0"
   },
   "devDependencies": {
     "babel-cli": "^6.14.0",
