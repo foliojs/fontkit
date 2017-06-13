@@ -40,6 +40,11 @@ describe('fontkit', function() {
     assert.equal(font.constructor.name, 'WOFF2Font');
   });
 
+  it('should open fonts lacking PostScript name', function() {
+    let font = fontkit.openSync(__dirname + '/data/Mada/Mada-Regular.subset1.ttf');
+    assert.equal(font.postscriptName, null);
+  });
+
   it('should error when opening an invalid font asynchronously', function() {
     fontkit.open(__filename, function(err, font) {
       assert(err instanceof Error);

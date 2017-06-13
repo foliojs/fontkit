@@ -89,8 +89,12 @@ export default class TTFFont {
    */
   get postscriptName() {
     let name = this.name.records.postscriptName;
-    let lang = Object.keys(name)[0];
-    return name[lang];
+    if (name) {
+      let lang = Object.keys(name)[0];
+      return name[lang];
+    }
+
+    return null;
   }
 
   /**
