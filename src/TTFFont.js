@@ -31,6 +31,7 @@ export default class TTFFont {
     this._directoryPos = this.stream.pos;
     this._tables = {};
     this._glyphs = {};
+    this._baseGlyphs = {};
     this._decodeDirectory();
 
     // define properties for each table to lazily parse
@@ -375,16 +376,16 @@ export default class TTFFont {
   }
 
   _getBaseGlyph(glyph, characters = []) {
-    if (!this._glyphs[glyph]) {
+    if (!this._baseGlyphs[glyph]) {
       if (this.directory.tables.glyf) {
-        this._glyphs[glyph] = new TTFGlyph(glyph, characters, this);
+        this._baseGlyphs[glyph] = new TTFGlyph(glyph, characters, this);
 
       } else if (this.directory.tables['CFF '] || this.directory.tables.CFF2) {
-        this._glyphs[glyph] = new CFFGlyph(glyph, characters, this);
+        this._baseGlyphs[glyph] = new CFFGlyph(glyph, characters, this);
       }
     }
 
-    return this._glyphs[glyph] || null;
+    return this._baseGlyphs[glyph] || null;
   }
 
   /**
@@ -405,7 +406,7 @@ export default class TTFFont {
         this._glyphs[glyph] = new COLRGlyph(glyph, characters, this);
 
       } else {
-        this._getBaseGlyph(glyph, characters);
+        this._glyphs[glyph] = this._getBaseGlyph(glyph, characters);
       }
     }
 

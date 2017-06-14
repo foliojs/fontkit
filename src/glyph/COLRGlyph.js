@@ -55,21 +55,14 @@ export default class COLRGlyph extends Glyph {
     // default to normal glyph from glyf or CFF
     if (baseLayer == null) {
       var g = this._font._getBaseGlyph(this.id);
-      var color = {
-        red: 0,
-        green: 0,
-        blue: 0,
-        alpha: 255
-      };
-
-      return [new COLRLayer(g, color)];
+      return [new COLRLayer(g, null)];
     }
 
     // otherwise, return an array of all the layers
     let layers = [];
     for (let i = baseLayer.firstLayerIndex; i < baseLayer.firstLayerIndex + baseLayer.numLayers; i++) {
       var rec = colr.layerRecords[i];
-      var color = cpal.colorRecords[rec.paletteIndex];
+      var color = cpal.colorRecords[rec.paletteIndex] || null;
       var g = this._font._getBaseGlyph(rec.gid);
       layers.push(new COLRLayer(g, color));
     }
@@ -79,8 +72,19 @@ export default class COLRGlyph extends Glyph {
 
   render(ctx, size) {
     for (let {glyph, color} of this.layers) {
-      ctx.fillColor([color.red, color.green, color.blue], color.alpha / 255 * 100);
+      ctx.save();
+
+      if (color) {
+        ctx.fillStyle = 'rgba(' + [
+          color.red,
+          color.green,
+          color.blue,
+          color.alpha / 255 * 100
+        ].join(',') + ')';
+      }
       glyph.render(ctx, size);
+
+      ctx.restore();
     }
 
     return;
