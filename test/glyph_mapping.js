@@ -65,6 +65,11 @@ describe('character to glyph mapping', function() {
       let {glyphs} = font.layout('123 1⁄16 123');
       return assert.deepEqual(glyphs.map(g => g.id), [ 1088, 1089, 1090, 1, 1617, 1724, 1603, 1608, 1, 1088, 1089, 1090 ]);
     });
+
+    it('should not break if can’t enable fractions when using fraction slash', function() {
+      let {glyphs} = font.layout('a⁄b ⁄ 1⁄ ⁄2');
+      return assert.deepEqual(glyphs.map(g => g.id), [ 28, 1724, 29, 1, 1724, 1, 1617, 1724, 1, 1724, 1604 ]);
+    });
   });
 
   describe('AAT features', function() {

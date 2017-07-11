@@ -43,17 +43,16 @@ export default class DefaultShaper {
 
   static assignFeatures(plan, glyphs) {
     // Enable contextual fractions
-    let i = 0;
-    while (i < glyphs.length) {
+    for (let i = 0; i < glyphs.length; i++) {
       let glyph = glyphs[i];
       if (glyph.codePoints[0] === 0x2044) { // fraction slash
-        let start = i - 1;
+        let start = i;
         let end = i + 1;
 
         // Apply numerator
-        while (start >= 0 && unicode.isDigit(glyphs[start].codePoints[0])) {
-          glyphs[start].features.numr = true;
-          glyphs[start].features.frac = true;
+        while (start > 0 && unicode.isDigit(glyphs[start - 1].codePoints[0])) {
+          glyphs[start - 1].features.numr = true;
+          glyphs[start - 1].features.frac = true;
           start--;
         }
 
@@ -67,9 +66,6 @@ export default class DefaultShaper {
         // Apply fraction slash
         glyph.features.frac = true;
         i = end - 1;
-
-      } else {
-        i++;
       }
     }
   }
