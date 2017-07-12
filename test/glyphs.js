@@ -47,6 +47,11 @@ describe('glyphs', function() {
       return assert.deepEqual(glyph.bbox, new BBox(201, 0, 1368, 1462));
     });
 
+    it('should get correct bbox for runs containing blanks', function () {
+      let r = font.layout('abc ef');
+      return assert.deepEqual(r.bbox, new BBox(94, -20, 5832, 1567));
+    });
+
     it('should get the advance width', function() {
       let glyph = font.getGlyph(39);
       return assert.equal(glyph.advanceWidth | 0, 1493);
