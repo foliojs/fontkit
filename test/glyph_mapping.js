@@ -91,6 +91,13 @@ describe('character to glyph mapping', function() {
       return assert.deepEqual(glyphs.map(g => g.codePoints), [[102, 102, 105], [32], [49, 8260, 50]]);
     });
 
+    it('should handle rtl direction', function() {
+      let {glyphs} = font.layout('ffi', [], null, null, "rtl");
+      assert.equal(glyphs.length, 3);
+      assert.deepEqual(glyphs.map(g => g.id), [ 76, 73, 73 ]);
+      return assert.deepEqual(glyphs.map(g => g.codePoints), [[105], [102], [102]]);
+    });
+
     it('should apply indic reordering features', function() {
       let f = fontkit.openSync(__dirname + '/data/Khmer/Khmer.ttf');
       let {glyphs} = f.layout('ខ្ញុំអាចញ៉ាំកញ្ចក់បាន ដោយគ្មានបញ្ហា');

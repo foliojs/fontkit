@@ -13,7 +13,7 @@ export default class AATLayoutEngine {
     // AAT expects the glyphs to be in visual order prior to morx processing,
     // so reverse the glyphs if the script is right-to-left.
     if (glyphRun.direction === 'rtl') {
-      glyphs.reverse();
+      glyphRun.glyphs.reverse();
     }
 
     this.morxProcessor.process(glyphRun.glyphs, AATFeatureMap.mapOTToAAT(glyphRun.features));
