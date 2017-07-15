@@ -1,4 +1,4 @@
-import KernProcessor from './KernProcessor';
+import KerningEngine from './KerningEngine';
 import UnicodeLayoutEngine from './UnicodeLayoutEngine';
 import GlyphRun from './GlyphRun';
 import GlyphPosition from './GlyphPosition';
@@ -110,7 +110,7 @@ export default class LayoutEngine {
     // if kerning is not supported by GPOS, do kerning with the TrueType/AAT kern table
     if ((!positioned || !positioned.kern) && glyphRun.features.kern !== false && this.font.kern) {
       if (!this.kernProcessor) {
-        this.kernProcessor = new KernProcessor(this.font);
+        this.kernProcessor = new KerningEngine(this.font);
       }
 
       this.kernProcessor.process(glyphRun.glyphs, glyphRun.positions);
