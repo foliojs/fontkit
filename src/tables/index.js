@@ -106,6 +106,7 @@ import gvar from './gvar';
 import just from './just';
 import morx from './morx';
 import opbd from './opbd';
+import kerx from './kerx';
 
 tables.avar = avar;
 tables.bsln = bsln;
@@ -115,3 +116,4 @@ tables.gvar = gvar;
 tables.just = just;
 tables.morx = morx;
 tables.opbd = opbd;
+tables.kerx = kerx;
