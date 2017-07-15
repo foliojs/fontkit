@@ -1,4 +1,5 @@
 import r from 'restructure';
+import { LookupTable, StateTable1, UnboundedArray } from './aat';
 
 let KernPair = new r.Struct({
   left:   r.uint16,
@@ -20,7 +21,7 @@ let Kern2Array = new r.Struct({
 });
 
 let KernSubtable = new r.VersionedStruct('format', {
-  0: {
+  0: { // Ordered List of Kerning Pairs
     nPairs:         r.uint16,
     searchRange:    r.uint16,
     entrySelector:  r.uint16,
@@ -28,14 +29,19 @@ let KernSubtable = new r.VersionedStruct('format', {
     pairs:          new r.Array(KernPair, 'nPairs')
   },
 
-  2: {
+  1: { // State Table for Contextual Kerning
+    stateTable: new StateTable1,
+    valueTable: new r.Pointer(r.uint16, new UnboundedArray(r.int16), {type: 'parent'})
+  },
+
+  2: { // Simple n x m Array of Kerning Values
     rowWidth:   r.uint16,
     leftTable:  new r.Pointer(r.uint16, ClassTable, {type: 'parent'}),
     rightTable: new r.Pointer(r.uint16, ClassTable, {type: 'parent'}),
     array:      new r.Pointer(r.uint16, Kern2Array, {type: 'parent'})
   },
 
-  3: {
+  3: { // Simple n x m Array of Kerning Indices
     glyphCount:       r.uint16,
     kernValueCount:   r.uint8,
     leftClassCount:   r.uint8,
@@ -45,7 +51,9 @@ let KernSubtable = new r.VersionedStruct('format', {
     leftClass:        new r.Array(r.uint8, 'glyphCount'),
     rightClass:       new r.Array(r.uint8, 'glyphCount'),
     kernIndex:        new r.Array(r.uint8, t => t.leftClassCount * t.rightClassCount)
-  }
+  },
+
+  4: {}
 });
 
 let KernTable = new r.VersionedStruct('version', {
@@ -57,23 +65,24 @@ let KernTable = new r.VersionedStruct('version', {
       'horizontal',    // 1 if table has horizontal data, 0 if vertical
       'minimum',       // If set to 1, the table has minimum values. If set to 0, the table has kerning values.
       'crossStream',   // If set to 1, kerning is perpendicular to the flow of the text
-      'override'      // If set to 1 the value in this table replaces the accumulated value
+      'override'       // If set to 1 the value in this table replaces the accumulated value
     ]),
     subtable:   KernSubtable,
-    padding: new r.Reserved(r.uint8, t => t.length - t._currentOffset)
+    padding:    new r.Reserved(r.uint8, t => t.length - t._currentOffset)
   },
   1: { // Apple uses this format
+    offset: t => t._startOffset,
     length:     r.uint32,
     coverage:   new r.Bitfield(r.uint8, [
       null, null, null, null, null,
       'variation',     // Set if table has variation kerning values
       'crossStream',   // Set if table has cross-stream kerning values
-      'vertical'      // Set if table has vertical kerning values
+      'vertical'       // Set if table has vertical kerning values
     ]),
     format:     r.uint8,
     tupleIndex: r.uint16,
     subtable:   KernSubtable,
-    padding: new r.Reserved(r.uint8, t => t.length - t._currentOffset)
+    padding:    new r.Reserved(r.uint8, t => t.length - t._currentOffset)
   }
 });
 

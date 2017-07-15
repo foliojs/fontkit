@@ -131,7 +131,7 @@ export function StateTable(entryData = {}, lookupType = r.uint16) {
 // This is the old version of the StateTable structure
 export function StateTable1(entryData = {}, lookupType = r.uint16) {
   let ClassLookupTable = new r.Struct({
-    version() { return 8; }, // simulate LookupTable
+    version: t => 8, // simulate LookupTable
     firstGlyph: r.uint16,
     values: new r.Array(r.uint8, r.uint16)
   });
@@ -139,7 +139,8 @@ export function StateTable1(entryData = {}, lookupType = r.uint16) {
   let entry = Object.assign({
     newStateOffset: r.uint16,
     // convert offset to stateArray index
-    newState: t => (t.newStateOffset - (t.parent.stateArray.base - t.parent._startOffset)) / t.parent.nClasses,
+    // newState: t => (t.newStateOffset - (t.parent.stateArray.base - t.parent._startOffset)) / t.parent.nClasses,
+    newState: t => (t.newStateOffset + t.parent._startOffset - t.parent.stateArray.base) / t.parent.nClasses,
     flags: r.uint16
   }, entryData);
 
