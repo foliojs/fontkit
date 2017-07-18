@@ -3,7 +3,7 @@ import AATLookupTable from './AATLookupTable';
 
 const PUSH_MASK = 0x8000;
 const VALUE_OFFSET_MASK = 0x3fff;
-const RESET_CROSS_STREAM_KERNING = 0x8000;
+const RESET_CROSS_STREAM_KERNING = -0x8000;
 const STACK_SIZE = 8;
 
 export default class AATKernProcessor {
@@ -21,6 +21,7 @@ export default class AATKernProcessor {
     let prop = this.coverage.crossStream ? 'yAdvance' : 'xAdvance';
 
     let stack = [];
+    let advancesSoFar = 0;
     let adjustments = [];
     for (let i = 0; i < glyphs.length; i++) {
       adjustments.push({ x: 0, y: 0 });
@@ -46,10 +47,12 @@ export default class AATKernProcessor {
           let glyphIndex = stack.pop();
 
           if (this.coverage.crossStream && value === RESET_CROSS_STREAM_KERNING) {
-            positions[glyphIndex][prop] = -positions[glyphIndex - 1][prop];
+            positions[glyphIndex][prop] = -advancesSoFar;
+            advancesSoFar = 0;
           } else {
             positions[glyphIndex][prop] += value;
             // adjustments[glyphIndex][this.coverage.crossStream ? 'y' : 'x'] += value;
+            advancesSoFar += value;
           }
         }
       }
