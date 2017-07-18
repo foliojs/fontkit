@@ -18,7 +18,6 @@ export default class AATKernProcessor {
   }
 
   process(glyphs, positions) {
-    console.log('-----------')
     let prop = this.coverage.crossStream ? 'yAdvance' : 'xAdvance';
 
     let stack = [];
@@ -27,14 +26,9 @@ export default class AATKernProcessor {
       adjustments.push({ x: 0, y: 0 });
     }
 
-    // glyphs.reverse();
-    // positions.reverse();
-
     this.stateMachine.process(glyphs, false, (glyph, entry, index) => {
       if (entry.flags & PUSH_MASK) {
-        console.log('push!', index);
         if (stack.length === STACK_SIZE) {
-          console.log("MAX")
           stack.shift();
         }
 
@@ -44,9 +38,6 @@ export default class AATKernProcessor {
       let valueOffset = entry.flags & VALUE_OFFSET_MASK;
       if (valueOffset !== 0) {
         let actionIndex = ((this.stateTableOffset + valueOffset) - this.valueTable.base) >> 1;
-        console.log('action!', valueOffset, actionIndex, stack.length)
-
-        // let actionIndex = (valueOffset - this.valueTableBase) >> 1;
         let action = 0;
 
         while (stack.length > 0 && !(action & 1)) {
@@ -54,17 +45,11 @@ export default class AATKernProcessor {
           let value = action & ~1;
           let glyphIndex = stack.pop();
 
-          // if (!this.coverage.crossStream) {
-            // glyphIndex--;
-          // }
-
           if (this.coverage.crossStream && value === RESET_CROSS_STREAM_KERNING) {
             positions[glyphIndex][prop] = -positions[glyphIndex - 1][prop];
-            console.log('RESET', glyphIndex, 0, positions[glyphIndex][prop])
           } else {
             positions[glyphIndex][prop] += value;
             // adjustments[glyphIndex][this.coverage.crossStream ? 'y' : 'x'] += value;
-            console.log('pop', glyphIndex, prop, actionIndex, action, value, positions[glyphIndex][prop])
           }
         }
       }
@@ -73,9 +58,5 @@ export default class AATKernProcessor {
         stack.length = 0;
       // }
     });
-
-    // glyphs.reverse();
-    // positions.reverse();
-    // console.log(adjustments)
   }
 }

@@ -15,8 +15,6 @@ export default class KerningEngine {
       let Processor = KernTableProcessors[table.format];
       this.tables.push(new Processor(table));
     }
-
-    console.log(this.tables)
   }
 
   process(glyphs, positions) {
