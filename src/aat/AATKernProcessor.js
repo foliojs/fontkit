@@ -18,14 +18,11 @@ export default class AATKernProcessor {
   }
 
   process(glyphs, positions) {
-    let prop = this.coverage.crossStream ? 'yAdvance' : 'xAdvance';
+    let advance = this.coverage.crossStream ? 'yAdvance' : 'xAdvance';
+    let offset = this.coverage.crossStream ? 'yOffset' : 'xOffset';
 
     let stack = [];
     let advancesSoFar = 0;
-    let adjustments = [];
-    for (let i = 0; i < glyphs.length; i++) {
-      adjustments.push({ x: 0, y: 0 });
-    }
 
     this.stateMachine.process(glyphs, false, (glyph, entry, index) => {
       if (entry.flags & PUSH_MASK) {
@@ -33,7 +30,7 @@ export default class AATKernProcessor {
           stack.shift();
         }
 
-        stack.push(index - 1);
+        stack.push(index);
       }
 
       let valueOffset = entry.flags & VALUE_OFFSET_MASK;
@@ -47,11 +44,12 @@ export default class AATKernProcessor {
           let glyphIndex = stack.pop();
 
           if (this.coverage.crossStream && value === RESET_CROSS_STREAM_KERNING) {
-            positions[glyphIndex][prop] = -advancesSoFar;
+            positions[glyphIndex][advance] = -advancesSoFar;
+            positions[glyphIndex][offset] = -advancesSoFar;
             advancesSoFar = 0;
           } else {
-            positions[glyphIndex][prop] += value;
-            // adjustments[glyphIndex][this.coverage.crossStream ? 'y' : 'x'] += value;
+            positions[glyphIndex][advance] += value;
+            positions[glyphIndex][offset] += value;
             advancesSoFar += value;
           }
         }
