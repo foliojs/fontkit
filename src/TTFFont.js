@@ -417,7 +417,7 @@ export default class TTFFont {
    * @return {Subset}
    */
   createSubset() {
-    if (this.directory.tables['CFF ']) {
+    if (this.directory.tables['CFF '] || this.directory.tables.CFF2) {
       return new CFFSubset(this);
     }
 

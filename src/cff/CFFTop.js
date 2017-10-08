@@ -214,8 +214,9 @@ let CFF2TopDict = new CFFDict([
   [25,        'maxstack',             'number',                               193]
 ]);
 
-let CFFTop = new r.VersionedStruct(r.fixed16, {
+let CFFTop = new r.VersionedStruct(r.uint8, {
   1: {
+    minorVersion:       r.uint8,
     hdrSize:            r.uint8,
     offSize:            r.uint8,
     nameIndex:          new CFFIndex(new r.String('length')),
@@ -225,6 +226,7 @@ let CFFTop = new r.VersionedStruct(r.fixed16, {
   },
 
   2: {
+    minorVersion:       r.uint8,
     hdrSize:            r.uint8,
     length:             r.uint16,
     topDict:            CFF2TopDict,

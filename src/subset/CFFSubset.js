@@ -1,13 +1,15 @@
+import r from 'restructure';
 import Subset from './Subset';
 import CFFTop from '../cff/CFFTop';
 import CFFPrivateDict from '../cff/CFFPrivateDict';
 import standardStrings from '../cff/CFFStandardStrings';
+import CFFOperand from '../cff/CFFOperand';
 
 export default class CFFSubset extends Subset {
   constructor(font) {
     super(font);
 
-    this.cff = this.font['CFF '];
+    this.cff = this.font.CFF2 || this.font['CFF '];
     if (!this.cff) {
       throw new Error('Not a CFF Font');
     }
@@ -18,7 +20,12 @@ export default class CFFSubset extends Subset {
     let gsubrs = {};
 
     for (let gid of this.glyphs) {
-      this.charstrings.push(this.cff.getCharString(gid));
+      let charString = this.cff.getCharString(gid);
+      if (this.cff.version >= 2) {
+        charString = this.blendCharstring(gid, charString);
+      }
+
+      this.charstrings.push(charString);
 
       let glyph = this.font.getGlyph(gid);
       let path = glyph.path; // this causes the glyph to be parsed
@@ -29,6 +36,67 @@ export default class CFFSubset extends Subset {
     }
 
     this.gsubrs = this.subsetSubrs(this.cff.globalSubrIndex, gsubrs);
+  }
+
+  blendCharstring(gid, charString) {
+    let stream = new r.DecodeStream(charString);
+    let output = new r.EncodeStream(charString.length + 1);
+    let stack = [];
+
+    let privateDict = this.cff.privateDictForGlyph(gid);
+    let vstore = this.cff.topDict.vstore && this.cff.topDict.vstore.itemVariationStore;
+    let vsindex = privateDict.vsindex;
+    let variationProcessor = this.font._variationProcessor;
+
+    while (stream.pos < stream.length) {
+      let op = stream.readUInt8();
+
+      if (op < 32) {
+        switch (op) {
+          case 15: { // vsindex
+            vsindex = stack.pop();
+            break;
+          }
+
+          case 16: { // blend
+            let blendVector = variationProcessor.getBlendVector(vstore, vsindex);
+            let numBlends = stack.pop();
+            let numOperands = numBlends * blendVector.length;
+            let delta = stack.length - numOperands;
+            let base = delta - numBlends;
+
+            for (let i = 0; i < numBlends; i++) {
+              let sum = stack[base + i];
+              for (let j = 0; j < blendVector.length; j++) {
+                sum += blendVector[j] * stack[delta++];
+              }
+
+              stack[base + i] = sum | 0;
+            }
+
+            while (numOperands--) {
+              stack.pop();
+            }
+
+            break;
+          }
+
+          default: {
+            for (let val of stack) {
+              CFFOperand.encode(output, val, true);
+            }
+
+            output.writeUInt8(op);
+            stack.length = 0;
+          }
+        }
+      } else {
+        stack.push(CFFOperand.decode(stream, op));
+      }
+    }
+
+    output.writeUInt8(14); // endchar
+    return output.buffer.slice(0, output.bufferOffset);
   }
 
   subsetSubrs(subrs, used) {
@@ -99,8 +167,12 @@ export default class CFFSubset extends Subset {
       }
     }
 
-    let privateDict = Object.assign({}, this.cff.topDict.Private);
-    privateDict.Subrs = this.subsetSubrs(this.cff.topDict.Private.Subrs, used_subrs);
+    let privateDict = Object.assign({}, this.cff.topDict.Private || this.cff.topDict.FDArray[0].Private);
+    delete privateDict.vsindex;
+    delete privateDict.blend;
+    if (privateDict.Subrs) {
+      privateDict.Subrs = this.subsetSubrs(privateDict.Subrs, used_subrs);
+    }
 
     topDict.FDArray = [{ Private: privateDict }];
     return topDict.FDSelect = {
@@ -137,15 +209,11 @@ export default class CFFSubset extends Subset {
     topDict.charset = charset;
     topDict.Encoding = null;
     topDict.CharStrings = this.charstrings;
-
-    for (let key of ['version', 'Notice', 'Copyright', 'FullName', 'FamilyName', 'Weight', 'PostScript', 'BaseFontName', 'FontName']) {
-      topDict[key] = this.addString(this.cff.string(topDict[key]));
-    }
-
+    topDict.PostScript = this.addString(this.font.postscriptName);
     topDict.ROS = [this.addString('Adobe'), this.addString('Identity'), 0];
     topDict.CIDCount = this.charstrings.length;
 
-    if (this.cff.isCIDFont) {
+    if (this.cff.topDict.FDSelect) {
       this.subsetFontdict(topDict);
     } else {
       this.createCIDFontdict(topDict);
@@ -153,10 +221,10 @@ export default class CFFSubset extends Subset {
 
     let top = {
       version: 1,
-      hdrSize: this.cff.hdrSize,
-      offSize: this.cff.length,
-      header: this.cff.header,
-      nameIndex: [this.cff.postscriptName],
+      minorVersion: 0,
+      hdrSize: 4,
+      offSize: 4,
+      nameIndex: [this.font.postscriptName],
       topDictIndex: [topDict],
       stringIndex: this.strings,
       globalSubrIndex: this.gsubrs

@@ -1,5 +1,6 @@
 import Glyph from './Glyph';
 import Path from './Path';
+import CFFOperand from '../cff/CFFOperand';
 
 /**
  * Represents an OpenType PostScript glyph, in the Compact Font Format.
@@ -574,16 +575,8 @@ export default class CFFGlyph extends Glyph {
               throw new Error(`Unknown op: ${op}`);
           }
 
-        } else if (op < 247) {
-          stack.push(op - 139);
-        } else if (op < 251) {
-          var b1 = stream.readUInt8();
-          stack.push((op - 247) * 256 + b1 + 108);
-        } else if (op < 255) {
-          var b1 = stream.readUInt8();
-          stack.push(-(op - 251) * 256 - b1 - 108);
         } else {
-          stack.push(stream.readInt32BE() / 65536);
+          stack.push(CFFOperand.decode(stream, op));
         }
       }
     };
