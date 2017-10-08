@@ -100,7 +100,9 @@ export default class CFFSubset extends Subset {
     }
 
     let privateDict = Object.assign({}, this.cff.topDict.Private);
-    privateDict.Subrs = this.subsetSubrs(this.cff.topDict.Private.Subrs, used_subrs);
+    if (this.cff.topDict.Private && this.cff.topDict.Private.Subrs) {
+      privateDict.Subrs = this.subsetSubrs(this.cff.topDict.Private.Subrs, used_subrs);
+    }
 
     topDict.FDArray = [{ Private: privateDict }];
     return topDict.FDSelect = {
