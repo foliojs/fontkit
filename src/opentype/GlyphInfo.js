@@ -44,7 +44,7 @@ export default class GlyphInfo {
       this.isMark = classID === 3;
       this.markAttachmentType = GDEF.markAttachClassDef ? OTProcessor.prototype.getClassID(id, GDEF.markAttachClassDef) : 0;
     } else {
-      this.isMark = this.codePoints.every(unicode.isMark);
+      this.isMark = this.codePoints.length > 0 && this.codePoints.every(unicode.isMark);
       this.isBase = !this.isMark;
       this.isLigature = this.codePoints.length > 1;
       this.markAttachmentType = 0;
