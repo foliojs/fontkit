@@ -27,7 +27,7 @@ let KerxSubtable = new r.VersionedStruct('format', {
 
   1: { // State Table for Contextual Kerning
     stateHeader: new StateTable(KerxAction),
-    valueTable: new r.Pointer(r.uint32, new UnboundedArray(r.uint16), {type: 'parent'})
+    valueTable:  new r.Pointer(r.uint32, new UnboundedArray(r.uint16), {type: 'parent'})
   },
 
   2: { // Simple n x m Array of Kerning Values
@@ -39,8 +39,18 @@ let KerxSubtable = new r.VersionedStruct('format', {
 
   4: { // State Table for Control Point/Anchor Point Positioning
     stateHeader: new StateTable,
-    flags: r.uint8,
-    offset: r.uint24
+    flags:       r.uint8,
+    offset:      r.uint24
+  },
+
+  6: { // Simple Index-based Array Header
+    flags:            r.uint32,
+    rowCount:         r.uint16,
+    columnCount:      r.uint16,
+    rowIndexTable:    new r.Pointer(r.uint32, new LookupTable, {type: 'parent'}),
+    columnIndexTable: new r.Pointer(r.uint32, new LookupTable, {type: 'parent'}),
+    kerningArray:     new r.Pointer(r.uint32, new LookupTable, {type: 'parent'}),
+    kerningVector:    new r.Pointer(r.uint32, new LookupTable, {type: 'parent'})
   }
 });
 
@@ -53,7 +63,7 @@ let KerxTable = new r.Struct({
     'crossStream',   // Set if table has cross-stream kerning values
     'vertical'       // Set if table has vertical kerning values
   ]),
-  unused: new r.Reserved(r.uint16),
+  unused:     new r.Reserved(r.uint16),
   format:     r.uint8,
   tupleIndex: r.uint32,
   subtable:   KerxSubtable,
@@ -70,7 +80,7 @@ export default new r.VersionedStruct(r.uint16, {
   2: {},
 
   3: {
-    subtableOffsets: new r.Array(r.uint32, 'nTables'),
+    subtableOffsets:   new r.Array(r.uint32, 'nTables'),
     coverageBitfields: new UnboundedArray(r.uint8)
   }
 });
