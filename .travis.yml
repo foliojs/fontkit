@@ -3,3 +3,7 @@ node_js:
   - stable
   - "6"
   - "4"
+matrix:
+  include:
+    - os: osx
+      node_js: stable
