@@ -160,10 +160,10 @@ export default class LayoutEngine {
   }
 
   hideDefaultIgnorables(glyphs, positions) {
-    let space = this.font.glyphForCodePoint(0x20);
+    const space = this.font.glyphForCodePoint(0x20);
     for (let i = 0; i < glyphs.length; i++) {
       if (this.isDefaultIgnorable(glyphs[i].codePoints[0])) {
-        glyphs[i] = space;
+        glyphs[i].id = space.id;
         positions[i].xAdvance = 0;
         positions[i].yAdvance = 0;
       }
