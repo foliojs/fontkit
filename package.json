@@ -61,7 +61,8 @@
     "rollup": "^0.34.10",
     "rollup-plugin-babel": "^2.6.1",
     "rollup-plugin-json": "^2.0.2",
-    "rollup-plugin-local-resolve": "^1.0.7"
+    "rollup-plugin-local-resolve": "^1.0.7",
+    "rollup-plugin-re": "^1.0.7"
   },
   "browserify": {
     "transform": [
