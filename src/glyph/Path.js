@@ -19,6 +19,9 @@ export default class Path {
     this.commands = [];
     this._bbox = null;
     this._cbox = null;
+    this.fill = 'black';
+    this.stroke = null;
+    this.strokeWidth = 1;
   }
 
   /**
@@ -30,6 +33,31 @@ export default class Path {
     let cmds = this.commands.map(c => `  ctx.${c.command}(${c.args.join(', ')});`);
     return new Function('ctx', cmds.join('\n'));
   }
+
+  /**
+   * Draw the path to a 2D context.
+   * @param {CanvasRenderingContext2D} ctx - A 2D drawing context.
+   */
+  draw (ctx) {
+    ctx.scale(1, -1);
+
+    ctx.beginPath();
+    
+    let fn = this.toFunction();
+    fn(ctx);
+
+    if (this.fill) {
+        ctx.fillStyle = this.fill;
+        ctx.fill();
+    }
+
+    if (this.stroke) {
+        ctx.strokeStyle = this.stroke;
+        ctx.lineWidth = this.strokeWidth;
+        ctx.stroke();
+    }
+  };
+
 
   /**
    * Converts the path to an SVG path data string
