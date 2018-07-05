@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "test": "mocha",
-    "preinstall": "make",
+    "prepublish": "make",
     "coverage": "BABEL_ENV=cover nyc mocha"
   },
   "main": "index.js",
