@@ -20,6 +20,7 @@
   "jsnext:main": "src/index.js",
   "files": [
     "src",
+    "Makefile",
     "base.js",
     "base.js.map",
     "index.js",
