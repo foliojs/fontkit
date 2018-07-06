@@ -127,12 +127,13 @@ class CFFFont {
 
           if (gid < ranges[mid].first) {
             high = mid - 1;
-          } else if (mid < high && gid > ranges[mid + 1].first) {
+          } else if (gid > ranges[mid].first) {
             low = mid + 1;
           } else {
             return ranges[mid].fd;
           }
         }
+        return ranges[low-1].fd;
       default:
         throw new Error(`Unknown FDSelect version: ${this.topDict.FDSelect.version}`);
     }
