@@ -76,6 +76,21 @@ describe('glyphs', function() {
       return assert.equal(glyph.path.toSVG(), 'M90 0L258 0C456 0 564 122 564 331C564 539 456 656 254 656L90 656ZM173 68L173 588L248 588C401 588 478 496 478 331C478 165 401 68 248 68Z');
     });
 
+    it('should get a function for the glyph', function() {
+      let glyph = font.getGlyph(5);
+      let results = [];
+      const addResult = (...args) => results.push(args);
+      let ctx = {
+        lineTo: addResult,
+        moveTo: addResult,
+        bezierCurveTo: addResult,
+        closePath: addResult
+      };
+      let fn = glyph.path.toFunction();
+      fn(ctx)
+      return assert.equal(results.join(','), '90,0,258,0,456,0,564,122,564,331,564,539,456,656,254,656,90,656,,173,68,173,588,248,588,401,588,478,496,478,331,478,165,401,68,248,68,');
+    });
+
     it('should get the glyph cbox', function() {
       let glyph = font.getGlyph(5);
       return assert.deepEqual(glyph.cbox, new BBox(90, 0, 564, 656));
@@ -90,6 +105,7 @@ describe('glyphs', function() {
       let glyph = font.getGlyph(5);
       return assert.equal(glyph.name, 'D');
     });
+    
   });
 
   describe('SBIX glyphs', function() {
