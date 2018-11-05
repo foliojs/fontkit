@@ -46,6 +46,7 @@ Directory.preEncode = function(stream) {
 
   let maxExponentFor2 = Math.floor((Math.log(this.numTables) / Math.LN2));
   let maxPowerOf2 = Math.pow(2, maxExponentFor2);
+
   this.searchRange =  maxPowerOf2 * 16;
   this.entrySelector = Math.log(maxPowerOf2) / Math.LN2;
   this.rangeShift = this.numTables * 16 - this.searchRange;
