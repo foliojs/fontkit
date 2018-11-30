@@ -20,12 +20,15 @@
     "trie:copy": "shx cp src/opentype/shapers/*.trie ./",
     "rollup:index": "rollup -c -m -i src/index.js -o index.js",
     "rollup:base": "rollup -c -m -i src/base.js -o base.js",
-    "browserify:full": "browserify index.js --standalone FontKit --debug | exorcist browser.js.map > browser.js",
-    "browserify:min": "browserify index.js --standalone FontKit --debug --plugin=tinyify | exorcist browser.min.js.map > browser.min.js",
+    "browserify:copy-temp": "shx cp index.js browser-temp.js && shx cp index.js.map browser-temp.js.map",
+    "browserify:full": "browserify browser-temp.js --standalone FontKit --debug | exorcist browser.js.map > browser.js",
+    "browserify:min": "browserify browser-temp.js --standalone FontKit --debug --plugin=tinyify | exorcist browser.min.js.map > browser.min.js",
+    "browserify:clean-temp": "shx rm -f browser-temp.js*",
     "clean": "shx rm -f index.js base.js browser.js browser.min.js *.map data.trie indic.trie use.trie src/opentype/shapers/data.trie src/opentype/shapers/use.trie src/opentype/shapers/use.json src/opentype/shapers/indic.trie src/opentype/shapers/indic.json",
     "coverage": "cross-env BABEL_ENV=cover nyc mocha"
   },
   "main": "index.js",
+  "browser": "browser.js",
   "jsnext:main": "src/index.js",
   "files": [
     "src",
