@@ -4,11 +4,14 @@ playground/
 coverage/
 coverage.html
 data.trie
+data.trie.js
 /index.js
 /base.js
 *.js.map
 use.trie
+use.trie.js
 use.json
 .nyc_output
 indic.trie
+indic.trie.js
 indic.json

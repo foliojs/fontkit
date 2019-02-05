@@ -3,6 +3,7 @@ import fs from 'fs';
 import UnicodeTrieBuilder from 'unicode-trie/builder';
 import compile from 'dfa/compile';
 import {CATEGORIES, POSITIONS, CONSONANT_FLAGS} from './indic-data';
+import { generateTrieModuleContents } from './gen-util.js';
 
 const CATEGORY_MAP = {
   Avagraha: 'Symbol',
@@ -201,6 +202,7 @@ for (let i = 0; i < codepoints.length; i++) {
 }
 
 fs.writeFileSync(__dirname + '/indic.trie', trie.toBuffer());
+fs.writeFileSync(__dirname + '/indic.trie.js', generateTrieModuleContents(trie));
 
 let stateMachine = compile(fs.readFileSync(__dirname + '/indic.machine', 'utf8'), symbols);
 fs.writeFileSync(__dirname + '/indic.json', JSON.stringify(stateMachine));

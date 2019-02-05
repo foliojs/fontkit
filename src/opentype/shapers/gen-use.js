@@ -2,6 +2,7 @@ import codepoints from 'codepoints';
 import fs from 'fs';
 import UnicodeTrieBuilder from 'unicode-trie/builder';
 import compile from 'dfa/compile';
+import { generateTrieModuleContents } from './gen-util';
 
 const CATEGORIES = {
   B: [
@@ -275,6 +276,7 @@ function decompose(code) {
 }
 
 fs.writeFileSync(__dirname + '/use.trie', trie.toBuffer());
+fs.writeFileSync(__dirname + '/use.trie.js', generateTrieModuleContents(trie));
 
 let stateMachine = compile(fs.readFileSync(__dirname + '/use.machine', 'utf8'), symbols);
 let json = Object.assign({

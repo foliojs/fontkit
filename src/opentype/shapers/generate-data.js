@@ -5,6 +5,7 @@
 import codepoints from 'codepoints';
 import fs from 'fs';
 import UnicodeTrieBuilder from 'unicode-trie/builder';
+import { generateTrieModuleContents } from './gen-util';
 
 let ShapingClasses = {
   Non_Joining: 0,
@@ -31,3 +32,4 @@ for (let i = 0; i < codepoints.length; i++) {
 }
 
 fs.writeFileSync(__dirname + '/data.trie', trie.toBuffer());
+fs.writeFileSync(__dirname + '/data.trie.js', generateTrieModuleContents(trie));

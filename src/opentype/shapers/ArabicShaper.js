@@ -1,8 +1,9 @@
 import DefaultShaper from './DefaultShaper';
 import unicode from 'unicode-properties';
 import UnicodeTrie from 'unicode-trie';
+import dataTrie from './data.trie.js';
 
-const trie = new UnicodeTrie(require('fs').readFileSync(__dirname + '/data.trie'));
+const trie = new UnicodeTrie(dataTrie);
 const FEATURES = ['isol', 'fina', 'fin2', 'fin3', 'medi', 'med2', 'init'];
 
 const ShapingClasses = {
