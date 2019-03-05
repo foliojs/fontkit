@@ -56,6 +56,23 @@ describe('font subsetting', function() {
         done();
       }));
     });
+
+    it('should handle fonts with long index to location format (indexToLocFormat = 1)', function(done) {
+      let font = fontkit.openSync(__dirname + '/data/FiraSans/FiraSans-Regular.ttf');
+      let subset = font.createSubset();
+      for (let glyph of font.glyphsForString('abcd')) {
+        subset.includeGlyph(glyph);
+      }
+
+      subset.encodeStream().pipe(concat(function(buf) {
+        let f = fontkit.create(buf);
+        assert.equal(f.numGlyphs, 5);
+        assert.equal(f.getGlyph(1).path.toSVG(), font.glyphsForString('a')[0].path.toSVG());
+        // must test also second glyph which has an odd loca index
+        assert.equal(f.getGlyph(2).path.toSVG(), font.glyphsForString('b')[0].path.toSVG());
+        done();
+      }));
+    });
   });
 
   describe('CFF subsetting', function() {
