@@ -25,7 +25,7 @@ export default class TTFFont {
   }
 
   constructor(stream, variationCoords = null) {
-    this.defaultLanguage = 'en';
+    this.defaultLanguage = fontkit.defaultLanguage;
     this.stream = stream;
     this.variationCoords = variationCoords;
 
@@ -43,6 +43,10 @@ export default class TTFFont {
         });
       }
     }
+  }
+
+  setDefaultLanguage(lang = fontkit.defaultLanguage) {
+    this.defaultLanguage = lang;
   }
 
   _getTable(table) {
@@ -93,13 +97,13 @@ export default class TTFFont {
     if (name) {
       return name;
     }
-    
+
     let record = this.name.records.postscriptName;
     if (record) {
       let lang = Object.keys(record)[0];
       return record[lang];
     }
-    
+
     return null;
   }
 
