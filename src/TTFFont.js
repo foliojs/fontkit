@@ -25,6 +25,7 @@ export default class TTFFont {
   }
 
   constructor(stream, variationCoords = null) {
+    this.defaultLanguage = 'en';
     this.stream = stream;
     this.variationCoords = variationCoords;
 
@@ -87,7 +88,7 @@ export default class TTFFont {
    * The unique PostScript name for this font
    * @type {string}
    */
-  get postscriptName() {
+  get postscriptName() {    
     let name = this.name.records.postscriptName;
     if (name) {
       let lang = Object.keys(name)[0];
@@ -102,7 +103,7 @@ export default class TTFFont {
    * `lang` is a BCP-47 language code.
    * @return {string}
    */
-  getName(key, lang = 'en') {
+  getName(key, lang = this.defaultLanguage) {
     let record = this.name.records[key];
     if (record) {
       return record[lang];
