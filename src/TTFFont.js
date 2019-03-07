@@ -89,25 +89,6 @@ export default class TTFFont {
   }
 
   /**
-   * The unique PostScript name for this font
-   * @type {string}
-   */
-  get postscriptName() {
-    let name = this.getName('postscriptName');
-    if (name) {
-      return name;
-    }
-
-    let record = this.name.records.postscriptName;
-    if (record) {
-      let lang = Object.keys(record)[0];
-      return record[lang];
-    }
-
-    return null;
-  }
-
-  /**
    * Gets a string from the font's `name` table
    * `lang` is a BCP-47 language code.
    * @return {string}
@@ -115,10 +96,39 @@ export default class TTFFont {
   getName(key, lang = this.defaultLanguage || fontkit.defaultLanguage) {
     let record = this.name.records[key];
     if (record) {
-      return record[lang];
+      // Attempt to retrieve the entry, depending on which translations are available:
+
+      // Try the user-supplied language:
+      let result = record[lang];
+      // Try the font's default language:
+      if (!result && lang !== this.defaultLanguage) {
+        result = record[this.defaultLanguage];
+      }
+      // Try the global default language:
+      if (!result && lang !== fontkit.defaultLanguage) {
+        result = record[fontkit.defaultLanguage];
+      }
+      // Try English:
+      if (!result && lang !== 'en') {
+        result = record['en'];
+      }
+      // Seriously, ANY language would be fine:
+      if (!result) {
+        result = record[Object.keys(record)[0]];
+      }
+
+      return result;
     }
 
     return null;
+  }
+
+  /**
+   * The unique PostScript name for this font, e.g. "Helvetica-Bold"
+   * @type {string}
+   */
+  get postscriptName() {
+    return this.getName('postscriptName');
   }
 
   /**
