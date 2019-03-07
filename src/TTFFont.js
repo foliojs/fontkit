@@ -94,30 +94,17 @@ export default class TTFFont {
    * @return {string}
    */
   getName(key, lang = this.defaultLanguage || fontkit.defaultLanguage) {
-    let record = this.name.records[key];
+    let record = this.name && this.name.records[key];
     if (record) {
-      // Attempt to retrieve the entry, depending on which translations are available:
-
-      // Try the user-supplied language:
-      let result = record[lang];
-      // Try the font's default language:
-      if (!result && lang !== this.defaultLanguage) {
-        result = record[this.defaultLanguage];
-      }
-      // Try the global default language:
-      if (!result && lang !== fontkit.defaultLanguage) {
-        result = record[fontkit.defaultLanguage];
-      }
-      // Try English:
-      if (!result && lang !== 'en') {
-        result = record['en'];
-      }
-      // Seriously, ANY language would be fine:
-      if (!result) {
-        result = record[Object.keys(record)[0]];
-      }
-
-      return result;
+      // Attempt to retrieve the entry, depending on which translation is available:
+      return (
+          record[lang]
+          || record[this.defaultLanguage]
+          || record[fontkit.defaultLanguage]
+          || record['en']
+          || record[Object.keys(record)[0]] // Seriously, ANY language would be fine
+          || null
+      );
     }
 
     return null;
