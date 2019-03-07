@@ -4,13 +4,16 @@ import fontkit from '../src';
 
 describe('i18n', function() {
     describe('fontkit.setDefaultLanguage', function () {
-        after(function () {
+        let font;
+        before('load Amiri font', function() {
+            font = fontkit.openSync(__dirname + '/data/amiri/amiri-regular.ttf');
+        });
+        after('reset default language', function () {
             fontkit.setDefaultLanguage();
         });
 
-        it('has "en" metadata properties', function() {
-            let font = fontkit.openSync(__dirname + '/data/amiri/amiri-regular.ttf');
 
+        it('font has "en" metadata properties', function() {
             assert.equal(font.fullName, 'Amiri');
             assert.equal(font.postscriptName, 'Amiri-Regular');
             assert.equal(font.familyName, 'Amiri');
@@ -19,14 +22,12 @@ describe('i18n', function() {
             assert.equal(font.version, 'Version 000.110 ');
         });
 
-        it('can set default language to "ar"', function () {
+        it('can set global default language to "ar"', function () {
             fontkit.setDefaultLanguage('ar');
             assert.equal(fontkit.defaultLanguage, 'ar');
         });
 
-        it('has "ar" metadata properties', function() {
-            let font = fontkit.openSync(__dirname + '/data/amiri/amiri-regular.ttf');
-
+        it('font now has "ar" metadata properties', function() {
             assert.equal(font.fullName, undefined,);
             assert.equal(font.postscriptName, 'Amiri-Regular',);
             assert.equal(font.familyName, undefined,);
@@ -35,7 +36,7 @@ describe('i18n', function() {
             assert.equal(font.version, 'إصدارة 000٫110');
         });
 
-        it('can set default language back to "en"', function () {
+        it('can reset default language back to "en"', function () {
             fontkit.setDefaultLanguage();
             assert.equal(fontkit.defaultLanguage, "en");
         });
@@ -47,7 +48,7 @@ describe('i18n', function() {
             font = fontkit.openSync(__dirname + '/data/amiri/amiri-regular.ttf');
         });
 
-        it('has "en" metadata properties', function() {
+        it('font has "en" metadata properties', function() {
             assert.equal(font.fullName, 'Amiri');
             assert.equal(font.postscriptName, 'Amiri-Regular');
             assert.equal(font.familyName, 'Amiri');
@@ -56,9 +57,12 @@ describe('i18n', function() {
             assert.equal(font.version, 'Version 000.110 ');
         });
 
-        it('has "ar" metadata properties', function() {
+        it('can set font\'s default language to "ar"', function () {
             font.setDefaultLanguage('ar');
+            assert.equal(font.defaultLanguage, 'ar');
+        });
 
+        it('font now has "ar" metadata properties', function() {
             assert.equal(font.fullName, undefined,);
             assert.equal(font.postscriptName, 'Amiri-Regular',);
             assert.equal(font.familyName, undefined,);
@@ -67,10 +71,16 @@ describe('i18n', function() {
             assert.equal(font.version, 'إصدارة 000٫110');
         });
 
-        it('can set default language back to "en"', function () {
-            font.setDefaultLanguage();
-            assert.equal(font.defaultLanguage, "en");
+        it('the font\'s language should not change when the global changes', function () {
+            fontkit.setDefaultLanguage('en');
 
+            assert.equal(font.defaultLanguage, 'ar');
+            assert.equal(font.subfamilyName, 'عادي',);
+        });
+
+        it('can reset default language back to "en"', function () {
+            font.setDefaultLanguage();
+            assert.equal(font.defaultLanguage, null);
             assert.equal(font.subfamilyName, 'Regular');
         });
     });

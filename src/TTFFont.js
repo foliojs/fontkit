@@ -25,7 +25,7 @@ export default class TTFFont {
   }
 
   constructor(stream, variationCoords = null) {
-    this.defaultLanguage = fontkit.defaultLanguage;
+    this.defaultLanguage = null;
     this.stream = stream;
     this.variationCoords = variationCoords;
 
@@ -45,7 +45,7 @@ export default class TTFFont {
     }
   }
 
-  setDefaultLanguage(lang = fontkit.defaultLanguage) {
+  setDefaultLanguage(lang = null) {
     this.defaultLanguage = lang;
   }
 
@@ -112,7 +112,7 @@ export default class TTFFont {
    * `lang` is a BCP-47 language code.
    * @return {string}
    */
-  getName(key, lang = this.defaultLanguage) {
+  getName(key, lang = this.defaultLanguage || fontkit.defaultLanguage) {
     let record = this.name.records[key];
     if (record) {
       return record[lang];
