@@ -45,7 +45,6 @@
     "url": "git://github.com/foliojs/fontkit.git"
   },
   "dependencies": {
-    "babel-runtime": "^6.26.0",
     "brfs": "^2.0.0",
     "brotli": "^1.2.0",
     "browserify-optional": "^1.0.1",
