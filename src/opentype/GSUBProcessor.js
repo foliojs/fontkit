@@ -28,6 +28,14 @@ export default class GSUBProcessor extends OTProcessor {
         let index = this.coverageIndex(table.coverage);
         if (index !== -1) {
           let sequence = table.sequences.get(index);
+
+          if (sequence.length === 0) {
+            // If the sequence length is zero, delete the glyph.
+            // The OpenType spec disallows this, but seems like Harfbuzz and Uniscribe allow it.
+            this.glyphs.splice(this.glyphIterator.index, 1);
+            return true;
+          }
+
           this.glyphIterator.cur.id = sequence[0];
           this.glyphIterator.cur.ligatureComponent = 0;
 
