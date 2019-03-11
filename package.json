@@ -37,6 +37,10 @@
   ],
   "author": "Devon Govett <devongovett@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/foliojs/fontkit.git"
+  },
   "dependencies": {
     "babel-runtime": "^6.11.6",
     "brfs": "^1.4.0",
