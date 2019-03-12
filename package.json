@@ -13,13 +13,12 @@
   ],
   "scripts": {
     "test": "mocha",
-    "prepublish": "run-s clean trie:** rollup:**",
+    "prepublish": "run-s clean trie:** rollup",
     "trie:data": "babel-node src/opentype/shapers/generate-data.js",
     "trie:use": "babel-node src/opentype/shapers/gen-use.js",
     "trie:indic": "babel-node src/opentype/shapers/gen-indic.js",
     "trie:copy": "shx cp src/opentype/shapers/*.trie ./",
-    "rollup:index": "rollup -c -m -i src/index.js -o index.js",
-    "rollup:base": "rollup -c -m -i src/base.js -o base.js",
+    "rollup": "rollup -c",
     "clean": "shx rm -f index.js base.js data.trie indic.trie use.trie src/opentype/shapers/data.trie src/opentype/shapers/use.trie src/opentype/shapers/use.json src/opentype/shapers/indic.trie src/opentype/shapers/indic.json",
     "coverage": "cross-env BABEL_ENV=cover nyc mocha"
   },
@@ -31,6 +30,10 @@
     "base.js.map",
     "index.js",
     "index.js.map",
+    "base.es5.js",
+    "base.es5.js.map",
+    "index.es5.js",
+    "index.es5.js.map",
     "data.trie",
     "use.trie",
     "indic.trie"
