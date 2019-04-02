@@ -1,6 +1,7 @@
 import AATStateMachine from './AATStateMachine';
 import AATLookupTable from './AATLookupTable';
 import {cache} from '../decorators';
+import GlyphInfo from '../opentype/GlyphInfo';
 
 // indic replacement flags
 const MARK_FIRST = 0x8000;
@@ -141,7 +142,7 @@ export default class AATMorxProcessor {
       glyph = this.glyphs[this.markedGlyph];
       var gid = lookupTable.lookup(glyph.id);
       if (gid) {
-        this.glyphs[this.markedGlyph] = this.font.getGlyph(gid, glyph.codePoints);
+        glyph.id = gid;
       }
     }
 
@@ -151,7 +152,7 @@ export default class AATMorxProcessor {
       glyph = this.glyphs[index];
       var gid = lookupTable.lookup(glyph.id);
       if (gid) {
-        this.glyphs[index] = this.font.getGlyph(gid, glyph.codePoints);
+        glyph.id = gid;
       }
     }
 
@@ -191,12 +192,12 @@ export default class AATMorxProcessor {
 
         if (last || store) {
           let ligatureEntry = ligatureList.getItem(ligatureIndex);
-          this.glyphs[componentGlyph] = this.font.getGlyph(ligatureEntry, codePoints);
+          this.glyphs[componentGlyph] = new GlyphInfo(this.font, ligatureEntry, codePoints, this.glyphs[componentGlyph].stringIndex);
           ligatureGlyphs.push(componentGlyph);
           ligatureIndex = 0;
           codePoints = [];
         } else {
-          this.glyphs[componentGlyph] = this.font.getGlyph(0xffff);
+          this.glyphs[componentGlyph] = new GlyphInfo(this.font, 0xffff);
         }
       }
 
@@ -213,17 +214,18 @@ export default class AATMorxProcessor {
       if (glyph.id !== 0xffff) {
         let gid = lookupTable.lookup(glyph.id);
         if (gid) { // 0 means do nothing
-          glyphs[index] = this.font.getGlyph(gid, glyph.codePoints);
+          glyph.id = gid;
         }
       }
     }
   }
 
   _insertGlyphs(glyphIndex, insertionActionIndex, count, isBefore) {
+    let stringIndex = this.glyphs[glyphIndex].stringIndex;
     let insertions = [];
     while (count--) {
       let gid = this.subtable.table.insertionActions.getItem(insertionActionIndex++);
-      insertions.push(this.font.getGlyph(gid));
+      insertions.push(new GlyphInfo(this.font, gid, undefined, stringIndex));
     }
 
     if (!isBefore) {
@@ -314,7 +316,7 @@ export default class AATMorxProcessor {
         });
 
         // Add glyph to input and glyphs to process.
-        let g = this.font.getGlyph(glyph);
+        let g = new GlyphInfo(this.font, glyph);
         input.push(g);
         glyphs.push(input[input.length - 1]);
 

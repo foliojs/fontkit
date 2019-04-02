@@ -2,10 +2,11 @@ import unicode from 'unicode-properties';
 import OTProcessor from './OTProcessor';
 
 export default class GlyphInfo {
-  constructor(font, id, codePoints = [], features) {
+  constructor(font, id, codePoints = [], stringIndex, features) {
     this._font = font;
     this.codePoints = codePoints;
     this.id = id;
+    this.stringIndex = stringIndex;
 
     this.features = {};
     if (Array.isArray(features)) {
@@ -51,7 +52,11 @@ export default class GlyphInfo {
     }
   }
 
+  get advanceWidth() {
+    return this._font.getGlyph(this.id).advanceWidth;
+  }
+
   copy() {
-    return new GlyphInfo(this._font, this.id, this.codePoints, this.features);
+    return new GlyphInfo(this._font, this.id, this.codePoints, this.stringIndex, this.features);
   }
 }

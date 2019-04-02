@@ -12,7 +12,7 @@ import StandardNames from './StandardNames';
  * on the font format, but they all inherit from this class.
  */
 export default class Glyph {
-  constructor(id, codePoints, font) {
+  constructor(id, font) {
     /**
      * The glyph id in the font
      * @type {number}
@@ -25,12 +25,7 @@ export default class Glyph {
      * that represent multiple visual characters.
      * @type {number[]}
      */
-    this.codePoints = codePoints;
     this._font = font;
-
-    // TODO: get this info from GDEF if available
-    this.isMark = this.codePoints.length > 0 && this.codePoints.every(unicode.isMark);
-    this.isLigature = this.codePoints.length > 1;
   }
 
   _getPath() {

@@ -49,14 +49,14 @@ export default class WOFF2Font extends TTFFont {
 
   // Override this method to get a glyph and return our
   // custom subclass if there is a glyf table.
-  _getBaseGlyph(glyph, characters = []) {
+  _getBaseGlyph(glyph) {
     if (!this._glyphs[glyph]) {
       if (this.directory.tables.glyf && this.directory.tables.glyf.transformed) {
         if (!this._transformedGlyphs) { this._transformGlyfTable(); }
-        return this._glyphs[glyph] = new WOFF2Glyph(glyph, characters, this);
+        return this._glyphs[glyph] = new WOFF2Glyph(glyph, this);
 
       } else {
-        return super._getBaseGlyph(glyph, characters);
+        return super._getBaseGlyph(glyph);
       }
     }
   }

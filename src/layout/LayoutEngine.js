@@ -6,6 +6,7 @@ import * as Script from './Script';
 import unicode from 'unicode-properties';
 import AATLayoutEngine from '../aat/AATLayoutEngine';
 import OTLayoutEngine from '../opentype/OTLayoutEngine';
+import GlyphInfo from '../opentype/GlyphInfo';
 
 export default class LayoutEngine {
   constructor(font) {
@@ -32,28 +33,12 @@ export default class LayoutEngine {
       features = [];
     }
 
-    // Map string to glyphs if needed
-    if (typeof string === 'string') {
-      // Attempt to detect the script from the string if not provided.
-      if (script == null) {
-        script = Script.forString(string);
-      }
-
-      var glyphs = this.font.glyphsForString(string);
-    } else {
-      // Attempt to detect the script from the glyph code points if not provided.
-      if (script == null) {
-        let codePoints = [];
-        for (let glyph of string) {
-          codePoints.push(...glyph.codePoints);
-        }
-
-        script = Script.forCodePoints(codePoints);
-      }
-
-      var glyphs = string;
+    // Attempt to detect the script from the string if not provided.
+    if (script == null) {
+      script = Script.forString(string);
     }
 
+    let glyphs = this.glyphsForString(string);
     let glyphRun = new GlyphRun(glyphs, features, script, language, direction);
 
     // Return early if there are no glyphs
@@ -78,7 +63,63 @@ export default class LayoutEngine {
       this.engine.cleanup();
     }
 
+    // Map glyph infos back to normal Glyph objects
+    glyphRun.stringIndices = glyphRun.glyphs.map(glyphInfo => glyphInfo.stringIndex);
+    glyphRun.glyphs = glyphRun.glyphs.map(glyphInfo => this.font.getGlyph(glyphInfo.id));
     return glyphRun;
+  }
+
+  /**
+   * Returns an array of Glyph objects for the given string.
+   * This is only a one-to-one mapping from characters to glyphs.
+   * For most uses, you should use font.layout (described below), which
+   * provides a much more advanced mapping supporting AAT and OpenType shaping.
+   *
+   * @param {string} string
+   * @return {Glyph[]}
+   */
+  glyphsForString(string) {
+    let glyphs = [];
+    let len = string.length;
+    let idx = 0;
+    let last = -1;
+    let state = -1;
+
+    while (idx <= len) {
+      let code = 0;
+      let nextState = 0;
+      let stringIndex = idx - 1;
+
+      if (idx < len) {
+        // Decode the next codepoint from UTF 16
+        code = string.charCodeAt(idx++);
+        if (0xd800 <= code && code <= 0xdbff && idx < len) {
+          let next = string.charCodeAt(idx);
+          if (0xdc00 <= next && next <= 0xdfff) {
+            idx++;
+            code = ((code & 0x3ff) << 10) + (next & 0x3ff) + 0x10000;
+          }
+        }
+
+        // Compute the next state: 1 if the next codepoint is a variation selector, 0 otherwise.
+        nextState = ((0xfe00 <= code && code <= 0xfe0f) || (0xe0100 <= code && code <= 0xe01ef)) ? 1 : 0;
+      } else {
+        idx++;
+      }
+
+      if (state === 0 && nextState === 1) {
+        // Variation selector following normal codepoint.
+        glyphs.push(new GlyphInfo(this.font, this.font._cmapProcessor.lookup(last, code), [last, code], stringIndex));
+      } else if (state === 0 && nextState === 0) {
+        // Normal codepoint following normal codepoint.
+        glyphs.push(new GlyphInfo(this.font, this.font._cmapProcessor.lookup(last), [last], stringIndex));
+      }
+
+      last = code;
+      state = nextState;
+    }
+
+    return glyphs;
   }
 
   substitute(glyphRun) {
@@ -119,10 +160,10 @@ export default class LayoutEngine {
   }
 
   hideDefaultIgnorables(glyphs, positions) {
-    let space = this.font.glyphForCodePoint(0x20);
+    const space = this.font.glyphForCodePoint(0x20);
     for (let i = 0; i < glyphs.length; i++) {
       if (this.isDefaultIgnorable(glyphs[i].codePoints[0])) {
-        glyphs[i] = space;
+        glyphs[i].id = space.id;
         positions[i].xAdvance = 0;
         positions[i].yAdvance = 0;
       }
