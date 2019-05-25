@@ -24,10 +24,8 @@ export default class CFFGlyph extends Glyph {
   }
 
   _getPath() {
-    let { stream } = this._font;
-    let { pos } = stream;
-
     let cff = this._font.CFF2 || this._font['CFF '];
+    let { stream } = cff;
     let str = cff.topDict.CharStrings[this.id];
     let end = str.offset + str.length;
     stream.pos = str.offset;

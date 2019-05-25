@@ -198,56 +198,101 @@ describe('glyphs', function() {
     });
   });
 
-  describe('WOFF glyphs', function() {
-    let font = fontkit.openSync(__dirname + '/data/SourceSansPro/SourceSansPro-Regular.woff');
+  describe('WOFF ttf glyphs', function() {
+    let font = fontkit.openSync(__dirname + '/data/SourceSansPro/SourceSansPro-Regular.ttf.woff');
+    let glyph = font.glyphsForString('D')[0];
+
+    it('should get the glyph name', function() {
+      return assert.equal(glyph.name, 'D');
+    });
 
     it('should get a TTFGlyph', function() {
-      let glyph = font.glyphsForString('T')[0];
       return assert.equal(glyph.constructor.name, 'TTFGlyph');
     });
 
-    it('should get a path for the glyph', function() {
-      let glyph = font.glyphsForString('T')[0];
-      return assert.equal(glyph.path.toSVG(), 'M226 586L28 586L28 656L508 656L508 586L310 586L310 0L226 0Z');
-    });
-
-    it('should get the glyph name', function() {
-      let glyph = font.glyphsForString('T')[0];
-      return assert.equal(glyph.name, 'T');
+    it('should get a quadratic path for the glyph', function() {
+      return assert.equal(glyph.path.toSVG(), 'M90 0L90 656L254 656Q406 656 485 571.5Q564 487 564 331Q564 174 485.5 87Q407 0 258 0ZM173 68L248 68Q363 68 420.5 137.5Q478 207 478 331Q478 455 420.5 521.5Q363 588 248 588L173 588Z');
     });
   });
 
-  describe('WOFF2 glyph', function() {
-    let font = fontkit.openSync(__dirname + '/data/SourceSansPro/SourceSansPro-Regular.woff2');
+  describe('WOFF otf glyphs', function() {
+      let font = fontkit.openSync(__dirname + '/data/SourceSansPro/SourceSansPro-Regular.otf.woff');
+      let glyph = font.glyphsForString('D')[0];
 
-    it('should get a WOFF2Glyph', function() {
-      let glyph = font.glyphsForString('T')[0];
-      return assert.equal(glyph.constructor.name, 'WOFF2Glyph');
-    });
+      it('should get the glyph name', function() {
+        return assert.equal(glyph.name, 'D');
+      });
 
-    it('should get a path for the glyph', function() {
-      let glyph = font.glyphsForString('T')[0];
-      return assert.equal(glyph.path.toSVG(), 'M226 586L28 586L28 656L508 656L508 586L310 586L310 0L226 0Z');
-    });
+      it('should get a CFFGlyph', function() {
+        return assert.equal(glyph.constructor.name, 'CFFGlyph');
+      });
 
-    it('should get a correct path for all contours', function() {
-      let glyph = font.glyphsForString('o')[0];
-      return assert.equal(glyph.path.toSVG(), 'M271 -12Q226 -12 185.5 5Q145 22 114 54.5Q83 87 64.5 134.5Q46 182 46 242Q46 303 64.5 350.5Q83 398 114 431Q145 464 185.5 481Q226 498 271 498Q316 498 356.5 481Q397 464 428 431Q459 398 477.5 350.5Q496 303 496 242Q496 182 477.5 134.5Q459 87 428 54.5Q397 22 356.5 5Q316 -12 271 -12ZM271 56Q302 56 328 69.5Q354 83 372.5 107.5Q391 132 401 166Q411 200 411 242Q411 284 401 318.5Q391 353 372.5 378Q354 403 328 416.5Q302 430 271 430Q240 430 214 416.5Q188 403 169.5 378Q151 353 141 318.5Q131 284 131 242Q131 200 141 166Q151 132 169.5 107.5Q188 83 214 69.5Q240 56 271 56Z');
-    });
+      it('should get a cubic path for the glyph', function() {
+        return assert.equal(glyph.path.toSVG(), 'M90 0L258 0C456 0 564 122 564 331C564 539 456 656 254 656L90 656ZM173 68L173 588L248 588C401 588 478 496 478 331C478 165 401 68 248 68Z');
+      });
+  });
 
-    it('should get the glyph cbox', function() {
-      let glyph = font.glyphsForString('T')[0];
-      return assert.deepEqual(glyph.cbox, new BBox(28, 0, 508, 656));
-    });
+  describe('WOFF2 ttf glyph', function() {
+      let font = fontkit.openSync(__dirname + '/data/SourceSansPro/SourceSansPro-Regular.ttf.woff2');
 
-    it('should get the glyph bbox', function() {
-      let glyph = font.glyphsForString('T')[0];
-      return assert.deepEqual(glyph.bbox, new BBox(28, 0, 508, 656));
-    });
+      let glyph = font.glyphsForString('D')[0];
+      let expectedBox = new BBox(90, 0, 564, 656);
 
-    it('should get the glyph name', function() {
-      let glyph = font.glyphsForString('T')[0];
-      return assert.equal(glyph.name, 'T');
-    });
+      it('should get the glyph name', function() {
+        return assert.equal(glyph.name, 'D');
+      });
+
+      it('should get a WOFF2Glyph', function() {
+        return assert.equal(glyph.constructor.name, 'WOFF2Glyph');
+      });
+
+      it('should get a path for the glyph', function() {
+        let tglyph = font.glyphsForString('T')[0];
+        return assert.equal(tglyph.path.toSVG(), 'M226 0L226 586L28 586L28 656L508 656L508 586L310 586L310 0Z');
+      });
+
+      it('should get a correct quadratic path for all contours', function() {
+        return assert.equal(glyph.path.toSVG(), 'M90 0L90 656L254 656Q406 656 485 571.5Q564 487 564 331Q564 174 485.5 87Q407 0 258 0ZM173 68L248 68Q363 68 420.5 137.5Q478 207 478 331Q478 455 420.5 521.5Q363 588 248 588L173 588Z');
+      });
+
+      it('should get the ttf glyph cbox', function() {
+        return assert.deepEqual(glyph.cbox, expectedBox);
+      });
+
+      it('should get the ttf glyph bbox', function() {
+        return assert.deepEqual(glyph.bbox, expectedBox);
+      });
+  });  
+
+  describe('WOFF2 otf glyph', function() {
+      let font = fontkit.openSync(__dirname + '/data/SourceSansPro/SourceSansPro-Regular.otf.woff2');
+
+      let glyph = font.glyphsForString('D')[0];
+      let expectedBox = new BBox(90, 0, 564, 656);
+
+      it('should get the glyph name', function() {
+        return assert.equal(glyph.name, 'D');
+      });
+
+      it('should get a CFFGlyph', function() {
+        return assert.equal(glyph.constructor.name, 'CFFGlyph');
+      });
+
+      it('should get a path for the glyph', function() {
+        let tglyph = font.glyphsForString('T')[0];
+        return assert.equal(tglyph.path.toSVG(), 'M226 0L310 0L310 586L508 586L508 656L28 656L28 586L226 586Z');
+      });
+
+      it('should get a correct cubic path for all contours', function() {
+        return assert.equal(glyph.path.toSVG(), 'M90 0L258 0C456 0 564 122 564 331C564 539 456 656 254 656L90 656ZM173 68L173 588L248 588C401 588 478 496 478 331C478 165 401 68 248 68Z');
+      });
+
+      it('should get the otf glyph cbox', function() {
+        return assert.deepEqual(glyph.cbox, expectedBox);
+      });
+
+      it('should get the otf glyph bbox', function() {
+        return assert.deepEqual(glyph.bbox, expectedBox);
+      });
   });
 });
