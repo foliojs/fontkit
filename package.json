@@ -1,6 +1,6 @@
 {
   "name": "fontkit",
-  "version": "1.7.8",
+  "version": "1.8.0",
   "description": "An advanced font engine for Node and the browser",
   "keywords": [
     "opentype",
@@ -13,8 +13,15 @@
   ],
   "scripts": {
     "test": "mocha",
-    "prepublish": "make",
-    "coverage": "BABEL_ENV=cover nyc mocha"
+    "prepublish": "run-s clean trie:** rollup:**",
+    "trie:data": "babel-node src/opentype/shapers/generate-data.js",
+    "trie:use": "babel-node src/opentype/shapers/gen-use.js",
+    "trie:indic": "babel-node src/opentype/shapers/gen-indic.js",
+    "trie:copy": "shx cp src/opentype/shapers/*.trie ./",
+    "rollup:index": "rollup -c -m -i src/index.js -o index.js",
+    "rollup:base": "rollup -c -m -i src/base.js -o base.js",
+    "clean": "shx rm -f index.js base.js data.trie indic.trie use.trie src/opentype/shapers/data.trie src/opentype/shapers/use.trie src/opentype/shapers/use.json src/opentype/shapers/indic.trie src/opentype/shapers/indic.json",
+    "coverage": "cross-env BABEL_ENV=cover nyc mocha"
   },
   "main": "index.js",
   "jsnext:main": "src/index.js",
@@ -31,6 +38,10 @@
   ],
   "author": "Devon Govett <devongovett@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/foliojs/fontkit.git"
+  },
   "dependencies": {
     "babel-runtime": "^6.11.6",
     "brfs": "^1.4.0",
@@ -54,15 +65,18 @@
     "babel-register": "^6.14.0",
     "codepoints": "^1.2.0",
     "concat-stream": "^1.4.6",
+    "cross-env": "^5.0.1",
     "esdoc": "^0.4.8",
     "esdoc-es7-plugin": "0.0.3",
     "iconv-lite": "^0.4.13",
     "mocha": "^2.0.1",
+    "npm-run-all": "^4.0.2",
     "nyc": "^10.3.2",
     "rollup": "^0.34.10",
     "rollup-plugin-babel": "^2.6.1",
     "rollup-plugin-json": "^2.0.2",
-    "rollup-plugin-local-resolve": "^1.0.7"
+    "rollup-plugin-local-resolve": "^1.0.7",
+    "shx": "^0.2.2"
   },
   "browserify": {
     "transform": [

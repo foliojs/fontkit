@@ -49,7 +49,7 @@ export default class CFFGlyph extends Glyph {
     let gsubrs = cff.globalSubrIndex || [];
     let gsubrsBias = this.bias(gsubrs);
 
-    let privateDict = cff.privateDictForGlyph(this.id);
+    let privateDict = cff.privateDictForGlyph(this.id) || {};
     let subrs = privateDict.Subrs || [];
     let subrsBias = this.bias(subrs);
 

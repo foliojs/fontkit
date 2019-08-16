@@ -25,6 +25,7 @@ export default class TTFFont {
   }
 
   constructor(stream, variationCoords = null) {
+    this.defaultLanguage = null;
     this.stream = stream;
     this.variationCoords = variationCoords;
 
@@ -42,6 +43,10 @@ export default class TTFFont {
         });
       }
     }
+  }
+
+  setDefaultLanguage(lang = null) {
+    this.defaultLanguage = lang;
   }
 
   _getTable(table) {
@@ -84,31 +89,33 @@ export default class TTFFont {
   }
 
   /**
-   * The unique PostScript name for this font
-   * @type {string}
+   * Gets a string from the font's `name` table
+   * `lang` is a BCP-47 language code.
+   * @return {string}
    */
-  get postscriptName() {
-    let name = this.name.records.postscriptName;
-    if (name) {
-      let lang = Object.keys(name)[0];
-      return name[lang];
+  getName(key, lang = this.defaultLanguage || fontkit.defaultLanguage) {
+    let record = this.name && this.name.records[key];
+    if (record) {
+      // Attempt to retrieve the entry, depending on which translation is available:
+      return (
+          record[lang]
+          || record[this.defaultLanguage]
+          || record[fontkit.defaultLanguage]
+          || record['en']
+          || record[Object.keys(record)[0]] // Seriously, ANY language would be fine
+          || null
+      );
     }
 
     return null;
   }
 
   /**
-   * Gets a string from the font's `name` table
-   * `lang` is a BCP-47 language code.
-   * @return {string}
+   * The unique PostScript name for this font, e.g. "Helvetica-Bold"
+   * @type {string}
    */
-  getName(key, lang = 'en') {
-    let record = this.name.records[key];
-    if (record) {
-      return record[lang];
-    }
-
-    return null;
+  get postscriptName() {
+    return this.getName('postscriptName');
   }
 
   /**
