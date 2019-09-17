@@ -44,7 +44,7 @@ export default class AATMorxProcessor {
   }
 
   // Processes an array of glyphs and applies the specified features
-  // Features should be in the form of {featureType:{featureSetting:true}}
+  // Features should be in the form of {featureType:{featureSetting:boolean}}
   process(glyphs, features = {}) {
     for (let chain of this.morx.chains) {
       let flags = chain.defaultFlags;
@@ -52,9 +52,14 @@ export default class AATMorxProcessor {
       // enable/disable the requested features
       for (let feature of chain.features) {
         let f;
-        if ((f = features[feature.featureType]) && f[feature.featureSetting]) {
-          flags &= feature.disableFlags;
-          flags |= feature.enableFlags;
+        if (f = features[feature.featureType]) {
+          if (f[feature.featureSetting]) {
+            flags &= feature.disableFlags;
+            flags |= feature.enableFlags;
+          } else if (f[feature.featureSetting] === false) {
+            flags |= ~feature.disableFlags;
+            flags &= ~feature.enableFlags;
+          }
         }
       }
 

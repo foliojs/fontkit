@@ -120,14 +120,14 @@ Fontkit includes several methods for accessing glyph metrics and performing layo
 
 Returns the advance width (described above) for a single glyph id.
 
-#### `font.layout(string, features = [])`
+#### `font.layout(string, features = [] | {})`
 
 This method returns a `GlyphRun` object, which includes an array of `Glyph`s and `GlyphPosition`s for the given string.
 `Glyph` objects are described below. `GlyphPosition` objects include 4 properties: `xAdvance`, `yAdvance`, `xOffset`,
 and `yOffset`.
 
-The `features` parameter is an array of [OpenType feature tags](https://www.microsoft.com/typography/otspec/featuretags.htm) to be applied
-in addition to the default set. If this is an AAT font, the OpenType feature tags are mapped to AAT features.
+The `features` parameter is either an array of [OpenType feature tags](https://www.microsoft.com/typography/otspec/featuretags.htm) to be applied
+in addition to the default set, or an object mapping OpenType features to a boolean enabling or disabling each. If this is an AAT font, the OpenType feature tags are mapped to AAT features.
 
 ### Variation fonts
 
