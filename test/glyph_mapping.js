@@ -84,6 +84,13 @@ describe('character to glyph mapping', function() {
       return assert.deepEqual(glyphs.map(g => g.codePoints), [[102, 102, 105], [32], [49], [8260], [50]]);
     });
 
+    it('should allow for disabling of default AAT morx features', function() {
+      let {glyphs} = font.layout('ffi 1⁄2', { 'liga': false });
+      assert.equal(glyphs.length, 7);
+      assert.deepEqual(glyphs.map(g => g.id), [73, 73, 76, 3, 20, 645, 21]);
+      return assert.deepEqual(glyphs.map(g => g.codePoints), [[102], [102], [105], [32], [49], [8260], [50]]);
+    });
+
     it('should apply user specified features', function() {
       let {glyphs} = font.layout('ffi 1⁄2', [ 'numr' ]);
       assert.equal(glyphs.length, 3);
