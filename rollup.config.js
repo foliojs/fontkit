@@ -35,12 +35,14 @@ function rollupBrfs(options = {}) {
 };
 
 function createConfig(filename, browserlist, suffix = '') {
+  const isBrowser = suffix === '.browser';
   return {
     input: `src/${filename}`,
     output: {
       file: `${filename}${suffix}.js`,
-      format: 'cjs',
-      sourcemap: true
+      format: isBrowser ? 'es' : 'cjs',
+      sourcemap: true,
+      interop: !!suffix
     },
     external: [
       'restructure',
@@ -78,7 +80,7 @@ function createConfig(filename, browserlist, suffix = '') {
           '@babel/plugin-proposal-class-properties'
         ]
       }),
-      suffix === '.browser' ? rollupBrfs({ parserOpts: { sourceType: 'module' } }) : undefined
+      isBrowser ? rollupBrfs({ parserOpts: { sourceType: 'module' } }) : undefined
     ]
   }
 }
