@@ -92,6 +92,49 @@ describe('glyphs', function() {
     });
   });
 
+  describe('CFF glyphs (CID font)', function() {
+    let font = fontkit.openSync(__dirname + '/data/NotoSansCJK/NotoSansCJKkr-Regular.otf');
+
+    it('should get a CFFGlyph', function() {
+      let glyph = font.getGlyph(27); // :
+      return assert.equal(glyph.constructor.name, 'CFFGlyph');
+    });
+
+    it('should get a path for the glyph', function() {
+      let glyph = font.getGlyph(27);
+      return assert.equal(glyph.path.toSVG(), 'M139 390C175 390 205 419 205 459C205 501 175 530 139 530C103 530 73 501 73 459C73 419 103 390 139 390ZM139 -13C175 -13 205 15 205 56C205 97 175 127 139 127C103 127 73 97 73 56C73 15 103 -13 139 -13Z');
+    });
+
+    it('should get the glyph cbox', function() {
+      let glyph = font.getGlyph(27);
+      return assert.deepEqual(glyph.cbox, new BBox(73, -13, 205, 530));
+    });
+
+    it('should get the glyph bbox', function() {
+      let glyph = font.getGlyph(27);
+      return assert.deepEqual(glyph.bbox, new BBox(73, -13, 205, 530));
+    });
+
+    it('should get the correct fd index', function() {
+      let cff = font['CFF '];
+      // FDSelect ranges
+      // {first: 0, fd: 5 }
+      // {first: 1, fd: 15 }
+      // {first: 17, fd: 17 }
+      // {first: 27, fd: 15 }
+      // {first: 102, fd: 3 }
+      assert.equal(cff.fdForGlyph(0), 5);
+      assert.equal(cff.fdForGlyph(1), 15);
+      assert.equal(cff.fdForGlyph(10), 15);
+      assert.equal(cff.fdForGlyph(16), 15);
+      assert.equal(cff.fdForGlyph(17), 17);
+      assert.equal(cff.fdForGlyph(26), 17);
+      assert.equal(cff.fdForGlyph(27), 15);
+      assert.equal(cff.fdForGlyph(28), 15);
+      assert.equal(cff.fdForGlyph(102), 3);
+    });
+  });
+
   describe('SBIX glyphs', function() {
     let font = fontkit.openSync(__dirname + '/data/ss-emoji/ss-emoji-apple.ttf');
 
