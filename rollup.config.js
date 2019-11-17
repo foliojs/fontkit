@@ -1,6 +1,38 @@
 import babel from 'rollup-plugin-babel';
 import localResolve from 'rollup-plugin-local-resolve';
 import json from 'rollup-plugin-json';
+import brfs from 'brfs';
+import { Readable } from 'stream'
+
+function rollupBrfs(options = {}) {
+  return {
+    name: 'brfs',
+    transform: function (code, id) {
+      if (!id.match(/(ArabicShaper|IndicShaper|UniversalShaper)/)) {
+        return null;
+      }
+      return new Promise(function (resolve, reject) {
+        let output = '';
+        const src = new Readable();
+        src.push(code);
+        src.push(null);
+        const stream = src.pipe(brfs(id, options));
+        stream.on('data', function (data) {
+          output += data.toString();
+        });
+        stream.on('end', function () {
+          resolve({
+            code: output,
+            map: { mappings: "" }
+          });
+        });
+        stream.on('error', function (error) {
+          reject(error);
+        });
+      });
+    }
+  };
+};
 
 function createConfig(filename, browserlist, suffix = '') {
   return {
@@ -45,7 +77,8 @@ function createConfig(filename, browserlist, suffix = '') {
           ],
           '@babel/plugin-proposal-class-properties'
         ]
-      })
+      }),
+      suffix === '.browser' ? rollupBrfs({ parserOpts: { sourceType: 'module' } }) : undefined
     ]
   }
 }
@@ -64,6 +97,7 @@ const legacyBrowsers = [
 export default [
   createConfig('base', modernBrowsers),
   createConfig('index', modernBrowsers),
+  createConfig('index', modernBrowsers, '.browser'),
   createConfig('base', legacyBrowsers, '.es5'),
   createConfig('index', legacyBrowsers, '.es5')
 ];
