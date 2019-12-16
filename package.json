@@ -11,7 +11,11 @@
     "glyph",
     "layout"
   ],
+  "resolutions": {
+    "dfa": "1.1.0"
+  },
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "test": "mocha",
     "prepublish": "run-s clean trie:** rollup:**",
     "trie:data": "babel-node src/opentype/shapers/generate-data.js",
@@ -49,7 +53,8 @@
     "browserify-optional": "^1.0.0",
     "clone": "^1.0.1",
     "deep-equal": "^1.0.0",
-    "dfa": "1.1.0",
+    "dfa": "^1.1.0",
+    "npm-force-resolutions": "0.0.3",
     "restructure": "^0.5.3",
     "tiny-inflate": "^1.0.2",
     "unicode-properties": "^1.0.0",
