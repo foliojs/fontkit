@@ -1,6 +1,6 @@
 {
   "name": "fontkit",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "An advanced font engine for Node and the browser",
   "keywords": [
     "opentype",
