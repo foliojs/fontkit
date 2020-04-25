@@ -1,5 +1,0 @@
-Copyright © 2015 DynaComware. All rights reserved.
-
-PingFang is a trademark of Apple Inc.
-DynaComware Shanghai Limited; DynaComware Hong Kong Limited; DynaComware Taiwan Inc.
-Designed by DynaComware & Apple.

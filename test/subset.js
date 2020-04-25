@@ -77,14 +77,16 @@ describe('font subsetting', function() {
 
   describe('CFF subsetting', function() {
     let font = fontkit.openSync(__dirname + '/data/SourceSansPro/SourceSansPro-Regular.otf');
-    let pingfang = fontkit.openSync(__dirname + '/data/PingFang/PingFang.ttc', 'PingFangTC-Regular');
 
     it('should create a CFFSubset instance', function() {
       let subset = font.createSubset();
       assert.equal(subset.constructor.name, 'CFFSubset');
 
-      subset = pingfang.createSubset();
-      assert.equal(subset.constructor.name, 'CFFSubset');
+      if (fs.existsSync('/Library/Fonts/PingFang.ttc')) {
+        let pingfang = fontkit.openSync('/Library/Fonts/PingFang.ttc', 'PingFangTC-Regular');
+        subset = pingfang.createSubset();
+        assert.equal(subset.constructor.name, 'CFFSubset');
+      }
     });
 
     it('should produce a subset', function(done) {
