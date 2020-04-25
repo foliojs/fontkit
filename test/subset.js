@@ -28,10 +28,10 @@ describe('font subsetting', function() {
         done();
       }));
     });
-    
+
     it('should re-encode variation glyphs', function(done) {
       if (!fs.existsSync('/Library/Fonts/Skia.ttf')) return done();
-      
+
       let font = fontkit.openSync('/Library/Fonts/Skia.ttf', 'Bold');
       let subset = font.createSubset();
       for (let glyph of font.glyphsForString('e')) {
@@ -77,10 +77,14 @@ describe('font subsetting', function() {
 
   describe('CFF subsetting', function() {
     let font = fontkit.openSync(__dirname + '/data/SourceSansPro/SourceSansPro-Regular.otf');
+    let pingfang = fontkit.openSync(__dirname + '/data/PingFang/PingFang.ttc', 'PingFangTC-Regular');
 
     it('should create a CFFSubset instance', function() {
       let subset = font.createSubset();
-      return assert.equal(subset.constructor.name, 'CFFSubset');
+      assert.equal(subset.constructor.name, 'CFFSubset');
+
+      subset = pingfang.createSubset();
+      assert.equal(subset.constructor.name, 'CFFSubset');
     });
 
     it('should produce a subset', function(done) {
