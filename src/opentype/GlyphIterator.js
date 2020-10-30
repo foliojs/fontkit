@@ -35,8 +35,8 @@ export default class GlyphIterator {
     return this.glyphs[this.index];
   }
 
-  next() {
-    return this.move(+1);
+  next(count = 1) {
+    return this.move(count);
   }
 
   prev() {

@@ -199,14 +199,16 @@ export default class OTProcessor {
           continue;
         }
 
+        const oldGlyphsLength = glyphs.length
         for (let table of lookup.subTables) {
           let res = this.applyLookup(lookup.lookupType, table);
           if (res) {
             break;
           }
         }
+        const newGlyphsLength = glyphs.length
 
-        this.glyphIterator.next();
+        this.glyphIterator.next(Math.max(1, newGlyphsLength - oldGlyphsLength + 1));
       }
     }
   }
