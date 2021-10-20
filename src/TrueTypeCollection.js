@@ -36,9 +36,8 @@ export default class TrueTypeCollection {
       let stream = new r.DecodeStream(this.stream.buffer);
       stream.pos = offset;
       let font = new TTFFont(stream);
-      if (font.postscriptName === name) {
+      if ((Buffer.isBuffer(font.postscriptName) && font.postscriptName.equals(name)) || font.postscriptName === name)
         return font;
-      }
     }
 
     return null;
