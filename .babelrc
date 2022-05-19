@@ -1,9 +1,0 @@
-{
-  "presets": ["es2015"],
-  "plugins": ["transform-decorators-legacy", "transform-class-properties", "transform-runtime"],
-  "env": {
-    "cover": {
-      "plugins": ["istanbul"]
-    }
-  }
-}

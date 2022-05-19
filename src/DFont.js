@@ -40,6 +40,8 @@ let DFontHeader = new r.Struct({
 });
 
 export default class DFont {
+  type = 'DFont';
+
   static probe(buffer) {
     let stream = new r.DecodeStream(buffer);
 

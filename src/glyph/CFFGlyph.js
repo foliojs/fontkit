@@ -5,6 +5,8 @@ import Path from './Path';
  * Represents an OpenType PostScript glyph, in the Compact Font Format.
  */
 export default class CFFGlyph extends Glyph {
+  type = 'CFF';
+
   _getName() {
     if (this._font.CFF2) {
       return super._getName();
@@ -79,10 +81,11 @@ export default class CFFGlyph extends Glyph {
       open = true;
     }
 
-    let parse = function() {
+    let parse = function () {
       while (stream.pos < end) {
         let op = stream.readUInt8();
         if (op < 32) {
+          let index, subr, phase;
           switch (op) {
             case 1:  // hstem
             case 3:  // vstem
@@ -110,7 +113,7 @@ export default class CFFGlyph extends Glyph {
 
             case 6: // hlineto
             case 7: // vlineto
-              let phase = op === 6;
+              phase = op === 6;
               while (stack.length >= 1) {
                 if (phase) {
                   x += stack.shift();
@@ -136,8 +139,8 @@ export default class CFFGlyph extends Glyph {
               break;
 
             case 10: // callsubr
-              let index = stack.pop() + subrsBias;
-              let subr = subrs[index];
+              index = stack.pop() + subrsBias;
+              subr = subrs[index];
               if (subr) {
                 usedSubrs[index] = true;
                 var p = stream.pos;

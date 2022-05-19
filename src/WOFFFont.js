@@ -5,6 +5,8 @@ import inflate from 'tiny-inflate';
 import r from 'restructure';
 
 export default class WOFFFont extends TTFFont {
+  type = 'WOFF';
+
   static probe(buffer) {
     return buffer.toString('ascii', 0, 4) === 'wOFF';
   }

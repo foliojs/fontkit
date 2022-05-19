@@ -12,6 +12,8 @@ let SBIXImage = new r.Struct({
  * Represents a color (e.g. emoji) glyph in Apple's SBIX format.
  */
 export default class SBIXGlyph extends TTFGlyph {
+  type = 'SBIX';
+
   /**
    * Returns an object representing a glyph image at the given point size.
    * The object has a data property with a Buffer containing the actual image data,
