@@ -30,15 +30,17 @@
     "import": "./dist/module.mjs",
     "require": "./dist/main.cjs"
   },
+  "targets": {
+    "main": {
+      "engines": {
+        "browsers": "Chrome 70"
+      }
+    }
+  },
   "files": [
     "src",
-    "base.js",
-    "base.js.map",
-    "index.js",
-    "index.js.map",
-    "data.trie",
-    "use.trie",
-    "indic.trie"
+    "dist",
+    "iconv-lite.cjs"
   ],
   "author": "Devon Govett <devongovett@gmail.com>",
   "license": "MIT",
