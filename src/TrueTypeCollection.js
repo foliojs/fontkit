@@ -18,6 +18,8 @@ let TTCHeader = new r.VersionedStruct(r.uint32, {
 });
 
 export default class TrueTypeCollection {
+  type = 'TTC';
+
   static probe(buffer) {
     return buffer.toString('ascii', 0, 4) === 'ttcf';
   }

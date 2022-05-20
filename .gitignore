@@ -12,3 +12,5 @@ use.json
 .nyc_output
 indic.trie
 indic.json
+dist
+.parcel-cache

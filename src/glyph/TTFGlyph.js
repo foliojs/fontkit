@@ -64,6 +64,8 @@ class Component {
  * Represents a TrueType glyph.
  */
 export default class TTFGlyph extends Glyph {
+  type = 'TTF';
+
   // Parses just the glyph header and returns the bounding box
   _getCBox(internal) {
     // We need to decode the glyph if variation processing is requested,

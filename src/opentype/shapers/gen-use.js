@@ -1,7 +1,9 @@
 import codepoints from 'codepoints';
 import fs from 'fs';
-import UnicodeTrieBuilder from 'unicode-trie/builder';
-import compile from 'dfa/compile';
+import UnicodeTrieBuilder from 'unicode-trie/builder.js';
+import dfa from 'dfa/compile.js';
+
+const compile = dfa.default;
 
 const CATEGORIES = {
   B: [
@@ -274,12 +276,12 @@ function decompose(code) {
   return decomposition;
 }
 
-fs.writeFileSync(__dirname + '/use.trie', trie.toBuffer());
+fs.writeFileSync(new URL('use.trie', import.meta.url), trie.toBuffer());
 
-let stateMachine = compile(fs.readFileSync(__dirname + '/use.machine', 'utf8'), symbols);
+let stateMachine = compile(fs.readFileSync(new URL('use.machine', import.meta.url), 'utf8'), symbols);
 let json = Object.assign({
   categories: Object.keys(symbols),
   decompositions: decompositions
 }, stateMachine);
 
-fs.writeFileSync(__dirname + '/use.json', JSON.stringify(json));
+fs.writeFileSync(new URL('use.json', import.meta.url), JSON.stringify(json));

@@ -1,32 +1,29 @@
 import r from 'restructure';
 const fs = require('fs');
 
-var fontkit = {};
-export default fontkit;
-
-fontkit.logErrors = false;
+export let logErrors = false;
 
 let formats = [];
-fontkit.registerFormat = function(format) {
+export function registerFormat(format) {
   formats.push(format);
 };
 
-fontkit.openSync = function(filename, postscriptName) {
+export function openSync(filename, postscriptName) {
   let buffer = fs.readFileSync(filename);
-  return fontkit.create(buffer, postscriptName);
+  return create(buffer, postscriptName);
 };
 
-fontkit.open = function(filename, postscriptName, callback) {
+export function open(filename, postscriptName, callback) {
   if (typeof postscriptName === 'function') {
     callback = postscriptName;
     postscriptName = null;
   }
 
-  fs.readFile(filename, function(err, buffer) {
+  fs.readFile(filename, function (err, buffer) {
     if (err) { return callback(err); }
 
     try {
-      var font = fontkit.create(buffer, postscriptName);
+      var font = create(buffer, postscriptName);
     } catch (e) {
       return callback(e);
     }
@@ -37,7 +34,7 @@ fontkit.open = function(filename, postscriptName, callback) {
   return;
 };
 
-fontkit.create = function(buffer, postscriptName) {
+export function create(buffer, postscriptName) {
   for (let i = 0; i < formats.length; i++) {
     let format = formats[i];
     if (format.probe(buffer)) {
@@ -53,7 +50,7 @@ fontkit.create = function(buffer, postscriptName) {
   throw new Error('Unknown font format');
 };
 
-fontkit.defaultLanguage = 'en';
-fontkit.setDefaultLanguage = function(lang = 'en') {
-  fontkit.defaultLanguage = lang;
+export let defaultLanguage = 'en';
+export function setDefaultLanguage(lang = 'en') {
+  defaultLanguage = lang;
 };
