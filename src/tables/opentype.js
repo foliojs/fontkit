@@ -39,7 +39,7 @@ let FeatureParams = new r.Struct({
 });
 
 export let Feature = new r.Struct({
-  featureParams:      0 === r.uint16 ? 0 : new r.Pointer(r.uint16, FeatureParams),
+  featureParams:      new r.Pointer(r.uint16, FeatureParams),
   lookupCount:        r.uint16,
   lookupListIndexes:  new r.Array(r.uint16, 'lookupCount')
 });
