@@ -125,12 +125,13 @@ export default class GPOSProcessor extends OTProcessor {
 
         let cur = this.positions[this.glyphIterator.index];
         let next = this.positions[nextIndex];
+        let d;
 
         switch (this.direction) {
           case 'ltr':
             cur.xAdvance = exit.x + cur.xOffset;
 
-            let d = entry.x + next.xOffset;
+            d = entry.x + next.xOffset;
             next.xAdvance -= d;
             next.xOffset -= d;
             break;
@@ -301,7 +302,7 @@ export default class GPOSProcessor extends OTProcessor {
       }
     }
 
-    return {x, y};
+    return { x, y };
   }
 
   applyFeatures(userFeatures, glyphs, advances) {

@@ -1,8 +1,10 @@
 import codepoints from 'codepoints';
 import fs from 'fs';
-import UnicodeTrieBuilder from 'unicode-trie/builder';
-import compile from 'dfa/compile';
-import {CATEGORIES, POSITIONS, CONSONANT_FLAGS} from './indic-data';
+import UnicodeTrieBuilder from 'unicode-trie/builder.js';
+import dfa from 'dfa/compile.js';
+import { CATEGORIES, POSITIONS, CONSONANT_FLAGS } from './indic-data.js';
+
+const compile = dfa.default;
 
 const CATEGORY_MAP = {
   Avagraha: 'Symbol',
@@ -200,7 +202,7 @@ for (let i = 0; i < codepoints.length; i++) {
   }
 }
 
-fs.writeFileSync(__dirname + '/indic.trie', trie.toBuffer());
+fs.writeFileSync(new URL('indic.trie', import.meta.url), trie.toBuffer());
 
-let stateMachine = compile(fs.readFileSync(__dirname + '/indic.machine', 'utf8'), symbols);
-fs.writeFileSync(__dirname + '/indic.json', JSON.stringify(stateMachine));
+let stateMachine = compile(fs.readFileSync(new URL('indic.machine', import.meta.url), 'utf8'), symbols);
+fs.writeFileSync(new URL('indic.json', import.meta.url), JSON.stringify(stateMachine));

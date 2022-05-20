@@ -1,5 +1,5 @@
 import r from 'restructure';
-import brotli from 'brotli/decompress';
+import brotli from 'brotli/decompress.js';
 import TTFFont from './TTFFont';
 import TTFGlyph, { Point } from './glyph/TTFGlyph';
 import WOFF2Glyph from './glyph/WOFF2Glyph';
@@ -10,6 +10,8 @@ import WOFF2Directory from './tables/WOFF2Directory';
  * See spec here: http://www.w3.org/TR/WOFF2/
  */
 export default class WOFF2Font extends TTFFont {
+  type = 'WOFF2';
+
   static probe(buffer) {
     return buffer.toString('ascii', 0, 4) === 'wOF2';
   }
@@ -37,7 +39,7 @@ export default class WOFF2Font extends TTFFont {
         throw new Error('Error decoding compressed data in WOFF2');
       }
 
-      this.stream = new r.DecodeStream(new Buffer(decompressed));
+      this.stream = new r.DecodeStream(Buffer.from(decompressed));
       this._decompressed = true;
     }
   }

@@ -1,12 +1,8 @@
-import {binarySearch} from './utils';
-import {getEncoding} from './encodings';
-import {cache} from './decorators';
-import {range} from './utils';
-
-// iconv-lite is an optional dependency.
-try {
-  var iconv = require('iconv-lite');
-} catch (err) {}
+import { binarySearch } from './utils';
+import { getEncoding } from './encodings';
+import { cache } from './decorators';
+import { range } from './utils';
+import iconv from '../iconv-lite.cjs';
 
 export default class CmapProcessor {
   constructor(cmapTable) {
@@ -70,7 +66,7 @@ export default class CmapProcessor {
         codepoint = (codepoint << 8) | buf[i];
       }
 
-    // Otherwise, try to get a Unicode variation selector for this codepoint if one is provided.
+      // Otherwise, try to get a Unicode variation selector for this codepoint if one is provided.
     } else if (variationSelector) {
       let gid = this.getVariationSelector(codepoint, variationSelector);
       if (gid) {

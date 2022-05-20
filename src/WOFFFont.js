@@ -5,6 +5,8 @@ import inflate from 'tiny-inflate';
 import r from 'restructure';
 
 export default class WOFFFont extends TTFFont {
+  type = 'WOFF';
+
   static probe(buffer) {
     return buffer.toString('ascii', 0, 4) === 'wOFF';
   }
@@ -20,7 +22,7 @@ export default class WOFFFont extends TTFFont {
 
       if (table.compLength < table.length) {
         this.stream.pos += 2; // skip deflate header
-        let outBuffer = new Buffer(table.length);
+        let outBuffer = Buffer.alloc(table.length);
         let buf = inflate(this.stream.readBuffer(table.compLength - 2), outBuffer);
         return new r.DecodeStream(buf);
       } else {

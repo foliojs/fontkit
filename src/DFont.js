@@ -40,6 +40,8 @@ let DFontHeader = new r.Struct({
 });
 
 export default class DFont {
+  type = 'DFont';
+
   static probe(buffer) {
     let stream = new r.DecodeStream(buffer);
 
@@ -87,9 +89,8 @@ export default class DFont {
       let pos = this.header.dataOffset + ref.dataOffset + 4;
       let stream = new r.DecodeStream(this.stream.buffer.slice(pos));
       let font = new TTFFont(stream);
-      if (font.postscriptName === name) {
+      if ((Buffer.isBuffer(font.postscriptName) && font.postscriptName.equals(name)) || font.postscriptName === name)
         return font;
-      }
     }
 
     return null;

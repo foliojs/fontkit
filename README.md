@@ -4,7 +4,7 @@ Fontkit is an advanced font engine for Node and the browser, used by [PDFKit](ht
 
 ## Features
 
-* Suports TrueType (.ttf), OpenType (.otf), WOFF, WOFF2, TrueType Collection (.ttc), and Datafork TrueType (.dfont) font files
+* Supports TrueType (.ttf), OpenType (.otf), WOFF, WOFF2, TrueType Collection (.ttc), and Datafork TrueType (.dfont) font files
 * Supports mapping characters to glyphs, including support for ligatures and other advanced substitutions (see below)
 * Supports reading glyph metrics and laying out glyphs, including support for kerning and other advanced layout features (see below)
 * Advanced OpenType features including glyph substitution (GSUB) and positioning (GPOS)
@@ -183,6 +183,7 @@ You do not create glyph objects directly. They are created by various methods on
 ### Properties
 
 * `id` - the glyph id in the font
+* `name` - the glyph name in the font
 * `codePoints` - an array of unicode code points that are represented by this glyph. There can be multiple code points in the case of ligatures and other glyphs that represent multiple visual characters.
 * `path` - a vector Path object representing the glyph
 * `bbox` - the glyph’s bounding box, i.e. the rectangle that encloses the glyph outline as tightly as possible.

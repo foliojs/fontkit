@@ -1,5 +1,5 @@
 import r from 'restructure';
-import { resolveLength } from 'restructure/src/utils';
+import { resolveLength } from 'restructure/src/utils.js';
 import CFFDict from './CFFDict';
 import CFFIndex from './CFFIndex';
 import CFFPointer from './CFFPointer';

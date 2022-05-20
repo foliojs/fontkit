@@ -14,10 +14,10 @@ let types = {
   yPlacement: r.int16,
   xAdvance:   r.int16,
   yAdvance:   r.int16,
-  xPlaDevice: new r.Pointer(r.uint16, Device, { type: 'global', relativeTo: 'rel' }),
-  yPlaDevice: new r.Pointer(r.uint16, Device, { type: 'global', relativeTo: 'rel' }),
-  xAdvDevice: new r.Pointer(r.uint16, Device, { type: 'global', relativeTo: 'rel' }),
-  yAdvDevice: new r.Pointer(r.uint16, Device, { type: 'global', relativeTo: 'rel' })
+  xPlaDevice: new r.Pointer(r.uint16, Device, { type: 'global', relativeTo: ctx => ctx.rel }),
+  yPlaDevice: new r.Pointer(r.uint16, Device, { type: 'global', relativeTo: ctx => ctx.rel }),
+  xAdvDevice: new r.Pointer(r.uint16, Device, { type: 'global', relativeTo: ctx => ctx.rel }),
+  yAdvDevice: new r.Pointer(r.uint16, Device, { type: 'global', relativeTo: ctx => ctx.rel })
 };
 
 class ValueRecord {
@@ -185,7 +185,7 @@ let GPOSLookup = new r.VersionedStruct('lookupType', {
   9: { // Extension Positioning
     posFormat:   r.uint16,
     lookupType:  r.uint16,   // cannot also be 9
-    extension:   new r.Pointer(r.uint32, GPOSLookup)
+    extension:   new r.Pointer(r.uint32, null)
   }
 });
 

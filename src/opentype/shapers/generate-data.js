@@ -4,7 +4,7 @@
 //
 import codepoints from 'codepoints';
 import fs from 'fs';
-import UnicodeTrieBuilder from 'unicode-trie/builder';
+import UnicodeTrieBuilder from 'unicode-trie/builder.js';
 
 let ShapingClasses = {
   Non_Joining: 0,
@@ -30,4 +30,4 @@ for (let i = 0; i < codepoints.length; i++) {
   }
 }
 
-fs.writeFileSync(__dirname + '/data.trie', trie.toBuffer());
+fs.writeFileSync(new URL('data.trie', import.meta.url), trie.toBuffer());

@@ -18,6 +18,8 @@ let TTCHeader = new r.VersionedStruct(r.uint32, {
 });
 
 export default class TrueTypeCollection {
+  type = 'TTC';
+
   static probe(buffer) {
     return buffer.toString('ascii', 0, 4) === 'ttcf';
   }
@@ -36,9 +38,8 @@ export default class TrueTypeCollection {
       let stream = new r.DecodeStream(this.stream.buffer);
       stream.pos = offset;
       let font = new TTFFont(stream);
-      if (font.postscriptName === name) {
+      if ((Buffer.isBuffer(font.postscriptName) && font.postscriptName.equals(name)) || font.postscriptName === name)
         return font;
-      }
     }
 
     return null;
