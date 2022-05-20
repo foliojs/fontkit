@@ -25,7 +25,7 @@ describe('font subsetting', function () {
     });
 
     it('should re-encode variation glyphs', function (done) {
-      if (!fs.existsSync('/Library/Fonts/Skia.ttf')) return done();
+      if (!fs.existsSync('/Library/Fonts/Skia.ttf')) return this.skip();
 
       let font = fontkit.openSync('/Library/Fonts/Skia.ttf', 'Bold');
       let subset = font.createSubset();
