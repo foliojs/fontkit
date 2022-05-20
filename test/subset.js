@@ -114,17 +114,19 @@ describe('font subsetting', function () {
       }));
     });
 
-    it('should produce a subset with asian punctuation corretly', function(done) {
-      const koreanFont = fontkit.openSync(__dirname + '/data/NotoSansCJK/NotoSansCJKkr-Regular.otf');
+    it('should produce a subset with asian punctuation corretly', function (done) {
+      const koreanFont = fontkit.openSync(new URL('data/NotoSansCJK/NotoSansCJKkr-Regular.otf', import.meta.url));
       const subset = koreanFont.createSubset();
       const iterable = koreanFont.glyphsForString('a。d');
       for (let i = 0; i < iterable.length; i++) {
-        const  glyph = iterable[i];
+        const glyph = iterable[i];
         subset.includeGlyph(glyph);
       }
 
-      return subset.encodeStream().pipe(concat(function(buf) {
+      return subset.encodeStream().pipe(concat(function (buf) {
         const stream = new r.DecodeStream(buf);
+        let CFFFont = font._tables['CFF '].constructor;
+        let CFFGlyph = iterable[0].constructor;
         const cff = new CFFFont(stream);
         let glyph = new CFFGlyph(1, [], { stream, 'CFF ': cff });
         assert.equal(glyph.path.toSVG(), koreanFont.glyphsForString('a')[0].path.toSVG());
