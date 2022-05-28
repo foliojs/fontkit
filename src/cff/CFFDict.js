@@ -1,4 +1,4 @@
-import isEqual from 'deep-equal';
+import isEqual from 'fast-deep-equal';
 import r from 'restructure';
 import CFFOperand from './CFFOperand';
 import { PropertyDescriptor } from 'restructure/src/utils.js';
