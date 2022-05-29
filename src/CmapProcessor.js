@@ -156,13 +156,10 @@ export default class CmapProcessor {
 
     let selectors = this.uvs.varSelectors.toArray();
     let i = binarySearch(selectors, x => variationSelector - x.varSelector);
-    if (i === -1) {
-      return 0;
-    }
     let sel = selectors[i];
 
-    if (sel.defaultUVS) {
-      i = binarySearch(sel.defaultUVS, x =>
+    if (i !== -1 && sel.defaultUVS) {
+      let i = binarySearch(sel.defaultUVS, x =>
         codepoint < x.startUnicodeValue ? -1 : codepoint > x.startUnicodeValue + x.additionalCount ? +1 : 0
       );
       if (i !== -1) {
@@ -170,8 +167,8 @@ export default class CmapProcessor {
       }
     }
 
-    if (sel.nonDefaultUVS) {
-      i = binarySearch(sel.nonDefaultUVS, x => codepoint - x.unicodeValue);
+    if (i !== -1 && sel.nonDefaultUVS) {
+      let i = binarySearch(sel.nonDefaultUVS, x => codepoint - x.unicodeValue);
       if (i !== -1) {
         return sel.nonDefaultUVS[i].glyphID;
       }
