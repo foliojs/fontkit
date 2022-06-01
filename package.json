@@ -40,7 +40,8 @@
   "files": [
     "src",
     "dist",
-    "iconv-lite.cjs"
+    "iconv-lite.cjs",
+    "fs.cjs"
   ],
   "author": "Devon Govett <devongovett@gmail.com>",
   "license": "MIT",
@@ -70,6 +71,7 @@
     "shx": "^0.3.4"
   },
   "alias": {
-    "./iconv-lite.cjs": "clone"
+    "./iconv-lite.cjs": "clone",
+    "./fs.cjs": "clone"
   }
 }
