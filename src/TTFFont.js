@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 import { cache } from './decorators';
 import * as fontkit from './base';
 import Directory from './tables/directory';
@@ -13,6 +13,7 @@ import GlyphVariationProcessor from './glyph/GlyphVariationProcessor';
 import TTFSubset from './subset/TTFSubset';
 import CFFSubset from './subset/CFFSubset';
 import BBox from './glyph/BBox';
+import { asciiDecoder } from './utils';
 
 /**
  * This is the base class for all SFNT-based font formats in fontkit.
@@ -22,7 +23,7 @@ export default class TTFFont {
   type = 'TTF';
 
   static probe(buffer) {
-    let format = buffer.toString('ascii', 0, 4);
+    let format = asciiDecoder.decode(buffer.slice(0, 4));
     return format === 'true' || format === 'OTTO' || format === String.fromCharCode(0, 1, 0, 0);
   }
 

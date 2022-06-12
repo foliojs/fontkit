@@ -40,8 +40,7 @@ run.glyphs.forEach(function(glyph) {
   subset.includeGlyph(glyph);
 });
 
-subset.encodeStream()
-      .pipe(fs.createWriteStream('subset.ttf'));
+let buffer = subset.encode();
 ```
 
 ## API
@@ -258,9 +257,9 @@ You create a Subset object by calling `font.createSubset()`, described above. Th
 
 Includes the given glyph object or glyph ID in the subset.
 
-### `subset.encodeStream()`
+### `subset.encode()`
 
-Returns a [stream](https://nodejs.org/api/stream.html) containing the encoded font file that can be piped to a destination, such as a file.
+Returns a `Uint8Array` containing the encoded font file.
 
 ## License
 

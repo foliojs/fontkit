@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 
 let Setting = new r.Struct({
   setting: r.uint16,

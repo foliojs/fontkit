@@ -1,7 +1,8 @@
-import r from 'restructure';
+import * as r from 'restructure';
 import TTFFont from './TTFFont';
 import Directory from './tables/directory';
 import tables from './tables';
+import { asciiDecoder } from './utils';
 
 let TTCHeader = new r.VersionedStruct(r.uint32, {
   0x00010000: {
@@ -21,7 +22,7 @@ export default class TrueTypeCollection {
   type = 'TTC';
 
   static probe(buffer) {
-    return buffer.toString('ascii', 0, 4) === 'ttcf';
+    return asciiDecoder.decode(buffer.slice(0, 4)) === 'ttcf';
   }
 
   constructor(stream) {
@@ -38,8 +39,16 @@ export default class TrueTypeCollection {
       let stream = new r.DecodeStream(this.stream.buffer);
       stream.pos = offset;
       let font = new TTFFont(stream);
-      if ((Buffer.isBuffer(font.postscriptName) && font.postscriptName.equals(name)) || font.postscriptName === name)
+      if (
+        font.postscriptName === name ||
+        (
+          font.postscriptName instanceof Uint8Array && 
+          name instanceof Uint8Array && 
+          font.postscriptName.every((v, i) => name[i] === v)
+        )
+      ) {
         return font;
+      }
     }
 
     return null;

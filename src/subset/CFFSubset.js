@@ -39,7 +39,7 @@ export default class CFFSubset extends Subset {
         this.cff.stream.pos = subr.offset;
         res.push(this.cff.stream.readBuffer(subr.length));
       } else {
-        res.push(Buffer.from([11])); // return
+        res.push(new Uint8Array([11])); // return
       }
     }
 
@@ -128,7 +128,7 @@ export default class CFFSubset extends Subset {
     return standardStrings.length + this.strings.length - 1;
   }
 
-  encode(stream) {
+  encode() {
     this.subsetCharstrings();
 
     let charset = {
@@ -166,6 +166,6 @@ export default class CFFSubset extends Subset {
       globalSubrIndex: this.gsubrs
     };
 
-    CFFTop.encode(stream, top);
+    return CFFTop.toBuffer(top);
   }
 }

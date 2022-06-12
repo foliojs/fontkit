@@ -1,4 +1,5 @@
 import { registerFormat, create, defaultLanguage, setDefaultLanguage } from './base';
+import { open, openSync } from './fs';
 import TTFFont from './TTFFont';
 import WOFFFont from './WOFFFont';
 import WOFF2Font from './WOFF2Font';
@@ -13,11 +14,14 @@ registerFormat(TrueTypeCollection);
 registerFormat(DFont);
 
 export * from './base';
+export * from './fs';
 
 // Legacy default export for backward compatibility.
 export default {
   registerFormat,
   create,
+  open,
+  openSync,
   defaultLanguage,
   setDefaultLanguage
 };
