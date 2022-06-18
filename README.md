@@ -45,9 +45,9 @@ let buffer = subset.encode();
 
 ## API
 
-### `fontkit.open(filename, postscriptName = null, callback(err, font))`
+### `fontkit.open(filename, postscriptName = null)`
 
-Opens a font file asynchronously, and calls the callback with a font object. For collection fonts (such as TrueType collection files), you can pass a `postscriptName` to get that font out of the collection instead of a collection object.
+Opens a font file asynchronously, and returns a `Promise` with a font object. For collection fonts (such as TrueType collection files), you can pass a `postscriptName` to get that font out of the collection instead of a collection object.
 
 ### `fontkit.openSync(filename, postscriptName = null)`
 
