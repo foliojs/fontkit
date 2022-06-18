@@ -32,13 +32,15 @@
     "node": {
       "import": "./dist/module.mjs",
       "require": "./dist/main.cjs"
-    }
+    },
+    "import": "./dist/browser-module.mjs",
+    "require": "./dist/browser.cjs"
   },
   "targets": {
     "main": {
       "source": "src/node.js",
       "engines": {
-        "chrome": "70"
+        "browsers": "chrome >= 70"
       }
     },
     "node-module": {
@@ -46,19 +48,19 @@
       "isLibrary": true,
       "includeNodeModules": false,
       "engines": {
-        "chrome": "70"
+        "browsers": "chrome >= 70"
       }
     },
     "module": {
       "source": "src/index.js",
       "engines": {
-        "chrome": "70"
+        "browsers": "chrome >= 70"
       }
     },
     "browser": {
       "source": "src/index.js",
       "engines": {
-        "chrome": "70"
+        "browsers": "chrome >= 70"
       }
     }
   },
