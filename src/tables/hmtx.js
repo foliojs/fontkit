@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 
 let HmtxEntry = new r.Struct({
   advance: r.uint16,

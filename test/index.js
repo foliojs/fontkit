@@ -2,12 +2,10 @@ import * as fontkit from 'fontkit';
 import assert from 'assert';
 
 describe('fontkit', function () {
-  it('should open a font asynchronously', () =>
-    fontkit.open(new URL('data/OpenSans/OpenSans-Regular.ttf', import.meta.url), function (err, font) {
-      assert.equal(err, null);
-      return assert.equal(font.type, 'TTF');
-    })
-  );
+  it('should open a font asynchronously', async () => {
+    let font = await fontkit.open(new URL('data/OpenSans/OpenSans-Regular.ttf', import.meta.url));
+    assert.equal(font.type, 'TTF');
+  });
 
   it('should open a font synchronously', function () {
     let font = fontkit.openSync(new URL('data/OpenSans/OpenSans-Regular.ttf', import.meta.url));
@@ -45,11 +43,11 @@ describe('fontkit', function () {
     assert.equal(font.postscriptName, null);
   });
 
-  it('should error when opening an invalid font asynchronously', function () {
-    fontkit.open(new URL(import.meta.url), function (err, font) {
-      assert(err instanceof Error);
-      assert.equal(err.message, 'Unknown font format');
-    });
+  it('should error when opening an invalid font asynchronously', async function () {
+    assert.rejects(
+      fontkit.open(new URL(import.meta.url)),
+      'Unknown font format'
+    );
   });
 
   it('should error when opening an invalid font synchronously', function () {

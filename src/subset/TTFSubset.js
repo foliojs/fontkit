@@ -25,10 +25,11 @@ export default class TTFSubset extends Subset {
 
     // if it is a compound glyph, include its components
     if (glyf && glyf.numberOfContours < 0) {
-      buffer = Buffer.from(buffer);
+      buffer = new Uint8Array(buffer);
+      let view = new DataView(buffer.buffer);
       for (let component of glyf.components) {
         gid = this.includeGlyph(component.glyphID);
-        buffer.writeUInt16BE(gid, component.pos);
+        view.setUint16(component.pos, gid);
       }
     } else if (glyf && this.font._variationProcessor) {
       // If this is a TrueType variation glyph, re-encode the path
@@ -47,7 +48,7 @@ export default class TTFSubset extends Subset {
     return this.glyf.length - 1;
   }
 
-  encode(stream) {
+  encode() {
     // tables required by PDF spec:
     //   head, hhea, loca, maxp, cvt , prep, glyf, hmtx, fpgm
     //
@@ -108,7 +109,7 @@ export default class TTFSubset extends Subset {
     //     ]
 
     // TODO: subset prep, cvt, fpgm?
-    Directory.encode(stream, {
+    return Directory.toBuffer({
       tables: {
         head,
         hhea,

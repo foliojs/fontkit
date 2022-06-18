@@ -40,15 +40,14 @@ run.glyphs.forEach(function(glyph) {
   subset.includeGlyph(glyph);
 });
 
-subset.encodeStream()
-      .pipe(fs.createWriteStream('subset.ttf'));
+let buffer = subset.encode();
 ```
 
 ## API
 
-### `fontkit.open(filename, postscriptName = null, callback(err, font))`
+### `fontkit.open(filename, postscriptName = null)`
 
-Opens a font file asynchronously, and calls the callback with a font object. For collection fonts (such as TrueType collection files), you can pass a `postscriptName` to get that font out of the collection instead of a collection object.
+Opens a font file asynchronously, and returns a `Promise` with a font object. For collection fonts (such as TrueType collection files), you can pass a `postscriptName` to get that font out of the collection instead of a collection object.
 
 ### `fontkit.openSync(filename, postscriptName = null)`
 
@@ -258,9 +257,9 @@ You create a Subset object by calling `font.createSubset()`, described above. Th
 
 Includes the given glyph object or glyph ID in the subset.
 
-### `subset.encodeStream()`
+### `subset.encode()`
 
-Returns a [stream](https://nodejs.org/api/stream.html) containing the encoded font file that can be piped to a destination, such as a file.
+Returns a `Uint8Array` containing the encoded font file.
 
 ## License
 

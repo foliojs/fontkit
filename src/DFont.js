@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 import TTFFont from './TTFFont';
 
 let DFontName = new r.String(r.uint8);
@@ -89,8 +89,16 @@ export default class DFont {
       let pos = this.header.dataOffset + ref.dataOffset + 4;
       let stream = new r.DecodeStream(this.stream.buffer.slice(pos));
       let font = new TTFFont(stream);
-      if ((Buffer.isBuffer(font.postscriptName) && font.postscriptName.equals(name)) || font.postscriptName === name)
+      if (
+        font.postscriptName === name ||
+        (
+          font.postscriptName instanceof Uint8Array && 
+          name instanceof Uint8Array && 
+          font.postscriptName.every((v, i) => name[i] === v)
+        )
+      ) {
         return font;
+      }
     }
 
     return null;

@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 
 let KernPair = new r.Struct({
   left:   r.uint16,

@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 import {BigMetrics} from './EBDT';
 
 let SBitLineMetrics = new r.Struct({

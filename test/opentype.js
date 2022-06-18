@@ -1,4 +1,4 @@
-import fontkit from 'fontkit';
+import * as fontkit from 'fontkit';
 import assert from 'assert';
 
 describe('opentype', function () {

@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 
 let LayerRecord = new r.Struct({
   gid: r.uint16,          // Glyph ID of layer glyph (must be in z-order from bottom to top).

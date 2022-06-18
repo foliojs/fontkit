@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 import { LookupTable } from './aat';
 
 let OpticalBounds = new r.Struct({

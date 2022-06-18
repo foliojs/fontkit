@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 
 export default class CFFPointer extends r.Pointer {
   constructor(type, options = {}) {

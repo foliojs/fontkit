@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 
 // Vertical Header Table
 export default new r.Struct({
