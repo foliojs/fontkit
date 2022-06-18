@@ -15,13 +15,3 @@ registerFormat(DFont);
 
 export * from './base';
 export * from './fs';
-
-// Legacy default export for backward compatibility.
-export default {
-  registerFormat,
-  create,
-  open,
-  openSync,
-  defaultLanguage,
-  setDefaultLanguage
-};

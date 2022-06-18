@@ -13,11 +13,3 @@ registerFormat(TrueTypeCollection);
 registerFormat(DFont);
 
 export * from './base';
-
-// Legacy default export for backward compatibility.
-export default {
-  registerFormat,
-  create,
-  defaultLanguage,
-  setDefaultLanguage
-};
