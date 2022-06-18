@@ -1,4 +1,4 @@
-import * as r from 'restructure';
+import {DecodeStream} from 'restructure';
 
 export let logErrors = false;
 
@@ -11,7 +11,7 @@ export function create(buffer, postscriptName) {
   for (let i = 0; i < formats.length; i++) {
     let format = formats[i];
     if (format.probe(buffer)) {
-      let font = new format(new r.DecodeStream(buffer));
+      let font = new format(new DecodeStream(buffer));
       if (postscriptName) {
         return font.getFont(postscriptName);
       }

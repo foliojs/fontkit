@@ -1,8 +1,7 @@
 import { binarySearch } from './utils';
-import { getEncoding } from './encodings';
+import { encodingExists, getEncoding, getEncodingMapping } from './encodings';
 import { cache } from './decorators';
 import { range } from './utils';
-import iconv from '../iconv-lite.cjs';
 
 export default class CmapProcessor {
   constructor(cmapTable) {
@@ -22,14 +21,14 @@ export default class CmapProcessor {
       [0, 0]
     ]);
 
-    // If not unicode cmap was found, and iconv-lite is installed,
-    // take the first table with a supported encoding.
-    if (!this.cmap && iconv) {
+    // If not unicode cmap was found, take the first table with a supported encoding.
+    if (!this.cmap) {
       for (let cmap of cmapTable.tables) {
         let encoding = getEncoding(cmap.platformID, cmap.encodingID, cmap.table.language - 1);
-        if (iconv.encodingExists(encoding)) {
+        let mapping = getEncodingMapping(encoding);
+        if (mapping) {
           this.cmap = cmap.table;
-          this.encoding = encoding;
+          this.encoding = mapping;
         }
       }
     }
@@ -60,11 +59,7 @@ export default class CmapProcessor {
     // If there is no Unicode cmap in this font, we need to re-encode
     // the codepoint in the encoding that the cmap supports.
     if (this.encoding) {
-      let buf = iconv.encode(String.fromCodePoint(codepoint), this.encoding);
-      codepoint = 0;
-      for (let i = 0; i < buf.length; i++) {
-        codepoint = (codepoint << 8) | buf[i];
-      }
+      codepoint = this.encoding.get(codepoint) || codepoint;
 
       // Otherwise, try to get a Unicode variation selector for this codepoint if one is provided.
     } else if (variationSelector) {
