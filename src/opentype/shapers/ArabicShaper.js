@@ -1,5 +1,5 @@
 import DefaultShaper from './DefaultShaper';
-import unicode from 'unicode-properties';
+import {getCategory} from 'unicode-properties';
 import UnicodeTrie from 'unicode-trie';
 import { decodeBase64 } from '../../utils';
 
@@ -114,7 +114,7 @@ function getShapingClass(codePoint) {
     return res - 1;
   }
 
-  let category = unicode.getCategory(codePoint);
+  let category = getCategory(codePoint);
   if (category === 'Mn' || category === 'Me' || category === 'Cf') {
     return ShapingClasses.Transparent;
   }

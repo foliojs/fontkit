@@ -1,7 +1,7 @@
 import DefaultShaper from './DefaultShaper';
 import StateMachine from 'dfa';
 import UnicodeTrie from 'unicode-trie';
-import unicode from 'unicode-properties';
+import {getCategory} from 'unicode-properties';
 import * as Script from '../../layout/Script';
 import GlyphInfo from '../GlyphInfo';
 import indicMachine from './indic.json';
@@ -897,7 +897,7 @@ function finalReordering(font, glyphs, plan) {
     }
 
     // Apply 'init' to the Left Matra if it's a word start.
-    if (glyphs[start].shaperInfo.position === POSITIONS.Pre_M && (!start || !/Cf|Mn/.test(unicode.getCategory(glyphs[start - 1].codePoints[0])))) {
+    if (glyphs[start].shaperInfo.position === POSITIONS.Pre_M && (!start || !/Cf|Mn/.test(getCategory(glyphs[start - 1].codePoints[0])))) {
       glyphs[start].features.init = true;
     }
   }

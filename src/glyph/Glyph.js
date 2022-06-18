@@ -1,6 +1,6 @@
 import { cache } from '../decorators';
 import Path from './Path';
-import unicode from 'unicode-properties';
+import {isMark} from 'unicode-properties';
 import StandardNames from './StandardNames';
 
 /**
@@ -29,7 +29,7 @@ export default class Glyph {
     this._font = font;
 
     // TODO: get this info from GDEF if available
-    this.isMark = this.codePoints.length > 0 && this.codePoints.every(unicode.isMark);
+    this.isMark = this.codePoints.length > 0 && this.codePoints.every(isMark);
     this.isLigature = this.codePoints.length > 1;
   }
 
