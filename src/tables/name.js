@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 import {getEncoding, LANGUAGES} from '../encodings';
 
 let NameRecord = new r.Struct({
@@ -108,7 +108,7 @@ NameTable.preEncode = function() {
       encodingID: 1,
       languageID: 0x409,
       nameID: NAMES.indexOf(key),
-      length: Buffer.byteLength(val.en, 'utf16le'),
+      length: val.en.length * 2,
       string: val.en
     });
 

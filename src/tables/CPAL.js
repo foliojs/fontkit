@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 
 let ColorRecord = new r.Struct({
   blue: r.uint8,

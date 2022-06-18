@@ -1,7 +1,7 @@
 import Glyph from './Glyph';
 import Path from './Path';
 import BBox from './BBox';
-import r from 'restructure';
+import * as r from 'restructure';
 
 // The header for both simple and composite glyphs
 let GlyfHeader = new r.Struct({

@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 
 export let BigMetrics = new r.Struct({
   height: r.uint8,
