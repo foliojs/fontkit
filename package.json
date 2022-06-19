@@ -39,6 +39,7 @@
   "targets": {
     "main": {
       "source": "src/node.js",
+      "context": "browser",
       "engines": {
         "browsers": "chrome >= 70"
       }
