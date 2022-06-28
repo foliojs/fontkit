@@ -66,7 +66,7 @@ export function getEncodingMapping(encoding) {
 // Map of platform ids to encoding ids.
 export const ENCODINGS = [
   // unicode
-  ['utf-16be', 'utf-16be', 'utf-16be', 'utf-16be', 'utf-16be', 'utf-16be'],
+  ['utf-16be', 'utf-16be', 'utf-16be', 'utf-16be', 'utf-16be', 'utf-16be', 'utf-16be'],
   
   // macintosh
   // Mappings available at http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/
