@@ -85,7 +85,7 @@ export default class CFFGlyph extends Glyph {
       while (stream.pos < end) {
         let op = stream.readUInt8();
         if (op < 32) {
-          let index, subr, phase;
+          let index, subr;
           switch (op) {
             case 1:  // hstem
             case 3:  // vstem
@@ -112,8 +112,8 @@ export default class CFFGlyph extends Glyph {
               break;
 
             case 6: // hlineto
-            case 7: // vlineto
-              phase = op === 6;
+            case 7: { // vlineto
+              let phase = op === 6;
               while (stack.length >= 1) {
                 if (phase) {
                   x += stack.shift();
@@ -125,26 +125,26 @@ export default class CFFGlyph extends Glyph {
                 phase = !phase;
               }
               break;
-
-            case 8: // rrcurveto
+            }
+            case 8: { // rrcurveto
               while (stack.length > 0) {
-                var c1x = x + stack.shift();
-                var c1y = y + stack.shift();
-                var c2x = c1x + stack.shift();
-                var c2y = c1y + stack.shift();
+                let c1x = x + stack.shift();
+                let c1y = y + stack.shift();
+                let c2x = c1x + stack.shift();
+                let c2y = c1y + stack.shift();
                 x = c2x + stack.shift();
                 y = c2y + stack.shift();
                 path.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
               }
               break;
-
-            case 10: // callsubr
-              index = stack.pop() + subrsBias;
-              subr = subrs[index];
+            }
+            case 10: { // callsubr
+              let index = stack.pop() + subrsBias;
+              let subr = subrs[index];
               if (subr) {
                 usedSubrs[index] = true;
-                var p = stream.pos;
-                var e = end;
+                let p = stream.pos;
+                let e = end;
                 stream.pos = subr.offset;
                 end = subr.offset + subr.length;
                 parse();
@@ -152,7 +152,7 @@ export default class CFFGlyph extends Glyph {
                 end = e;
               }
               break;
-
+            }
             case 11: // return
               if (cff.version >= 2) {
                 break;
@@ -239,12 +239,12 @@ export default class CFFGlyph extends Glyph {
               moveTo(x, y);
               break;
 
-            case 24: // rcurveline
+            case 24: { // rcurveline
               while (stack.length >= 8) {
-                var c1x = x + stack.shift();
-                var c1y = y + stack.shift();
-                var c2x = c1x + stack.shift();
-                var c2y = c1y + stack.shift();
+                let c1x = x + stack.shift();
+                let c1y = y + stack.shift();
+                let c2x = c1x + stack.shift();
+                let c2y = c1y + stack.shift();
                 x = c2x + stack.shift();
                 y = c2y + stack.shift();
                 path.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
@@ -254,66 +254,66 @@ export default class CFFGlyph extends Glyph {
               y += stack.shift();
               path.lineTo(x, y);
               break;
-
-            case 25: // rlinecurve
+            }
+            case 25: { // rlinecurve
               while (stack.length >= 8) {
                 x += stack.shift();
                 y += stack.shift();
                 path.lineTo(x, y);
               }
 
-              var c1x = x + stack.shift();
-              var c1y = y + stack.shift();
-              var c2x = c1x + stack.shift();
-              var c2y = c1y + stack.shift();
+              let c1x = x + stack.shift();
+              let c1y = y + stack.shift();
+              let c2x = c1x + stack.shift();
+              let c2y = c1y + stack.shift();
               x = c2x + stack.shift();
               y = c2y + stack.shift();
               path.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
               break;
-
-            case 26: // vvcurveto
+            }
+            case 26: { // vvcurveto
               if (stack.length % 2) {
                 x += stack.shift();
               }
 
               while (stack.length >= 4) {
-                c1x = x;
-                c1y = y + stack.shift();
-                c2x = c1x + stack.shift();
-                c2y = c1y + stack.shift();
+                let c1x = x;
+                let c1y = y + stack.shift();
+                let c2x = c1x + stack.shift();
+                let c2y = c1y + stack.shift();
                 x = c2x;
                 y = c2y + stack.shift();
                 path.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
               }
               break;
-
-            case 27: // hhcurveto
+            }
+            case 27: { // hhcurveto
               if (stack.length % 2) {
                 y += stack.shift();
               }
 
               while (stack.length >= 4) {
-                c1x = x + stack.shift();
-                c1y = y;
-                c2x = c1x + stack.shift();
-                c2y = c1y + stack.shift();
+                let c1x = x + stack.shift();
+                let c1y = y;
+                let c2x = c1x + stack.shift();
+                let c2y = c1y + stack.shift();
                 x = c2x + stack.shift();
                 y = c2y;
                 path.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
               }
               break;
-
+            }
             case 28: // shortint
               stack.push(stream.readInt16BE());
               break;
 
-            case 29: // callgsubr
-              index = stack.pop() + gsubrsBias;
-              subr = gsubrs[index];
+            case 29: { // callgsubr
+              let index = stack.pop() + gsubrsBias;
+              let subr = gsubrs[index];
               if (subr) {
                 usedGsubrs[index] = true;
-                var p = stream.pos;
-                var e = end;
+                let p = stream.pos;
+                let e = end;
                 stream.pos = subr.offset;
                 end = subr.offset + subr.length;
                 parse();
@@ -321,11 +321,12 @@ export default class CFFGlyph extends Glyph {
                 end = e;
               }
               break;
-
+            }
             case 30: // vhcurveto
-            case 31: // hvcurveto
-              phase = op === 31;
+            case 31: { // hvcurveto
+              let phase = op === 31;
               while (stack.length >= 4) {
+                let c1x, c1y, c2x, c2y;
                 if (phase) {
                   c1x = x + stack.shift();
                   c1y = y;
@@ -346,7 +347,7 @@ export default class CFFGlyph extends Glyph {
                 phase = !phase;
               }
               break;
-
+            }
             case 12:
               op = stream.readUInt8();
               switch (op) {
@@ -488,11 +489,11 @@ export default class CFFGlyph extends Glyph {
                   }
                   break;
 
-                case 34: // hflex
-                  c1x = x + stack.shift();
-                  c1y = y;
-                  c2x = c1x + stack.shift();
-                  c2y = c1y + stack.shift();
+                case 34: { // hflex
+                  let c1x = x + stack.shift();
+                  let c1y = y;
+                  let c2x = c1x + stack.shift();
+                  let c2y = c1y + stack.shift();
                   let c3x = c2x + stack.shift();
                   let c3y = c2y;
                   let c4x = c3x + stack.shift();
@@ -507,8 +508,8 @@ export default class CFFGlyph extends Glyph {
                   path.bezierCurveTo(c1x, c1y, c2x, c2y, c3x, c3y);
                   path.bezierCurveTo(c4x, c4y, c5x, c5y, c6x, c6y);
                   break;
-
-                case 35: // flex
+                }
+                case 35: { // flex
                   let pts = [];
 
                   for (let i = 0; i <= 5; i++) {
@@ -521,32 +522,32 @@ export default class CFFGlyph extends Glyph {
                   path.bezierCurveTo(...pts.slice(6));
                   stack.shift(); // fd
                   break;
-
-                case 36: // hflex1
-                  c1x = x + stack.shift();
-                  c1y = y + stack.shift();
-                  c2x = c1x + stack.shift();
-                  c2y = c1y + stack.shift();
-                  c3x = c2x + stack.shift();
-                  c3y = c2y;
-                  c4x = c3x + stack.shift();
-                  c4y = c3y;
-                  c5x = c4x + stack.shift();
-                  c5y = c4y + stack.shift();
-                  c6x = c5x + stack.shift();
-                  c6y = c5y;
+                }
+                case 36: { // hflex1
+                  let c1x = x + stack.shift();
+                  let c1y = y + stack.shift();
+                  let c2x = c1x + stack.shift();
+                  let c2y = c1y + stack.shift();
+                  let c3x = c2x + stack.shift();
+                  let c3y = c2y;
+                  let c4x = c3x + stack.shift();
+                  let c4y = c3y;
+                  let c5x = c4x + stack.shift();
+                  let c5y = c4y + stack.shift();
+                  let c6x = c5x + stack.shift();
+                  let c6y = c5y;
                   x = c6x;
                   y = c6y;
 
                   path.bezierCurveTo(c1x, c1y, c2x, c2y, c3x, c3y);
                   path.bezierCurveTo(c4x, c4y, c5x, c5y, c6x, c6y);
                   break;
-
-                case 37: // flex1
+                }
+                case 37: { // flex1
                   let startx = x;
                   let starty = y;
 
-                  pts = [];
+                  let pts = [];
                   for (let i = 0; i <= 4; i++) {
                     x += stack.shift();
                     y += stack.shift();
@@ -565,7 +566,7 @@ export default class CFFGlyph extends Glyph {
                   path.bezierCurveTo(...pts.slice(0, 6));
                   path.bezierCurveTo(...pts.slice(6));
                   break;
-
+                }
                 default:
                   throw new Error(`Unknown op: 12 ${op}`);
               }
