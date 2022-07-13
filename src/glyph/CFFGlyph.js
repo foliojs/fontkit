@@ -147,8 +147,8 @@ export default class CFFGlyph extends Glyph {
               subr = subrs[index];
               if (subr) {
                 usedSubrs[index] = true;
-                var p = stream.pos;
-                var e = end;
+                let p = stream.pos;
+                let e = end;
                 stream.pos = subr.offset;
                 end = subr.offset + subr.length;
                 parse();
@@ -316,8 +316,8 @@ export default class CFFGlyph extends Glyph {
               subr = gsubrs[index];
               if (subr) {
                 usedGsubrs[index] = true;
-                var p = stream.pos;
-                var e = end;
+                let p = stream.pos;
+                let e = end;
                 stream.pos = subr.offset;
                 end = subr.offset + subr.length;
                 parse();
