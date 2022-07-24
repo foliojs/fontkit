@@ -29,12 +29,15 @@
   "module": "dist/browser-module.mjs",
   "source": "src/index.js",
   "exports": {
-    "node": {
-      "import": "./dist/module.mjs",
-      "require": "./dist/main.cjs"
+    ".": {
+      "node": {
+        "import": "./dist/module.mjs",
+        "require": "./dist/main.cjs"
+      },
+      "import": "./dist/browser-module.mjs",
+      "require": "./dist/browser.cjs"
     },
-    "import": "./dist/browser-module.mjs",
-    "require": "./dist/browser.cjs"
+    "./package.json": "./package.json"
   },
   "targets": {
     "main": {
