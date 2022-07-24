@@ -66,7 +66,7 @@ export function getEncodingMapping(encoding) {
 // Map of platform ids to encoding ids.
 export const ENCODINGS = [
   // unicode
-  ['utf16be', 'utf16be', 'utf16be', 'utf16be', 'utf16be', 'utf16be'],
+  ['utf-16be', 'utf-16be', 'utf-16be', 'utf-16be', 'utf-16be', 'utf-16be', 'utf-16be'],
   
   // macintosh
   // Mappings available at http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/
@@ -90,15 +90,15 @@ export const ENCODINGS = [
   ['x-mac-roman', 'shift-jis', 'big5', 'euc-kr', 'iso-8859-6', 'iso-8859-8',
    'x-mac-greek', 'x-mac-cyrillic', 'x-mac-symbol', 'x-mac-devanagari', 'x-mac-gurmukhi', 'x-mac-gujarati',
    'Oriya', 'Bengali', 'Tamil', 'Telugu', 'Kannada', 'Malayalam', 'Sinhalese',
-   'Burmese', 'Khmer', 'iso-8859-11', 'Laotian', 'Georgian', 'Armenian', 'hz-gb-2312', 
+   'Burmese', 'Khmer', 'iso-8859-11', 'Laotian', 'Georgian', 'Armenian', 'gbk', 
    'Tibetan', 'Mongolian', 'Geez', 'x-mac-ce', 'Vietnamese', 'Sindhi'],
   
   // ISO (deprecated)
-  ['ascii'],
+  ['ascii', null, 'iso-8859-1'],
   
   // windows
   // Docs here: http://msdn.microsoft.com/en-us/library/system.text.encoding(v=vs.110).aspx
-  ['symbol', 'utf16be', 'shift-jis', 'gb18030', 'big5', 'x-cp20949', 'johab', null, null, null, 'utf16be']
+  ['symbol', 'utf-16be', 'shift-jis', 'gb18030', 'big5', 'euc-kr', 'johab', null, null, null, 'utf-16be']
 ];
 
 // Overrides for Mac scripts by language id.
