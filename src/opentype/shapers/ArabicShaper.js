@@ -1,8 +1,9 @@
 import DefaultShaper from './DefaultShaper';
-import unicode from 'unicode-properties';
+import {getCategory} from 'unicode-properties';
 import UnicodeTrie from 'unicode-trie';
+import { decodeBase64 } from '../../utils';
 
-const trie = new UnicodeTrie(require('fs').readFileSync(__dirname + '/data.trie'));
+const trie = new UnicodeTrie(decodeBase64(require('fs').readFileSync(__dirname + '/data.trie', 'base64')));
 const FEATURES = ['isol', 'fina', 'fin2', 'fin3', 'medi', 'med2', 'init'];
 
 const ShapingClasses = {
@@ -113,7 +114,7 @@ function getShapingClass(codePoint) {
     return res - 1;
   }
 
-  let category = unicode.getCategory(codePoint);
+  let category = getCategory(codePoint);
   if (category === 'Mn' || category === 'Me' || category === 'Cf') {
     return ShapingClasses.Transparent;
   }

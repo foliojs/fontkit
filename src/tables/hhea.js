@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 
 // horizontal header
 export default new r.Struct({

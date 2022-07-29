@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 
 let ImageTable = new r.Struct({
   ppem: r.uint16,

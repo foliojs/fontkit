@@ -1,4 +1,4 @@
-import unicode from 'unicode-properties';
+import {getScript} from 'unicode-properties';
 
 // This maps the Unicode Script property to an OpenType script tag
 // Data from http://www.microsoft.com/typography/otspec/scripttags.htm
@@ -170,7 +170,7 @@ export function forString(string) {
       }
     }
 
-    let script = unicode.getScript(code);
+    let script = getScript(code);
     if (script !== 'Common' && script !== 'Inherited' && script !== 'Unknown') {
       return UNICODE_SCRIPTS[script];
     }
@@ -182,7 +182,7 @@ export function forString(string) {
 export function forCodePoints(codePoints) {
   for (let i = 0; i < codePoints.length; i++) {
     let codePoint = codePoints[i];
-    let script = unicode.getScript(codePoint);
+    let script = getScript(codePoint);
     if (script !== 'Common' && script !== 'Inherited' && script !== 'Unknown') {
       return UNICODE_SCRIPTS[script];
     }

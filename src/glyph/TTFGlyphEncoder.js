@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 
 // Flags for simple glyphs
 const ON_CURVE        = 1 << 0;

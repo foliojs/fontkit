@@ -30,8 +30,11 @@ export default class Path {
    * @return {string}
    */
   toFunction() {
-    let cmds = this.commands.map(c => `  ctx.${c.command}(${c.args.join(', ')});`);
-    return new Function('ctx', cmds.join('\n'));
+    return ctx => {
+      this.commands.forEach(c => {
+        return ctx[c.command].apply(ctx, c.args)
+      })
+    };
   }
 
   /**
@@ -226,9 +229,9 @@ export default class Path {
    */
   transform(m0, m1, m2, m3, m4, m5) {
     return this.mapPoints((x, y) => {
-      x = m0 * x + m2 * y + m4;
-      y = m1 * x + m3 * y + m5;
-      return [x, y];
+      const tx = m0 * x + m2 * y + m4;
+      const ty = m1 * x + m3 * y + m5;
+      return [tx, ty];
     });
   }
 

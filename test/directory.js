@@ -1,10 +1,10 @@
-import fontkit from '../src';
+import * as fontkit from 'fontkit';
 import assert from 'assert';
 
-describe('metadata', function() {
-  let font = fontkit.openSync(__dirname + '/data/OpenSans/OpenSans-Regular.ttf');
+describe('metadata', function () {
+  let font = fontkit.openSync(new URL('data/OpenSans/OpenSans-Regular.ttf', import.meta.url));
 
-  it('decodes SFNT directory values correctly', function() {
+  it('decodes SFNT directory values correctly', function () {
     let dir = font.directory;
     assert.equal(dir.numTables, 19);
     assert.equal(dir.searchRange, 256);
@@ -12,7 +12,7 @@ describe('metadata', function() {
     assert.equal(dir.rangeShift, 48);
   });
 
-  it('numTables matches table collection', function() {
+  it('numTables matches table collection', function () {
     let dir = font.directory;
     assert.equal(Object.keys(dir.tables).length, dir.numTables);
   });

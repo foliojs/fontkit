@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 import {getEncoding, LANGUAGES} from '../encodings';
 
 let NameRecord = new r.Struct({
@@ -9,13 +9,13 @@ let NameRecord = new r.Struct({
   length:     r.uint16,
   string:     new r.Pointer(r.uint16,
     new r.String('length', t => getEncoding(t.platformID, t.encodingID, t.languageID)),
-    { type: 'parent', relativeTo: 'parent.stringOffset', allowNull: false }
+    { type: 'parent', relativeTo: ctx => ctx.parent.stringOffset, allowNull: false }
   )
 });
 
 let LangTagRecord = new r.Struct({
   length:  r.uint16,
-  tag:     new r.Pointer(r.uint16, new r.String('length', 'utf16be'), {type: 'parent', relativeTo: 'stringOffset'})
+  tag:     new r.Pointer(r.uint16, new r.String('length', 'utf16be'), {type: 'parent', relativeTo: ctx => ctx.stringOffset})
 });
 
 var NameTable = new r.VersionedStruct(r.uint16, {
@@ -108,7 +108,7 @@ NameTable.preEncode = function() {
       encodingID: 1,
       languageID: 0x409,
       nameID: NAMES.indexOf(key),
-      length: Buffer.byteLength(val.en, 'utf16le'),
+      length: val.en.length * 2,
       string: val.en
     });
 

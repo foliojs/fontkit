@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 
 let Axis = new r.Struct({
   axisTag: new r.String(4),

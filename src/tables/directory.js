@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 import Tables from './';
 
 let TableEntry = new r.Struct({
@@ -26,23 +26,26 @@ Directory.process = function() {
   this.tables = tables;
 };
 
-Directory.preEncode = function(stream) {
-  let tables = [];
-  for (let tag in this.tables) {
-    let table = this.tables[tag];
-    if (table) {
-      tables.push({
-        tag: tag,
-        checkSum: 0,
-        offset: new r.VoidPointer(Tables[tag], table),
-        length: Tables[tag].size(table)
-      });
+Directory.preEncode = function() {
+  if (!Array.isArray(this.tables)) {
+    let tables = [];
+    for (let tag in this.tables) {
+      let table = this.tables[tag];
+      if (table) {
+        tables.push({
+          tag: tag,
+          checkSum: 0,
+          offset: new r.VoidPointer(Tables[tag], table),
+          length: Tables[tag].size(table)
+        });
+      }
     }
+    
+    this.tables = tables;
   }
 
   this.tag = 'true';
-  this.numTables = tables.length;
-  this.tables = tables;
+  this.numTables = this.tables.length;
 
   let maxExponentFor2 = Math.floor((Math.log(this.numTables) / Math.LN2));
   let maxPowerOf2 = Math.pow(2, maxExponentFor2);

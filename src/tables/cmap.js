@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 
 let SubHeader = new r.Struct({
   firstCode:      r.uint16,

@@ -1,4 +1,4 @@
-import unicode from 'unicode-properties';
+import {isDigit} from 'unicode-properties';
 
 const VARIATION_FEATURES = ['rvrn'];
 const COMMON_FEATURES = ['ccmp', 'locl', 'rlig', 'mark', 'mkmk'];
@@ -50,14 +50,14 @@ export default class DefaultShaper {
         let end = i + 1;
 
         // Apply numerator
-        while (start > 0 && unicode.isDigit(glyphs[start - 1].codePoints[0])) {
+        while (start > 0 && isDigit(glyphs[start - 1].codePoints[0])) {
           glyphs[start - 1].features.numr = true;
           glyphs[start - 1].features.frac = true;
           start--;
         }
 
         // Apply denominator
-        while (end < glyphs.length && unicode.isDigit(glyphs[end].codePoints[0])) {
+        while (end < glyphs.length && isDigit(glyphs[end].codePoints[0])) {
           glyphs[end].features.dnom = true;
           glyphs[end].features.frac = true;
           end++;

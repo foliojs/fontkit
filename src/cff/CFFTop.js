@@ -1,5 +1,5 @@
-import r from 'restructure';
-import { resolveLength } from 'restructure/src/utils';
+import * as r from 'restructure';
+import { resolveLength } from 'restructure';
 import CFFDict from './CFFDict';
 import CFFIndex from './CFFIndex';
 import CFFPointer from './CFFPointer';
@@ -156,7 +156,9 @@ class CFFPrivateOp {
 let FontDict = new CFFDict([
   // key       name                   type(s)                                 default
   [18,        'Private',              new CFFPrivateOp,                       null],
-  [[12, 38],  'FontName',             'sid',                                  null]
+  [[12, 38],  'FontName',             'sid',                                  null],
+  [[12, 7],   'FontMatrix',           'array',                                [0.001, 0, 0, 0.001, 0, 0]],
+  [[12, 5],   'PaintType',            'number',                               0],
 ]);
 
 let CFFTopDict = new CFFDict([

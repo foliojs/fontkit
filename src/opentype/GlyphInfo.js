@@ -1,4 +1,4 @@
-import unicode from 'unicode-properties';
+import {isMark} from 'unicode-properties';
 import OTProcessor from './OTProcessor';
 
 export default class GlyphInfo {
@@ -44,7 +44,7 @@ export default class GlyphInfo {
       this.isMark = classID === 3;
       this.markAttachmentType = GDEF.markAttachClassDef ? OTProcessor.prototype.getClassID(id, GDEF.markAttachClassDef) : 0;
     } else {
-      this.isMark = this.codePoints.length > 0 && this.codePoints.every(unicode.isMark);
+      this.isMark = this.codePoints.length > 0 && this.codePoints.every(isMark);
       this.isBase = !this.isMark;
       this.isLigature = this.codePoints.length > 1;
       this.markAttachmentType = 0;

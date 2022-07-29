@@ -1,12 +1,12 @@
-import fontkit from '../src';
+import * as fontkit from 'fontkit';
 import assert from 'assert';
 
-describe('shaping', function() {
+describe('shaping', function () {
   let fontCache = {};
   let test = (description, font, text, output) => {
-    it(description, function() {
-      let f = fontCache[font] || (fontCache[font] = fontkit.openSync(__dirname + '/data/' + font));
-      let {glyphs, positions} = f.layout(text);
+    it(description, function () {
+      let f = fontCache[font] || (fontCache[font] = fontkit.openSync(new URL('data/' + font, import.meta.url)));
+      let { glyphs, positions } = f.layout(text);
 
       // Generate a compact string representation of the results
       // in the same format as Harfbuzz, for comparison.
@@ -27,21 +27,21 @@ describe('shaping', function() {
     })
   };
 
-  describe('general shaping tests', function() {
-    let font = fontkit.openSync(__dirname + '/data/amiri/amiri-regular.ttf');
+  describe('general shaping tests', function () {
+    let font = fontkit.openSync(new URL('data/amiri/amiri-regular.ttf', import.meta.url));
 
-    it('should use correct script and language when features are not specified', function() {
-      let {glyphs} = font.layout('۴', 'arab', 'URD');
-      return assert.deepEqual(glyphs.map(g => g.id), [ 1940 ]);
+    it('should use correct script and language when features are not specified', function () {
+      let { glyphs } = font.layout('۴', 'arab', 'URD');
+      return assert.deepEqual(glyphs.map(g => g.id), [1940]);
     });
 
-    it('should use specified left-to-right direction', function() {
-      let {glyphs} = font.layout('١٢٣', 'arab', 'ARA ', 'ltr');
-      return assert.deepEqual(glyphs.map(g => g.id), [ 446, 447, 448 ]);
+    it('should use specified left-to-right direction', function () {
+      let { glyphs } = font.layout('١٢٣', 'arab', 'ARA ', 'ltr');
+      return assert.deepEqual(glyphs.map(g => g.id), [446, 447, 448]);
     });
   });
 
-  describe('arabic shaper', function() {
+  describe('arabic shaper', function () {
     test('should shape Arabic text', 'NotoSans/NotoKufiArabic-Regular.ttf', 'سُلَّاِّمتی',
       '223+1974|143+801|39+1176|270@180,80+0|268@1060,50+0|51+1452|101@900,-600+0|15+1798');
 
@@ -66,57 +66,57 @@ describe('shaping', function() {
 
     test('should attach marks to the first base of a multiple substitution', 'amiri/amiri-regular.ttf', 'الله', '1824+721|461@-267,-162+0|430@-277,-440+0|6714+0|1823+473|1822+319|388+446');
 
-    test('should adjust attached marks if base is adjusted', 'amiri/amiri-regular.ttf', 'لَكنت' ,'2054+1810|2133+500|2300+1206|427@-96,0+0|5988+380|2322+360');
+    test('should adjust attached marks if base is adjusted', 'amiri/amiri-regular.ttf', 'لَكنت', '2054+1810|2133+500|2300+1206|427@-96,0+0|5988+380|2322+360');
   });
 
-  describe('hangul shaper', function() {
-    let font = fontkit.openSync(__dirname + '/data/NotoSansCJK/NotoSansCJKkr-Regular.otf');
+  describe('hangul shaper', function () {
+    let font = fontkit.openSync(new URL('data/NotoSansCJK/NotoSansCJKkr-Regular.otf', import.meta.url));
 
-    it('should use composed versions if supported by the font', function() {
-      let {glyphs} = font.layout('\uD734\uAC00\u0020\uAC00\u002D\u002D\u0020\u0028\uC624\u002D\u002D\u0029');
-      return assert.deepEqual(glyphs.map(g => g.id), [ 58626, 47566, 62995, 47566, 14, 14, 1, 9, 54258, 14, 14, 10 ]);
+    it('should use composed versions if supported by the font', function () {
+      let { glyphs } = font.layout('\uD734\uAC00\u0020\uAC00\u002D\u002D\u0020\u0028\uC624\u002D\u002D\u0029');
+      return assert.deepEqual(glyphs.map(g => g.id), [58626, 47566, 62995, 47566, 14, 14, 1, 9, 54258, 14, 14, 10]);
     });
 
-    it('should compose decomposed syllables if supported', function() {
-      let {glyphs} = font.layout('\u1112\u1172\u1100\u1161\u0020\u1100\u1161\u002D\u002D\u0020\u0028\u110B\u1169\u002D\u002D\u0029');
-      return assert.deepEqual(glyphs.map(g => g.id), [ 58626, 47566, 62995, 47566, 14, 14, 1, 9, 54258, 14, 14, 10 ]);
+    it('should compose decomposed syllables if supported', function () {
+      let { glyphs } = font.layout('\u1112\u1172\u1100\u1161\u0020\u1100\u1161\u002D\u002D\u0020\u0028\u110B\u1169\u002D\u002D\u0029');
+      return assert.deepEqual(glyphs.map(g => g.id), [58626, 47566, 62995, 47566, 14, 14, 1, 9, 54258, 14, 14, 10]);
     });
 
-    it('should use OT features for non-combining <L,V,T>', function() {
-      let {glyphs} = font.layout('\ua960\ud7b0\ud7cb');
-      return assert.deepEqual(glyphs.map(g => g.id), [ 64003, 64479, 64822 ]);
+    it('should use OT features for non-combining <L,V,T>', function () {
+      let { glyphs } = font.layout('\ua960\ud7b0\ud7cb');
+      return assert.deepEqual(glyphs.map(g => g.id), [64003, 64479, 64822]);
     });
 
-    it('should decompose <LV,T> to <L,V,T> if <LVT> is not supported', function() {
+    it('should decompose <LV,T> to <L,V,T> if <LVT> is not supported', function () {
       // <L,V> combine at first, but the T is non-combining, so this
       // tests that the <LV> gets decomposed again in this case.
-      let {glyphs} = font.layout('\u1100\u1161\ud7cb');
-      return assert.deepEqual(glyphs.map(g => g.id), [ 63657, 64408, 64685 ]);
+      let { glyphs } = font.layout('\u1100\u1161\ud7cb');
+      return assert.deepEqual(glyphs.map(g => g.id), [63657, 64408, 64685]);
     });
 
-    it('should reorder tone marks to the beginning of <L,V> syllables', function() {
-      let {glyphs} = font.layout('\ua960\ud7b0\u302f');
-      return assert.deepEqual(glyphs.map(g => g.id), [ 1436, 64378, 64574 ]);
+    it('should reorder tone marks to the beginning of <L,V> syllables', function () {
+      let { glyphs } = font.layout('\ua960\ud7b0\u302f');
+      return assert.deepEqual(glyphs.map(g => g.id), [1436, 64378, 64574]);
     });
 
-    it('should reorder tone marks to the beginning of <L,V,T> syllables', function() {
-      let {glyphs} = font.layout('\ua960\ud7b0\ud7cb\u302f');
-      return assert.deepEqual(glyphs.map(g => g.id), [ 1436, 64003, 64479, 64822 ]);
+    it('should reorder tone marks to the beginning of <L,V,T> syllables', function () {
+      let { glyphs } = font.layout('\ua960\ud7b0\ud7cb\u302f');
+      return assert.deepEqual(glyphs.map(g => g.id), [1436, 64003, 64479, 64822]);
     });
 
-    it('should reorder tone marks to the beginning of <LV> syllables', function() {
-      let {glyphs} = font.layout('\uac00\u302f');
-      return assert.deepEqual(glyphs.map(g => g.id), [ 1436, 47566 ]);
+    it('should reorder tone marks to the beginning of <LV> syllables', function () {
+      let { glyphs } = font.layout('\uac00\u302f');
+      return assert.deepEqual(glyphs.map(g => g.id), [1436, 47566]);
     });
 
-    it('should reorder tone marks to the beginning of <LVT> syllables', function() {
-      let {glyphs} = font.layout('\uac01\u302f');
-      return assert.deepEqual(glyphs.map(g => g.id), [ 1436, 47567 ]);
+    it('should reorder tone marks to the beginning of <LVT> syllables', function () {
+      let { glyphs } = font.layout('\uac01\u302f');
+      return assert.deepEqual(glyphs.map(g => g.id), [1436, 47567]);
     });
 
-    it('should insert a dotted circle for invalid tone marks', function() {
-      let {glyphs} = font.layout('\u1100\u302f\u1161');
-      return assert.deepEqual(glyphs.map(g => g.id), [ 365, 1436, 1256, 462 ]);
+    it('should insert a dotted circle for invalid tone marks', function () {
+      let { glyphs } = font.layout('\u1100\u302f\u1161');
+      return assert.deepEqual(glyphs.map(g => g.id), [365, 1436, 1256, 462]);
     });
   });
 
@@ -542,8 +542,8 @@ describe('shaping', function() {
     });
   });
 
-  describe('universal shaping engine', function() {
-    describe('shapes balinese text', function() {
+  describe('universal shaping engine', function () {
+    describe('shapes balinese text', function () {
       // Tests from https://github.com/unicode-org/text-rendering-tests
       test('SHBALI-1/1', 'NotoSans/NotoSansBalinese-Regular.ttf', "ᬓᬸᬀ", '23+2275|60@5,0+0|4@-95,0+0');
       test('SHBALI-1/2', 'NotoSans/NotoSansBalinese-Regular.ttf', "ᬕ᭄ᬖᬂ", '25+2237|132+0|6@-307,0+0');

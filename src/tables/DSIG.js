@@ -1,4 +1,4 @@
-import r from 'restructure';
+import * as r from 'restructure';
 
 let Signature = new r.Struct({
   format: r.uint32,

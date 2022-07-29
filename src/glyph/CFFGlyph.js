@@ -5,6 +5,8 @@ import Path from './Path';
  * Represents an OpenType PostScript glyph, in the Compact Font Format.
  */
 export default class CFFGlyph extends Glyph {
+  type = 'CFF';
+
   _getName() {
     if (this._font.CFF2) {
       return super._getName();
@@ -24,10 +26,8 @@ export default class CFFGlyph extends Glyph {
   }
 
   _getPath() {
-    let { stream } = this._font;
-    let { pos } = stream;
-
     let cff = this._font.CFF2 || this._font['CFF '];
+    let { stream } = cff;
     let str = cff.topDict.CharStrings[this.id];
     let end = str.offset + str.length;
     stream.pos = str.offset;
@@ -81,10 +81,15 @@ export default class CFFGlyph extends Glyph {
       open = true;
     }
 
-    let parse = function() {
+    let parse = function () {
       while (stream.pos < end) {
         let op = stream.readUInt8();
         if (op < 32) {
+          let index, subr, phase;
+          let c1x, c1y, c2x, c2y, c3x, c3y;
+          let c4x, c4y, c5x, c5y, c6x, c6y;
+          let pts;
+
           switch (op) {
             case 1:  // hstem
             case 3:  // vstem
@@ -112,7 +117,7 @@ export default class CFFGlyph extends Glyph {
 
             case 6: // hlineto
             case 7: // vlineto
-              let phase = op === 6;
+              phase = op === 6;
               while (stack.length >= 1) {
                 if (phase) {
                   x += stack.shift();
@@ -127,10 +132,10 @@ export default class CFFGlyph extends Glyph {
 
             case 8: // rrcurveto
               while (stack.length > 0) {
-                var c1x = x + stack.shift();
-                var c1y = y + stack.shift();
-                var c2x = c1x + stack.shift();
-                var c2y = c1y + stack.shift();
+                c1x = x + stack.shift();
+                c1y = y + stack.shift();
+                c2x = c1x + stack.shift();
+                c2y = c1y + stack.shift();
                 x = c2x + stack.shift();
                 y = c2y + stack.shift();
                 path.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
@@ -138,12 +143,12 @@ export default class CFFGlyph extends Glyph {
               break;
 
             case 10: // callsubr
-              let index = stack.pop() + subrsBias;
-              let subr = subrs[index];
+              index = stack.pop() + subrsBias;
+              subr = subrs[index];
               if (subr) {
                 usedSubrs[index] = true;
-                var p = stream.pos;
-                var e = end;
+                let p = stream.pos;
+                let e = end;
                 stream.pos = subr.offset;
                 end = subr.offset + subr.length;
                 parse();
@@ -240,10 +245,10 @@ export default class CFFGlyph extends Glyph {
 
             case 24: // rcurveline
               while (stack.length >= 8) {
-                var c1x = x + stack.shift();
-                var c1y = y + stack.shift();
-                var c2x = c1x + stack.shift();
-                var c2y = c1y + stack.shift();
+                c1x = x + stack.shift();
+                c1y = y + stack.shift();
+                c2x = c1x + stack.shift();
+                c2y = c1y + stack.shift();
                 x = c2x + stack.shift();
                 y = c2y + stack.shift();
                 path.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
@@ -261,10 +266,10 @@ export default class CFFGlyph extends Glyph {
                 path.lineTo(x, y);
               }
 
-              var c1x = x + stack.shift();
-              var c1y = y + stack.shift();
-              var c2x = c1x + stack.shift();
-              var c2y = c1y + stack.shift();
+              c1x = x + stack.shift();
+              c1y = y + stack.shift();
+              c2x = c1x + stack.shift();
+              c2y = c1y + stack.shift();
               x = c2x + stack.shift();
               y = c2y + stack.shift();
               path.bezierCurveTo(c1x, c1y, c2x, c2y, x, y);
@@ -311,8 +316,8 @@ export default class CFFGlyph extends Glyph {
               subr = gsubrs[index];
               if (subr) {
                 usedGsubrs[index] = true;
-                var p = stream.pos;
-                var e = end;
+                let p = stream.pos;
+                let e = end;
                 stream.pos = subr.offset;
                 end = subr.offset + subr.length;
                 parse();
@@ -492,14 +497,14 @@ export default class CFFGlyph extends Glyph {
                   c1y = y;
                   c2x = c1x + stack.shift();
                   c2y = c1y + stack.shift();
-                  let c3x = c2x + stack.shift();
-                  let c3y = c2y;
-                  let c4x = c3x + stack.shift();
-                  let c4y = c3y;
-                  let c5x = c4x + stack.shift();
-                  let c5y = c4y;
-                  let c6x = c5x + stack.shift();
-                  let c6y = c5y;
+                  c3x = c2x + stack.shift();
+                  c3y = c2y;
+                  c4x = c3x + stack.shift();
+                  c4y = c3y;
+                  c5x = c4x + stack.shift();
+                  c5y = c4y;
+                  c6x = c5x + stack.shift();
+                  c6y = c5y;
                   x = c6x;
                   y = c6y;
 
@@ -508,7 +513,7 @@ export default class CFFGlyph extends Glyph {
                   break;
 
                 case 35: // flex
-                  let pts = [];
+                  pts = [];
 
                   for (let i = 0; i <= 5; i++) {
                     x += stack.shift();

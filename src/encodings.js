@@ -10,10 +10,63 @@ export function getEncoding(platformID, encodingID, languageID = 0) {
   return ENCODINGS[platformID][encodingID];
 }
 
+const SINGLE_BYTE_ENCODINGS = new Set(['x-mac-roman', 'x-mac-cyrillic', 'iso-8859-6', 'iso-8859-8']);
+const MAC_ENCODINGS = {
+  'x-mac-croatian': 'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®Š™´¨≠ŽØ∞±≤≥∆µ∂∑∏š∫ªºΩžø¿¡¬√ƒ≈Ć«Č… ÀÃÕŒœĐ—“”‘’÷◊©⁄€‹›Æ»–·‚„‰ÂćÁčÈÍÎÏÌÓÔđÒÚÛÙıˆ˜¯πË˚¸Êæˇ',
+  'x-mac-gaelic': 'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ÆØḂ±≤≥ḃĊċḊḋḞḟĠġṀæøṁṖṗɼƒſṠ«»… ÀÃÕŒœ–—“”‘’ṡẛÿŸṪ€‹›Ŷŷṫ·Ỳỳ⁊ÂÊÁËÈÍÎÏÌÓÔ♣ÒÚÛÙıÝýŴŵẄẅẀẁẂẃ',
+  'x-mac-greek': 'Ä¹²É³ÖÜ΅àâä΄¨çéèêë£™îï•½‰ôö¦€ùûü†ΓΔΘΛΞΠß®©ΣΪ§≠°·Α±≤≥¥ΒΕΖΗΙΚΜΦΫΨΩάΝ¬ΟΡ≈Τ«»… ΥΧΆΈœ–―“”‘’÷ΉΊΌΎέήίόΏύαβψδεφγηιξκλμνοπώρστθωςχυζϊϋΐΰ\u00AD',
+  'x-mac-icelandic': 'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûüÝ°¢£§•¶ß®©™´¨≠ÆØ∞±≤≥¥µ∂∑∏π∫ªºΩæø¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸ⁄€ÐðÞþý·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙıˆ˜¯˘˙˚¸˝˛ˇ',
+  'x-mac-inuit': 'ᐃᐄᐅᐆᐊᐋᐱᐲᐳᐴᐸᐹᑉᑎᑏᑐᑑᑕᑖᑦᑭᑮᑯᑰᑲᑳᒃᒋᒌᒍᒎᒐᒑ°ᒡᒥᒦ•¶ᒧ®©™ᒨᒪᒫᒻᓂᓃᓄᓅᓇᓈᓐᓯᓰᓱᓲᓴᓵᔅᓕᓖᓗᓘᓚᓛᓪᔨᔩᔪᔫᔭ… ᔮᔾᕕᕖᕗ–—“”‘’ᕘᕙᕚᕝᕆᕇᕈᕉᕋᕌᕐᕿᖀᖁᖂᖃᖄᖅᖏᖐᖑᖒᖓᖔᖕᙱᙲᙳᙴᙵᙶᖖᖠᖡᖢᖣᖤᖥᖦᕼŁł',
+  'x-mac-ce': 'ÄĀāÉĄÖÜáąČäčĆćéŹźĎíďĒēĖóėôöõúĚěü†°Ę£§•¶ß®©™ę¨≠ģĮįĪ≤≥īĶ∂∑łĻļĽľĹĺŅņŃ¬√ńŇ∆«»… ňŐÕőŌ–—“”‘’÷◊ōŔŕŘ‹›řŖŗŠ‚„šŚśÁŤťÍŽžŪÓÔūŮÚůŰűŲųÝýķŻŁżĢˇ',
+  'x-mac-romanian': 'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ĂȘ∞±≤≥¥µ∂∑∏π∫ªºΩăș¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸ⁄€‹›Țț‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙıˆ˜¯˘˙˚¸˝˛ˇ',
+  'x-mac-turkish': 'ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûü†°¢£§•¶ß®©™´¨≠ÆØ∞±≤≥¥µ∂∑∏π∫ªºΩæø¿¡¬√ƒ≈∆«»… ÀÃÕŒœ–—“”‘’÷◊ÿŸĞğİıŞş‡·‚„‰ÂÊÁËÈÍÎÏÌÓÔÒÚÛÙˆ˜¯˘˙˚¸˝˛ˇ'
+};
+
+const encodingCache = new Map();
+
+export function getEncodingMapping(encoding) {
+  let cached = encodingCache.get(encoding);
+  if (cached) {
+    return cached;
+  }
+
+  // These encodings aren't supported by TextDecoder.
+  let mapping = MAC_ENCODINGS[encoding];
+  if (mapping) {
+    let res = new Map();
+    for (let i = 0; i < mapping.length; i++) {
+      res.set(mapping.charCodeAt(i), 0x80 + i);
+    }
+
+    encodingCache.set(encoding, res);
+    return res;
+  }
+
+  // Only single byte encodings can be mapped 1:1.
+  if (SINGLE_BYTE_ENCODINGS.has(encoding)) {
+    // TextEncoder only supports utf8, whereas TextDecoder supports legacy encodings.
+    // Use this to create a mapping of code points.
+    let decoder = new TextDecoder(encoding);
+    let mapping = new Uint8Array(0x80);
+    for (let i = 0; i < 0x80; i++) {
+      mapping[i] = 0x80 + i;
+    }
+
+    let res = new Map();
+    let s = decoder.decode(mapping);
+    for (let i = 0; i < 0x80; i++) {
+      res.set(s.charCodeAt(i), 0x80 + i);
+    }
+
+    encodingCache.set(encoding, res);
+    return res;
+  }
+}
+
 // Map of platform ids to encoding ids.
 export const ENCODINGS = [
   // unicode
-  ['utf16be', 'utf16be', 'utf16be', 'utf16be', 'utf16be', 'utf16be'],
+  ['utf-16be', 'utf-16be', 'utf-16be', 'utf-16be', 'utf-16be', 'utf-16be', 'utf-16be'],
   
   // macintosh
   // Mappings available at http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/
@@ -34,38 +87,38 @@ export const ENCODINGS = [
   // 14	Tamil	                31	Sindhi
   // 15	Telugu	              32	(Uninterpreted)
   // 16	Kannada
-  ['macroman', 'shift-jis', 'big5', 'euc-kr', 'iso-8859-6', 'iso-8859-8',
-   'macgreek', 'maccyrillic', 'symbol', 'Devanagari', 'Gurmukhi', 'Gujarati',
+  ['x-mac-roman', 'shift-jis', 'big5', 'euc-kr', 'iso-8859-6', 'iso-8859-8',
+   'x-mac-greek', 'x-mac-cyrillic', 'x-mac-symbol', 'x-mac-devanagari', 'x-mac-gurmukhi', 'x-mac-gujarati',
    'Oriya', 'Bengali', 'Tamil', 'Telugu', 'Kannada', 'Malayalam', 'Sinhalese',
-   'Burmese', 'Khmer', 'macthai', 'Laotian', 'Georgian', 'Armenian', 'gb-2312-80', 
-   'Tibetan', 'Mongolian', 'Geez', 'maccenteuro', 'Vietnamese', 'Sindhi'],
+   'Burmese', 'Khmer', 'iso-8859-11', 'Laotian', 'Georgian', 'Armenian', 'gbk', 
+   'Tibetan', 'Mongolian', 'Geez', 'x-mac-ce', 'Vietnamese', 'Sindhi'],
   
   // ISO (deprecated)
-  ['ascii'],
+  ['ascii', null, 'iso-8859-1'],
   
   // windows
   // Docs here: http://msdn.microsoft.com/en-us/library/system.text.encoding(v=vs.110).aspx
-  ['symbol', 'utf16be', 'shift-jis', 'gb18030', 'big5', 'wansung', 'johab', null, null, null, 'utf16be']
+  ['symbol', 'utf-16be', 'shift-jis', 'gb18030', 'big5', 'euc-kr', 'johab', null, null, null, 'utf-16be']
 ];
 
 // Overrides for Mac scripts by language id.
 // See http://unicode.org/Public/MAPPINGS/VENDORS/APPLE/Readme.txt
 export const MAC_LANGUAGE_ENCODINGS = {
-  15: 'maciceland',
-  17: 'macturkish',
-  18: 'maccroatian',
-  24: 'maccenteuro',
-  25: 'maccenteuro',
-  26: 'maccenteuro',
-  27: 'maccenteuro',
-  28: 'maccenteuro',
-  30: 'maciceland',
-  37: 'macromania',
-  38: 'maccenteuro',
-  39: 'maccenteuro',
-  40: 'maccenteuro',
-  143: 'macinuit', // Unsupported by iconv-lite
-  146: 'macgaelic' // Unsupported by iconv-lite
+  15: 'x-mac-icelandic',
+  17: 'x-mac-turkish',
+  18: 'x-mac-croatian',
+  24: 'x-mac-ce',
+  25: 'x-mac-ce',
+  26: 'x-mac-ce',
+  27: 'x-mac-ce',
+  28: 'x-mac-ce',
+  30: 'x-mac-icelandic',
+  37: 'x-mac-romanian',
+  38: 'x-mac-ce',
+  39: 'x-mac-ce',
+  40: 'x-mac-ce',
+  143: 'x-mac-inuit',
+  146: 'x-mac-gaelic'
 };
 
 // Map of platform ids to BCP-47 language codes.

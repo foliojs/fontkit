@@ -4,7 +4,7 @@ Fontkit is an advanced font engine for Node and the browser, used by [PDFKit](ht
 
 ## Features
 
-* Suports TrueType (.ttf), OpenType (.otf), WOFF, WOFF2, TrueType Collection (.ttc), and Datafork TrueType (.dfont) font files
+* Supports TrueType (.ttf), OpenType (.otf), WOFF, WOFF2, TrueType Collection (.ttc), and Datafork TrueType (.dfont) font files
 * Supports mapping characters to glyphs, including support for ligatures and other advanced substitutions (see below)
 * Supports reading glyph metrics and laying out glyphs, including support for kerning and other advanced layout features (see below)
 * Advanced OpenType features including glyph substitution (GSUB) and positioning (GPOS)
@@ -40,15 +40,14 @@ run.glyphs.forEach(function(glyph) {
   subset.includeGlyph(glyph);
 });
 
-subset.encodeStream()
-      .pipe(fs.createWriteStream('subset.ttf'));
+let buffer = subset.encode();
 ```
 
 ## API
 
-### `fontkit.open(filename, postscriptName = null, callback(err, font))`
+### `fontkit.open(filename, postscriptName = null)`
 
-Opens a font file asynchronously, and calls the callback with a font object. For collection fonts (such as TrueType collection files), you can pass a `postscriptName` to get that font out of the collection instead of a collection object.
+Opens a font file asynchronously, and returns a `Promise` with a font object. For collection fonts (such as TrueType collection files), you can pass a `postscriptName` to get that font out of the collection instead of a collection object.
 
 ### `fontkit.openSync(filename, postscriptName = null)`
 
@@ -120,14 +119,14 @@ Fontkit includes several methods for accessing glyph metrics and performing layo
 
 Returns the advance width (described above) for a single glyph id.
 
-#### `font.layout(string, features = [])`
+#### `font.layout(string, features = [] | {})`
 
 This method returns a `GlyphRun` object, which includes an array of `Glyph`s and `GlyphPosition`s for the given string.
 `Glyph` objects are described below. `GlyphPosition` objects include 4 properties: `xAdvance`, `yAdvance`, `xOffset`,
 and `yOffset`.
 
-The `features` parameter is an array of [OpenType feature tags](https://www.microsoft.com/typography/otspec/featuretags.htm) to be applied
-in addition to the default set. If this is an AAT font, the OpenType feature tags are mapped to AAT features.
+The `features` parameter is either an array of [OpenType feature tags](https://www.microsoft.com/typography/otspec/featuretags.htm) to be applied
+in addition to the default set, or an object mapping OpenType features to a boolean enabling or disabling each. If this is an AAT font, the OpenType feature tags are mapped to AAT features.
 
 ### Variation fonts
 
@@ -183,6 +182,7 @@ You do not create glyph objects directly. They are created by various methods on
 ### Properties
 
 * `id` - the glyph id in the font
+* `name` - the glyph name in the font
 * `codePoints` - an array of unicode code points that are represented by this glyph. There can be multiple code points in the case of ligatures and other glyphs that represent multiple visual characters.
 * `path` - a vector Path object representing the glyph
 * `bbox` - the glyph’s bounding box, i.e. the rectangle that encloses the glyph outline as tightly as possible.
@@ -257,9 +257,9 @@ You create a Subset object by calling `font.createSubset()`, described above. Th
 
 Includes the given glyph object or glyph ID in the subset.
 
-### `subset.encodeStream()`
+### `subset.encode()`
 
-Returns a [stream](https://nodejs.org/api/stream.html) containing the encoded font file that can be piped to a destination, such as a file.
+Returns a `Uint8Array` containing the encoded font file.
 
 ## License
 

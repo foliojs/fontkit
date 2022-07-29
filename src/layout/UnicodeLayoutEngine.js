@@ -1,4 +1,4 @@
-import unicode from 'unicode-properties';
+import {getCombiningClass} from 'unicode-properties';
 
 /**
  * This class is used when GPOS does not define 'mark' or 'mkmk' features
@@ -136,7 +136,7 @@ export default class UnicodeLayoutEngine {
   }
 
   getCombiningClass(codePoint) {
-    let combiningClass = unicode.getCombiningClass(codePoint);
+    let combiningClass = getCombiningClass(codePoint);
 
     // Thai / Lao need some per-character work
     if ((codePoint & ~0xff) === 0x0e00) {

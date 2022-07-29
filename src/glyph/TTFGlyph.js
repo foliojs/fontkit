@@ -1,7 +1,7 @@
 import Glyph from './Glyph';
 import Path from './Path';
 import BBox from './BBox';
-import r from 'restructure';
+import * as r from 'restructure';
 
 // The header for both simple and composite glyphs
 let GlyfHeader = new r.Struct({
@@ -64,6 +64,8 @@ class Component {
  * Represents a TrueType glyph.
  */
 export default class TTFGlyph extends Glyph {
+  type = 'TTF';
+
   // Parses just the glyph header and returns the bounding box
   _getCBox(internal) {
     // We need to decode the glyph if variation processing is requested,

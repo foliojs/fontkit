@@ -1,4 +1,6 @@
-import r from 'restructure';
+import * as r from 'restructure';
+
+const resolved = Promise.resolve();
 
 export default class Subset {
   constructor(font) {
@@ -21,16 +23,5 @@ export default class Subset {
     }
 
     return this.mapping[glyph];
-  }
-
-  encodeStream() {
-    let s = new r.EncodeStream();
-
-    process.nextTick(() => {
-      this.encode(s);
-      return s.end();
-    });
-
-    return s;
   }
 }
