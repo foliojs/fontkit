@@ -2,7 +2,10 @@ import {isDigit} from 'unicode-properties';
 
 const VARIATION_FEATURES = ['rvrn'];
 const COMMON_FEATURES = ['ccmp', 'locl', 'rlig', 'mark', 'mkmk'];
-const FRACTIONAL_FEATURES = ['frac', 'numr', 'dnom'];
+// For substitution-based fractions, as often encountered in mono-spaced fonts:
+const FRACTIONAL_FEATURES_GLOBAL = ['frac'];
+// For contextual-based fractions, as often encountered in proportional fonts: 
+const FRACTIONAL_FEATURES_LOCAL = ['frac', 'numr', 'dnom'];
 const HORIZONTAL_FEATURES = ['calt', 'clig', 'liga', 'rclt', 'curs', 'kern'];
 const VERTICAL_FEATURES = ['vert'];
 const DIRECTIONAL_FEATURES = {
@@ -27,8 +30,12 @@ export default class DefaultShaper {
 
   static planPreprocessing(plan) {
     plan.add({
-      global: [...VARIATION_FEATURES, ...DIRECTIONAL_FEATURES[plan.direction]],
-      local: FRACTIONAL_FEATURES
+      global: [
+        ...VARIATION_FEATURES,
+        ...DIRECTIONAL_FEATURES[plan.direction],
+        ...FRACTIONAL_FEATURES_GLOBAL
+      ],
+      local: FRACTIONAL_FEATURES_LOCAL
     });
   }
 
