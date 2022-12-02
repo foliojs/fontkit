@@ -75,14 +75,15 @@ NameTable.process = function(stream) {
       language = record.platformID + '-' + record.languageID;
     }
 
-    // if the nameID is >= 256, it is a font feature record (AAT)
-    let key = record.nameID >= 256 ? 'fontFeatures' : (NAMES[record.nameID] || record.nameID);
+    // if the nameID is >= 256 or 2 or 17, it is a font feature record (AAT).
+    const isFontFeatureRecord = record.nameID >= 256 || record.nameID == 2 || record.nameID == 17
+    let key = isFontFeatureRecord ? 'fontFeatures' : (NAMES[record.nameID] || record.nameID);
     if (records[key] == null) {
       records[key] = {};
     }
 
     let obj = records[key];
-    if (record.nameID >= 256) {
+    if (isFontFeatureRecord) {
       obj = obj[record.nameID] || (obj[record.nameID] = {});
     }
 
