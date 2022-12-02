@@ -69,10 +69,17 @@ let MapDataEntry = new r.Struct({
   innerIndex: t => t.entry & ((1 << ((t.parent.entryFormat & 0x000F) + 1)) - 1)
 });
 
-export let DeltaSetIndexMap = new r.Struct({
-  entryFormat: r.uint16,
-  mapCount: r.uint16,
-  mapData: new r.Array(MapDataEntry, 'mapCount')
+export let DeltaSetIndexMap = new r.VersionedStruct(r.uint8, {
+  0: {
+    entryFormat: r.uint8,
+    mapCount: r.uint16,
+    mapData: new r.Array(MapDataEntry, 'mapCount')
+  },
+  1: {
+    entryFormat: r.uint8,
+    mapCount: r.uint32,
+    mapData: new r.Array(MapDataEntry, 'mapCount')
+  }
 });
 
 
