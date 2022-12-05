@@ -13,7 +13,7 @@ class COLRLayer {
  * Each glyph in this format contain a list of colored layers, each
  * of which  is another vector glyph.
  */
-export default class COLRGlyph extends Glyph {
+export class COLRGlyph extends Glyph {
   type = 'COLR';
 
   _getBBox() {
@@ -86,5 +86,29 @@ export default class COLRGlyph extends Glyph {
     }
 
     return;
+  }
+}
+
+
+export class COLRv1Glyph extends COLRGlyph {
+  type = 'COLRv1';
+
+  _getBBox() {
+    // If we have a clip list item, use that
+    let colr = this._font.COLR;
+    if (colr.clipList) {
+      for (var clip of colr.clipList.clips) {
+        if (clip.startGlyphId <= this.id && this.id <= clip.endGlyphId) {
+          let box = clip.clipBox;
+          return new BBox(
+            box.xMin,
+            box.yMin,
+            box.xMax,
+            box.yMax
+          )
+        }
+      }
+    }
+    return super._getBBox()
   }
 }
