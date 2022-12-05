@@ -106,7 +106,7 @@ export let CompositionMode = {
 
 // The Paint table is format-switching rather than version-switching, but
 // we use the VersionedStruct functionality to achieve what we want.
-var Paint = new r.VersionedStruct(r.uint16, {
+var Paint = new r.VersionedStruct(r.uint8, {
   header: {},
   // PaintColrLayers
   1: {
@@ -349,6 +349,7 @@ var ClipBox = new r.VersionedStruct(r.uint8, {
     xMax: r.int16,
     yMax: r.int16,
   },
+  1: {},
   2: {
     varIndexBase: r.uint32
   }
@@ -357,7 +358,7 @@ var ClipBox = new r.VersionedStruct(r.uint8, {
 var Clip = new r.Struct({
   startGlyphId: r.uint16,
   endGlyphId: r.uint16,
-  clipBox: new r.Pointer(r.uint24, ClipBox)
+  clipBox: new r.Pointer(r.uint24, ClipBox, { type: 'parent' })
 });
 
 var ClipList = new r.Struct({
@@ -373,8 +374,8 @@ var ClipList = new r.Struct({
 
 let BaseGlyphPaintRecord = new r.Struct({
   gid: r.uint16,                        // Glyph ID of the base glyph.
-  paint: new r.Pointer(r.uint32, Paint) // Offset to a Paint table.
-});
+  paint: new r.Pointer(r.uint32, Paint, { type: 'parent' }) // Offset to a Paint table.
+ });
 
 
 let BaseGlyphList = new r.Struct({
