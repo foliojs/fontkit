@@ -9,19 +9,14 @@ let UFWORD = r.uint16;
 // COLRv0
 
 let LayerRecord = new r.Struct({
-  gid: r.uint16,          // Glyph ID of layer glyph (must be in z-order from bottom to top).
-  paletteIndex: r.uint16  // Index value to use in the appropriate palette. This value must
-});                       // be less than numPaletteEntries in the CPAL table, except for
-                          // the special case noted below. Each palette entry is 16 bits.
-                          // A palette index of 0xFFFF is a special case indicating that
-                          // the text foreground color should be used.
+  gid: r.uint16,             // Glyph ID of layer glyph (must be in z-order from bottom to top).
+  paletteIndex: r.uint16     // Index value to use in the appropriate palette.
+});
 
 let BaseGlyphRecord = new r.Struct({
-  gid: r.uint16,             // Glyph ID of reference glyph. This glyph is for reference only
-                             // and is not rendered for color.
+  gid: r.uint16,             // Glyph ID of reference glyph. This glyph is for reference only and is not rendered for color.
   firstLayerIndex: r.uint16, // Index (from beginning of the Layer Records) to the layer record.
-                             // There will be numLayers consecutive entries for this base glyph.
-  numLayers: r.uint16
+  numLayers: r.uint16        // There will be numLayers consecutive entries for this base glyph.
 });
 
 // COLRv1
@@ -35,7 +30,7 @@ let Affine2x3 = new r.Struct({
   yy: Fixed,                  // y-component of transformed y-basis vector.
   dx: Fixed,                  // Translation in x direction.
   dy: Fixed                   // Translation in y direction.
-})
+});
 
 let VarAffine2x3 = new r.Struct({
   xx: Fixed,                  // x-component of transformed x-basis vector.
@@ -45,7 +40,7 @@ let VarAffine2x3 = new r.Struct({
   dx: Fixed,                  // Translation in x direction.
   dy: Fixed,                  // Translation in y direction.
   varIndexBase: r.uint32      // Base index into DeltaSetIndexMap.
-})
+});
 
 // Color lines for gradients
 let ColorStop = new r.Struct({
@@ -65,12 +60,12 @@ let ColorLine = new r.Struct({
   extend: r.uint8,            // An Extend enum value
   numStops: r.uint16,         // Number of ColorStop records.
   colorStops: new r.Array(ColorStop, 'numStops')
-})
+});
 let VarColorLine = new r.Struct({
   extend: r.uint8,            // An Extend enum value
   numStops: r.uint16,         // Number of ColorStop records.
   colorStops: new r.Array(VarColorStop, 'numStops')
-})
+});
 
 // Porter-Duff Composition modes, used in PaintComposite
 export let CompositionMode = {
@@ -102,7 +97,7 @@ export let CompositionMode = {
   HSL_SATURATION: 25,
   HSL_COLOR: 26,
   HSL_LUMINOSITY: 27
-}
+};
 
 // The Paint table is format-switching rather than version-switching, but
 // we use the VersionedStruct functionality to achieve what we want.
@@ -187,7 +182,7 @@ Paint.versions = {
   },
   // PaintGlyph
   10: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     glyphID: r.uint16                          // Glyph ID for the source outline.
   },
   // PaintColrGlyph
@@ -206,41 +201,41 @@ Paint.versions = {
   },
   // PaintTranslate
   14: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     dx: FWORD,                                 // Translation in x direction.
     dy: FWORD                                  // Translation in y direction.
   },
   // PaintVarTranslate
   15: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     dx: FWORD,                                 // Translation in x direction.
     dy: FWORD,                                 // Translation in y direction.
     varIndexBase: r.uint32                     // Base index into DeltaSetIndexMap.
   },
   // PaintScale
   16: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     scaleX: F2DOT14,                           // Scale factor in x direction.
     scaleY: F2DOT14                            // Scale factor in y direction.
   },
   // PaintVarScale
   17: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     scaleX: F2DOT14,                           // Scale factor in x direction.
     scaleY: F2DOT14,                           // Scale factor in y direction.
     varIndexBase: r.uint32                     // Base index into DeltaSetIndexMap.
   },
   // PaintScaleAroundCenter
   18: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     scaleX: F2DOT14,                           // Scale factor in x direction.
     scaleY: F2DOT14,                           // Scale factor in y direction.
     centerX: FWORD,                            // x coordinate for the center of scaling.
-    centerY: FWORD                            // y coordinate for the center of scaling.
+    centerY: FWORD                             // y coordinate for the center of scaling.
   },
   // PaintVarScaleAroundCenter
   19: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     dx: FWORD,                                 // Scale factor in x direction.
     scaleY: F2DOT14,                           // Scale factor in y direction.
     centerX: FWORD,                            // x coordinate for the center of scaling.
@@ -249,25 +244,25 @@ Paint.versions = {
   },
   // PaintScaleUniform
   20: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     scale: F2DOT14                            // Scale factor in x and y directions.
   },
   // PaintVarScaleUniform
   21: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     scale: F2DOT14,                            // Scale factor in x and y directions.
     varIndexBase: r.uint32                     // Base index into DeltaSetIndexMap.
   },
   // PaintScaleUniformAroundCenter
   22: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     scale: F2DOT14,                            // Scale factor in x and y directions.
     centerX: FWORD,                            // x coordinate for the center of scaling.
     centerY: FWORD                             // y coordinate for the center of scaling.
   },
   // PaintVarScaleUniformAroundCenter
   23: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     scale: F2DOT14,                            // Scale factor in x and y directions.
     centerX: FWORD,                            // x coordinate for the center of scaling.
     centerY: FWORD,                            // y coordinate for the center of scaling.
@@ -275,25 +270,25 @@ Paint.versions = {
   },
   // PaintRotate
   24: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     angle: F2DOT14                             // Rotation angle, 180° in counter-clockwise degrees per 1.0 of value
   },
   // PaintVarRotate
   25: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     angle: F2DOT14,                            // Rotation angle, 180° in counter-clockwise degrees per 1.0 of value
     varIndexBase: r.uint32                     // Base index into DeltaSetIndexMap.
   },
   // PaintRotateAroundCenter
   26: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     angle: F2DOT14,                            // Rotation angle, 180° in counter-clockwise degrees per 1.0 of value
     centerX: FWORD,                            // x coordinate for the center of scaling.
     centerY: FWORD                             // y coordinate for the center of scaling.
   },
   // PaintVarRotateAroundCenter
   27: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     angle: F2DOT14,                            // Rotation angle, 180° in counter-clockwise degrees per 1.0 of value
     centerX: FWORD,                            // x coordinate for the center of scaling.
     centerY: FWORD,                            // y coordinate for the center of scaling.
@@ -301,30 +296,30 @@ Paint.versions = {
   },
   // PaintSkew
   28: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     xSkewAngle: F2DOT14,                       // Angle of skew in the direction of the x-axis, 180° in counter-clockwise degrees per 1.0 of value.
-    ySkewAngle: F2DOT14                        // Angle of skew in the direction of the 5-axis, 180° in counter-clockwise degrees per 1.0 of value.
+    ySkewAngle: F2DOT14                        // Angle of skew in the direction of the y-axis, 180° in counter-clockwise degrees per 1.0 of value.
   },
   // PaintVarSkew
   29: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     xSkewAngle: F2DOT14,                       // Angle of skew in the direction of the x-axis, 180° in counter-clockwise degrees per 1.0 of value. 
-    ySkewAngle: F2DOT14,                       // Angle of skew in the direction of the 5-axis, 180° in counter-clockwise degrees per 1.0 of value.
+    ySkewAngle: F2DOT14,                       // Angle of skew in the direction of the y-axis, 180° in counter-clockwise degrees per 1.0 of value.
     varIndexBase: r.uint32                     // Base index into DeltaSetIndexMap.
   },
   // PaintSkewAroundCenter
   30: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     xSkewAngle: F2DOT14,                       // Angle of skew in the direction of the x-axis, 180° in counter-clockwise degrees per 1.0 of value.
-    ySkewAngle: F2DOT14,                       // Angle of skew in the direction of the 5-axis, 180° in counter-clockwise degrees per 1.0 of value.
+    ySkewAngle: F2DOT14,                       // Angle of skew in the direction of the y-axis, 180° in counter-clockwise degrees per 1.0 of value.
     centerX: FWORD,                            // x coordinate for the center of scaling.
     centerY: FWORD                             // y coordinate for the center of scaling.
   },
   // PaintVarSkewAroundCenter
   31: {
-    paint: new r.Pointer(r.uint24, Paint),         // Paint table.
+    paint: new r.Pointer(r.uint24, Paint),     // Paint table.
     xSkewAngle: F2DOT14,                       // Angle of skew in the direction of the x-axis, 180° in counter-clockwise degrees per 1.0 of value. 
-    ySkewAngle: F2DOT14,                       // Angle of skew in the direction of the 5-axis, 180° in counter-clockwise degrees per 1.0 of value.
+    ySkewAngle: F2DOT14,                       // Angle of skew in the direction of the y-axis, 180° in counter-clockwise degrees per 1.0 of value.
     centerX: FWORD,                            // x coordinate for the center of scaling.
     centerY: FWORD,                            // y coordinate for the center of scaling.
     varIndexBase: r.uint32                     // Base index into DeltaSetIndexMap.
@@ -366,7 +361,7 @@ var Clip = new r.Struct({
 var ClipList = new r.Struct({
   format: r.uint8,
   numClips: r.uint32,
-  clips: new r.Array(Clip, "numClips")
+  clips: new r.Array(Clip, 'numClips')
 });
 
 // "The BaseGlyphList table is, conceptually, similar to the baseGlyphRecords
@@ -377,7 +372,7 @@ var ClipList = new r.Struct({
 let BaseGlyphPaintRecord = new r.Struct({
   gid: r.uint16,                        // Glyph ID of the base glyph.
   paint: new r.Pointer(r.uint32, Paint, { type: 'parent' }) // Offset to a Paint table.
- });
+});
 
 
 let BaseGlyphList = new r.Struct({
