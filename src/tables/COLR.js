@@ -133,7 +133,7 @@ Paint.versions = {
   },
   // PaintVarLinearGradient
   5: {
-    colorLine: new r.Pointer(r.uint24, ColorLine), // Offset to ColorLine table.
+    colorLine: new r.Pointer(r.uint24, VarColorLine), // Offset to ColorLine table.
     x0: FWORD,                                 // Start point x coordinate.
     y0: FWORD,                                 // Start point y coordinate.
     x1: FWORD,                                 // End point x coordinate.
@@ -154,7 +154,7 @@ Paint.versions = {
   },
   // PaintVarRadialGradient
   7: {
-    colorLine: new r.Pointer(r.uint24, ColorLine), // Offset to ColorLine table.
+    colorLine: new r.Pointer(r.uint24, VarColorLine), // Offset to ColorLine table.
     x0: FWORD,                                 // Start circle center x coordinate.
     y0: FWORD,                                 // Start circle center y coordinate.
     radius0: UFWORD,                           // Start circle radius.
@@ -173,7 +173,7 @@ Paint.versions = {
   },
   // PaintVarSweepGradient
   9: {
-    colorLine: new r.Pointer(r.uint24, ColorLine), // Offset to ColorLine table.
+    colorLine: new r.Pointer(r.uint24, VarColorLine), // Offset to ColorLine table.
     centerX: FWORD,                            // Center x coordinate.
     centerY: FWORD,                            // Center y coordinate.
     startAngle: F2DOT14,                       // Start of the angular range of the gradient, 180° in counter-clockwise degrees per 1.0 of value.
