@@ -9,6 +9,7 @@ import TTFGlyph from './glyph/TTFGlyph';
 import CFFGlyph from './glyph/CFFGlyph';
 import SBIXGlyph from './glyph/SBIXGlyph';
 import { COLRGlyph, COLRv1Glyph } from './glyph/COLRGlyph';
+import { PAINT_OPERATIONS } from './glyph/PaintOperation';
 import GlyphVariationProcessor from './glyph/GlyphVariationProcessor';
 import TTFSubset from './subset/TTFSubset';
 import CFFSubset from './subset/CFFSubset';
@@ -397,6 +398,20 @@ export default class TTFFont {
     return this._glyphs[glyph] || null;
   }
 
+  _getColrGlyph(glyph, characters = []) {
+    if (this.COLR.version == 1 && this.COLR.baseGlyphList) {
+      for (let baseGlyph of this.COLR.baseGlyphList.baseGlyphPaintRecords) {
+        if (baseGlyph.gid == glyph) {
+          let colorGlyph = new COLRv1Glyph(glyph, characters, this)
+          colorGlyph.paint = (new PAINT_OPERATIONS[baseGlyph.paint.version])(baseGlyph.paint, this);
+          return colorGlyph
+        }
+      }
+    }
+    // Either v0 format, no BaseGlyphList, or not found -> treat as COLRv0
+    return new COLRGlyph(glyph, characters, this);
+  }
+
   /**
    * Returns a glyph object for the given glyph id.
    * You can pass the array of code points this glyph represents for
@@ -412,12 +427,8 @@ export default class TTFFont {
         this._glyphs[glyph] = new SBIXGlyph(glyph, characters, this);
 
       } else if ((this.directory.tables.COLR) && (this.directory.tables.CPAL)) {
-        if (this.COLR.version == 0) {
-          this._glyphs[glyph] = new COLRGlyph(glyph, characters, this);
-        } else {
-          this._glyphs[glyph] = new COLRv1Glyph(glyph, characters, this);
-        }
-
+        // Each glyph may be either COLRv0 (layers) or COLRv1 (paint tree)
+        this._glyphs[glyph] = this._getColrGlyph(glyph, characters);
       } else {
         this._getBaseGlyph(glyph, characters);
       }

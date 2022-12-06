@@ -89,7 +89,11 @@ export class COLRGlyph extends Glyph {
   }
 }
 
-
+/**
+ * Represents a color (e.g. emoji) glyph in Microsoft/Google's COLRv1
+ * format. Each glyph in this format contains a directed acyclic graph
+ * of Paint structures.
+ */
 export class COLRv1Glyph extends COLRGlyph {
   type = 'COLRv1';
 
@@ -105,10 +109,13 @@ export class COLRv1Glyph extends COLRGlyph {
             box.yMin,
             box.xMax,
             box.yMax
-          )
+          );
         }
       }
     }
-    return super._getBBox()
+    return super._getBBox();
+  }
+  render(ctx, size) {
+    this.paint.render(ctx, size);
   }
 }
