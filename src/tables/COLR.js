@@ -106,7 +106,9 @@ export let CompositionMode = {
 
 // The Paint table is format-switching rather than version-switching, but
 // we use the VersionedStruct functionality to achieve what we want.
-var Paint = new r.VersionedStruct(r.uint8, {
+var Paint = new r.VersionedStruct(r.uint8, {});
+// Declare first, then fill the version, to allow for self-use.
+Paint.versions = {
   header: {},
   // PaintColrLayers
   1: {
@@ -333,7 +335,7 @@ var Paint = new r.VersionedStruct(r.uint8, {
     compositeMode: r.uint8,                    // A CompositeMode enumeration value.
     backdropPaint: new r.Pointer(r.uint24, Paint), // Backdrop paint table.
   },
-});
+};
 
 var LayerList = new r.Struct({
   numLayers: r.uint32,
