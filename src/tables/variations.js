@@ -18,9 +18,15 @@ let VariationRegionList = new r.Struct({
   variationRegions: new r.Array(new r.Array(RegionAxisCoordinates, 'axisCount'), 'regionCount')
 });
 
-let DeltaSet = new r.Struct({
-  shortDeltas: new r.Array(r.int16, t => t.parent.shortDeltaCount),
-  regionDeltas: new r.Array(r.int8, t => t.parent.regionIndexCount - t.parent.shortDeltaCount),
+let shortDeltaSet = new r.Struct({
+  shortDeltas: new r.Array(r.int16, t => t.parent.shortDeltaCount & 0x7FFF),
+  regionDeltas: new r.Array(r.int8, t => t.parent.regionIndexCount - (t.parent.shortDeltaCount  & 0x7FFF)),
+  deltas: t => t.shortDeltas.concat(t.regionDeltas)
+});
+
+let longDeltaSet = new r.Struct({
+  shortDeltas: new r.Array(r.int32, t => t.parent.shortDeltaCount & 0x7FFF),
+  regionDeltas: new r.Array(r.int16, t => t.parent.regionIndexCount - (t.parent.shortDeltaCount & 0x7FFF)),
   deltas: t => t.shortDeltas.concat(t.regionDeltas)
 });
 
@@ -28,9 +34,16 @@ let ItemVariationData = new r.Struct({
   itemCount: r.uint16,
   shortDeltaCount: r.uint16,
   regionIndexCount: r.uint16,
-  regionIndexes: new r.Array(r.uint16, 'regionIndexCount'),
-  deltaSets: new r.Array(DeltaSet, 'itemCount')
+  regionIndexes: new r.Array(r.uint16, 'regionIndexCount')
 });
+
+ItemVariationData.process = function(stream) {
+  var decoder = new r.Array(
+    (this.shortDeltaCount & 0x8000) ? longDeltaSet : shortDeltaSet,
+    this.itemCount
+  );
+  this.deltaSets = decoder.decode(stream, this);
+};
 
 export let ItemVariationStore = new r.Struct({
   format: r.uint16,
