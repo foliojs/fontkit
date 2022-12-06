@@ -115,12 +115,12 @@ var Paint = new r.VersionedStruct(r.uint8, {
   },
   // PaintSolid
   2: {
-    paletteIndex: r.uint8,    // Index for a CPAL palette entry.
+    paletteIndex: r.uint16,   // Index for a CPAL palette entry.
     alpha: F2DOT14            // Alpha value.
   },
   // PaintVarSolid
   3: {
-    paletteIndex: r.uint8,    // Index for a CPAL palette entry.
+    paletteIndex: r.uint16,   // Index for a CPAL palette entry.
     alpha: F2DOT14,           // Alpha value.
     varIndexBase: r.uint32    // Base index into DeltaSetIndexMap.
   },
