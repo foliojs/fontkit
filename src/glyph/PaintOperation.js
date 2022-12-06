@@ -159,7 +159,7 @@ class PaintGlyphOperation extends PaintOperation {
     // Set fill, transform, etc.
     ctx.beginPath();
     this.next.render(ctx, size);
-    const glyph = this.font._getBaseGlyph(this.paint.glyphID);
+    const glyph = this.font._getBaseGlyphUncached(this.paint.glyphID);
     glyph.render(ctx, size);
     ctx.restore();
   }

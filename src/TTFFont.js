@@ -387,15 +387,18 @@ export default class TTFFont {
 
   _getBaseGlyph(glyph, characters = []) {
     if (!this._glyphs[glyph]) {
-      if (this.directory.tables.glyf) {
-        this._glyphs[glyph] = new TTFGlyph(glyph, characters, this);
-
-      } else if (this.directory.tables['CFF '] || this.directory.tables.CFF2) {
-        this._glyphs[glyph] = new CFFGlyph(glyph, characters, this);
-      }
+      this._glyphs[glyph] = this._getBaseGlyphUncached(glyph, characters)
     }
 
     return this._glyphs[glyph] || null;
+  }
+
+  _getBaseGlyphUncached(glyph, characters = []) {
+    if (this.directory.tables.glyf) {
+      return new TTFGlyph(glyph, characters, this);
+    } else if (this.directory.tables['CFF '] || this.directory.tables.CFF2) {
+      return new CFFGlyph(glyph, characters, this);
+    }
   }
 
   _getColrGlyph(glyph, characters = []) {

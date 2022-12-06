@@ -87,6 +87,11 @@ export class COLRGlyph extends Glyph {
 
     return;
   }
+  _getContours() {
+    var base = this._font._getBaseGlyphUncached(this.id);
+    return base._getContours();
+  }
+
 }
 
 /**
