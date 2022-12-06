@@ -58,12 +58,10 @@ class PaintColrLayersOperation extends PaintOperation {
   }
 
   render(ctx, size) {
-    let count = 0;
     for (let layer of this.layers) {
       ctx.save();
       layer.render(ctx, size);
       ctx.restore();
-      count = count + 1;
     }
   }
 }
