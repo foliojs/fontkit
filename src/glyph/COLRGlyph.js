@@ -121,6 +121,11 @@ export class COLRv1Glyph extends COLRGlyph {
     return super._getBBox();
   }
   render(ctx, size) {
-    this.paint.render(ctx, size);
+    let paint = this.paint;
+    if (this._font.variationCoords) {
+      paint = paint.instantiate(this._font._variationProcessor);
+    }
+
+    paint.render(ctx, size);
   }
 }

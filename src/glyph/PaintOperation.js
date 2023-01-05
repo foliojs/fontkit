@@ -1,4 +1,5 @@
 import * as fontkit from '../base';
+import GlyphVariationProcessor from './GlyphVariationProcessor';
 
 class PaintOperation {
   constructor(paint, font) {
@@ -6,30 +7,47 @@ class PaintOperation {
     this.font = font;
     this.cpal = font.CPAL;
     this.layerList = font.COLR.layerList?.paint;
+    this.ivs = font.COLR.itemVariationStore;
     this.next = null;
     this.layers = [];
   }
   render(_ctx, _size) {}
-  instantiate(location) {
-    this._instantiate_others(location);
-    return this;
-  }
-  _instantiate_others(location) {
+  instantiate(processor) {
+    var instantiated = new (this.constructor)(this.paint, this.font);
+    instantiated = instantiated._instantiate_this(processor);
     if (this.next) {
-      this.next = this.next.instantiate(location);
+      instantiated.next = this.next.instantiate(processor);
     }
-    for (let layer in this.layers) {
-      layer.instantiate(location);
+    instantiated.layers = [];
+    for (let layer of this.layers) {
+      instantiated.layers.push(layer.instantiate(processor));
     }
+    return instantiated;
+  }
+  _instantiate_this(_processor) {
+    return this;
   }
 }
 
 class VariablePaintOperation extends PaintOperation {
-  instantiate(location) { // Do something clever here
-    this._instantiate_others(location);
+  _instantiate_this(_processor) { // Do something clever here
     return this;
   }
-
+  getDeltas(instantiator, count) {
+    let res = [];
+    let ix = this.paint.varIndexBase;
+    while (res.length < count) {
+      let {outerIndex, innerIndex} = this.font.COLR.varIndexMap.mapData[ix];
+      let delta = 0;
+      try {
+        delta = instantiator.getDelta(this.ivs, outerIndex, innerIndex);
+      } catch {
+      }
+      res.push(delta);
+      ix += 1;
+    }
+    return res;
+  }
 }
 
 export var PAINT_OPERATIONS = [null];
@@ -88,10 +106,16 @@ PAINT_OPERATIONS.push(PaintVarSolidOperation);
 // PaintLinearGradient
 class PaintGradientOperation extends PaintOperation {
   _renderColorLine(gradient, colorline) {
+    if (!colorline || !colorline.colorStops) {
+      return
+    }
     for (let stop of colorline.colorStops) {
       var color = this.cpal.colorRecords[stop.paletteIndex];
       var alpha = color.alpha / 255 * stop.alpha;
-      gradient.addColorStop(stop.stopOffset, `rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha})`);
+      // If the stop offset > 1 or < 0 we should interpolate,
+      // not clamp. But we're going to clamp for now.
+      let stopOffset = stop.stopOffset > 1.0 ? 1.0 : (stop.stopOffset < 0.0 ? 0.0 : stop.stopOffset)
+      gradient.addColorStop(stopOffset, `rgba(${color.red}, ${color.green}, ${color.blue}, ${alpha})`);
     }
   }
 }
@@ -127,13 +151,14 @@ class PaintVarRadialGradientOperation extends VariablePaintOperation {}
 PAINT_OPERATIONS.push(PaintVarRadialGradientOperation);
 
 // PaintSweepGradient
-class PaintSweepGradientOperation extends PaintOperation {
+class PaintSweepGradientOperation extends PaintGradientOperation {
   render(ctx, _size) {
     const angle = this.paint.startAngle * Math.PI;
     let gradient = ctx.createConicGradient(
       angle, this.paint.centerX, this.paint.centerY
     );
     this._renderColorLine(gradient, this.colorLine);
+    // console.log(gradient);
     ctx.fillStyle = gradient;
   }
 
@@ -141,7 +166,9 @@ class PaintSweepGradientOperation extends PaintOperation {
 PAINT_OPERATIONS.push(PaintSweepGradientOperation);
 
 // PaintVarSweepGradient
-class PaintVarSweepGradientOperation extends VariablePaintOperation {}
+class PaintVarSweepGradientOperation extends VariablePaintOperation {
+
+}
 PAINT_OPERATIONS.push(PaintVarSweepGradientOperation);
 
 /*
@@ -207,6 +234,10 @@ class PaintVarTransformOperation extends VariablePaintOperation {
     super(paint, font);
     this.next = makePaintOperation(this.paint.paint, this.font);
   }
+  _instantiate_this(processor) {
+    return this;
+    // XXX
+  }
 }
 PAINT_OPERATIONS.push(PaintVarTransformOperation);
 
@@ -222,11 +253,25 @@ class PaintTranslateOperation extends PaintTransformOperation {
       dy: this.paint.dy,
     };
   }
+
 }
 PAINT_OPERATIONS.push(PaintTranslateOperation);
 
 // PaintVarTranslate
-class PaintVarTranslateOperation extends PaintVarTransformOperation {}
+class PaintVarTranslateOperation extends PaintVarTransformOperation {
+  _instantiate_this(processor) {
+    let [deltaX, deltaY] = this.getDeltas(processor, 2);
+    let rv = new PaintTranslateOperation(
+      {
+        version: 14,
+        paint: this.paint.paint,
+        dx: this.paint.dx + deltaX,
+        dy: this.paint.dy + deltaY,
+      }, this.font
+    );
+    return rv;
+  }
+}
 PAINT_OPERATIONS.push(PaintVarTranslateOperation);
 
 // PaintScale
@@ -241,23 +286,59 @@ class PaintScaleOperation extends PaintTransformOperation {
       dy: 0,
     };
   }
+  render(ctx, size) {
+    ctx.scale(this.paint.scaleX, this.paint.scaleY);
+    this.next.render(ctx, size);
+  }
 }
 PAINT_OPERATIONS.push(PaintScaleOperation);
 
 // PaintVarScale
-class PaintVarScaleOperation extends PaintVarTransformOperation {}
+class PaintVarScaleOperation extends PaintVarTransformOperation {
+  _instantiate_this(processor) {
+    let [scaleX, scaleY] = this.getDeltas(processor, 2);
+    let rv = new PaintScaleOperation(
+      {
+        version: 16,
+        paint: this.paint.paint,
+        scaleX: this.paint.scaleX + scaleX / (1<<14),
+        scaleY: this.paint.scaleY + scaleY / (1<<14),
+      }, this.font
+    );
+    // console.log(rv);
+    return rv;
+  }
+}
 PAINT_OPERATIONS.push(PaintVarScaleOperation);
 
 // PaintScaleAroundCenter
 class PaintScaleAroundCenterOperation extends PaintTransformOperation {
-  get affine() {
-    return; // XXX
+  render(ctx, size) {
+    ctx.translate(-this.paint.centerX, -this.paint.centerY);
+    ctx.scale(this.paint.scaleX, this.paint.scaleY);
+    ctx.translate(this.paint.centerX, this.paint.centerY);
+    this.next.render(ctx, size);
   }
 }
 PAINT_OPERATIONS.push(PaintScaleAroundCenterOperation);
 
 // PaintVarScaleAroundCenter
-class PaintVarScaleAroundCenterOperation extends PaintVarTransformOperation {}
+class PaintVarScaleAroundCenterOperation extends PaintVarTransformOperation {
+  _instantiate_this(processor) {
+    let [scaleX, scaleY, centerX, centerY] = this.getDeltas(processor, 4);
+    let rv = new PaintScaleAroundCenterOperation(
+      {
+        version: 18,
+        paint: this.paint.paint,
+        scaleX: this.paint.scaleX + scaleX / (1 << 14),
+        scaleY: this.paint.scaleY + scaleY / (1 << 14),
+        centerX: this.paint.centerX + centerX,
+        centerY: this.paint.centerY + centerY,
+      }, this.font
+    );
+    return rv;
+  }
+}
 PAINT_OPERATIONS.push(PaintVarScaleAroundCenterOperation);
 
 // PaintScale
@@ -272,54 +353,112 @@ class PaintScaleUniformOperation extends PaintTransformOperation {
       dy: 0,
     };
   }
+  render(ctx, size) {
+    ctx.scale(this.paint.scale, this.paint.scale);
+    this.next.render(ctx, size);
+  }
 }
 PAINT_OPERATIONS.push(PaintScaleUniformOperation);
 
 // PaintVarScale
-class PaintVarScaleUniformOperation extends PaintVarTransformOperation {}
+class PaintVarScaleUniformOperation extends PaintVarTransformOperation {
+  _instantiate_this(processor) {
+    let [deltaScale] = this.getDeltas(processor, 1);
+    let rv = new PaintScaleUniformOperation(
+      {
+        version: 20,
+        paint: this.paint.paint,
+        scale: this.paint.scale + deltaScale / (1<<14)
+      }, this.font
+    );
+    // console.log(rv);
+    return rv;
+  }
+}
 PAINT_OPERATIONS.push(PaintVarScaleUniformOperation);
 
 // PaintScaleUniformAroundCenter
 class PaintScaleUniformAroundCenterOperation extends PaintTransformOperation {
-  get affine() {
-    return; // XXX
+  render(ctx, size) {
+    // Something not right here...
+
+    // ctx.translate(this.paint.centerX, this.paint.centerY);
+    // ctx.scale(this.paint.scale, this.paint.scale);
+    // ctx.translate(-this.paint.centerX, -this.paint.centerY);
+    this.next.render(ctx, size);
   }
 }
 PAINT_OPERATIONS.push(PaintScaleUniformAroundCenterOperation);
 
 // PaintVarScaleUniformAroundCenter
-class PaintVarScaleUniformAroundCenterOperation extends PaintVarTransformOperation {}
+class PaintVarScaleUniformAroundCenterOperation extends PaintVarTransformOperation {
+  _instantiate_this(processor) {
+    let [deltaScale, centerX, centerY] = this.getDeltas(processor, 3);
+    let rv = new PaintScaleUniformAroundCenterOperation(
+      {
+        version: 22,
+        paint: this.paint.paint,
+        scale: this.paint.scale + deltaScale / (1<< 14),
+        centerX: this.paint.centerX + centerX,
+        centerY: this.paint.centerY + centerY,
+      }, this.font
+    );
+    // console.log(rv)
+    return rv;
+  }
+}
 PAINT_OPERATIONS.push(PaintVarScaleUniformAroundCenterOperation);
 
 // PaintRotate
 class PaintRotateOperation extends PaintTransformOperation {
-  get affine() {
-    return {
-      xx: this.paint.scale,
-      yx: 0,
-      xy: 0,
-      yy: this.paint.scale,
-      dx: 0,
-      dy: 0,
-    };
+  render(ctx, size) {
+    ctx.rotate(this.paint.angle * Math.PI);
+    this.next.render(ctx, size);
   }
 }
 PAINT_OPERATIONS.push(PaintRotateOperation);
 
 // PaintVarRotate
-class PaintVarRotateOperation extends PaintVarTransformOperation {}
-PAINT_OPERATIONS.push(PaintVarRotateOperation);
+class PaintVarRotateOperation extends PaintVarTransformOperation {
+  _instantiate_this(processor) {
+    let [delta] = this.getDeltas(processor, 1);
+    let rv = new PaintRotateOperation(
+      {
+        version: 24,
+        paint: this.paint.paint,
+        angle: this.paint.angle + delta / (1<< 14)
+      }, this.font
+    );
+    return rv;
+  }
+}PAINT_OPERATIONS.push(PaintVarRotateOperation);
 
 // PaintRotateAroundCenter
 class PaintRotateAroundCenterOperation extends PaintTransformOperation {
-  get affine() {
-    return; // XXX
-  }
-}
+  render(ctx, size) {
+    ctx.translate(-this.paint.centerX, -this.paint.centerY);
+    ctx.rotate(this.paint.angle * Math.PI);
+    ctx.translate(this.paint.centerX, this.paint.centerY);
+    this.next.render(ctx, size);
+  }}
 PAINT_OPERATIONS.push(PaintRotateAroundCenterOperation);
 
 // PaintVarRotateAroundCenter
-class PaintVarRotateAroundCenterOperation extends PaintVarTransformOperation {}
+class PaintVarRotateAroundCenterOperation extends PaintVarTransformOperation {
+    _instantiate_this(processor) {
+    let [deltaAngle, deltaX, deltaY] = this.getDeltas(processor, 3);
+    let rv = new PaintRotateAroundCenterOperation(
+      {
+        version: 26,
+        paint: this.paint.paint,
+        angle: this.paint.angle + deltaAngle / (1<< 14),
+        centerX: this.paint.centerX + deltaX,
+        centerY: this.paint.centerY + deltaY
+      }, this.font
+    );
+    return rv;
+  }
+}
 PAINT_OPERATIONS.push(PaintVarRotateAroundCenterOperation);
 
 // PaintRotate
@@ -348,12 +487,67 @@ PAINT_OPERATIONS.push(PaintVarSkewAroundCenterOperation);
 
 /* And finally... */
 // PaintComposite
+let CANVAS_COMPOSITING_MODES = [
+  'source-over',
+  'source-over',
+  'source-over',
+  'source-over',
+  'dest-over',
+  'source-in',
+  'dest-in',
+  'source-out',
+  'dest-out',
+  'source-atop',
+  'dest-atop',
+  'xor',
+  'lighter',
+  'screen',
+  'overlay',
+  'lighten',
+  'darken',
+  'color-dodge',
+  'color-burn',
+  'hard-light',
+  'soft-light',
+  'difference',
+  'exclusion',
+  'multiply',
+  'hue',
+  'saturation',
+  'color',
+  'luminosity'
+];
+
 class PaintComposite extends PaintOperation {
-  source() {
-    return makePaintOperation(this.paint.source, this.font);
+  constructor(paint, font) {
+    super(paint, font);
+    this.layers = [
+      makePaintOperation(this.paint.sourcePaint, this.font),
+      makePaintOperation(this.paint.backdropPaint, this.font)
+    ];
   }
-  backdrop() {
-    return makePaintOperation(this.paint.backdrop, this.font);
+
+  get source() {
+    return this.layers[0];
+  }
+  get backdrop() {
+    return this.layers[1];
+  }
+
+  render(ctx, size) {
+    // console.log(this.paint.compositeMode);
+    if (this.paint.compositeMode == 1 || this.paint.compositeMode > 2) {
+      ctx.save();
+      this.backdrop.render(ctx,size);
+      ctx.restore();
+    }
+    if (this.paint.compositeMode > 1) {
+      ctx.save();
+      ctx.globalCompositeOperation = CANVAS_COMPOSITING_MODES[this.paint.compositeMode];
+      this.source.render(ctx, size);
+
+      ctx.restore();
+    }
   }
 }
 
