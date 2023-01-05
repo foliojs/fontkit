@@ -236,7 +236,7 @@ Paint.versions = {
   // PaintVarScaleAroundCenter
   19: {
     paint: new r.Pointer(r.uint24, Paint),     // Paint table.
-    dx: FWORD,                                 // Scale factor in x direction.
+    scaleX: F2DOT14,                           // Scale factor in x direction.
     scaleY: F2DOT14,                           // Scale factor in y direction.
     centerX: FWORD,                            // x coordinate for the center of scaling.
     centerY: FWORD,                            // y coordinate for the center of scaling.
