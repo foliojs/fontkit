@@ -61,6 +61,7 @@ export default class Glyph {
 
   _getMetrics(cbox) {
     if (this._metrics) { return this._metrics; }
+    if (typeof cbox === 'undefined' || cbox === null) { ({ cbox } = this); }
 
     let {advance:advanceWidth, bearing:leftBearing} = this._getTableMetrics(this._font.hmtx);
 
@@ -76,7 +77,21 @@ export default class Glyph {
       advanceWidth += this._font._variationProcessor.getAdvanceAdjustment(this.id, this._font.HVAR);
     }
 
-    return this._metrics = { advanceWidth, advanceHeight, leftBearing, topBearing };
+    let width = cbox.width;
+    let height = cbox.height;
+    let rightBearing = advanceWidth - leftBearing - width;
+    let bottomBearing = advanceHeight - topBearing - height;
+
+    return this._metrics = {
+      width,
+      height,
+      advanceWidth,
+      advanceHeight,
+      leftBearing,
+      topBearing,
+      rightBearing,
+      bottomBearing
+    };
   }
 
   /**
@@ -127,6 +142,24 @@ export default class Glyph {
   }
 
   /**
+   * The glyph's width.
+   * @type {number}
+   */
+  @cache
+  get width() {
+    return this._getMetrics().width;
+  }
+
+  /**
+   * The glyph's height.
+   * @type {number}
+   */
+  @cache
+  get height() {
+    return this._getMetrics().height;
+  }
+
+  /**
    * The glyph's advance width.
    * @type {number}
    */
@@ -142,6 +175,43 @@ export default class Glyph {
   @cache
   get advanceHeight() {
     return this._getMetrics().advanceHeight;
+  }
+
+  /**
+   * The glyph's left side bearing.
+   * @type {number}
+   */
+  @cache
+  get leftBearing() {
+    return this._getMetrics().leftBearing;
+  }
+
+
+  /**
+   * The glyph's top side bearing.
+   * @type {number}
+   */
+  @cache
+  get topBearing() {
+    return this._getMetrics().topBearing;
+  }
+
+  /**
+   * The glyph's right side bearing.
+   * @type {number}
+   */
+  @cache
+  get rightBearing() {
+    return this._getMetrics().rightBearing;
+  }
+
+  /**
+   * The glyph's bottom side bearing.
+   * @type {number}
+   */
+  @cache
+  get bottomBearing() {
+    return this._getMetrics().bottomBearing;
   }
 
   get ligatureCaretPositions() {}

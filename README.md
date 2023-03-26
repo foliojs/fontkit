@@ -188,7 +188,14 @@ You do not create glyph objects directly. They are created by various methods on
 * `path` - a vector Path object representing the glyph
 * `bbox` - the glyph’s bounding box, i.e. the rectangle that encloses the glyph outline as tightly as possible.
 * `cbox` - the glyph’s control box. This is often the same as the bounding box, but is faster to compute. Because of the way bezier curves are defined, some of the control points can be outside of the bounding box. Where `bbox` takes this into account, `cbox` does not. Thus, `cbox` is less accurate, but faster to compute. See [here](http://www.freetype.org/freetype2/docs/glyphs/glyphs-6.html#section-2) for a more detailed description.
+* `width` - the glyph’s width.
+* `weight` - the glyph’s height.
 * `advanceWidth` - the glyph’s advance width.
+* `advanceHeight` - the glyph’s advance height.
+* `leftBearing` - the glyph’s left side bearing.
+* `topBearing` - the glyph’s top side bearing.
+* `rightBearing` - the glyph’s right side bearing.
+* `bottomBearing` - the glyph’s bottom side bearing.
 
 ### `glyph.render(ctx, size)`
 
