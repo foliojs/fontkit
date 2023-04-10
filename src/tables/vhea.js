@@ -1,8 +1,9 @@
 import * as r from 'restructure';
+import { version16Dot16 } from '../utils';
 
 // Vertical Header Table
 export default new r.Struct({
-  version:                r.uint16,  // Version number of the Vertical Header Table
+  version:                version16Dot16,
   ascent:                 r.int16,   // The vertical typographic ascender for this font
   descent:                r.int16,   // The vertical typographic descender for this font
   lineGap:                r.int16,   // The vertical typographic line gap for this font
