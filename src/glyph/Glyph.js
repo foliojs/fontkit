@@ -64,23 +64,12 @@ export default class Glyph {
 
     let {advance:advanceWidth, bearing:leftBearing} = this._getTableMetrics(this._font.hmtx);
 
-    // For vertical metrics, use vmtx if available, or fall back to global data from OS/2 or hhea
+    // For vertical metrics, use vmtx if available, or fall back to global data
     if (this._font.vmtx) {
       var {advance:advanceHeight, bearing:topBearing} = this._getTableMetrics(this._font.vmtx);
-
     } else {
-      let os2;
-      if (typeof cbox === 'undefined' || cbox === null) { ({ cbox } = this); }
-
-      if ((os2 = this._font['OS/2']) && os2.version > 0) {
-        var advanceHeight = Math.abs(os2.typoAscender - os2.typoDescender);
-        var topBearing = os2.typoAscender - cbox.maxY;
-
-      } else {
-        let { hhea } = this._font;
-        var advanceHeight = Math.abs(hhea.ascent - hhea.descent);
-        var topBearing = hhea.ascent - cbox.maxY;
-      }
+      var advanceHeight = Math.abs(this._font.ascent - this._font.descent);
+      var topBearing = this._font.ascent - cbox.maxY;
     }
 
     if (this._font._variationProcessor && this._font.HVAR) {

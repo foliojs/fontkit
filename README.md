@@ -83,6 +83,7 @@ The following properties describe the general metrics of the font. See [here](ht
 * `underlinePosition` - the offset from the normal underline position that should be used
 * `underlineThickness` - the weight of the underline that should be used
 * `italicAngle` - if this is an italic font, the angle the cursor should be drawn at to match the font design
+* `lineHeight` - is the vertical space between adjacent lines (their baselines) of text, also known as leading. See [here](https://en.wikipedia.org/wiki/Leading) for more details.
 * `capHeight` - the height of capital letters above the baseline. See [here](http://en.wikipedia.org/wiki/Cap_height) for more details.
 * `xHeight`- the height of lower case letters. See [here](http://en.wikipedia.org/wiki/X-height) for more details.
 * `bbox` - the font’s bounding box, i.e. the box that encloses all glyphs in the font
