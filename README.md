@@ -83,6 +83,7 @@ The following properties describe the general metrics of the font. See [here](ht
 * `underlinePosition` - the offset from the normal underline position that should be used
 * `underlineThickness` - the weight of the underline that should be used
 * `italicAngle` - if this is an italic font, the angle the cursor should be drawn at to match the font design
+* `lineHeight` - is the vertical space between adjacent lines (their baselines) of text, also known as leading. See [here](https://en.wikipedia.org/wiki/Leading) for more details.
 * `capHeight` - the height of capital letters above the baseline. See [here](http://en.wikipedia.org/wiki/Cap_height) for more details.
 * `xHeight`- the height of lower case letters. See [here](http://en.wikipedia.org/wiki/X-height) for more details.
 * `bbox` - the font’s bounding box, i.e. the box that encloses all glyphs in the font
@@ -187,7 +188,14 @@ You do not create glyph objects directly. They are created by various methods on
 * `path` - a vector Path object representing the glyph
 * `bbox` - the glyph’s bounding box, i.e. the rectangle that encloses the glyph outline as tightly as possible.
 * `cbox` - the glyph’s control box. This is often the same as the bounding box, but is faster to compute. Because of the way bezier curves are defined, some of the control points can be outside of the bounding box. Where `bbox` takes this into account, `cbox` does not. Thus, `cbox` is less accurate, but faster to compute. See [here](http://www.freetype.org/freetype2/docs/glyphs/glyphs-6.html#section-2) for a more detailed description.
+* `width` - the glyph’s width.
+* `height` - the glyph’s height.
 * `advanceWidth` - the glyph’s advance width.
+* `advanceHeight` - the glyph’s advance height.
+* `leftBearing` - the glyph’s left side bearing.
+* `topBearing` - the glyph’s top side bearing.
+* `rightBearing` - the glyph’s right side bearing.
+* `bottomBearing` - the glyph’s bottom side bearing.
 
 ### `glyph.render(ctx, size)`
 

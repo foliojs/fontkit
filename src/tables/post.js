@@ -1,7 +1,8 @@
 import * as r from 'restructure';
+import { version16Dot16 } from '../utils';
 
 // PostScript information
-export default new r.VersionedStruct(r.fixed32, {
+export default new r.VersionedStruct(version16Dot16, {
   header: { // these fields exist at the top of all versions
     italicAngle:        r.fixed32, // Italic angle in counter-clockwise degrees from the vertical.
     underlinePosition:  r.int16,   // Suggested distance of the top of the underline from the baseline
