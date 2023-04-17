@@ -7,6 +7,7 @@ export default class Subset {
     this.font = font;
     this.glyphs = [];
     this.mapping = {};
+    this.tables = [];
 
     // always include the missing glyph
     this.includeGlyph(0);
@@ -24,4 +25,11 @@ export default class Subset {
 
     return this.mapping[glyph];
   }
+
+  includeTable(table) {
+    if (typeof table === 'string' && table.length === 4) {
+      this.tables.push(table);
+    }
+  }
+
 }
