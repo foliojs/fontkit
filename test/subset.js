@@ -58,6 +58,19 @@ describe('font subsetting', function () {
       // must test also second glyph which has an odd loca index
       assert.equal(f.getGlyph(2).path.toSVG(), font.glyphsForString('b')[0].path.toSVG());
     });
+
+    it('should produce a subset including font table OS/2', function () {
+      let subset = font.createSubset();
+      for (let glyph of font.glyphsForString('hello')) {
+        subset.includeGlyph(glyph);
+      }
+      subset.includeTable('OS/2');
+
+      let buf = subset.encode();
+      let f = fontkit.create(buf);      
+      assert.equal(f.hasOwnProperty('OS/2'), true);
+    });
+
   });
 
   describe('CFF subsetting', function () {
