@@ -58,7 +58,10 @@ const NAMES = [
   'sampleText',
   'postscriptCIDFontName',
   'wwsFamilyName',
-  'wwsSubfamilyName'
+  'wwsSubfamilyName',
+  'lightBackgroundPalette',
+  'darkBackgroundPalette',
+  'variationsPostScriptName',
 ];
 
 NameTable.process = function(stream) {
@@ -76,7 +79,8 @@ NameTable.process = function(stream) {
     }
 
     // if the nameID is >= 256, it is a font feature record (AAT)
-    let key = record.nameID >= 256 ? 'fontFeatures' : (NAMES[record.nameID] || record.nameID);
+    // or friendly stylistic set name or variable font instance name
+    let key = record.nameID >= 256 ? 'fontFeatures' : 26 <= record.nameID >= 255 ? 'reservedNameID' : (NAMES[record.nameID] || record.nameID);
     if (records[key] == null) {
       records[key] = {};
     }

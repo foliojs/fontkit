@@ -12,8 +12,8 @@
     "layout"
   ],
   "scripts": {
-    "test": "run-s build mocha",
-    "mocha": "mocha",
+    "test": "run-s build mocha", 
+    "mocha": "mocha --reporter spec \"./test/**/*.js\"",
     "build": "parcel build",
     "prepublish": "run-s clean trie:** build",
     "trie:data": "node src/opentype/shapers/generate-data.js",
