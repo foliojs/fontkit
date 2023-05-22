@@ -121,11 +121,17 @@ export class COLRv1Glyph extends COLRGlyph {
     return super._getBBox();
   }
   render(ctx, size) {
+    // One scale only.
+    ctx.save();
+    let scale = 1 / this._font.unitsPerEm * size;
+    ctx.scale(scale, scale);
+
     let paint = this.paint;
     if (this._font.variationCoords) {
       paint = paint.instantiate(this._font._variationProcessor);
     }
 
     paint.render(ctx, size);
+    ctx.restore();
   }
 }
