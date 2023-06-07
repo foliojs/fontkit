@@ -183,8 +183,16 @@ class PaintGradientOperation extends PaintFillOperation {
 
 class PaintLinearGradientOperation extends PaintGradientOperation {
   render(ctx, size) {
-    let gradient = ctx.createLinearGradient(this.paint.x0, this.paint.y0, this.paint.x1, this.paint.y1);
-    // XXX This does not handle the x2,y2 (rotation point)
+    const d1x = this.paint.x1 - this.paint.x0;
+    const d1y = this.paint.y1 - this.paint.y0;
+    const d2x = this.paint.x2 - this.paint.x0;
+    const d2y = this.paint.y2 - this.paint.y0;
+    const dotProd = d1x*d2x + d1y*d2y;
+    const rotLengthSquared = d2x*d2x + d2y*d2y;
+    const magnitude = dotProd / rotLengthSquared;
+    let finalX = this.paint.x1 - magnitude * d2x;
+    let finalY = this.paint.y1 - magnitude * d2y;
+    let gradient = ctx.createLinearGradient(this.paint.x0, this.paint.y0, finalX, finalY);
     this._renderColorLine(gradient, this.paint.colorLine);
     ctx.fillStyle = gradient;
     this.floodFill(ctx, size);
