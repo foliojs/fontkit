@@ -264,11 +264,12 @@ PAINT_OPERATIONS.push(PaintVarRadialGradientOperation);
 class PaintSweepGradientOperation extends PaintGradientOperation {
   render(ctx, _size) {
     const angle = this.paint.startAngle * Math.PI;
+    // This is clearly wrong, but HTML Canvas doesn't support
+    // sweep gradients.
     let gradient = ctx.createConicGradient(
       angle, this.paint.centerX, this.paint.centerY
     );
     this._renderColorLine(gradient, this.colorLine);
-    // console.log(gradient);
     ctx.fillStyle = gradient;
   }
 
@@ -277,7 +278,21 @@ PAINT_OPERATIONS.push(PaintSweepGradientOperation);
 
 // PaintVarSweepGradient
 class PaintVarSweepGradientOperation extends VariablePaintOperation {
-
+  _instantiate(processor) {
+    let [deltaX0, deltaY0, deltaStart, deltaEnd] = this.getDeltas(processor, 4);
+    let rv = new PaintSweepGradientOperation(
+      {
+        version: 8,
+        paint: this.paint.paint,
+        centerX: this.paint.centerX + deltaX0,
+        centerY: this.paint.centerY + deltaY0,
+        startAngle: this.paint.startAngle + deltaStart / (1<< 14),
+        endAngle: this.paint.endAngle + deltaEnd / (1<< 14),
+        colorLine: this._instantiateColorLine(this.paint.colorLine, processor),
+      }, this.font
+    );
+    return rv;
+  }
 }
 PAINT_OPERATIONS.push(PaintVarSweepGradientOperation);
 
@@ -302,13 +317,6 @@ class PaintGlyphOperation extends PaintOperation {
     ctx.clip();
 
     this.next.render(ctx, size);
-    // // Use this as a clipping mask
-    // let path = glyph.path;
-    // path.commands.pop(); // Remove the closepath
-    // let fn = path.toFunction();
-    // fn(ctx);
-    // ctx.clip();
-    // // ctx.fill();
   }
 }
 PAINT_OPERATIONS.push(PaintGlyphOperation);
@@ -723,6 +731,9 @@ class PaintComposite extends PaintOperation {
     }
     if (this.paint.compositeMode > 1) {
       ctx.save();
+      // There is an issue here when composite paints are nested
+      // inside other composite paints, which I am not clever enough
+      // to solve.
       ctx.globalCompositeOperation = CANVAS_COMPOSITING_MODES[this.paint.compositeMode];
       this.source.render(ctx, size);
 
