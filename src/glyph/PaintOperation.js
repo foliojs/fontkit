@@ -239,7 +239,25 @@ class PaintRadialGradientOperation extends PaintGradientOperation {
 PAINT_OPERATIONS.push(PaintRadialGradientOperation);
 
 // PaintVarRadialGradient
-class PaintVarRadialGradientOperation extends VariablePaintOperation {}
+class PaintVarRadialGradientOperation extends VariablePaintOperation {
+  _instantiate(processor) {
+    let [deltaX0, deltaY0, deltaR0, deltaX1, deltaY1, deltaR1] = this.getDeltas(processor, 6);
+    let rv = new PaintRadialGradientOperation(
+      {
+        version: 6,
+        paint: this.paint.paint,
+        x0: this.paint.x0 + deltaX0,
+        y0: this.paint.y0 + deltaY0,
+        radius0: this.paint.radius0 + deltaR0,
+        x1: this.paint.x1 + deltaX1,
+        y1: this.paint.y1 + deltaY1,
+        radius1: this.paint.radius1 + deltaR1,
+        colorLine: this._instantiateColorLine(this.paint.colorLine, processor),
+      }, this.font
+    );
+    return rv;
+  }
+}
 PAINT_OPERATIONS.push(PaintVarRadialGradientOperation);
 
 // PaintSweepGradient
