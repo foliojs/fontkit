@@ -219,10 +219,10 @@ describe('glyphs', function () {
     });
   });
 
-  describe('COLR glyphs', function () {
+  describe('COLRv0 glyphs', function () {
     let font = fontkit.openSync(new URL('data/ss-emoji/ss-emoji-microsoft.ttf', import.meta.url));
 
-    it('should get an SBIXGlyph', function () {
+    it('should get an COLRGlyph', function () {
       let glyph = font.glyphsForString('😜')[0];
       return assert.equal(glyph.type, 'COLR');
     });
@@ -252,6 +252,38 @@ describe('glyphs', function () {
     it('should get the glyph name', function () {
       let glyph = font.glyphsForString('😜')[0];
       return assert.equal(glyph.name, 'stuckouttonguewinkingeye');
+    });
+  });
+
+
+  describe('COLRv1 glyphs', function () {
+    let font = fontkit.openSync(new URL('data/COLRv1/noto_handwriting-glyf_colr_1.ttf', import.meta.url));
+
+    it('should get an COLRv1Glyph', function () {
+      let glyph = font.glyphsForString('✍')[0];
+      return assert.equal(glyph.type, 'COLRv1');
+    });
+
+    it('should get layers', function () {
+      let glyph = font.glyphsForString('✍')[0];
+      return assert.deepEqual(glyph.layers, [
+        { glyph: font.getGlyph(247), color: { red: 252, green: 194, blue: 0, alpha: 255 } },
+        { glyph: font.getGlyph(248), color: { red: 159, green: 79, blue: 0, alpha: 255 } },
+        { glyph: font.getGlyph(249), color: { red: 229, green: 65, blue: 65, alpha: 255 } }
+      ]);
+    });
+
+    it('should get empty path', function () {
+      let glyph = font.glyphsForString('✍')[0];
+      return assert.equal(glyph.path.toSVG(), '');
+    });
+
+    it('should get bbox', function () {
+      let glyph = font.glyphsForString('✍')[0];
+      assert.deepEqual(glyph.bbox.minX, 64);
+      assert.deepEqual(glyph.bbox.minY, -224);
+      assert.deepEqual(glyph.bbox.maxX, 1216);
+      assert.deepEqual(glyph.bbox.maxY, 928);
     });
   });
 
