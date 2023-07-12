@@ -30,20 +30,52 @@ let longDeltaSet = new r.Struct({
   deltas: t => t.shortDeltas.concat(t.regionDeltas)
 });
 
+var DeltaSets = new r.Struct({})
+
+DeltaSets.decode = function(stream, parent) {
+  var decoder = new r.Array(
+    (parent.shortDeltaCount & 0x8000) ? longDeltaSet : shortDeltaSet,
+    parent.itemCount
+  );
+  return decoder.decode(stream, parent);
+};
+
+DeltaSets.encode = function(stream, array, parent) {
+  for (var deltaset of array) {
+    // Split deltas into short and long, if this hasn't been done already
+    let shortDeltaCount = parent.val.shortDeltaCount & 0x7FFF;
+    deltaset.shortDeltas = deltaset.deltas.slice(0, shortDeltaCount);
+    deltaset.regionDeltas = deltaset.deltas.slice(shortDeltaCount);
+    if (parent.val.shortDeltaCount & 0x8000) {
+      longDeltaSet.encode(stream, deltaset, parent)
+    } else {
+      shortDeltaSet.encode(stream, deltaset, parent)
+    }
+  }
+}
+
 let ItemVariationData = new r.Struct({
   itemCount: r.uint16,
   shortDeltaCount: r.uint16,
   regionIndexCount: r.uint16,
-  regionIndexes: new r.Array(r.uint16, 'regionIndexCount')
+  regionIndexes: new r.Array(r.uint16, 'regionIndexCount'),
+  deltaSets: DeltaSets
 });
 
-ItemVariationData.process = function(stream) {
-  var decoder = new r.Array(
-    (this.shortDeltaCount & 0x8000) ? longDeltaSet : shortDeltaSet,
-    this.itemCount
-  );
-  this.deltaSets = decoder.decode(stream, this);
-};
+ItemVariationData.size = function(array, ctx) {
+  let headersize = 6 + 2 * array.regionIndexCount;
+  let shortDeltaCount = array.shortDeltaCount;
+  let deltasize = 0;
+  for (var deltaset of array.deltaSets) {
+    var shortDeltas = deltaset.deltas.slice(0, shortDeltaCount & 0x7FFF);
+    var regionDeltas = deltaset.deltas.slice(shortDeltaCount & 0x7FFF);
+    deltasize += shortDeltas.length * 2 + regionDeltas.length;
+  }
+  if (shortDeltaCount & 0x8000) {
+    deltasize *= 2;
+  }
+  return headersize + deltasize;
+}
 
 export let ItemVariationStore = new r.Struct({
   format: r.uint16,
@@ -82,6 +114,21 @@ let MapDataEntry = new r.Struct({
   innerIndex: t => t.entry & ((1 << ((t.parent.entryFormat & 0x000F) + 1)) - 1)
 });
 
+MapDataEntry.encode = function (stream, val, parent) {
+  let fmt = (parent.val.entryFormat & 0x0030)
+  let innerBits = 1 + (fmt & 0x000F);
+  let innerMask = (1 << innerBits) - 1;
+  let outerShift = 16 - innerBits;
+  let entrySize = 1 + ((fmt & 0x0030) >> 4);
+  let packed = (((val.entry & 0xFFFF0000) >> outerShift) | (val.entry & innerMask))
+  switch(entrySize) {
+    case 1: return stream.writeUInt8(packed);
+    case 2: return stream.writeUInt16BE(packed);
+    case 3: return stream.writeUInt24BE(packed);
+    case 4: return stream.writeUInt32BE(packed);
+  }
+}
+
 export let DeltaSetIndexMap = new r.VersionedStruct(r.uint8, {
   0: {
     entryFormat: r.uint8,
@@ -95,6 +142,41 @@ export let DeltaSetIndexMap = new r.VersionedStruct(r.uint8, {
   }
 });
 
+DeltaSetIndexMap.preEncode = function (val, stream) {
+  // Compute correct version and entry format
+  let ored = 0;
+  for (var idx of val.mapData) {
+      ored |= idx.entry
+  }
+  let inner = ored & 0xFFFF
+  let innerBits = 0
+  while (inner) {
+      innerBits += 1
+      inner >>= 1
+  }
+  innerBits = Math.max(innerBits, 1)
+  console.assert(innerBits <= 16)
+
+  ored = (ored >> (16 - innerBits)) | (ored & ((1 << innerBits) - 1))
+  let entrySize = 1;
+  if (ored  <= 0x000000FF) {
+      entrySize = 1
+  } else if (ored <= 0x0000FFFF) {
+      entrySize = 2
+  } else if (ored <= 0x00FFFFFF) {
+      entrySize = 3
+  } else {
+      entrySize = 4
+  }
+
+  val.entryFormat = ((entrySize - 1) << 4) | (innerBits - 1)
+  val.mapCount = val.mapData.length
+  if (val.mapCount > 0xFFFF) {
+    val.version = 1
+  } else {
+    val.version = 0
+  }
+}
 
 /**********************
  * Feature Variations *
