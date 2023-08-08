@@ -449,8 +449,9 @@ export default class TTFFont {
     }
 
     for (let axis of this.fvar.axis) {
+      const name = axis.name && axis.name.en ? axis.name.en : axis.axisTag.trim();
       res[axis.axisTag.trim()] = {
-        name: axis.name.en,
+        name,
         min: axis.minValue,
         default: axis.defaultValue,
         max: axis.maxValue
