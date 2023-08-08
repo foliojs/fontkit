@@ -78,7 +78,7 @@ export default class TTFFont {
   }
 
   _decodeDirectory() {
-    return this.directory = Directory.decode(this.stream, {_startOffset: 0});
+    return this.directory = Directory.decode(this.stream, { _startOffset: 0 });
   }
 
   _decodeTable(table) {
@@ -101,12 +101,12 @@ export default class TTFFont {
     if (record) {
       // Attempt to retrieve the entry, depending on which translation is available:
       return (
-          record[lang]
-          || record[this.defaultLanguage]
-          || record[fontkit.defaultLanguage]
-          || record['en']
-          || record[Object.keys(record)[0]] // Seriously, ANY language would be fine
-          || null
+        record[lang]
+        || record[this.defaultLanguage]
+        || record[fontkit.defaultLanguage]
+        || record['en']
+        || record[Object.keys(record)[0]] // Seriously, ANY language would be fine
+        || null
       );
     }
 
@@ -482,7 +482,9 @@ export default class TTFFont {
         settings[axis.axisTag.trim()] = instance.coord[i];
       }
 
-      res[instance.name.en] = settings;
+      // use instance.postscriptNameID as fallback name for namedVariations when the name is not available
+      const name = instance.name && instance.name.en ? instance.name.en : `PS${instance.postscriptNameID}`;
+      res[name] = settings;
     }
 
     return res;
