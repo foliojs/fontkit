@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "test": "run-s build mocha",
-    "mocha": "mocha",
+    "mocha": "mocha -g \"seac\"",
     "build": "parcel build",
     "prepublish": "run-s clean trie:** build",
     "trie:data": "node src/opentype/shapers/generate-data.js",

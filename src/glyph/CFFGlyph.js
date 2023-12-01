@@ -1,5 +1,7 @@
 import Glyph from './Glyph';
 import Path from './Path';
+import { StandardEncoding } from '../cff/CFFEncodings';
+import CFFStandardStrings from '../cff/CFFStandardStrings';
 
 /**
  * Represents an OpenType PostScript glyph, in the Compact Font Format.
@@ -57,6 +59,9 @@ export default class CFFGlyph extends Glyph {
     let vsindex = privateDict.vsindex;
     let variationProcessor = this._font._variationProcessor;
 
+    let encodingVector;
+    const font = this._font;
+
     function checkWidth() {
       if (width == null) {
         width = stack.shift() + privateDict.nominalWidthX;
@@ -80,6 +85,14 @@ export default class CFFGlyph extends Glyph {
       path.moveTo(x, y);
       open = true;
     }
+    
+    function glyphForName(name) {
+      if (!encodingVector) {
+        encodingVector = cff.topDict.charset.glyphs.map(g => CFFStandardStrings[g]);
+      }
+      const glyphId = Math.max(0, encodingVector.indexOf(name) + 1); // .notdef is not included, hence + 1
+      return font.getGlyph(glyphId);
+    };
 
     let parse = function () {
       while (stream.pos < end) {
@@ -168,7 +181,23 @@ export default class CFFGlyph extends Glyph {
                 break;
               }
 
-              if (stack.length > 0) {
+              if(stack.length >= 4) {
+                // Type 2 Charstring Format Appendix C
+                // treat like Type 1 seac command (standard encoding accented character)
+                const acharName = StandardEncoding?.[stack.pop()];
+                const bcharName = StandardEncoding?.[stack.pop()];
+                const ady = stack.pop();
+                const adx = stack.pop();
+                // const asb = stack.pop(); // ignored for Type 2
+
+                const achar = glyphForName(acharName);
+                const bchar = glyphForName(bcharName);
+
+                const aPathShifted = achar.path.translate(adx, ady);
+                path.commands = [...bchar.path.commands, ...aPathShifted.commands];
+
+                open = false;
+              } else if (stack.length > 0) {
                 checkWidth();
               }
 

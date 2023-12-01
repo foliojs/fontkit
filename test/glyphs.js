@@ -138,6 +138,12 @@ describe('glyphs', function () {
       let glyph = font.getGlyph(5);
       return assert.equal(glyph.name, 'D');
     });
+
+    it('should handle seac-like endchar operators', function () {
+      let font2 = fontkit.openSync(new URL('data/unicode/TestCFFThree.otf', import.meta.url));
+      assert.equal(font2.getGlyph(3).path.toSVG(), 'M203 367C227 440 248 512 268 588L272 588C293 512 314 440 338 367L369 267L172 267ZM3 0L88 0L151 200L390 200L452 0L541 0L319 656L225 656ZM300 653L342 694L201 861L143 806Z');
+      assert.equal(font2.getGlyph(4).path.toSVG(), 'M323 -12C457 -12 558 60 558 271L558 656L478 656L478 269C478 111 410 61 323 61C237 61 170 111 170 269L170 656L87 656L87 271C87 60 189 -12 323 -12ZM220 727C248 727 269 749 269 777C269 805 248 827 220 827C191 827 170 805 170 777C170 749 191 727 220 727ZM412 727C441 727 462 749 462 777C462 805 441 827 412 827C384 827 363 805 363 777C363 749 384 727 412 727Z');
+    })
   });
 
   describe('CFF glyphs (CID font)', function () {
