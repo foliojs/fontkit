@@ -62,7 +62,8 @@ const NAMES = [
 ];
 
 NameTable.process = function(stream) {
-  var records = {};
+  let records = {};
+
   for (let record of this.records) {
     // find out what language this is for
     let language = LANGUAGES[record.platformID][record.languageID];
@@ -77,17 +78,27 @@ NameTable.process = function(stream) {
 
     // if the nameID is >= 256, it is a font feature record (AAT)
     let key = record.nameID >= 256 ? 'fontFeatures' : (NAMES[record.nameID] || record.nameID);
-    if (records[key] == null) {
-      records[key] = {};
+
+    let addRecord = (key, record) => {
+      if (records[key] == null) {
+        records[key] = {};
+      }
+
+      let obj = records[key];
+      if (key === 'fontFeatures') {
+        obj = obj[record.nameID] || (obj[record.nameID] = {});
+      }
+
+      if (typeof record.string === 'string' || typeof obj[language] !== 'string') {
+        obj[language] = record.string;
+      }
     }
 
-    let obj = records[key];
-    if (record.nameID >= 256) {
-      obj = obj[record.nameID] || (obj[record.nameID] = {});
-    }
+    addRecord(key, record);
 
-    if (typeof record.string === 'string' || typeof obj[language] !== 'string') {
-      obj[language] = record.string;
+    // if the nameID is 2 or 17, it may also be a font feature record (AAT).
+    if (record.nameID == 2 || record.nameID == 17) {
+      addRecord('fontFeatures', record);
     }
   }
 
