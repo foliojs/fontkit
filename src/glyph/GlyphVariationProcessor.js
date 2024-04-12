@@ -160,8 +160,8 @@ export default class GlyphVariationProcessor {
             let point = outPoints[idx];
             hasDelta[idx] = true;
 
-            point.x += Math.round(xDeltas[i] * factor);
-            point.y += Math.round(yDeltas[i] * factor);
+            point.x += xDeltas[i] * factor;
+            point.y += yDeltas[i] * factor;
           }
         }
 
@@ -171,8 +171,8 @@ export default class GlyphVariationProcessor {
           let deltaX = outPoints[i].x - origPoints[i].x;
           let deltaY = outPoints[i].y - origPoints[i].y;
 
-          glyphPoints[i].x += deltaX;
-          glyphPoints[i].y += deltaY;
+          glyphPoints[i].x = Math.round(glyphPoints[i].x + deltaX);
+          glyphPoints[i].y = Math.round(glyphPoints[i].y + deltaY);
         }
       }
 
