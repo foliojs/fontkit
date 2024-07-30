@@ -2,7 +2,7 @@ import * as r from 'restructure';
 
 // Vertical Header Table
 export default new r.Struct({
-  version:                r.int32,  // Version number of the Vertical Header Table
+  version:                r.fixed32, // Version number of the Vertical Header Table
   ascent:                 r.int16,   // The vertical typographic ascender for this font
   descent:                r.int16,   // The vertical typographic descender for this font
   lineGap:                r.int16,   // The vertical typographic line gap for this font
