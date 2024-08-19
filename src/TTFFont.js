@@ -8,7 +8,8 @@ import LayoutEngine from './layout/LayoutEngine';
 import TTFGlyph from './glyph/TTFGlyph';
 import CFFGlyph from './glyph/CFFGlyph';
 import SBIXGlyph from './glyph/SBIXGlyph';
-import COLRGlyph from './glyph/COLRGlyph';
+import { COLRGlyph, COLRv1Glyph } from './glyph/COLRGlyph';
+import { PAINT_OPERATIONS } from './glyph/PaintOperation';
 import GlyphVariationProcessor from './glyph/GlyphVariationProcessor';
 import TTFSubset from './subset/TTFSubset';
 import CFFSubset from './subset/CFFSubset';
@@ -386,15 +387,32 @@ export default class TTFFont {
 
   _getBaseGlyph(glyph, characters = []) {
     if (!this._glyphs[glyph]) {
-      if (this.directory.tables.glyf) {
-        this._glyphs[glyph] = new TTFGlyph(glyph, characters, this);
-
-      } else if (this.directory.tables['CFF '] || this.directory.tables.CFF2) {
-        this._glyphs[glyph] = new CFFGlyph(glyph, characters, this);
-      }
+      this._glyphs[glyph] = this._getBaseGlyphUncached(glyph, characters)
     }
 
     return this._glyphs[glyph] || null;
+  }
+
+  _getBaseGlyphUncached(glyph, characters = []) {
+    if (this.directory.tables.glyf) {
+      return new TTFGlyph(glyph, characters, this);
+    } else if (this.directory.tables['CFF '] || this.directory.tables.CFF2) {
+      return new CFFGlyph(glyph, characters, this);
+    }
+  }
+
+  _getColrGlyph(glyph, characters = []) {
+    if (this.COLR.version == 1 && this.COLR.baseGlyphList) {
+      for (let baseGlyph of this.COLR.baseGlyphList.baseGlyphPaintRecords) {
+        if (baseGlyph.gid == glyph) {
+          let colorGlyph = new COLRv1Glyph(glyph, characters, this)
+          colorGlyph.paint = (new PAINT_OPERATIONS[baseGlyph.paint.version])(baseGlyph.paint, this);
+          return colorGlyph
+        }
+      }
+    }
+    // Either v0 format, no BaseGlyphList, or not found -> treat as COLRv0
+    return new COLRGlyph(glyph, characters, this);
   }
 
   /**
@@ -412,8 +430,8 @@ export default class TTFFont {
         this._glyphs[glyph] = new SBIXGlyph(glyph, characters, this);
 
       } else if ((this.directory.tables.COLR) && (this.directory.tables.CPAL)) {
-        this._glyphs[glyph] = new COLRGlyph(glyph, characters, this);
-
+        // Each glyph may be either COLRv0 (layers) or COLRv1 (paint tree)
+        this._glyphs[glyph] = this._getColrGlyph(glyph, characters);
       } else {
         this._getBaseGlyph(glyph, characters);
       }

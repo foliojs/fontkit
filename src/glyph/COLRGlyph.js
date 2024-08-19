@@ -13,7 +13,7 @@ class COLRLayer {
  * Each glyph in this format contain a list of colored layers, each
  * of which  is another vector glyph.
  */
-export default class COLRGlyph extends Glyph {
+export class COLRGlyph extends Glyph {
   type = 'COLR';
 
   _getBBox() {
@@ -86,5 +86,52 @@ export default class COLRGlyph extends Glyph {
     }
 
     return;
+  }
+  _getContours() {
+    var base = this._font._getBaseGlyphUncached(this.id);
+    return base._getContours();
+  }
+
+}
+
+/**
+ * Represents a color (e.g. emoji) glyph in Microsoft/Google's COLRv1
+ * format. Each glyph in this format contains a directed acyclic graph
+ * of Paint structures.
+ */
+export class COLRv1Glyph extends COLRGlyph {
+  type = 'COLRv1';
+
+  _getBBox() {
+    // If we have a clip list item, use that
+    let colr = this._font.COLR;
+    if (colr.clipList) {
+      for (var clip of colr.clipList.clips) {
+        if (clip.startGlyphId <= this.id && this.id <= clip.endGlyphId) {
+          let box = clip.clipBox;
+          return new BBox(
+            box.xMin,
+            box.yMin,
+            box.xMax,
+            box.yMax
+          );
+        }
+      }
+    }
+    return super._getBBox();
+  }
+  render(ctx, size) {
+    // One scale only.
+    ctx.save();
+    let scale = 1 / this._font.unitsPerEm * size;
+    ctx.scale(scale, scale);
+
+    let paint = this.paint;
+    if (this._font.variationCoords) {
+      paint = paint.instantiate(this._font._variationProcessor);
+    }
+
+    paint.render(ctx, size);
+    ctx.restore();
   }
 }
