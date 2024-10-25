@@ -23,7 +23,12 @@ export function create(buffer, postscriptName) {
   throw new Error('Unknown font format');
 };
 
-export let defaultLanguage = 'en';
+let _defaultLanguage = 'en';
+
+export function defaultLanguage() {
+  return _defaultLanguage;
+}
+
 export function setDefaultLanguage(lang = 'en') {
-  defaultLanguage = lang;
+  _defaultLanguage = lang;
 };

@@ -96,14 +96,14 @@ export default class TTFFont {
    * `lang` is a BCP-47 language code.
    * @return {string}
    */
-  getName(key, lang = this.defaultLanguage || fontkit.defaultLanguage) {
+  getName(key, lang = this.defaultLanguage || fontkit.defaultLanguage()) {
     let record = this.name && this.name.records[key];
     if (record) {
       // Attempt to retrieve the entry, depending on which translation is available:
       return (
           record[lang]
           || record[this.defaultLanguage]
-          || record[fontkit.defaultLanguage]
+          || record[fontkit.defaultLanguage()]
           || record['en']
           || record[Object.keys(record)[0]] // Seriously, ANY language would be fine
           || null
