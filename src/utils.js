@@ -1,3 +1,5 @@
+import { DecodeStream, EncodeStream } from 'restructure';
+
 export function binarySearch(arr, cmp) {
   let min = 0;
   let max = arr.length - 1;
@@ -60,3 +62,37 @@ export function decodeBase64(base64) {
 
   return bytes;
 }
+
+export class Version16Dot16 {
+  fromBuffer(buffer) {
+    let stream = new DecodeStream(buffer);
+    return this.decode(stream);
+  }
+
+  toBuffer(value) {
+    let size = this.size(value);
+    let buffer = new Uint8Array(size);
+    let stream = new EncodeStream(buffer);
+    this.encode(stream, value);
+    return buffer;
+  }
+
+  size() {
+    return 4;
+  }
+
+  decode(stream) {
+    let major = stream.readUInt16BE();
+    let minor = stream.readUInt16BE() >> 12;
+    return major + minor / 10;
+  }
+
+  encode(stream, val) {
+    let major = Math.trunc(val);
+    let minor = (val - major) * 10;
+    stream.writeUInt16BE(major);
+    return stream.writeUInt16BE(minor << 12);
+  }
+}
+
+export const version16Dot16 = new Version16Dot16();
