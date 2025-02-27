@@ -285,6 +285,9 @@ export default class GPOSProcessor extends OTProcessor {
   }
 
   getAnchor(anchor) {
+    if (anchor == null) {
+      return { x: 0, y: 0 };
+    }
     // TODO: contour point, device tables
     let x = anchor.xCoordinate;
     let y = anchor.yCoordinate;
