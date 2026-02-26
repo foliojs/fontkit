@@ -273,7 +273,13 @@ export default class TTFGlyph extends Glyph {
     if (glyph.numberOfContours < 0) {
       // resolve composite glyphs
       for (let component of glyph.components) {
-        let contours = this._font.getGlyph(component.glyphID)._getContours();
+        // In COLR fonts, getGlyph() may return a COLRGlyph which doesn't
+        // have _getContours(). Use _getBaseGlyph() to get the TTF outline.
+        let componentGlyph = this._font._getBaseGlyph(component.glyphID) || this._font.getGlyph(component.glyphID);
+        if (!componentGlyph || typeof componentGlyph._getContours !== 'function') {
+          continue;
+        }
+        let contours = componentGlyph._getContours();
         for (let i = 0; i < contours.length; i++) {
           let contour = contours[i];
           for (let j = 0; j < contour.length; j++) {

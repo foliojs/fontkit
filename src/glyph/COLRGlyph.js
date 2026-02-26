@@ -36,6 +36,14 @@ export default class COLRGlyph extends Glyph {
   get layers() {
     let cpal = this._font.CPAL;
     let colr = this._font.COLR;
+
+    // COLR v1 fonts (e.g. OpenMoji COLRv1) use paint-based records
+    // instead of v0 baseGlyphRecord. fontkit only supports v0, so
+    // return null to let callers fall back gracefully.
+    if (!colr || !colr.baseGlyphRecord) {
+      return null;
+    }
+
     let low = 0;
     let high = colr.baseGlyphRecord.length - 1;
 

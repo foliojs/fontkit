@@ -362,4 +362,195 @@ describe('glyphs', function () {
       assert.equal(glyph.bbox.maxY, 656);
     });
   });
+
+  describe('CBDT glyphs', function () {
+    let notoEmojiPath = new URL('data/NotoColorEmoji/NotoColorEmoji.ttf', import.meta.url);
+    let font = fontkit.openSync(notoEmojiPath);
+
+    it('should get a CBDTGlyph', function () {
+      let glyph = font.glyphsForString('😀')[0];
+      assert.equal(glyph.type, 'CBDT');
+    });
+
+    it('should not crash on layout', function () {
+      assert.doesNotThrow(() => {
+        font.layout('😀');
+      });
+    });
+
+    it('should have an empty path', function () {
+      let glyph = font.glyphsForString('😀')[0];
+      let svg = glyph.path.toSVG();
+      assert.ok(svg.length <= 20, 'Expected minimal/empty path, got: ' + svg);
+    });
+
+    it('should have valid advance width', function () {
+      let glyph = font.glyphsForString('😀')[0];
+      assert.ok(glyph.advanceWidth > 0, 'Expected positive advance width');
+    });
+
+    it('should get glyph by ID', function () {
+      let glyphId = font._cmapProcessor.lookup(0x1F600);
+      let glyph = font.getGlyph(glyphId);
+      assert.ok(glyph !== null, 'Expected non-null glyph for ID ' + glyphId);
+    });
+  });
+
+  describe('CBDT glyphs (OpenMoji)', function () {
+    let font = fontkit.openSync(new URL('data/OpenMoji/OpenMoji-color-cbdt.ttf', import.meta.url));
+
+    it('should get a CBDTGlyph', function () {
+      let glyph = font.glyphsForString('😀')[0];
+      assert.equal(glyph.type, 'CBDT');
+    });
+
+    it('should not crash on layout', function () {
+      assert.doesNotThrow(() => {
+        font.layout('😀');
+      });
+    });
+
+    it('should handle ZWJ sequences', function () {
+      let run = font.layout('👨‍👩‍👧‍👦');
+      assert.ok(run.glyphs.length >= 1, 'Expected at least 1 glyph for ZWJ family');
+    });
+
+    it('should handle skin tone modifiers', function () {
+      let run = font.layout('👋🏽');
+      assert.ok(run.glyphs.length >= 1, 'Expected at least 1 glyph for skin tone emoji');
+    });
+
+    it('should handle flag sequences', function () {
+      let run = font.layout('🇺🇸');
+      assert.ok(run.glyphs.length >= 1, 'Expected at least 1 glyph for flag');
+    });
+  });
+
+  describe('COLR glyphs (Twemoji)', function () {
+    let font = fontkit.openSync(new URL('data/Twemoji/Twemoji.Mozilla.ttf', import.meta.url));
+
+    it('should get a COLRGlyph', function () {
+      let glyph = font.glyphsForString('😀')[0];
+      assert.equal(glyph.type, 'COLR');
+    });
+
+    it('should not crash on layout', function () {
+      assert.doesNotThrow(() => {
+        font.layout('😀');
+      });
+    });
+
+    it('should have valid advance width', function () {
+      let glyph = font.glyphsForString('😀')[0];
+      assert.ok(glyph.advanceWidth > 0, 'Expected positive advance width');
+    });
+
+    it('should handle ZWJ sequences', function () {
+      let run = font.layout('👨‍👩‍👧‍👦');
+      assert.ok(run.glyphs.length >= 1, 'Expected at least 1 glyph for ZWJ family');
+    });
+
+    it('should handle skin tone modifiers', function () {
+      let run = font.layout('👋🏽');
+      assert.ok(run.glyphs.length >= 1, 'Expected at least 1 glyph for skin tone emoji');
+    });
+
+    it('should handle flag sequences', function () {
+      let run = font.layout('🇺🇸');
+      assert.ok(run.glyphs.length >= 1, 'Expected at least 1 glyph for flag');
+    });
+  });
+
+  describe('COLR glyphs (OpenMoji COLRv1+SVG)', function () {
+    let font = fontkit.openSync(new URL('data/OpenMoji/OpenMoji-color-colr1_svg.ttf', import.meta.url));
+
+    it('should get a COLRGlyph', function () {
+      let glyph = font.glyphsForString('😀')[0];
+      assert.equal(glyph.type, 'COLR');
+    });
+
+    it('should not crash on layout', function () {
+      assert.doesNotThrow(() => {
+        font.layout('😀');
+      });
+    });
+
+    it('should handle ZWJ sequences', function () {
+      let run = font.layout('👨‍👩‍👧‍👦');
+      assert.ok(run.glyphs.length >= 1, 'Expected at least 1 glyph for ZWJ family');
+    });
+  });
+
+  describe('COLR v1 glyphs — null baseGlyphRecord (OpenMoji COLRv1)', function () {
+    let font = fontkit.openSync(new URL('data/OpenMoji/OpenMoji-color-colr1_svg.ttf', import.meta.url));
+
+    it('should return null layers for COLR v1 glyphs (no v0 baseGlyphRecord)', function () {
+      // COLR v1 uses paint-based records; fontkit only supports v0.
+      // The layers getter must return null instead of crashing with:
+      //   TypeError: Cannot read properties of null (reading 'length')
+      let glyph = font.glyphsForString('😀')[0];
+      assert.equal(glyph.type, 'COLR');
+      assert.equal(glyph.layers, null);
+    });
+
+    it('should not crash when accessing path on COLR v1 glyph', function () {
+      let glyph = font.glyphsForString('😀')[0];
+      // Accessing .path triggers _getContours internally
+      assert.doesNotThrow(() => {
+        let path = glyph.path;
+      });
+    });
+  });
+
+  describe('COLR v0 glyphs — composite glyph _getContours (OpenMoji COLRv0)', function () {
+    let font = fontkit.openSync(new URL('data/OpenMoji/OpenMoji-color-glyf_colr_0.ttf', import.meta.url));
+
+    it('should get COLR type glyph with layers', function () {
+      let glyph = font.glyphsForString('😀')[0];
+      assert.equal(glyph.type, 'COLR');
+      assert.ok(glyph.layers != null, 'Expected non-null layers for COLR v0');
+      assert.ok(glyph.layers.length > 0, 'Expected at least 1 layer');
+    });
+
+    it('should not crash on layout (composite glyph resolution)', function () {
+      // OpenMoji COLR v0 has composite TTF glyphs whose components may
+      // reference glyph IDs that getGlyph() resolves as COLRGlyph.
+      // COLRGlyph has no _getContours(), so composite resolution
+      // must fall back to _getBaseGlyph() or skip gracefully.
+      // Without the fix this throws:
+      //   TypeError: this._font.getGlyph(...)._getContours is not a function
+      assert.doesNotThrow(() => {
+        font.layout('😀🚀✅👨‍👩‍👧‍👦');
+      });
+    });
+
+    it('should render path without crashing', function () {
+      let run = font.layout('😀');
+      for (let glyph of run.glyphs) {
+        assert.doesNotThrow(() => {
+          glyph.path;
+        });
+      }
+    });
+  });
+
+  describe('SBIX glyphs (Apple emoji)', function () {
+    let font = fontkit.openSync(new URL('data/ss-emoji/ss-emoji-apple.ttf', import.meta.url));
+
+    it('should get a SBIXGlyph', function () {
+      let glyph = font.glyphsForString('😀')[0];
+      assert.equal(glyph.type, 'SBIX');
+    });
+
+    it('should not crash on layout', function () {
+      assert.doesNotThrow(() => {
+        font.layout('😀');
+      });
+    });
+
+    it('should have valid advance width', function () {
+      let glyph = font.glyphsForString('😀')[0];
+      assert.ok(glyph.advanceWidth > 0, 'Expected positive advance width');
+    });
+  });
 });
