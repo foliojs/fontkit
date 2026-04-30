@@ -3,6 +3,7 @@
 ### Unreleased
 
 - End the second curve of CFF hflex and hflex1 operators at the starting y, so later points are no longer shifted (#437)
+- Normalize variation coordinates like HarfBuzz, so FeatureVariations apply at the axis default and on condition boundaries
 
 ### [3.0.0] - 11-11-2026
 
