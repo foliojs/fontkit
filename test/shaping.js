@@ -3372,5 +3372,28 @@ describe('shaping', function () {
         ['dollar', 'cent'],
       );
     });
+
+    it('matches conditions with coordinates rounded to F2DOT14', function () {
+      // wght 499.99 normalizes to just below the condition's minimum, but
+      // rounds to it, so HarfBuzz applies the alternates there too.
+      let { glyphs } = font.getVariation({ wght: 499.99 }).layout('$¢');
+      assert.deepEqual(
+        glyphs.map((g) => g.name),
+        ['dollar.BRACKET.110', 'cent.BRACKET.110'],
+      );
+    });
+
+    it('applies FeatureVariations at a default that is the axis maximum', function () {
+      // AdobeVFPrototype's wght default is its maximum (1000), and its rvrn
+      // swaps dollar for dollar.nostroke from 800 up.
+      let font = fontkit.openSync(
+        new URL('data/fonttest/AdobeVFPrototype-Subset.otf', import.meta.url),
+      );
+      let { glyphs } = font.layout('$');
+      assert.deepEqual(
+        glyphs.map((g) => g.name),
+        ['dollar.nostroke'],
+      );
+    });
   });
 });

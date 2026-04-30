@@ -31,19 +31,30 @@ export default class GlyphVariationProcessor {
   normalizeCoords(coords) {
     // the default mapping is linear along each axis, in two segments:
     // from the minValue to defaultValue, and from defaultValue to maxValue.
+    // Like HarfBuzz, round each step to 16.16 and the result to F2DOT14, so
+    // the coordinates match its outlines and compare exactly with the F2DOT14
+    // ranges of FeatureVariations conditions.
+    let round16Dot16 = (value) =>
+      (Math.sign(value) * Math.round(Math.abs(value) * 65536)) / 65536;
     let normalized = [];
     for (var i = 0; i < this.font.fvar.axis.length; i++) {
       let axis = this.font.fvar.axis[i];
       if (coords[i] < axis.defaultValue) {
         normalized.push(
-          (coords[i] - axis.defaultValue + Number.EPSILON) /
-            (axis.defaultValue - axis.minValue + Number.EPSILON),
+          round16Dot16(
+            (coords[i] - axis.defaultValue) /
+              (axis.defaultValue - axis.minValue),
+          ),
+        );
+      } else if (coords[i] > axis.defaultValue) {
+        normalized.push(
+          round16Dot16(
+            (coords[i] - axis.defaultValue) /
+              (axis.maxValue - axis.defaultValue),
+          ),
         );
       } else {
-        normalized.push(
-          (coords[i] - axis.defaultValue + Number.EPSILON) /
-            (axis.maxValue - axis.defaultValue + Number.EPSILON),
-        );
+        normalized.push(0);
       }
     }
 
@@ -56,12 +67,12 @@ export default class GlyphVariationProcessor {
           let pair = segment.correspondence[j];
           if (j >= 1 && normalized[i] < pair.fromCoord) {
             let prev = segment.correspondence[j - 1];
-            normalized[i] =
+            normalized[i] = round16Dot16(
               ((normalized[i] - prev.fromCoord) *
-                (pair.toCoord - prev.toCoord) +
-                Number.EPSILON) /
-                (pair.fromCoord - prev.fromCoord + Number.EPSILON) +
-              prev.toCoord;
+                (pair.toCoord - prev.toCoord)) /
+                (pair.fromCoord - prev.fromCoord) +
+                prev.toCoord,
+            );
 
             break;
           }
@@ -69,7 +80,7 @@ export default class GlyphVariationProcessor {
       }
     }
 
-    return normalized;
+    return normalized.map((value) => ((value * 65536 + 2) >> 2) / 16384);
   }
 
   transformPoints(gid, glyphPoints) {
