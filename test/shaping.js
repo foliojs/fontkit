@@ -56,6 +56,15 @@ describe('shaping', function () {
       '218+545|11+1781|94+1362|26@35,0+1139|34+564|32+1250|3+532|9+1904|96+1088|93+1383|51+569|8+1904|' +
       '3+532|33+1225|21+1470|3+532|96+1088|17+1496|96+1088|17+1496|32+1250|3+532|9+1904|95+1104|12+1781|39+1052');
 
+    // Exercises chain context backtrack ordering: the Syriac `calt` chain rule
+    // requires backtrack[0] (mark uni0731) immediately before the input glyph
+    // (uni0713.Fina) and backtrack[1] (uni0712.Init) one position further
+    // back. Without reversing the backtrack array, fontkit matches in stored
+    // order and the rule fails to fire, leaving uni0713.Fina unsubstituted.
+    test('should match chain context backtrack in OpenType spec order',
+      'NotoSans/NotoSansSyriacEstrangela-Regular.ttf', 'ܒܱܓ',
+      '249+2485|141@606,-200+0|17+1496');
+
     test('should shape N\'Ko text', 'NotoSans/NotoSansNKo-Regular.ttf', 'ߞߊ߬ ߞߐߕߐ߮ ߞߎߘߊ ߘߏ߫ ߘߊߦߟߍ߬ ߸ ߏ߬',
       '52@10,-300+0|23+1128|3+532|64+985|3+532|52@150,-300+0|84+1268|139+1184|160+1067|76+543|119+1622|3+532|51@10,-300+0|90+1128' +
       '|119+1622|3+532|75+543|118+1622|88+1212|137+1114|3+532|54@170,0+0|93+1321|109+1155|94+1321|137+1114|3+532|52@-210,0+0|75+543|137+1114');
