@@ -500,6 +500,15 @@ describe('shaping', function () {
       test('HB-MLYM-63', 'NotoSans/NotoSansMalayalam-Regular.ttf', 'കോം‌', '67+1219|20+2125|59+1033|3+0|4+927');
       test('HB-MLYM-64', 'NotoSans/NotoSansMalayalam-Regular.ttf', 'യ‍്യ', '46+2120|3+0|144+497');
       test('HB-MLYM-65', 'NotoSans/NotoSansMalayalam-Regular.ttf', 'സ്റ്റ്', '214+2505|72+0');
+
+      // Regression for null GPOS anchor crash (#367). The hinted Noto Sans
+      // Malayalam ships 189 NULL anchor offsets in mark-positioning lookups;
+      // applyAnchor used to dereference them and throw `TypeError: Cannot
+      // read properties of null (reading 'xCoordinate')`. Treat NULL anchors
+      // as no-op per the OT spec.
+      test('should not crash on null GPOS anchors',
+        'NotoSans/NotoSansMalayalam-Hinted.ttf', 'പുസ്തകം',
+        '44+896|67+332|58+1223|77+0|38+1014|23+1038|6+453');
     });
 
     describe('shapes Oriya text', function () {

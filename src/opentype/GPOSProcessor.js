@@ -273,6 +273,10 @@ export default class GPOSProcessor extends OTProcessor {
   }
 
   applyAnchor(markRecord, baseAnchor, baseGlyphIndex) {
+    // A font's base/ligature/mark array may omit an anchor for a given mark
+    // class (the cell is null). Per HarfBuzz, treat the lookup as a no-op
+    // rather than crashing when reading xCoordinate of null.
+    if (!baseAnchor || !markRecord.markAnchor) return;
     let baseCoords = this.getAnchor(baseAnchor);
     let markCoords = this.getAnchor(markRecord.markAnchor);
 
