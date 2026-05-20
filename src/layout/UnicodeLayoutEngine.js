@@ -149,7 +149,7 @@ export default class UnicodeLayoutEngine {
           case 0x0e37:
           case 0x0e47:
           case 0x0e4c:
-          case 0x0e3d:
+          case 0x0e4d:
           case 0x0e4e:
             return 'Above_Right';
 
