@@ -2,6 +2,13 @@ import OTProcessor from './OTProcessor';
 import GlyphInfo from './GlyphInfo';
 
 export default class GSUBProcessor extends OTProcessor {
+  // Reverse Chaining Contextual Single Substitution is applied right-to-left,
+  // so substitutions never feed back into the lookahead context of an
+  // earlier-in-text glyph
+  isReverseLookup(lookup) {
+    return lookup.lookupType === 8;
+  }
+
   applyLookup(lookupType, table) {
     switch (lookupType) {
       case 1: {
@@ -208,6 +215,31 @@ export default class GSUBProcessor extends OTProcessor {
 
       case 7: // Extension Substitution
         return this.applyLookup(table.lookupType, table.extension);
+
+      case 8: {
+        // Reverse Chaining Contextual Single Substitution
+        let index = this.coverageIndex(table.coverage);
+        if (index === -1) {
+          return false;
+        }
+
+        // Backtrack/lookahead contexts are checked against the current
+        // glyph in the buffer. The iteration order in applyLookups is
+        // reversed for Type 8 so lookahead always sees post-substitution
+        // glyphs (per OpenType spec) and backtrack sees pre-substitution.
+        if (
+          this.coverageSequenceMatches(
+            -table.backtrackGlyphCount,
+            table.backtrackCoverage,
+          ) &&
+          this.coverageSequenceMatches(1, table.lookaheadCoverage)
+        ) {
+          this.glyphIterator.cur.id = table.substitute.get(index);
+          return true;
+        }
+
+        return false;
+      }
 
       default:
         throw new Error(`GSUB lookupType ${lookupType} is not supported`);
