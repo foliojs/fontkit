@@ -43,10 +43,16 @@ export default class OTLayoutEngine {
     this.plan = new ShapingPlan(this.font, script, glyphRun.direction);
     this.shaper.plan(this.plan, this.glyphInfos, glyphRun.features);
 
-    // Assign chosen features to output glyph run
-    for (let key in this.plan.allFeatures) {
-      glyphRun.features[key] = true;
-    }
+    // Build the output features object: every shaper-chosen feature marked
+    // `true`, then overlay the user's original values so alternateNumber
+    // selections (e.g. `nalt: 2` for Type 3 lookups) survive instead of being
+    // clobbered to `true`. The caller's input object is left untouched.
+    glyphRun.features = {
+      ...Object.fromEntries(
+        Object.keys(this.plan.allFeatures).map(k => [k, true])
+      ),
+      ...glyphRun.features
+    };
   }
 
   substitute(glyphRun) {

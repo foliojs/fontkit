@@ -61,8 +61,17 @@ export default class GSUBProcessor extends OTProcessor {
       case 3: { // Alternate Substitution
         let index = this.coverageIndex(table.coverage);
         if (index !== -1) {
-          let USER_INDEX = 0; // TODO
-          this.glyphIterator.cur.id = table.alternateSet.get(index)[USER_INDEX];
+          // Honour the user's 1-based alternate index for the current feature
+          // (e.g. `nalt: 2` selects the second alternate). Fall back to the
+          // first alternate when no value was given or the value isn't a
+          // positive integer.
+          let alt = this.userFeatures && this.userFeatures[this.currentFeature];
+          let userIndex = Number.isInteger(alt) && alt > 0 ? alt - 1 : 0;
+          let alternates = table.alternateSet.get(index);
+          if (userIndex >= alternates.length) {
+            userIndex = 0;
+          }
+          this.glyphIterator.cur.id = alternates[userIndex];
           return true;
         }
 

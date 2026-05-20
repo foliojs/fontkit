@@ -179,8 +179,9 @@ export default class OTProcessor {
     });
   }
 
-  applyFeatures(userFeatures, glyphs, advances) {
-    let lookups = this.lookupsForFeatures(userFeatures);
+  applyFeatures(featureTags, glyphs, advances, userFeatures) {
+    this.userFeatures = userFeatures;
+    let lookups = this.lookupsForFeatures(featureTags);
     this.applyLookups(lookups, glyphs, advances);
   }
 
