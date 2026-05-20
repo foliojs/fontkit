@@ -69,6 +69,48 @@ describe('shaping', function () {
     test('should adjust attached marks if base is adjusted', 'amiri/amiri-regular.ttf', 'لَكنت', '2054+1810|2133+500|2300+1206|427@-96,0+0|5988+380|2322+360');
   });
 
+  describe('hebrew shaper', function () {
+    // Plain consonants — sanity check that the Hebrew shaper routes
+    // through DefaultShaper without disturbing basic consonant runs.
+    test('should shape plain Hebrew consonants',
+      'Hebrew/TaameyFrankCLM.ttf', 'קול',
+      '40+901|33+484|50+997');
+
+    // Base + hataf patah + base + tsere + base — the marks attach via
+    // GPOS mark-to-base. Ported from HarfBuzz's hebrew-diacritics test:
+    // (U+05D4 U+05B2 U+05D1 U+05B5 U+05DC).
+    test('should position Hebrew nikud via GPOS',
+      'Hebrew/TaameyFrankCLM.ttf', 'הֲבֵל',
+      '40+901|15@512,0+0|29+967|13@600,0+0|32+1071');
+
+    // bet+dagesh+patah+bet+dagesh+holam+qof+segol+resh — exercises the
+    // font's ccmp ligatures (bet+dagesh → betdagesh, glyph 71). Hebrew
+    // shaper does NOT do fallback composition because the font ships a
+    // GPOS `mark` feature (matches HB's `!has_gpos_mark` gate).
+    test('should let the font handle dagesh composition via GSUB',
+      'Hebrew/TaameyFrankCLM.ttf', 'בַּבֹּקֶר',
+      '51+883|16@618,0+0|50+997|19@422,0+0|71+967|17@505,0+0|71+967');
+
+    // alef + patah(CCC17) + sheva(CCC10) + meteg(CCC22) — exercises
+    // `reorder_marks_hebrew`: the shaper swaps sheva and meteg so meteg
+    // sits next to patah, matching HarfBuzz's ordering. Without the
+    // reorder, fontkit produces sheva (id 11) AFTER meteg (id 22) in
+    // visual order.
+    test('should reorder patah/sheva/meteg per HarfBuzz',
+      'Hebrew/TaameyFrankCLM.ttf', 'אְַֽ',
+      '11@506,0+0|22@744,0+0|17@739,0+0|28+1048');
+
+    // Same pattern with qamats(CCC18) + hiriq(CCC14) + meteg(CCC22).
+    test('should reorder qamats/hiriq/meteg per HarfBuzz',
+      'Hebrew/TaameyFrankCLM.ttf', 'אִָֽ',
+      '14@506,0+0|22@744,0+0|18@740,0+0|28+1048');
+
+    // Same triplet but in non-canonical CCC order — alef + patah(17) + sheva(10) + meteg(22). HarfBuzz reaches this layout after its modified-CCC sort; fontkit may see it directly from a host that didn't NFC-normalise the input. The reorder catches the triplet by codepoint identity (any permutation of patah/qamats, sheva/hiriq, meteg/below), not by Unicode CCC, so it fires either way.
+    test('should reorder marks regardless of input order',
+      'Hebrew/TaameyFrankCLM.ttf', String.fromCodePoint(0x05D0, 0x05B7, 0x05B0, 0x05BD),
+      '11@506,0+0|22@744,0+0|17@739,0+0|28+1048');
+  });
+
   describe('hangul shaper', function () {
     let font = fontkit.openSync(new URL('data/NotoSansCJK/NotoSansCJKkr-Regular.otf', import.meta.url));
 
