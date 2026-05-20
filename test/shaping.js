@@ -56,6 +56,18 @@ describe('shaping', function () {
       '218+545|11+1781|94+1362|26@35,0+1139|34+564|32+1250|3+532|9+1904|96+1088|93+1383|51+569|8+1904|' +
       '3+532|33+1225|21+1470|3+532|96+1088|17+1496|96+1088|17+1496|32+1250|3+532|9+1904|95+1104|12+1781|39+1052');
 
+    // Exercises the useMarkFilteringSet lookup flag: Mada's `rclt` chain
+    // rule fires for [Jeem-form, ar1Dot.below, kasra] and substitutes the
+    // kasra with a positioned variant (`uni0650.alt`). The lookup carries
+    // a mark filtering set containing only the below-marks, so when an
+    // above-mark (fatha) sits between the dot and the kasra the iterator
+    // must skip it. Without the flag honoured, fontkit sees the fatha as
+    // the immediate predecessor of the kasra, the backtrack fails to
+    // match and the kasra is left unsubstituted.
+    test('should honour useMarkFilteringSet during contextual matching',
+      'Mada/Mada-VF.ttf', 'جَِ',
+      '86@873,-335+0|83@253,495+0|111@273,-95+0|8+568');
+
     test('should shape N\'Ko text', 'NotoSans/NotoSansNKo-Regular.ttf', 'ߞߊ߬ ߞߐߕߐ߮ ߞߎߘߊ ߘߏ߫ ߘߊߦߟߍ߬ ߸ ߏ߬',
       '52@10,-300+0|23+1128|3+532|64+985|3+532|52@150,-300+0|84+1268|139+1184|160+1067|76+543|119+1622|3+532|51@10,-300+0|90+1128' +
       '|119+1622|3+532|75+543|118+1622|88+1212|137+1114|3+532|54@170,0+0|93+1321|109+1155|94+1321|137+1114|3+532|52@-210,0+0|75+543|137+1114');
