@@ -582,4 +582,17 @@ describe('shaping', function () {
       test('SHBALI-2/12', 'NotoSans/NotoSansBalinese-Regular.ttf', "ᬓ᭄ᭅᬸ", '23+2275|162+0|60@0,-1000+0');
     });
   });
+
+  describe('reverse chaining contextual single substitution (GSUB Type 8)', function () {
+    // Noto Sans Coptic's ccmp feature applies a Type 8 lookup that converts
+    // basic combining-macron glyphs to their `.cap` variants when followed
+    // by another macron in the run — the spec-mandated reverse-direction
+    // pass means the second macron's earlier-stage substitution must be
+    // visible as the first macron's lookahead context. Matching HarfBuzz's
+    // output here proves Type 8 actually fired in the right order.
+    test('GSUB Type 8: Coptic stacked-macron .cap variant',
+      'NotoCoptic/NotoSansCoptic-Regular.ttf',
+      'Ⲁ̅ⲁ̅',
+      '33+633|196@-319,0+0|34+574|199@-291,0+0');
+  });
 });

@@ -191,22 +191,25 @@ export default class OTProcessor {
 
     for (let { feature, lookup } of lookups) {
       this.currentFeature = feature;
-      this.glyphIterator.reset(lookup.flags);
 
-      while (this.glyphIterator.index < glyphs.length) {
-        if (!(feature in this.glyphIterator.cur.features)) {
-          this.glyphIterator.next();
-          continue;
-        }
+      // GSUB Type 8 (Reverse Chaining Contextual Single Substitution) is
+      // applied in reverse direction per OpenType spec — process the run
+      // right-to-left so substitutions never feed back into the lookahead
+      // context of an earlier-in-text glyph.
+      let direction = lookup.lookupType === 8 ? -1 : 1;
+      let startIndex = direction === -1 ? glyphs.length - 1 : 0;
 
-        for (let table of lookup.subTables) {
-          let res = this.applyLookup(lookup.lookupType, table);
-          if (res) {
-            break;
+      this.glyphIterator.reset(lookup.flags, startIndex);
+
+      while (this.glyphIterator.index >= 0 && this.glyphIterator.index < glyphs.length) {
+        if (feature in this.glyphIterator.cur.features) {
+          for (let table of lookup.subTables) {
+            if (this.applyLookup(lookup.lookupType, table)) {
+              break;
+            }
           }
         }
-
-        this.glyphIterator.next();
+        this.glyphIterator.move(direction);
       }
     }
   }

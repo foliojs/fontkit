@@ -59,11 +59,12 @@ let GSUBLookup = new r.VersionedStruct('lookupType', {
   8: { // Reverse Chaining Contextual Single Substitution
     substFormat:            r.uint16,
     coverage:               new r.Pointer(r.uint16, Coverage),
+    backtrackGlyphCount:    r.uint16,
     backtrackCoverage:      new r.Array(new r.Pointer(r.uint16, Coverage), 'backtrackGlyphCount'),
     lookaheadGlyphCount:    r.uint16,
     lookaheadCoverage:      new r.Array(new r.Pointer(r.uint16, Coverage), 'lookaheadGlyphCount'),
     glyphCount:             r.uint16,
-    substitutes:            new r.Array(r.uint16, 'glyphCount')
+    substitute:             new r.LazyArray(r.uint16, 'glyphCount')
   }
 });
 
