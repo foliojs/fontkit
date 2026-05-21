@@ -33,16 +33,24 @@ export default class TTFFont {
     this.variationCoords = variationCoords;
 
     this._directoryPos = this.stream.pos;
+    // Preserve the original source buffer so getVariation() can reconstruct
+    // the same kind of font. Subclasses (e.g. WOFF2Font) may later replace
+    // this.stream with a decompressed buffer, which would otherwise lose the
+    // original file contents.
+    this._buffer = this.stream.buffer;
     this._tables = {};
     this._glyphs = {};
     this._decodeDirectory();
+    this._installTableGetters();
+  }
 
-    // define properties for each table to lazily parse
+  _installTableGetters() {
     for (let tag in this.directory.tables) {
       let table = this.directory.tables[tag];
       if (tables[tag] && table.length > 0) {
         Object.defineProperty(this, tag, {
-          get: this._getTable.bind(this, table)
+          get: this._getTable.bind(this, table),
+          configurable: true
         });
       }
     }
@@ -518,12 +526,25 @@ export default class TTFFont {
       }
     });
 
-    let stream = new r.DecodeStream(this.stream.buffer);
-    stream.pos = this._directoryPos;
+    // Ensure any subclass-level decompression (WOFF inflate, WOFF2 brotli)
+    // has happened on THIS font so the variation inherits the fully
+    // resolved state instead of redoing that work.
+    if (typeof this._decompress === 'function') {
+      this._decompress();
+    }
 
-    let font = new TTFFont(stream, coords);
-    font._tables = this._tables;
-
+    // Clone this font and override the per-variation state. Object.assign
+    // copies the parsed-state fields (stream, directory, _tables, ...) but
+    // skips the things we WANT to recompute: cached @cache values and the
+    // table-accessor getters are installed as non-enumerable properties, so
+    // they're not copied here and will be recreated lazily on the new
+    // instance (table accessors via _installTableGetters() below; @cache
+    // getters via the class prototype on first access).
+    let font = Object.create(Object.getPrototypeOf(this));
+    Object.assign(font, this);
+    font.variationCoords = coords;
+    font._glyphs = {};
+    font._installTableGetters();
     return font;
   }
 
