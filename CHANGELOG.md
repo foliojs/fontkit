@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Expose the shaped glyph infos on the glyph run, with the features the shaper applied to each glyph
 - Use non-default variation sequences when the variation selector also has default ones
 - Add `fontkit/core` and `fontkit/formats/{format}` entry points with named format exports for explicit format registration, sharing state with the default entries
 - Remove the fast-deep-equal runtime dependency

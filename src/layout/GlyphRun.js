@@ -20,6 +20,13 @@ export default class GlyphRun {
     this.positions = null;
 
     /**
+     * An array of GlyphInfo objects parallel to `glyphs`, with the features
+     * the shaper applied to each glyph. Only set by OpenType layout.
+     * @type {GlyphInfo[]}
+     */
+    this.glyphInfos = null;
+
+    /**
      * The script that was requested for shaping. This was either passed in or detected automatically.
      * @type {string}
      */

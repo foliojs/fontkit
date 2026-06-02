@@ -144,6 +144,8 @@ Returns the advance width (described above) for a single glyph id.
 This method returns a `GlyphRun` object, which includes an array of `Glyph`s and `GlyphPosition`s for the given string.
 `Glyph` objects are described below. `GlyphPosition` objects include 4 properties: `xAdvance`, `yAdvance`, `xOffset`,
 and `yOffset`.
+With OpenType layout, its `glyphInfos` array holds the shaped glyph infos parallel to its glyphs, and each one's
+`features` object lists the features the shaper applied to that glyph, such as Arabic joining forms.
 
 The `features` parameter is either an array of [OpenType feature tags](https://www.microsoft.com/typography/otspec/featuretags.htm) to be applied
 in addition to the default set, or an object mapping OpenType features to a boolean enabling or disabling each. If this is an AAT font, the OpenType feature tags are mapped to AAT features.

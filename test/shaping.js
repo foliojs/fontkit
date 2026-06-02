@@ -195,6 +195,27 @@ describe('shaping', function () {
       '86@273,-335+0|83@253,495+0|111@273,-95+0|8+568',
     );
 
+    it('should expose the joining feature applied to each glyph', function () {
+      let font = fontkit.openSync(
+        new URL('data/Mada/Mada-VF.ttf', import.meta.url),
+      );
+      let { glyphs, glyphInfos } = font.layout('بيت');
+      assert.deepEqual(
+        glyphInfos.map((info, i) => [
+          glyphs[i].name,
+          ['isol', 'init', 'medi', 'fina'].find((tag) => info.features[tag]),
+        ]),
+        [
+          ['ar2Dot.above', 'fina'],
+          ['arBeh.fina', 'fina'],
+          ['ar2Dot.below', 'medi'],
+          ['arBeh.medi', 'medi'],
+          ['ar1Dot.below', 'init'],
+          ['arBeh.init', 'init'],
+        ],
+      );
+    });
+
     test(
       "should shape N'Ko text",
       'NotoSans/NotoSansNKo-Regular.ttf',

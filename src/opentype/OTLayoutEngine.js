@@ -79,6 +79,8 @@ export default class OTLayoutEngine {
     glyphRun.glyphs = this.glyphInfos.map((glyphInfo) =>
       this.font.getGlyph(glyphInfo.id, glyphInfo.codePoints),
     );
+    // The glyphs are shared, so expose the per-run features separately.
+    glyphRun.glyphInfos = this.glyphInfos;
   }
 
   position(glyphRun) {
@@ -108,6 +110,7 @@ export default class OTLayoutEngine {
     if (glyphRun.direction === 'rtl') {
       glyphRun.glyphs.reverse();
       glyphRun.positions.reverse();
+      glyphRun.glyphInfos.reverse();
     }
 
     return this.GPOSProcessor && this.GPOSProcessor.features;
