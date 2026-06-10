@@ -74,8 +74,14 @@ export default class TTFGlyph extends Glyph {
       return this.path.cbox;
     }
 
+    let glyfPos = this._font.loca.offsets[this.id];
+    let nextPos = this._font.loca.offsets[this.id + 1];
+
+    // Return an empty bounding box if there is no data for this glyph
+    if (glyfPos === nextPos) { return Object.freeze(new BBox(0, 0, 0, 0)); }
+
     let stream = this._font._getTableStream('glyf');
-    stream.pos += this._font.loca.offsets[this.id];
+    stream.pos += glyfPos;
     let glyph = GlyfHeader.decode(stream);
 
     let cbox = new BBox(glyph.xMin, glyph.yMin, glyph.xMax, glyph.yMax);
