@@ -17,9 +17,19 @@ export default class OTProcessor {
     this.features = {};
     this.lookups = {};
 
-    // Setup variation substitutions
-    this.variationsIndex = font._variationProcessor
-      ? this.findVariationsIndex(font._variationProcessor.normalizedCoords)
+    // Setup variation substitutions. FeatureVariations apply at the font's
+    // current location, defaulting to the normalized origin (all-zero coords)
+    // when no variation is set — matching HarfBuzz, which always evaluates them.
+    // fontkit only builds a _variationProcessor once coords are applied (or for
+    // CFF2), so a plain variable font would otherwise skip FeatureVariations
+    // (e.g. default-location bracket-layer substitutions) entirely.
+    let variationCoords = font._variationProcessor
+      ? font._variationProcessor.normalizedCoords
+      : font.fvar
+        ? new Array(font.fvar.axis.length).fill(0)
+        : null;
+    this.variationsIndex = variationCoords
+      ? this.findVariationsIndex(variationCoords)
       : -1;
 
     // initialize to default script + language
