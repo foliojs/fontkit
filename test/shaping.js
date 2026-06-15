@@ -582,4 +582,54 @@ describe('shaping', function () {
       test('SHBALI-2/12', 'NotoSans/NotoSansBalinese-Regular.ttf', "ᬓ᭄ᭅᬸ", '23+2275|162+0|60@0,-1000+0');
     });
   });
+
+  describe('canonical composition (NFC)', function () {
+    // HarfBuzz composes a base + combining-mark sequence into the font's
+    // precomposed glyph before GSUB/GPOS when the font has one. The default
+    // shaper does the same: decomposed input must shape identically to the
+    // precomposed character, not as a separate base + floating mark.
+    let font = fontkit.openSync(new URL('data/FiraSans/FiraSans-Regular.ttf', import.meta.url));
+    let shape = (...cps) => font.layout(String.fromCodePoint(...cps)).glyphs.map(g => g.id);
+
+    it('composes base + combining mark into the precomposed glyph', function () {
+      // "i" + U+0300 (combining grave) === precomposed U+00EC "ì" (igrave)
+      assert.deepEqual(shape(0x69, 0x300), shape(0x00EC));
+    });
+
+    it('composes a multi-mark sequence greedily', function () {
+      // "e" + U+0302 (circumflex) + U+0301 (acute) === precomposed U+1EBF "ế"
+      assert.deepEqual(shape(0x65, 0x302, 0x301), shape(0x1EBF));
+    });
+
+    it('leaves a sequence decomposed when the font has no precomposed glyph', function () {
+      // No precomposed "b-grave" exists, so the mark must stay separate.
+      assert.equal(shape(0x62, 0x300).length, 2);
+    });
+
+    it('does not interfere with GSUB ligatures', function () {
+      // "office": the fi ligature must still form (composition is mark-only).
+      assert.ok(shape(0x6F, 0x66, 0x66, 0x69, 0x63, 0x65).length < 6);
+    });
+
+    it('reorders and composes Arabic marks across combining classes', function () {
+      let amiri = fontkit.openSync(new URL('data/amiri/amiri-regular.ttf', import.meta.url));
+      let shapeAr = (...cps) => amiri.layout(String.fromCodePoint(...cps)).glyphs.map(g => g.id);
+      // alef + combining hamza-above === precomposed U+0623 (alef with hamza).
+      assert.deepEqual(shapeAr(0x627, 0x654), shapeAr(0x623));
+      // alef + fathatan + hamza-above: the hamza (ccc 230) composes onto the
+      // alef across the lower-class fathatan (ccc 27) per canonical reordering,
+      // leaving the fathatan — i.e. identical to precomposed U+0623 + fathatan.
+      assert.deepEqual(shapeAr(0x627, 0x64b, 0x654), shapeAr(0x623, 0x64b));
+    });
+
+    it('leaves a non-composing mark cluster unreordered for GSUB', function () {
+      // alef + shadda + fathatan don't compose, so the cluster must stay in its
+      // original order: canonically reordering shadda (ccc 33) after fathatan
+      // (ccc 27) would break Amiri's calt, which keys on shadda-before-vowel and
+      // yields fathatan's small variant. Applying a pure NFC reorder regresses it.
+      let amiri = fontkit.openSync(new URL('data/amiri/amiri-regular.ttf', import.meta.url));
+      let { glyphs } = amiri.layout(String.fromCodePoint(0x627, 0x651, 0x64b), { calt: true }, undefined, 'ARA ');
+      assert.deepEqual(glyphs.map(g => g.name), ['uni064B.small', 'uni0651', 'uni0627']);
+    });
+  });
 });
