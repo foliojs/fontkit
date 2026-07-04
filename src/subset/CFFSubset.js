@@ -133,7 +133,7 @@ export default class CFFSubset extends Subset {
 
     let charset = {
       version: this.charstrings.length > 255 ? 2 : 1,
-      ranges: [{ first: 1, nLeft: this.charstrings.length - 2 }]
+      ranges: this.charstrings.length > 1 ? [{ first: 1, nLeft: this.charstrings.length - 2 }] : []
     };
 
     let topDict = Object.assign({}, this.cff.topDict);
