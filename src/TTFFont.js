@@ -407,6 +407,12 @@ export default class TTFFont {
    * @return {Glyph}
    */
   getGlyph(glyph, characters = []) {
+    // Composite glyph decomposition can cache a component without code points.
+    // Evict it so a later call with code points can build the correct Glyph.
+    if (characters.length > 0 && this._glyphs[glyph] && this._glyphs[glyph].codePoints.length === 0) {
+      this._glyphs[glyph] = null;
+    }
+
     if (!this._glyphs[glyph]) {
       if (this.directory.tables.sbix) {
         this._glyphs[glyph] = new SBIXGlyph(glyph, characters, this);
