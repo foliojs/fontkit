@@ -385,16 +385,21 @@ export default class TTFFont {
   }
 
   _getBaseGlyph(glyph, characters = []) {
-    if (!this._glyphs[glyph]) {
+    let key = this._getGlyphKey(glyph, characters);
+    if (!this._glyphs[key]) {
       if (this.directory.tables.glyf) {
-        this._glyphs[glyph] = new TTFGlyph(glyph, characters, this);
+        this._glyphs[key] = new TTFGlyph(glyph, characters, this);
 
       } else if (this.directory.tables['CFF '] || this.directory.tables.CFF2) {
-        this._glyphs[glyph] = new CFFGlyph(glyph, characters, this);
+        this._glyphs[key] = new CFFGlyph(glyph, characters, this);
       }
     }
 
-    return this._glyphs[glyph] || null;
+    return this._glyphs[key] || null;
+  }
+
+  _getGlyphKey(glyph, characters = []) {
+    return `${glyph}:${characters.join(',')}`;
   }
 
   /**
@@ -407,25 +412,21 @@ export default class TTFFont {
    * @return {Glyph}
    */
   getGlyph(glyph, characters = []) {
-    // Composite glyph decomposition can cache a component without code points.
-    // Evict it so a later call with code points can build the correct Glyph.
-    if (characters.length > 0 && this._glyphs[glyph] && this._glyphs[glyph].codePoints.length === 0) {
-      this._glyphs[glyph] = null;
-    }
+    let key = this._getGlyphKey(glyph, characters);
 
-    if (!this._glyphs[glyph]) {
+    if (!this._glyphs[key]) {
       if (this.directory.tables.sbix) {
-        this._glyphs[glyph] = new SBIXGlyph(glyph, characters, this);
+        this._glyphs[key] = new SBIXGlyph(glyph, characters, this);
 
       } else if ((this.directory.tables.COLR) && (this.directory.tables.CPAL)) {
-        this._glyphs[glyph] = new COLRGlyph(glyph, characters, this);
+        this._glyphs[key] = new COLRGlyph(glyph, characters, this);
 
       } else {
         this._getBaseGlyph(glyph, characters);
       }
     }
 
-    return this._glyphs[glyph] || null;
+    return this._glyphs[key] || null;
   }
 
   /**
