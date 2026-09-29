@@ -278,8 +278,8 @@ export default class TTFGlyph extends Glyph {
           let contour = contours[i];
           for (let j = 0; j < contour.length; j++) {
             let point = contour[j];
-            let x = point.x * component.scaleX + point.y * component.scale01 + component.dx;
-            let y = point.y * component.scaleY + point.x * component.scale10 + component.dy;
+            let x = point.x * component.scaleX + point.y * component.scale10 + component.dx;
+            let y = point.y * component.scaleY + point.x * component.scale01 + component.dy;
             points.push(new Point(point.onCurve, point.endContour, x, y));
           }
         }

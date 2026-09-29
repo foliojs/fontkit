@@ -38,6 +38,14 @@ describe('glyphs', function () {
       return assert.equal(glyph.path.toSVG(), 'M639 -20Q396 -20 255.5 128Q115 276 115 539Q115 804 245.5 960Q376 1116 596 1116Q802 1116 922 980.5Q1042 845 1042 623L1042 518L287 518Q292 325 384.5 225Q477 125 645 125Q822 125 995 199L995 51Q907 13 828.5 -3.5Q750 -20 639 -20ZM594 977Q462 977 383.5 891Q305 805 291 653L864 653Q864 810 794 893.5Q724 977 594 977ZM471 1266Q519 1328 574.5 1416Q630 1504 662 1569L864 1569L864 1548Q820 1483 733 1388Q646 1293 582 1241L471 1241Z');
     });
 
+    it('should apply the correct off-diagonal coefficients to a composite glyph', function () {
+      // The test font has a rectangular component with different scale01 and scale10
+      // values, so swapping them changes the rendered outline.
+      let compositeFont = fontkit.openSync(new URL('data/composite-transform.ttf', import.meta.url));
+      let glyph = compositeFont.glyphForCodePoint(43); // +
+      assert.equal(glyph.path.toSVG(), 'M30 20L130 -30L140 10L40 60Z');
+    });
+
     it('should resolve composite glyphs recursively', function () {
       let r = mada.layout('ي');
       assert.equal(r.glyphs[0].path.toSVG(), 'M-140 0Q-140 -22 -125 -37Q-110 -52 -88 -52Q-66 -52 -51 -37Q-36 -22 -36 0Q-36 22 -51 37Q-66 52 -88 52Q-110 52 -125 37Q-140 22 -140 0ZM36 0Q36 -22 51 -37Q66 -52 88 -52Q110 -52 125 -37Q140 -22 140 0Q140 22 125 37Q110 52 88 52Q66 52 51 37Q36 22 36 0Z');
