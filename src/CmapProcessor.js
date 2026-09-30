@@ -146,26 +146,38 @@ export default class CmapProcessor {
 
   getVariationSelector(codepoint, variationSelector) {
     if (!this.uvs) {
+      // This font file does not contain information about variation forms.
       return 0;
     }
 
     let selectors = this.uvs.varSelectors.toArray();
     let i = binarySearch(selectors, x => variationSelector - x.varSelector);
+    if (i === -1) {
+      // There is no information about the specified variation form.
+      return 0;
+    }
     let sel = selectors[i];
 
-    if (i !== -1 && sel.defaultUVS) {
+    if (sel.defaultUVS) {
       i = binarySearch(sel.defaultUVS, x =>
         codepoint < x.startUnicodeValue ? -1 : codepoint > x.startUnicodeValue + x.additionalCount ? +1 : 0
       );
+      if (i !== -1) {
+        // Since this variation is the default form of this character,
+        // the base character’s glyph should be searched for as usual.
+        return 0;
+      }
     }
 
-    if (i !== -1 && sel.nonDefaultUVS) {
+    if (sel.nonDefaultUVS) {
       i = binarySearch(sel.nonDefaultUVS, x => codepoint - x.unicodeValue);
       if (i !== -1) {
+        // The glyph for this variation form has been identified.
         return sel.nonDefaultUVS[i].glyphID;
       }
     }
 
+    // The variation form was not found.
     return 0;
   }
 
