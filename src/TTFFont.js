@@ -518,13 +518,26 @@ export default class TTFFont {
       }
     });
 
-    let stream = new r.DecodeStream(this.stream.buffer);
-    stream.pos = this._directoryPos;
-
-    let font = new TTFFont(stream, coords);
+    let font = this._createVariation(coords);
     font._tables = this._tables;
 
     return font;
+  }
+
+  /**
+   * Creates the font `getVariation` returns: this font, read again from the
+   * same data, at the given coordinates. A subclass whose data is not an
+   * sfnt at `_directoryPos` — a WOFF2, which decompresses it — overrides this.
+   *
+   * @private
+   */
+  _createVariation(coords) {
+    let stream = new r.DecodeStream(this.stream.buffer);
+    stream.pos = this._directoryPos;
+
+    // The same class, so that a font in a container reads its directory,
+    // and its tables, the way the container holds them.
+    return new this.constructor(stream, coords);
   }
 
   @cache
