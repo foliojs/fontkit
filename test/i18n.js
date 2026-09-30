@@ -23,7 +23,7 @@ describe('i18n', function () {
 
     it('can set global default language to "ar"', function () {
       fontkit.setDefaultLanguage('ar');
-      assert.equal(fontkit.defaultLanguage, 'ar');
+      assert.equal(fontkit.defaultLanguage(), 'ar');
     });
 
     it('font now has "ar" metadata properties', function () {
@@ -37,7 +37,7 @@ describe('i18n', function () {
 
     it('can reset default language back to "en"', function () {
       fontkit.setDefaultLanguage();
-      assert.equal(fontkit.defaultLanguage, "en");
+      assert.equal(fontkit.defaultLanguage(), "en");
     });
   });
 
