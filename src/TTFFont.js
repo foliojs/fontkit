@@ -15,6 +15,10 @@ import CFFSubset from './subset/CFFSubset';
 import BBox from './glyph/BBox';
 import { asciiDecoder } from './utils';
 
+function needsCodePoints(glyph, characters) {
+  return glyph && glyph.codePoints.length === 0 && characters.length > 0;
+}
+
 /**
  * This is the base class for all SFNT-based font formats in fontkit.
  * It supports TrueType, and PostScript glyphs, and several color glyph formats.
@@ -385,21 +389,16 @@ export default class TTFFont {
   }
 
   _getBaseGlyph(glyph, characters = []) {
-    let key = this._getGlyphKey(glyph, characters);
-    if (!this._glyphs[key]) {
+    if (!this._glyphs[glyph]) {
       if (this.directory.tables.glyf) {
-        this._glyphs[key] = new TTFGlyph(glyph, characters, this);
+        this._glyphs[glyph] = new TTFGlyph(glyph, characters, this);
 
       } else if (this.directory.tables['CFF '] || this.directory.tables.CFF2) {
-        this._glyphs[key] = new CFFGlyph(glyph, characters, this);
+        this._glyphs[glyph] = new CFFGlyph(glyph, characters, this);
       }
     }
 
-    return this._glyphs[key] || null;
-  }
-
-  _getGlyphKey(glyph, characters = []) {
-    return `${glyph}:${characters.join(',')}`;
+    return this._glyphs[glyph] || null;
   }
 
   /**
@@ -412,21 +411,24 @@ export default class TTFFont {
    * @return {Glyph}
    */
   getGlyph(glyph, characters = []) {
-    let key = this._getGlyphKey(glyph, characters);
+    // Composite decomposition can cache a component before its code points are known.
+    if (needsCodePoints(this._glyphs[glyph], characters)) {
+      delete this._glyphs[glyph];
+    }
 
-    if (!this._glyphs[key]) {
+    if (!this._glyphs[glyph]) {
       if (this.directory.tables.sbix) {
-        this._glyphs[key] = new SBIXGlyph(glyph, characters, this);
+        this._glyphs[glyph] = new SBIXGlyph(glyph, characters, this);
 
       } else if ((this.directory.tables.COLR) && (this.directory.tables.CPAL)) {
-        this._glyphs[key] = new COLRGlyph(glyph, characters, this);
+        this._glyphs[glyph] = new COLRGlyph(glyph, characters, this);
 
       } else {
         this._getBaseGlyph(glyph, characters);
       }
     }
 
-    return this._glyphs[key] || null;
+    return this._glyphs[glyph] || null;
   }
 
   /**
