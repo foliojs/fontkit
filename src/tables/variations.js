@@ -46,7 +46,6 @@ export let ItemVariationStore = new r.Struct({
 let ConditionTable = new r.VersionedStruct(r.uint16, {
   1: {
     axisIndex: r.uint16,
-    axisIndex: r.uint16,
     filterRangeMinValue: F2DOT14,
     filterRangeMaxValue: F2DOT14
   }
