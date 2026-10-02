@@ -38,9 +38,13 @@ export default class OTLayoutEngine {
     }
 
     // Choose a shaper based on the script, and setup a shaping plan.
-    // This determines which features to apply to which glyphs.
-    this.shaper = Shapers.choose(script);
-    this.plan = new ShapingPlan(this.font, script, glyphRun.direction);
+    // This determines which features to apply to which glyphs. Fall back
+    // to the buffer's Unicode script when neither GSUB nor GPOS picked an
+    // OT script — script-specific shaping (e.g. Thai SARA AM decomp, the
+    // PUA fallback for fonts without Thai GSUB) still applies.
+    let shaperScript = script || glyphRun.script;
+    this.shaper = Shapers.choose(shaperScript);
+    this.plan = new ShapingPlan(this.font, shaperScript, glyphRun.direction);
     this.shaper.plan(this.plan, this.glyphInfos, glyphRun.features);
 
     // Assign chosen features to output glyph run

@@ -2,6 +2,7 @@ import DefaultShaper from './DefaultShaper';
 import ArabicShaper from './ArabicShaper';
 import HangulShaper from './HangulShaper';
 import IndicShaper from './IndicShaper';
+import ThaiShaper from './ThaiShaper';
 import UniversalShaper from './UniversalShaper';
 
 const SHAPERS = {
@@ -35,6 +36,9 @@ const SHAPERS = {
   telu: IndicShaper,     // Telugu
   tel2: IndicShaper,     // Telugu
   khmr: IndicShaper,     // Khmer
+
+  thai: ThaiShaper,      // Thai
+  'lao ': ThaiShaper,    // Lao (4-char OT tag with trailing space)
 
   bali: UniversalShaper, // Balinese
   batk: UniversalShaper, // Batak
