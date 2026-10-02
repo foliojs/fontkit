@@ -393,7 +393,9 @@ export default class OTProcessor {
 
         let set = table.chainRuleSets[index];
         for (let rule of set) {
-          if (this.sequenceMatches(-rule.backtrack.length, rule.backtrack)
+          // Backtrack is stored in reverse order per OpenType spec, so reverse
+          // it before matching forward from the start position.
+          if (this.sequenceMatches(-rule.backtrack.length, [...rule.backtrack].reverse())
             && this.sequenceMatches(1, rule.input)
             && this.sequenceMatches(1 + rule.input.length, rule.lookahead)) {
             return this.applyLookupList(rule.lookupRecords);
@@ -414,7 +416,8 @@ export default class OTProcessor {
         }
 
         for (let rule of rules) {
-          if (this.classSequenceMatches(-rule.backtrack.length, rule.backtrack, table.backtrackClassDef) &&
+          // Backtrack is stored in reverse order per OpenType spec.
+          if (this.classSequenceMatches(-rule.backtrack.length, [...rule.backtrack].reverse(), table.backtrackClassDef) &&
             this.classSequenceMatches(1, rule.input, table.inputClassDef) &&
             this.classSequenceMatches(1 + rule.input.length, rule.lookahead, table.lookaheadClassDef)) {
             return this.applyLookupList(rule.lookupRecords);
@@ -424,7 +427,8 @@ export default class OTProcessor {
         break;
 
       case 3:
-        if (this.coverageSequenceMatches(-table.backtrackGlyphCount, table.backtrackCoverage) &&
+        // Backtrack is stored in reverse order per OpenType spec.
+        if (this.coverageSequenceMatches(-table.backtrackGlyphCount, [...table.backtrackCoverage].reverse()) &&
           this.coverageSequenceMatches(0, table.inputCoverage) &&
           this.coverageSequenceMatches(table.inputGlyphCount, table.lookaheadCoverage)) {
           return this.applyLookupList(table.lookupRecords);
