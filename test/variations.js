@@ -123,6 +123,81 @@ describe('variations', function () {
     });
   });
 
+  describe('WOFF and WOFF2 variations', function () {
+    // For each variable TrueType test font we ship in both WOFF and WOFF2,
+    // confirm that getVariation() produces the same glyph path and advance
+    // width as the equivalent .ttf at the same variation settings. The .ttf
+    // results are produced by the assertions above; here we just compare
+    // against them as the source of truth so any future divergence is
+    // reported as a clear mismatch.
+    let cases = [
+      { name: 'TestGVAROne',   char: '彌', settings: { wght: 300 } },
+      { name: 'TestGVARTwo',   char: '彌', settings: { wght: 300 } },
+      { name: 'TestGVARThree', char: '彌', settings: { wght: 300 } },
+      { name: 'TestGVARFour',  char: 'O',  settings: { wght: 150 } },
+      { name: 'TestHVARTwo',   char: 'A',  settings: { wght: 400 } },
+    ];
+
+    function variationGlyph(filename, settings, char) {
+      let font = fontkit.openSync(new URL('data/fonttest/' + filename, import.meta.url));
+      let variation = font.getVariation(settings);
+      return { font: variation, glyph: variation.glyphsForString(char)[0] };
+    }
+
+    for (let { name, char, settings } of cases) {
+      describe(name, function () {
+        let ttf = variationGlyph(name + '.ttf', settings, char);
+        let ttfSvg = ttf.glyph.path.toSVG();
+        let ttfAdvance = Math.round(ttf.glyph.advanceWidth);
+
+        it('matches TTF output when loaded from WOFF', function () {
+          let { font, glyph } = variationGlyph(name + '.woff', settings, char);
+          assert.equal(font.type, 'WOFF');
+          assert.equal(glyph.path.toSVG(), ttfSvg);
+          assert.equal(Math.round(glyph.advanceWidth), ttfAdvance);
+        });
+
+        it('matches TTF output when loaded from WOFF2', function () {
+          let { font, glyph } = variationGlyph(name + '.woff2', settings, char);
+          assert.equal(font.type, 'WOFF2');
+          assert.equal(glyph.path.toSVG(), ttfSvg);
+          assert.equal(Math.round(glyph.advanceWidth), ttfAdvance);
+        });
+      });
+    }
+
+    it('returns a font of the same type as the source for WOFF', function () {
+      let font = fontkit.openSync(new URL('data/fonttest/TestGVAROne.woff', import.meta.url));
+      let variation = font.getVariation({ wght: 300 });
+      assert.equal(variation.type, 'WOFF');
+    });
+
+    it('returns a font of the same type as the source for WOFF2', function () {
+      let font = fontkit.openSync(new URL('data/fonttest/TestGVAROne.woff2', import.meta.url));
+      let variation = font.getVariation({ wght: 300 });
+      assert.equal(variation.type, 'WOFF2');
+    });
+
+    it('does not mutate the source font when applying a variation (WOFF2)', function () {
+      let font = fontkit.openSync(new URL('data/fonttest/TestGVAROne.woff2', import.meta.url));
+      let originalSvg = font.glyphsForString('彌')[0].path.toSVG();
+      font.getVariation({ wght: 300 }).glyphsForString('彌')[0].path.toSVG();
+      let afterSvg = font.glyphsForString('彌')[0].path.toSVG();
+      assert.equal(afterSvg, originalSvg);
+    });
+
+    it('produces independent results when getVariation is called multiple times (WOFF2)', function () {
+      let font = fontkit.openSync(new URL('data/fonttest/TestGVAROne.woff2', import.meta.url));
+      let light = font.getVariation({ wght: 0 }).glyphsForString('彌')[0].path.toSVG();
+      let bold = font.getVariation({ wght: 1000 }).glyphsForString('彌')[0].path.toSVG();
+      assert.notEqual(light, bold);
+      // Calling again must yield the same result for the same coords.
+      let lightAgain = font.getVariation({ wght: 0 }).glyphsForString('彌')[0].path.toSVG();
+      assert.equal(lightAgain, light);
+    });
+
+  });
+
   describe('CFF2 variations', function () {
     let font = fontkit.openSync(new URL('data/fonttest/AdobeVFPrototype-Subset.otf', import.meta.url));
 
