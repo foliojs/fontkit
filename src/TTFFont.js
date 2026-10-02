@@ -15,6 +15,10 @@ import CFFSubset from './subset/CFFSubset';
 import BBox from './glyph/BBox';
 import { asciiDecoder } from './utils';
 
+function needsCodePoints(glyph, characters) {
+  return glyph && glyph.codePoints.length === 0 && characters.length > 0;
+}
+
 /**
  * This is the base class for all SFNT-based font formats in fontkit.
  * It supports TrueType, and PostScript glyphs, and several color glyph formats.
@@ -407,6 +411,11 @@ export default class TTFFont {
    * @return {Glyph}
    */
   getGlyph(glyph, characters = []) {
+    // Composite decomposition can cache a component before its code points are known.
+    if (needsCodePoints(this._glyphs[glyph], characters)) {
+      delete this._glyphs[glyph];
+    }
+
     if (!this._glyphs[glyph]) {
       if (this.directory.tables.sbix) {
         this._glyphs[glyph] = new SBIXGlyph(glyph, characters, this);
