@@ -169,11 +169,7 @@ export default class TTFGlyph extends Glyph {
     }
 
     if (this._font._variationProcessor) {
-      let points = glyph.points.slice();
-      points.push(...this._getPhantomPoints(glyph));
-
-      this._font._variationProcessor.transformPoints(this.id, points);
-      glyph.phantomPoints = points.slice(-4);
+      this._applyVariation(glyph);
     }
 
     return;
@@ -224,6 +220,24 @@ export default class TTFGlyph extends Glyph {
     }
 
     if (this._font._variationProcessor) {
+      this._applyVariation(glyph);
+    }
+
+    return haveInstructions;
+  }
+
+  // Moves a decoded glyph to the font's variation coordinates: the points
+  // of a simple glyph, or the offsets of a composite glyph's components,
+  // and the phantom points its metrics are then measured from.
+  _applyVariation(glyph) {
+    if (glyph.numberOfContours > 0) {
+      let points = glyph.points.slice();
+      points.push(...this._getPhantomPoints(glyph));
+
+      this._font._variationProcessor.transformPoints(this.id, points);
+      glyph.phantomPoints = points.slice(-4);
+
+    } else if (glyph.numberOfContours < 0) {
       let points = [];
       for (let j = 0; j < glyph.components.length; j++) {
         var component = glyph.components[j];
@@ -241,8 +255,6 @@ export default class TTFGlyph extends Glyph {
         glyph.components[i].dy = point.y;
       }
     }
-
-    return haveInstructions;
   }
 
   _getPhantomPoints(glyph) {
