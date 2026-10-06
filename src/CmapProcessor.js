@@ -69,6 +69,11 @@ export default class CmapProcessor {
       }
     }
 
+    return this._lookupCode(codepoint);
+  }
+
+  // Maps a code in the selected cmap subtable to a glyph id, or 0 if unmapped
+  _lookupCode(codepoint) {
     let cmap = this.cmap;
     switch (cmap.version) {
       case 0:
@@ -171,6 +176,11 @@ export default class CmapProcessor {
 
   @cache
   getCharacterSet() {
+    // Codes that map to glyph 0 (.notdef) are not supported characters
+    return this._getCodes().filter(code => this._lookupCode(code) !== 0);
+  }
+
+  _getCodes() {
     let cmap = this.cmap;
     switch (cmap.version) {
       case 0:
