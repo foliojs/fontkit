@@ -7,7 +7,16 @@ describe('character to glyph mapping', function () {
 
     it('should get characterSet', function () {
       assert(Array.isArray(font.characterSet));
-      return assert.equal(font.characterSet.length, 884);
+      return assert.equal(font.characterSet.length, 883);
+    });
+
+    it('should leave code points mapped to .notdef out of characterSet', function () {
+      // U+FFFF is only the closing segment of the format 4 subtable (#158)
+      assert(!font.characterSet.includes(0xffff));
+      assert(font.characterSet.every(codePoint => font.hasGlyphForCodePoint(codePoint)));
+
+      let cmap14 = fontkit.openSync(new URL('data/fonttest/TestCMAP14.otf', import.meta.url));
+      assert.deepEqual(cmap14.characterSet, [0x20, 0x2269, 0x82a6]);
     });
 
     it('should check if a character is supported', function () {
