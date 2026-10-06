@@ -44,6 +44,14 @@ describe('character to glyph mapping', function () {
       assert.deepEqual(glyphs.map(g => g.id), [1, 1, 2]);
     });
 
+    it('should support cmap format 10', function () {
+      let font = fontkit.openSync(new URL('data/aots/cmap10_font1.otf', import.meta.url));
+      assert.deepEqual(font.characterSet, [0x109423, 0x109424, 0x109425]);
+
+      let glyphs = font.glyphsForString('\u{109423}\u{109424}\u{109425}');
+      assert.deepEqual(glyphs.map(g => g.id), [26, 27, 32]);
+    });
+
     it('should support legacy encodings when no unicode cmap is found', function () {
       let font = fontkit.openSync(new URL('data/fonttest/TestCMAPMacTurkish.ttf', import.meta.url));
       let glyphs = font.glyphsForString("“ABÇĞIİÖŞÜ”");
