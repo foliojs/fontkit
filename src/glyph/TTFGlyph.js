@@ -251,7 +251,13 @@ export default class TTFGlyph extends Glyph {
       this._metrics = Glyph.prototype._getMetrics.call(this, cbox);
     }
 
-    let { advanceWidth, advanceHeight, leftBearing, topBearing } = this._metrics;
+    // _getContours replaces this._metrics with the varied metrics, and a glyph
+    // is decoded again for every composite using it, so keep the default ones.
+    if (this._defaultMetrics == null) {
+      this._defaultMetrics = Object.assign({}, this._metrics);
+    }
+
+    let { advanceWidth, advanceHeight, leftBearing, topBearing } = this._defaultMetrics;
 
     return [
       new Point(false, true, glyph.xMin - leftBearing, 0),

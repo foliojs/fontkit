@@ -121,6 +121,12 @@ describe('variations', function () {
       assert.equal(Math.floor(run.positions[0].xOffset), 639);
       assert.equal(Math.floor(run.positions[0].yOffset), 542);
     });
+
+    it('should not change variation metrics of glyphs used by several composites', function () {
+      let font = fontkit.openSync(new URL('data/Mada/Mada-VF.ttf', import.meta.url)).getVariation({ wght: 100 });
+      let run = font.layout('\u00ec\u00ed\u00ee\u00ef\u0131');
+      assert.deepEqual(run.positions.map(p => p.xAdvance), [229, 229, 229, 229, 229]);
+    });
   });
 
   describe('CFF2 variations', function () {
