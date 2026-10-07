@@ -19,6 +19,10 @@ function needsCodePoints(glyph, characters) {
   return glyph && glyph.codePoints.length === 0 && characters.length > 0;
 }
 
+function hasCodePoints(glyph, characters) {
+  return glyph.codePoints.length === characters.length && glyph.codePoints.every((c, i) => c === characters[i]);
+}
+
 /**
  * This is the base class for all SFNT-based font formats in fontkit.
  * It supports TrueType, and PostScript glyphs, and several color glyph formats.
@@ -39,6 +43,7 @@ export default class TTFFont {
     this._directoryPos = this.stream.pos;
     this._tables = {};
     this._glyphs = {};
+    this._glyphsByCharacters = {};
     this._decodeDirectory();
 
     // define properties for each table to lazily parse
@@ -428,7 +433,23 @@ export default class TTFFont {
       }
     }
 
-    return this._glyphs[glyph] || null;
+    let cached = this._glyphs[glyph] || null;
+
+    // Glyphs shared by several code points (e.g. space and no-break space) are cached with the first caller's.
+    if (cached && characters.length > 0 && !hasCodePoints(cached, characters)) {
+      return this._getGlyphForCharacters(cached, characters);
+    }
+
+    return cached;
+  }
+
+  _getGlyphForCharacters(base, characters) {
+    let key = base.id + ':' + characters.join(',');
+    if (!this._glyphsByCharacters[key]) {
+      this._glyphsByCharacters[key] = new base.constructor(base.id, characters, this);
+    }
+
+    return this._glyphsByCharacters[key];
   }
 
   /**
