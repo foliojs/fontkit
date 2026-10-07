@@ -267,6 +267,18 @@ export default class CmapProcessor {
         return res;
       }
 
+      case 6:
+      case 10: {
+        let res = [];
+        for (let i = 0; i < cmap.glyphIndices.length; i++) {
+          if (cmap.glyphIndices.get(i) === gid) {
+            res.push(cmap.firstCode + i);
+          }
+        }
+
+        return res;
+      }
+
       case 12: {
         let res = [];
         for (let group of cmap.groups.toArray()) {

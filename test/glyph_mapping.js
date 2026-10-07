@@ -50,6 +50,7 @@ describe('character to glyph mapping', function () {
 
       let glyphs = font.glyphsForString('\u{109423}\u{109424}\u{109425}');
       assert.deepEqual(glyphs.map(g => g.id), [26, 27, 32]);
+      assert.deepEqual(font.stringsForGlyph(27), ['\u{109424}']);
     });
 
     it('should support legacy encodings when no unicode cmap is found', function () {
