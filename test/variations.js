@@ -126,6 +126,7 @@ describe('variations', function () {
       let font = fontkit.openSync(new URL('data/Mada/Mada-VF.ttf', import.meta.url)).getVariation({ wght: 100 });
       let run = font.layout('\u00ec\u00ed\u00ee\u00ef\u0131');
       assert.deepEqual(run.positions.map(p => p.xAdvance), [229, 229, 229, 229, 229]);
+      assert.deepEqual(font.layout('\u00e9\u00e8e').positions.map(p => p.xAdvance), [483, 483, 483]);
     });
   });
 

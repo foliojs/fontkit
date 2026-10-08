@@ -253,7 +253,7 @@ export default class TTFGlyph extends Glyph {
 
     // _getContours replaces this._metrics with the varied metrics, and a glyph
     // is decoded again for every composite using it, so keep the default ones.
-    if (this._defaultMetrics == null) {
+    if (!this._defaultMetrics) {
       this._defaultMetrics = Object.assign({}, this._metrics);
     }
 
