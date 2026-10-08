@@ -63,7 +63,7 @@ export default class CmapProcessor {
       // have no glyph unless the encoding can represent them.
       if (codepoint >= 0x80) {
         codepoint = this.encoding.get(codepoint);
-        if (codepoint == null) {
+        if (!codepoint) {
           return 0;
         }
       }
