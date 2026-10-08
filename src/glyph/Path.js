@@ -63,6 +63,14 @@ export default class Path {
         }
       }
 
+      if (this.commands.length === 0) {
+        // No content, put 0 instead of Infinity
+        cbox.minX = 0;
+        cbox.minY = 0;
+        cbox.maxX = 0;
+        cbox.maxY = 0;
+      }
+
       this._cbox = Object.freeze(cbox);
     }
 
@@ -170,6 +178,14 @@ export default class Path {
           cy = p3y;
           break;
       }
+    }
+
+    if (this.commands.length === 0) {
+      // No content, put 0 instead of Infinity
+      bbox.minX = 0;
+      bbox.minY = 0;
+      bbox.maxX = 0;
+      bbox.maxY = 0;
     }
 
     return this._bbox = Object.freeze(bbox);
