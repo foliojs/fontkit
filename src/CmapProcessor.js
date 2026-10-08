@@ -59,7 +59,14 @@ export default class CmapProcessor {
     // If there is no Unicode cmap in this font, we need to re-encode
     // the codepoint in the encoding that the cmap supports.
     if (this.encoding) {
-      codepoint = this.encoding.get(codepoint) || codepoint;
+      // ASCII is shared by all supported legacy encodings. Other code points
+      // have no glyph unless the encoding can represent them.
+      if (codepoint >= 0x80) {
+        codepoint = this.encoding.get(codepoint);
+        if (!codepoint) {
+          return 0;
+        }
+      }
 
       // Otherwise, try to get a Unicode variation selector for this codepoint if one is provided.
     } else if (variationSelector) {

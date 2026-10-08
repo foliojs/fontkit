@@ -58,6 +58,12 @@ describe('character to glyph mapping', function () {
       let glyphs = font.glyphsForString("“ABÇĞIİÖŞÜ”");
       assert.deepEqual(glyphs.map(g => g.id), [200, 34, 35, 126, 176, 42, 178, 140, 181, 145, 201]);
     });
+
+    it('should not map code points missing from a legacy encoding to other glyphs', function () {
+      let font = fontkit.openSync(new URL('data/fonttest/TestCMAPMacTurkish.ttf', import.meta.url));
+      let glyphs = font.glyphsForString(' \u00a0\u00b9\u0080');
+      assert.deepEqual(glyphs.map(g => g.id), [1, 96, 0, 0]);
+    });
   });
 
   describe('opentype features', function () {
