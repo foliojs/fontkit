@@ -19,18 +19,32 @@ export default class WOFFFont extends TTFFont {
   _getTableStream(tag) {
     let table = this.directory.tables[tag];
     if (table) {
-      this.stream.pos = table.offset;
-
       if (table.compLength < table.length) {
-        this.stream.pos += 2; // skip deflate header
-        let outBuffer = new Uint8Array(table.length);
-        let buf = inflate(this.stream.readBuffer(table.compLength - 2), outBuffer);
+        // Inflated once, and kept: a glyph asks for `glyf`, and a variation
+        // for `gvar`, once for every glyph.
+        let inflated = this._inflated || (this._inflated = {});
+        let buf = inflated[tag];
+        if (!buf) {
+          this.stream.pos = table.offset + 2; // skip deflate header
+          let outBuffer = new Uint8Array(table.length);
+          buf = inflated[tag] = inflate(this.stream.readBuffer(table.compLength - 2), outBuffer);
+        }
+
         return new r.DecodeStream(buf);
       } else {
+        this.stream.pos = table.offset;
         return this.stream;
       }
     }
 
     return null;
+  }
+
+  _createVariation(coords) {
+    let font = super._createVariation(coords);
+
+    // The tables are the same bytes at any coordinates
+    font._inflated = this._inflated || (this._inflated = {});
+    return font;
   }
 }

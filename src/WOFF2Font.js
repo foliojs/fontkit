@@ -40,9 +40,42 @@ export default class WOFF2Font extends TTFFont {
         throw new Error('Error decoding compressed data in WOFF2');
       }
 
+      // A variation reads the directory again (see _createVariation),
+      // so a font that has any keeps the file it came in.
+      if (this.directory.tables.fvar) {
+        this._file = this.stream;
+      }
+
       this.stream = new r.DecodeStream(decompressed);
       this._decompressed = true;
     }
+  }
+
+  _createVariation(coords) {
+    // By now `this.stream` is the decompressed tables, with no directory in
+    // front of them. The directory is read from the file again, and the
+    // tables are not decompressed again: the variation reads this font's.
+    this._decompress();
+
+    let stream = new r.DecodeStream(this._file.buffer);
+    stream.pos = this._directoryPos;
+
+    let font = new this.constructor(stream, coords);
+    for (let tag in font.directory.tables) {
+      font.directory.tables[tag].offset = this.directory.tables[tag].offset;
+    }
+
+    font._file = this._file;
+    font.stream = new r.DecodeStream(this.stream.buffer);
+    font._decompressed = true;
+
+    // Nor are the glyphs decoded again: WOFF2Glyph moves a copy of each.
+    if (this.directory.tables.glyf && this.directory.tables.glyf.transformed) {
+      if (!this._transformedGlyphs) { this._transformGlyfTable(); }
+      font._transformedGlyphs = this._transformedGlyphs;
+    }
+
+    return font;
   }
 
   _decodeTable(table) {
@@ -70,8 +103,12 @@ export default class WOFF2Font extends TTFFont {
     let table = GlyfTable.decode(this.stream);
     let glyphs = [];
 
+    // The bounding boxes stream starts with a bit for each glyph, set for
+    // the ones whose box is stored. The rest are computed from the points.
+    let bboxBitmap = table.bboxes.readBuffer(((table.numGlyphs + 31) >> 5) << 2);
+
     for (let index = 0; index < table.numGlyphs; index++) {
-      let glyph = {};
+      let glyph = { xMin: 0, yMin: 0, xMax: 0, yMax: 0 };
       let nContours = table.nContours.readInt16BE();
       glyph.numberOfContours = nContours;
 
@@ -93,10 +130,21 @@ export default class WOFF2Font extends TTFFont {
         var instructionSize = read255UInt16(table.glyphs);
 
       } else if (nContours < 0) { // composite glyph
-        let haveInstructions = TTFGlyph.prototype._decodeComposite.call({ _font: this }, glyph, table.composites);
+        // Decoded as the file has it, whatever this font's coordinates:
+        // the glyphs are shared with its variations.
+        let haveInstructions = TTFGlyph.prototype._decodeComposite.call({ _font: {} }, glyph, table.composites);
         if (haveInstructions) {
           var instructionSize = read255UInt16(table.glyphs);
         }
+      }
+
+      if (bboxBitmap[index >> 3] & (0x80 >> (index & 7))) {
+        glyph.xMin = table.bboxes.readInt16BE();
+        glyph.yMin = table.bboxes.readInt16BE();
+        glyph.xMax = table.bboxes.readInt16BE();
+        glyph.yMax = table.bboxes.readInt16BE();
+      } else if (nContours > 0) {
+        setBBox(glyph);
       }
 
       glyphs.push(glyph);
@@ -138,6 +186,23 @@ let GlyfTable = new r.Struct({
   bboxes: new Substream('bboxStreamSize'),
   instructions: new Substream('instructionStreamSize')
 });
+
+// Computes the bounding box an encoder left out: that of a simple glyph's
+// points, on and off the curve.
+function setBBox(glyph) {
+  let xMin = Infinity, yMin = Infinity, xMax = -Infinity, yMax = -Infinity;
+  for (let point of glyph.points) {
+    if (point.x < xMin) { xMin = point.x; }
+    if (point.x > xMax) { xMax = point.x; }
+    if (point.y < yMin) { yMin = point.y; }
+    if (point.y > yMax) { yMax = point.y; }
+  }
+
+  glyph.xMin = xMin;
+  glyph.yMin = yMin;
+  glyph.xMax = xMax;
+  glyph.yMax = yMax;
+}
 
 const WORD_CODE = 253;
 const ONE_MORE_BYTE_CODE2 = 254;

@@ -72,8 +72,10 @@ export default class GlyphVariationProcessor {
     let offset = gvar.offsets[gid];
     if (offset === gvar.offsets[gid + 1]) { return; }
 
-    // Read the gvar data for this glyph
-    let { stream } = this.font;
+    // Read the gvar data for this glyph, from the stream its table was
+    // decoded from, which the offsets are positions in. That is the font's
+    // own, unless the table is compressed by itself (WOFF).
+    let stream = this.font._getTableStream('gvar');
     stream.pos = offset;
     if (stream.pos >= stream.length) {
       return;
@@ -85,7 +87,7 @@ export default class GlyphVariationProcessor {
     if (tupleCount & TUPLES_SHARE_POINT_NUMBERS) {
       var here = stream.pos;
       stream.pos = offsetToData;
-      var sharedPoints = this.decodePoints();
+      var sharedPoints = this.decodePoints(stream);
       offsetToData = stream.pos;
       stream.pos = here;
     }
@@ -134,15 +136,15 @@ export default class GlyphVariationProcessor {
       stream.pos = offsetToData;
 
       if (tupleIndex & PRIVATE_POINT_NUMBERS) {
-        var points = this.decodePoints();
+        var points = this.decodePoints(stream);
       } else {
         var points = sharedPoints;
       }
 
       // points.length = 0 means there are deltas for all points
       let nPoints = points.length === 0 ? glyphPoints.length : points.length;
-      let xDeltas = this.decodeDeltas(nPoints);
-      let yDeltas = this.decodeDeltas(nPoints);
+      let xDeltas = this.decodeDeltas(stream, nPoints);
+      let yDeltas = this.decodeDeltas(stream, nPoints);
 
       if (points.length === 0) { // all points
         for (let i = 0; i < glyphPoints.length; i++) {
@@ -181,8 +183,7 @@ export default class GlyphVariationProcessor {
     }
   }
 
-  decodePoints() {
-    let stream = this.font.stream;
+  decodePoints(stream) {
     let count = stream.readUInt8();
 
     if (count & POINTS_ARE_WORDS) {
@@ -206,8 +207,7 @@ export default class GlyphVariationProcessor {
     return points;
   }
 
-  decodeDeltas(count) {
-    let stream = this.font.stream;
+  decodeDeltas(stream, count) {
     let i = 0;
     let deltas = new Int16Array(count);
 
