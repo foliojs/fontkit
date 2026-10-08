@@ -16,21 +16,46 @@ export default class WOFFFont extends TTFFont {
     this.directory = WOFFDirectory.decode(this.stream, { _startOffset: 0 });
   }
 
-  _getTableStream(tag) {
-    let table = this.directory.tables[tag];
-    if (table) {
-      this.stream.pos = table.offset;
+  _decodeTable(table) {
+    this._decompress();
+    return super._decodeTable(table);
+  }
 
-      if (table.compLength < table.length) {
-        this.stream.pos += 2; // skip deflate header
-        let outBuffer = new Uint8Array(table.length);
-        let buf = inflate(this.stream.readBuffer(table.compLength - 2), outBuffer);
-        return new r.DecodeStream(buf);
-      } else {
-        return this.stream;
-      }
+  // Inflate all tables into a single contiguous stream so that table-internal
+  // offsets remain valid against `this.stream` after decoding. Without this,
+  // tables that are deflated in the WOFF file (e.g. `gvar`) would be decoded
+  // from a temporary per-table inflate buffer, while code that later re-reads
+  // the table (e.g. GlyphVariationProcessor) reads from `this.stream` — and
+  // gets garbage. Mirrors WOFF2Font's _decompress for the same reason.
+  _decompress() {
+    if (this._decompressed) return;
+
+    // Lay each table out at 4-byte aligned offsets and compute total size.
+    let totalSize = 0;
+    let layout = [];
+    for (let tag in this.directory.tables) {
+      let entry = this.directory.tables[tag];
+      layout.push({ entry, newOffset: totalSize });
+      totalSize += entry.length;
+      totalSize = (totalSize + 3) & ~3;
     }
 
-    return null;
+    let buffer = new Uint8Array(totalSize);
+    for (let { entry, newOffset } of layout) {
+      this.stream.pos = entry.offset;
+      let data;
+      if (entry.compLength < entry.length) {
+        this.stream.pos += 2; // skip 2-byte zlib header
+        data = new Uint8Array(entry.length);
+        inflate(this.stream.readBuffer(entry.compLength - 2), data);
+      } else {
+        data = this.stream.readBuffer(entry.length);
+      }
+      buffer.set(data, newOffset);
+      entry.offset = newOffset;
+    }
+
+    this.stream = new r.DecodeStream(buffer);
+    this._decompressed = true;
   }
 }
