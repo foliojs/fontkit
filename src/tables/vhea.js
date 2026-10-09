@@ -2,11 +2,11 @@ import * as r from 'restructure';
 
 // Vertical Header Table
 export default new r.Struct({
-  version:                r.uint16,  // Version number of the Vertical Header Table
+  version:                r.fixed32, // Version number of the Vertical Header Table
   ascent:                 r.int16,   // The vertical typographic ascender for this font
   descent:                r.int16,   // The vertical typographic descender for this font
   lineGap:                r.int16,   // The vertical typographic line gap for this font
-  advanceHeightMax:       r.int16,   // The maximum advance height measurement found in the font
+  advanceHeightMax:       r.uint16,  // The maximum advance height measurement found in the font
   minTopSideBearing:      r.int16,   // The minimum top side bearing measurement found in the font
   minBottomSideBearing:   r.int16,   // The minimum bottom side bearing measurement found in the font
   yMaxExtent:             r.int16,
