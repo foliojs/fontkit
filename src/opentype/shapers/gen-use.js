@@ -1,6 +1,6 @@
 import codepoints from 'codepoints';
 import fs from 'fs';
-import UnicodeTrieBuilder from 'unicode-trie/builder.js';
+import { UnicodeTrieBuilder } from 'unicode-trie/builder.js';
 import dfa from 'dfa/compile.js';
 
 const compile = dfa.default;

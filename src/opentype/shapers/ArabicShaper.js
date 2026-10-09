@@ -1,6 +1,6 @@
 import DefaultShaper from './DefaultShaper';
-import {getCategory} from 'unicode-properties';
-import UnicodeTrie from 'unicode-trie';
+import { getCategory } from 'unicode-properties';
+import { UnicodeTrie } from 'unicode-trie';
 import { decodeBase64 } from '../../utils';
 
 const trie = new UnicodeTrie(decodeBase64(require('fs').readFileSync(__dirname + '/data.trie', 'base64')));

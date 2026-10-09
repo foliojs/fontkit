@@ -4,7 +4,7 @@
 //
 import codepoints from 'codepoints';
 import fs from 'fs';
-import UnicodeTrieBuilder from 'unicode-trie/builder.js';
+import { UnicodeTrieBuilder } from 'unicode-trie/builder.js';
 
 let ShapingClasses = {
   Non_Joining: 0,
@@ -17,7 +17,7 @@ let ShapingClasses = {
   Transparent: 6
 };
 
-let trie = new UnicodeTrieBuilder;
+let trie = new UnicodeTrieBuilder();
 for (let i = 0; i < codepoints.length; i++) {
   let codepoint = codepoints[i];
   if (codepoint) {
