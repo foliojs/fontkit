@@ -1,6 +1,6 @@
 import AATStateMachine from './AATStateMachine';
 import AATLookupTable from './AATLookupTable';
-import {cache} from '../decorators';
+import {cache} from '../cache';
 
 // indic replacement flags
 const MARK_FIRST = 0x8000;
@@ -104,7 +104,6 @@ export default class AATMorxProcessor {
     return stateMachine.process(this.glyphs, reverse, process);
   }
 
-  @cache
   getStateMachine(subtable) {
     return new AATStateMachine(subtable.table.stateTable);
   }
@@ -354,6 +353,10 @@ export default class AATMorxProcessor {
     });
   }
 }
+
+cache(AATMorxProcessor, {
+  getStateMachine: 'key'
+});
 
 // swaps the glyphs in rangeA with those in rangeB
 // reverse the glyphs inside those ranges if specified

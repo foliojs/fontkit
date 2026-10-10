@@ -1,4 +1,4 @@
-import { cache } from '../decorators';
+import { cache } from '../cache';
 import Path from './Path';
 import {isMark} from 'unicode-properties';
 import StandardNames from './StandardNames';
@@ -101,7 +101,6 @@ export default class Glyph {
    *
    * @type {BBox}
    */
-  @cache
   get cbox() {
     return this._getCBox();
   }
@@ -111,7 +110,6 @@ export default class Glyph {
    * glyph outline as tightly as possible.
    * @type {BBox}
    */
-  @cache
   get bbox() {
     return this._getBBox();
   }
@@ -120,7 +118,6 @@ export default class Glyph {
    * A vector Path object representing the glyph outline.
    * @type {Path}
    */
-  @cache
   get path() {
     // Cache the path so we only decode it once
     // Decoding is actually performed by subclasses
@@ -141,7 +138,6 @@ export default class Glyph {
    * The glyph's advance width.
    * @type {number}
    */
-  @cache
   get advanceWidth() {
     return this._getMetrics().advanceWidth;
   }
@@ -150,7 +146,6 @@ export default class Glyph {
    * The glyph's advance height.
    * @type {number}
    */
-  @cache
   get advanceHeight() {
     return this._getMetrics().advanceHeight;
   }
@@ -187,7 +182,6 @@ export default class Glyph {
    * The glyph's name
    * @type {string}
    */
-  @cache
   get name() {
     return this._getName();
   }
@@ -210,3 +204,12 @@ export default class Glyph {
     ctx.restore();
   }
 }
+
+cache(Glyph, {
+  cbox: 'once',
+  bbox: 'once',
+  path: 'once',
+  advanceWidth: 'once',
+  advanceHeight: 'once',
+  name: 'once'
+});

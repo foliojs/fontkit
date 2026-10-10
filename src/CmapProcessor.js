@@ -1,6 +1,6 @@
 import { binarySearch } from './utils';
 import { encodingExists, getEncoding, getEncodingMapping } from './encodings';
-import { cache } from './decorators';
+import { cache } from './cache';
 import { range } from './utils';
 
 export default class CmapProcessor {
@@ -181,7 +181,6 @@ export default class CmapProcessor {
     return 0;
   }
 
-  @cache
   getCharacterSet() {
     // Codes that map to glyph 0 (.notdef) are not supported characters
     return this._getCodes().filter(code => this._lookupCode(code) !== 0);
@@ -230,7 +229,6 @@ export default class CmapProcessor {
     }
   }
 
-  @cache
   codePointsForGlyph(gid) {
     let cmap = this.cmap;
     switch (cmap.version) {
@@ -313,3 +311,8 @@ export default class CmapProcessor {
     }
   }
 }
+
+cache(CmapProcessor, {
+  getCharacterSet: 'once',
+  codePointsForGlyph: 'key'
+});

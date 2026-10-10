@@ -10,6 +10,31 @@ describe('character to glyph mapping', function () {
       return assert.equal(font.characterSet.length, 883);
     });
 
+    it('should cache character sets separately for each cmap processor', function () {
+      let other = fontkit.openSync(new URL('data/OpenSans/OpenSans-Regular.ttf', import.meta.url));
+      let processor = font._cmapProcessor;
+      let characterSet = processor.getCharacterSet();
+      assert.strictEqual(processor.getCharacterSet(), characterSet);
+      assert.deepEqual(other._cmapProcessor.getCharacterSet(), characterSet);
+      assert.notStrictEqual(other._cmapProcessor.getCharacterSet(), characterSet);
+    });
+
+    it('should cache code points separately for each glyph and cmap processor', function () {
+      let other = fontkit.openSync(new URL('data/OpenSans/OpenSans-Regular.ttf', import.meta.url));
+      let processor = font._cmapProcessor;
+      let codePoints = processor.codePointsForGlyph(68);
+      assert.deepEqual(codePoints, [97]);
+      assert.strictEqual(processor.codePointsForGlyph(68), codePoints);
+      assert.deepEqual(processor.codePointsForGlyph(69), [98]);
+      assert.notStrictEqual(processor.codePointsForGlyph(69), codePoints);
+      assert.deepEqual(other._cmapProcessor.codePointsForGlyph(68), codePoints);
+      assert.notStrictEqual(other._cmapProcessor.codePointsForGlyph(68), codePoints);
+
+      let missing = processor.codePointsForGlyph(0xffff);
+      assert.deepEqual(missing, []);
+      assert.strictEqual(processor.codePointsForGlyph(0xffff), missing);
+    });
+
     it('should leave code points mapped to .notdef out of characterSet', function () {
       // U+FFFF is only the closing segment of the format 4 subtable (#158)
       assert(!font.characterSet.includes(0xffff));

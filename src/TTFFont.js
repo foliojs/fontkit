@@ -1,5 +1,5 @@
 import * as r from 'restructure';
-import { cache } from './decorators';
+import { cache } from './cache';
 import * as fontkit from './base';
 import Directory from './tables/directory';
 import tables from './tables';
@@ -258,12 +258,10 @@ export default class TTFFont {
    * The font’s bounding box, i.e. the box that encloses all glyphs in the font.
    * @type {BBox}
    */
-  @cache
   get bbox() {
     return Object.freeze(new BBox(this.head.xMin, this.head.yMin, this.head.xMax, this.head.yMax));
   }
 
-  @cache
   get _cmapProcessor() {
     return new CmapProcessor(this.cmap);
   }
@@ -272,7 +270,6 @@ export default class TTFFont {
    * An array of all of the unicode code points supported by the font.
    * @type {number[]}
    */
-  @cache
   get characterSet() {
     return this._cmapProcessor.getCharacterSet();
   }
@@ -350,7 +347,6 @@ export default class TTFFont {
     return glyphs;
   }
 
-  @cache
   get _layoutEngine() {
     return new LayoutEngine(this);
   }
@@ -471,7 +467,6 @@ export default class TTFFont {
    *
    * @type {object}
    */
-  @cache
   get variationAxes() {
     let res = {};
     if (!this.fvar) {
@@ -497,7 +492,6 @@ export default class TTFFont {
    *
    * @type {object}
    */
-  @cache
   get namedVariations() {
     let res = {};
     if (!this.fvar) {
@@ -557,7 +551,6 @@ export default class TTFFont {
     return font;
   }
 
-  @cache
   get _variationProcessor() {
     if (!this.fvar) {
       return null;
@@ -582,3 +575,13 @@ export default class TTFFont {
     return this.getVariation(name);
   }
 }
+
+cache(TTFFont, {
+  bbox: 'once',
+  _cmapProcessor: 'once',
+  characterSet: 'once',
+  _layoutEngine: 'once',
+  variationAxes: 'once',
+  namedVariations: 'once',
+  _variationProcessor: 'once'
+});

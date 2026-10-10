@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+ - Replace cache decorators with specialized lazy caching
  - Map space and missing code points correctly with a legacy Mac cmap (#394) 
  - Keep a glyph's variation metrics stable when several composites use it
  - Return the requested code points for glyphs shared by several code points (#342) (#395)

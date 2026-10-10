@@ -1,4 +1,4 @@
-import {cache} from '../decorators';
+import {cache} from '../cache';
 import {range} from '../utils';
 
 export default class AATLookupTable {
@@ -74,7 +74,6 @@ export default class AATLookupTable {
     }
   }
 
-  @cache
   glyphsForValue(classValue) {
     let res = [];
 
@@ -123,3 +122,7 @@ export default class AATLookupTable {
     return res;
   }
 }
+
+cache(AATLookupTable, {
+  glyphsForValue: 'key'
+});
