@@ -4,8 +4,8 @@ import { UnicodeTrie } from 'unicode-trie';
 import { getCategory } from 'unicode-properties';
 import * as Script from '../../layout/Script';
 import GlyphInfo from '../GlyphInfo';
-import indicMachine from './generated/indic.json';
-import useData from './generated/use.json';
+import indicMachine from './generated/indic.js';
+import useData from './generated/use.js';
 import {
   CATEGORIES,
   POSITIONS,

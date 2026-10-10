@@ -2,7 +2,7 @@ import DefaultShaper from './DefaultShaper';
 import StateMachine from 'dfa';
 import { UnicodeTrie } from 'unicode-trie';
 import GlyphInfo from '../GlyphInfo';
-import useData from './generated/use.json';
+import useData from './generated/use.js';
 import { decodeBase64 } from '../../utils';
 
 const { categories, decompositions } = useData;
