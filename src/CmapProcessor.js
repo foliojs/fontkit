@@ -1,5 +1,5 @@
 import { binarySearch } from './utils';
-import { encodingExists, getEncoding, getEncodingMapping } from './encodings';
+import { getEncoding, getEncodingMapping } from './encodings';
 import { cache } from './cache';
 import { range } from './utils';
 
