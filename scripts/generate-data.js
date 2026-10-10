@@ -38,4 +38,9 @@ for (let i = 0; i < codepoints.length; i++) {
   }
 }
 
-fs.writeFileSync(new URL('data.trie', generatedDir), trie.toBuffer());
+const dataTrieBuffer = trie.toBuffer();
+fs.writeFileSync(new URL('data.trie', generatedDir), dataTrieBuffer);
+fs.writeFileSync(
+  new URL('data.trie.base64.js', generatedDir),
+  `export default "${dataTrieBuffer.toString('base64')}"`,
+);

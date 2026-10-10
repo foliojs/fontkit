@@ -242,7 +242,8 @@ function decompose(code) {
   return decomposition;
 }
 
-fs.writeFileSync(new URL('use.trie', generatedDir), trie.toBuffer());
+const useTrieBuffer = trie.toBuffer();
+fs.writeFileSync(new URL('use.trie', generatedDir), useTrieBuffer);
 
 let stateMachine = compile(
   fs.readFileSync(
@@ -264,3 +265,7 @@ export default ${JSON.stringify(json)};
 `;
 
 fs.writeFileSync(new URL('use.js', generatedDir), fileContent);
+fs.writeFileSync(
+  new URL('use.trie.base64.js', generatedDir),
+  `export default "${useTrieBuffer.toString('base64')}"`,
+);

@@ -1,13 +1,10 @@
 import DefaultShaper from './DefaultShaper';
 import { getCategory } from 'unicode-properties';
 import { UnicodeTrie } from 'unicode-trie';
+import dataTrieBase64 from './generated/data.trie.base64.js';
 import { decodeBase64 } from '../../utils';
 
-const trie = new UnicodeTrie(
-  decodeBase64(
-    require('fs').readFileSync(__dirname + '/generated/data.trie', 'base64'),
-  ),
-);
+const trie = new UnicodeTrie(decodeBase64(dataTrieBase64));
 const FEATURES = ['isol', 'fina', 'fin2', 'fin3', 'medi', 'med2', 'init'];
 
 const ShapingClasses = {

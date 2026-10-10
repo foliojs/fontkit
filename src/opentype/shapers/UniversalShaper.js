@@ -3,14 +3,12 @@ import StateMachine from 'dfa';
 import { UnicodeTrie } from 'unicode-trie';
 import GlyphInfo from '../GlyphInfo';
 import useData from './generated/use.js';
+import useTrieBase64 from './generated/use.trie.base64.js';
+
 import { decodeBase64 } from '../../utils';
 
 const { categories, decompositions } = useData;
-const trie = new UnicodeTrie(
-  decodeBase64(
-    require('fs').readFileSync(__dirname + '/generated/use.trie', 'base64'),
-  ),
-);
+const trie = new UnicodeTrie(decodeBase64(useTrieBase64));
 const stateMachine = new StateMachine(useData);
 
 /**
