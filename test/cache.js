@@ -2,7 +2,11 @@ import assert from 'assert';
 import { cache } from '../src/cache.js';
 
 class CachedFixture {
-  constructor(compute = function(key) { return { owner: this, key }; }) {
+  constructor(
+    compute = function (key) {
+      return { owner: this, key };
+    },
+  ) {
     this.compute = compute;
     this.calls = 0;
   }
@@ -26,7 +30,7 @@ class CachedFixture {
 cache(CachedFixture, {
   property: 'once',
   once: 'once',
-  keyed: 'key'
+  keyed: 'key',
 });
 
 describe('lazy caching without decorators', function () {
@@ -74,7 +78,7 @@ describe('lazy caching without decorators', function () {
   it('should distinguish argument values and use object identity for keys', function () {
     let fixture = new CachedFixture();
     let keys = [0, '0', false, null, undefined, NaN, {}, {}, Symbol('key')];
-    let results = keys.map(key => fixture.keyed(key));
+    let results = keys.map((key) => fixture.keyed(key));
     assert.equal(new Set(results).size, keys.length);
 
     for (let i = 0; i < keys.length; i++) {
@@ -99,14 +103,15 @@ describe('lazy caching without decorators', function () {
 
   it('should retry computations that throw without caching the exception', function () {
     for (let member of ['property', 'once', 'keyed']) {
-      let fixture = new CachedFixture(function() {
+      let fixture = new CachedFixture(function () {
         if (this.calls === 1) {
           throw new Error('retry');
         }
 
         return {};
       });
-      let read = () => member === 'property' ? fixture.property : fixture[member](0);
+      let read = () =>
+        member === 'property' ? fixture.property : fixture[member](0);
       assert.throws(read, /retry/);
       let result = read();
       assert.strictEqual(read(), result);
@@ -121,7 +126,10 @@ describe('lazy caching without decorators', function () {
     fixture.keyed(0);
 
     for (let member of ['property', 'once', 'keyed']) {
-      let prototype = Object.getOwnPropertyDescriptor(CachedFixture.prototype, member);
+      let prototype = Object.getOwnPropertyDescriptor(
+        CachedFixture.prototype,
+        member,
+      );
       assert.equal(prototype.configurable, true);
       assert.equal(prototype.enumerable, false);
 
@@ -134,8 +142,12 @@ describe('lazy caching without decorators', function () {
 
   it('should reject unsupported members and cache modes', function () {
     class Fixture {
-      get property() { return 1; }
-      method() { return 1; }
+      get property() {
+        return 1;
+      }
+      method() {
+        return 1;
+      }
     }
 
     assert.throws(() => cache(Fixture, { method: 'unknown' }), TypeError);

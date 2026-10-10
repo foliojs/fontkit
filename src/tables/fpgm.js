@@ -4,5 +4,5 @@ import * as r from 'restructure';
 // These instructions are known as the font program. The main use of this table
 // is for the definition of functions that are used in many different glyph programs.
 export default new r.Struct({
-  instructions: new r.Array(r.uint8)
+  instructions: new r.Array(r.uint8),
 });

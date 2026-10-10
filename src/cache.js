@@ -11,8 +11,13 @@ export function cache(Class, members) {
       throw new TypeError(`Unknown cache mode for ${key}: ${mode}`);
     }
 
-    if (!descriptor || (!descriptor.get && typeof descriptor.value !== 'function')) {
-      throw new TypeError(`Cannot cache ${key}: expected an own getter or method`);
+    if (
+      !descriptor ||
+      (!descriptor.get && typeof descriptor.value !== 'function')
+    ) {
+      throw new TypeError(
+        `Cannot cache ${key}: expected an own getter or method`,
+      );
     }
 
     if (descriptor.get) {
@@ -21,7 +26,7 @@ export function cache(Class, members) {
       }
 
       let get = descriptor.get;
-      descriptor.get = function() {
+      descriptor.get = function () {
         let value = get.call(this);
         Object.defineProperty(this, key, { value });
         return value;
@@ -36,7 +41,7 @@ export function cache(Class, members) {
           if (mode === 'once') {
             let computed = false;
             let value;
-            memoized = function() {
+            memoized = function () {
               if (!computed) {
                 value = fn.call(this);
                 computed = true;
@@ -46,7 +51,7 @@ export function cache(Class, members) {
             };
           } else {
             let values = new Map();
-            memoized = function(arg) {
+            memoized = function (arg) {
               let value = values.get(arg);
               if (value !== undefined || values.has(arg)) {
                 return value;
@@ -60,7 +65,7 @@ export function cache(Class, members) {
 
           Object.defineProperty(this, key, { value: memoized });
           return memoized;
-        }
+        },
       };
     }
 

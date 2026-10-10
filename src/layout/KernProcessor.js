@@ -1,4 +1,4 @@
-import {binarySearch} from '../utils';
+import { binarySearch } from '../utils';
 
 export default class KernProcessor {
   constructor(font) {
@@ -43,7 +43,7 @@ export default class KernProcessor {
       switch (table.format) {
         case 0:
           let pairIdx = binarySearch(s.pairs, function (pair) {
-            return (left - pair.left) || (right - pair.right);
+            return left - pair.left || right - pair.right;
           });
 
           if (pairIdx >= 0) {
@@ -53,14 +53,21 @@ export default class KernProcessor {
           break;
 
         case 2:
-          let leftOffset = 0, rightOffset = 0;
-          if (left >= s.leftTable.firstGlyph && left < s.leftTable.firstGlyph + s.leftTable.nGlyphs) {
+          let leftOffset = 0,
+            rightOffset = 0;
+          if (
+            left >= s.leftTable.firstGlyph &&
+            left < s.leftTable.firstGlyph + s.leftTable.nGlyphs
+          ) {
             leftOffset = s.leftTable.offsets[left - s.leftTable.firstGlyph];
           } else {
             leftOffset = s.array.off;
           }
 
-          if (right >= s.rightTable.firstGlyph && right < s.rightTable.firstGlyph + s.rightTable.nGlyphs) {
+          if (
+            right >= s.rightTable.firstGlyph &&
+            right < s.rightTable.firstGlyph + s.rightTable.nGlyphs
+          ) {
             rightOffset = s.rightTable.offsets[right - s.rightTable.firstGlyph];
           }
 
@@ -73,11 +80,18 @@ export default class KernProcessor {
             return 0;
           }
 
-          val = s.kernValue[s.kernIndex[s.leftClass[left] * s.rightClassCount + s.rightClass[right]]];
+          val =
+            s.kernValue[
+              s.kernIndex[
+                s.leftClass[left] * s.rightClassCount + s.rightClass[right]
+              ]
+            ];
           break;
 
         default:
-          throw new Error(`Unsupported kerning sub-table format ${table.format}`);
+          throw new Error(
+            `Unsupported kerning sub-table format ${table.format}`,
+          );
       }
 
       // Microsoft supports the override flag, which resets the result

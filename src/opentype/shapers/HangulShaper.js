@@ -38,7 +38,7 @@ export default class HangulShaper extends DefaultShaper {
       let code = glyph.codePoints[0];
       let type = getType(code);
 
-      [ action, state ] = STATE_TABLE[state][type];
+      [action, state] = STATE_TABLE[state][type];
 
       switch (action) {
         case DECOMPOSE:
@@ -69,72 +69,120 @@ export default class HangulShaper extends DefaultShaper {
   }
 }
 
-const HANGUL_BASE  = 0xac00;
-const HANGUL_END   = 0xd7a4;
+const HANGUL_BASE = 0xac00;
+const HANGUL_END = 0xd7a4;
 const HANGUL_COUNT = HANGUL_END - HANGUL_BASE + 1;
-const L_BASE  = 0x1100; // lead
-const V_BASE  = 0x1161; // vowel
-const T_BASE  = 0x11a7; // trail
+const L_BASE = 0x1100; // lead
+const V_BASE = 0x1161; // vowel
+const T_BASE = 0x11a7; // trail
 const L_COUNT = 19;
 const V_COUNT = 21;
 const T_COUNT = 28;
-const L_END   = L_BASE + L_COUNT - 1;
-const V_END   = V_BASE + V_COUNT - 1;
-const T_END   = T_BASE + T_COUNT - 1;
+const L_END = L_BASE + L_COUNT - 1;
+const V_END = V_BASE + V_COUNT - 1;
+const T_END = T_BASE + T_COUNT - 1;
 const DOTTED_CIRCLE = 0x25cc;
 
-const isL    = code => 0x1100 <= code && code <= 0x115f || 0xa960 <= code && code <= 0xa97c;
-const isV    = code => 0x1160 <= code && code <= 0x11a7 || 0xd7b0 <= code && code <= 0xd7c6;
-const isT    = code => 0x11a8 <= code && code <= 0x11ff || 0xd7cb <= code && code <= 0xd7fb;
-const isTone = code => 0x302e <= code && code <= 0x302f;
-const isLVT  = code => HANGUL_BASE <= code && code <= HANGUL_END;
-const isLV   = code => (code - HANGUL_BASE) < HANGUL_COUNT && (code - HANGUL_BASE) % T_COUNT === 0;
-const isCombiningL = code => L_BASE <= code && code <= L_END;
-const isCombiningV = code => V_BASE <= code && code <= V_END;
-const isCombiningT = code => T_BASE + 1 && 1 <= code && code <= T_END;
+const isL = (code) =>
+  (0x1100 <= code && code <= 0x115f) || (0xa960 <= code && code <= 0xa97c);
+const isV = (code) =>
+  (0x1160 <= code && code <= 0x11a7) || (0xd7b0 <= code && code <= 0xd7c6);
+const isT = (code) =>
+  (0x11a8 <= code && code <= 0x11ff) || (0xd7cb <= code && code <= 0xd7fb);
+const isTone = (code) => 0x302e <= code && code <= 0x302f;
+const isLVT = (code) => HANGUL_BASE <= code && code <= HANGUL_END;
+const isLV = (code) =>
+  code - HANGUL_BASE < HANGUL_COUNT && (code - HANGUL_BASE) % T_COUNT === 0;
+const isCombiningL = (code) => L_BASE <= code && code <= L_END;
+const isCombiningV = (code) => V_BASE <= code && code <= V_END;
+const isCombiningT = (code) => T_BASE + 1 && 1 <= code && code <= T_END;
 
 // Character categories
-const X   = 0; // Other character
-const L   = 1; // Leading consonant
-const V   = 2; // Medial vowel
-const T   = 3; // Trailing consonant
-const LV  = 4; // Composed <LV> syllable
+const X = 0; // Other character
+const L = 1; // Leading consonant
+const V = 2; // Medial vowel
+const T = 3; // Trailing consonant
+const LV = 4; // Composed <LV> syllable
 const LVT = 5; // Composed <LVT> syllable
-const M   = 6; // Tone mark
+const M = 6; // Tone mark
 
 // This function classifies a character using the above categories.
 function getType(code) {
-  if (isL(code))    { return L; }
-  if (isV(code))    { return V; }
-  if (isT(code))    { return T; }
-  if (isLV(code))   { return LV; }
-  if (isLVT(code))  { return LVT; }
-  if (isTone(code)) { return M; }
+  if (isL(code)) {
+    return L;
+  }
+  if (isV(code)) {
+    return V;
+  }
+  if (isT(code)) {
+    return T;
+  }
+  if (isLV(code)) {
+    return LV;
+  }
+  if (isLVT(code)) {
+    return LVT;
+  }
+  if (isTone(code)) {
+    return M;
+  }
   return X;
 }
 
 // State machine actions
 const NO_ACTION = 0;
 const DECOMPOSE = 1;
-const COMPOSE   = 2;
+const COMPOSE = 2;
 const TONE_MARK = 4;
-const INVALID   = 5;
+const INVALID = 5;
 
 // Build a state machine that accepts valid syllables, and applies actions along the way.
 // The logic this is implementing is documented at the top of the file.
 const STATE_TABLE = [
   //       X                 L                 V                T                  LV                LVT               M
   // State 0: start state
-  [ [ NO_ACTION, 0 ], [ NO_ACTION, 1 ], [ NO_ACTION, 0 ], [ NO_ACTION, 0 ], [ DECOMPOSE, 2 ], [ DECOMPOSE, 3 ], [  INVALID, 0  ] ],
+  [
+    [NO_ACTION, 0],
+    [NO_ACTION, 1],
+    [NO_ACTION, 0],
+    [NO_ACTION, 0],
+    [DECOMPOSE, 2],
+    [DECOMPOSE, 3],
+    [INVALID, 0],
+  ],
 
   // State 1: <L>
-  [ [ NO_ACTION, 0 ], [ NO_ACTION, 1 ], [  COMPOSE, 2  ], [ NO_ACTION, 0 ], [ DECOMPOSE, 2 ], [ DECOMPOSE, 3 ], [  INVALID, 0  ] ],
+  [
+    [NO_ACTION, 0],
+    [NO_ACTION, 1],
+    [COMPOSE, 2],
+    [NO_ACTION, 0],
+    [DECOMPOSE, 2],
+    [DECOMPOSE, 3],
+    [INVALID, 0],
+  ],
 
   // State 2: <L,V> or <LV>
-  [ [ NO_ACTION, 0 ], [ NO_ACTION, 1 ], [ NO_ACTION, 0 ], [  COMPOSE, 3  ], [ DECOMPOSE, 2 ], [ DECOMPOSE, 3 ], [ TONE_MARK, 0 ] ],
+  [
+    [NO_ACTION, 0],
+    [NO_ACTION, 1],
+    [NO_ACTION, 0],
+    [COMPOSE, 3],
+    [DECOMPOSE, 2],
+    [DECOMPOSE, 3],
+    [TONE_MARK, 0],
+  ],
 
   // State 3: <L,V,T> or <LVT>
-  [ [ NO_ACTION, 0 ], [ NO_ACTION, 1 ], [ NO_ACTION, 0 ], [ NO_ACTION, 0 ], [ DECOMPOSE, 2 ], [ DECOMPOSE, 3 ], [ TONE_MARK, 0 ] ]
+  [
+    [NO_ACTION, 0],
+    [NO_ACTION, 1],
+    [NO_ACTION, 0],
+    [NO_ACTION, 0],
+    [DECOMPOSE, 2],
+    [DECOMPOSE, 3],
+    [TONE_MARK, 0],
+  ],
 ];
 
 function getGlyph(font, code, features) {
@@ -146,15 +194,17 @@ function decompose(glyphs, i, font) {
   let code = glyph.codePoints[0];
 
   let s = code - HANGUL_BASE;
-  let t = T_BASE + s % T_COUNT;
-  s = s / T_COUNT | 0;
-  let l = L_BASE + s / V_COUNT | 0;
-  let v = V_BASE + s % V_COUNT;
+  let t = T_BASE + (s % T_COUNT);
+  s = (s / T_COUNT) | 0;
+  let l = (L_BASE + s / V_COUNT) | 0;
+  let v = V_BASE + (s % V_COUNT);
 
   // Don't decompose if all of the components are not available
-  if (!font.hasGlyphForCodePoint(l) ||
-      !font.hasGlyphForCodePoint(v) ||
-      (t !== T_BASE && !font.hasGlyphForCodePoint(t))) {
+  if (
+    !font.hasGlyphForCodePoint(l) ||
+    !font.hasGlyphForCodePoint(v) ||
+    (t !== T_BASE && !font.hasGlyphForCodePoint(t))
+  ) {
     return i;
   }
 
@@ -166,7 +216,7 @@ function decompose(glyphs, i, font) {
   let vjmo = getGlyph(font, v, glyph.features);
   vjmo.features.vjmo = true;
 
-  let insert = [ ljmo, vjmo ];
+  let insert = [ljmo, vjmo];
 
   if (t > T_BASE) {
     let tjmo = getGlyph(font, t, glyph.features);
@@ -214,7 +264,7 @@ function compose(glyphs, i, font) {
   }
 
   let t = (tjmo && tjmo.codePoints[0]) || T_BASE;
-  if ((lv != null) && (t === T_BASE || isCombiningT(t))) {
+  if (lv != null && (t === T_BASE || isCombiningT(t))) {
     let s = lv + (t - T_BASE);
 
     // Replace with a composed glyph if supported by the font,
@@ -227,9 +277,15 @@ function compose(glyphs, i, font) {
   }
 
   // Didn't compose (either a non-combining component or unsupported by font).
-  if (ljmo) { ljmo.features.ljmo = true; }
-  if (vjmo) { vjmo.features.vjmo = true; }
-  if (tjmo) { tjmo.features.tjmo = true; }
+  if (ljmo) {
+    ljmo.features.ljmo = true;
+  }
+  if (vjmo) {
+    vjmo.features.vjmo = true;
+  }
+  if (tjmo) {
+    tjmo.features.tjmo = true;
+  }
 
   if (prevType === LV) {
     // Sequence was originally <L,V>, which got combined earlier.
@@ -259,7 +315,9 @@ function reorderToneMark(glyphs, i, font) {
   let code = glyphs[i].codePoints[0];
 
   // Move tone mark to the beginning of the previous syllable, unless it is zero width
-  if (font.glyphForCodePoint(code).advanceWidth === 0) { return; }
+  if (font.glyphForCodePoint(code).advanceWidth === 0) {
+    return;
+  }
 
   let prev = glyphs[i - 1].codePoints[0];
   let len = getLength(prev);

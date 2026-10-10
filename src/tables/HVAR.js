@@ -10,10 +10,14 @@ class VariableSizeNumber {
 
   decode(stream, parent) {
     switch (this.size(0, parent)) {
-      case 1: return stream.readUInt8();
-      case 2: return stream.readUInt16BE();
-      case 3: return stream.readUInt24BE();
-      case 4: return stream.readUInt32BE();
+      case 1:
+        return stream.readUInt8();
+      case 2:
+        return stream.readUInt16BE();
+      case 3:
+        return stream.readUInt24BE();
+      case 4:
+        return stream.readUInt32BE();
     }
   }
 
@@ -23,15 +27,18 @@ class VariableSizeNumber {
 }
 
 let MapDataEntry = new r.Struct({
-  entry: new VariableSizeNumber(t => ((t.parent.entryFormat & 0x0030) >> 4) + 1),
-  outerIndex: t => t.entry >> ((t.parent.entryFormat & 0x000F) + 1),
-  innerIndex: t => t.entry & ((1 << ((t.parent.entryFormat & 0x000F) + 1)) - 1)
+  entry: new VariableSizeNumber(
+    (t) => ((t.parent.entryFormat & 0x0030) >> 4) + 1,
+  ),
+  outerIndex: (t) => t.entry >> ((t.parent.entryFormat & 0x000f) + 1),
+  innerIndex: (t) =>
+    t.entry & ((1 << ((t.parent.entryFormat & 0x000f) + 1)) - 1),
 });
 
 let DeltaSetIndexMap = new r.Struct({
   entryFormat: r.uint16,
   mapCount: r.uint16,
-  mapData: new r.Array(MapDataEntry, 'mapCount')
+  mapData: new r.Array(MapDataEntry, 'mapCount'),
 });
 
 export default new r.Struct({
@@ -40,5 +47,5 @@ export default new r.Struct({
   itemVariationStore: new r.Pointer(r.uint32, ItemVariationStore),
   advanceWidthMapping: new r.Pointer(r.uint32, DeltaSetIndexMap),
   LSBMapping: new r.Pointer(r.uint32, DeltaSetIndexMap),
-  RSBMapping: new r.Pointer(r.uint32, DeltaSetIndexMap)
+  RSBMapping: new r.Pointer(r.uint32, DeltaSetIndexMap),
 });

@@ -16,7 +16,10 @@ export default class AATLayoutEngine {
       glyphRun.glyphs.reverse();
     }
 
-    this.morxProcessor.process(glyphRun.glyphs, AATFeatureMap.mapOTToAAT(glyphRun.features));
+    this.morxProcessor.process(
+      glyphRun.glyphs,
+      AATFeatureMap.mapOTToAAT(glyphRun.features),
+    );
   }
 
   getAvailableFeatures(script, language) {
@@ -25,7 +28,7 @@ export default class AATLayoutEngine {
 
   stringsForGlyph(gid) {
     let glyphStrings = this.morxProcessor.generateInputs(gid);
-    let result = new Set;
+    let result = new Set();
 
     for (let glyphs of glyphStrings) {
       this._addStrings(glyphs, 0, result, '');

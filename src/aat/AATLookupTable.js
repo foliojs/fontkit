@@ -1,5 +1,5 @@
-import {cache} from '../cache';
-import {range} from '../utils';
+import { cache } from '../cache';
+import { range } from '../utils';
 
 export default class AATLookupTable {
   constructor(table) {
@@ -41,7 +41,8 @@ export default class AATLookupTable {
         return null;
       }
 
-      case 6: { // lookup single
+      case 6: {
+        // lookup single
         let min = 0;
         let max = this.table.binarySearchHeader.nUnits - 1;
 
@@ -81,7 +82,7 @@ export default class AATLookupTable {
       case 2: // segment format
       case 4: {
         for (let segment of this.table.segments) {
-          if ((this.table.version === 2 && segment.value === classValue)) {
+          if (this.table.version === 2 && segment.value === classValue) {
             res.push(...range(segment.firstGlyph, segment.lastGlyph + 1));
           } else {
             for (let index = 0; index < segment.values.length; index++) {
@@ -95,7 +96,8 @@ export default class AATLookupTable {
         break;
       }
 
-      case 6: { // lookup single
+      case 6: {
+        // lookup single
         for (let segment of this.table.segments) {
           if (segment.value === classValue) {
             res.push(segment.glyph);
@@ -105,7 +107,8 @@ export default class AATLookupTable {
         break;
       }
 
-      case 8: { // lookup trimmed
+      case 8: {
+        // lookup trimmed
         for (let i = 0; i < this.table.values.length; i++) {
           if (this.table.values[i] === classValue) {
             res.push(this.table.firstGlyph + i);
@@ -124,5 +127,5 @@ export default class AATLookupTable {
 }
 
 cache(AATLookupTable, {
-  glyphsForValue: 'key'
+  glyphsForValue: 'key',
 });

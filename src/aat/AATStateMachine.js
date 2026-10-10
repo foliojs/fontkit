@@ -21,7 +21,10 @@ export default class AATStateMachine {
     let index = reverse ? glyphs.length - 1 : 0;
     let dir = reverse ? -1 : 1;
 
-    while ((dir === 1 && index <= glyphs.length) || (dir === -1 && index >= -1)) {
+    while (
+      (dir === 1 && index <= glyphs.length) ||
+      (dir === -1 && index >= -1)
+    ) {
       let glyph = null;
       let classCode = OUT_OF_BOUNDS_CLASS;
       let shouldAdvance = true;
@@ -30,7 +33,8 @@ export default class AATStateMachine {
         classCode = END_OF_TEXT_CLASS;
       } else {
         glyph = glyphs[index];
-        if (glyph.id === 0xffff) { // deleted glyph
+        if (glyph.id === 0xffff) {
+          // deleted glyph
           classCode = DELETED_GLYPH_CLASS;
         } else {
           classCode = this.lookupTable.lookup(glyph.id);
@@ -44,7 +48,10 @@ export default class AATStateMachine {
       let entryIndex = row[classCode];
       let entry = this.stateTable.entryTable.getItem(entryIndex);
 
-      if (classCode !== END_OF_TEXT_CLASS && classCode !==  DELETED_GLYPH_CLASS) {
+      if (
+        classCode !== END_OF_TEXT_CLASS &&
+        classCode !== DELETED_GLYPH_CLASS
+      ) {
         processEntry(glyph, entry, index);
         shouldAdvance = !(entry.flags & DONT_ADVANCE);
       }
@@ -62,14 +69,14 @@ export default class AATStateMachine {
    * Performs a depth-first traversal of the glyph strings
    * represented by the state machine.
    */
-  traverse(opts, state = 0, visited = new Set) {
+  traverse(opts, state = 0, visited = new Set()) {
     if (visited.has(state)) {
       return;
     }
 
     visited.add(state);
 
-    let {nClasses, stateArray, entryTable} = this.stateTable;
+    let { nClasses, stateArray, entryTable } = this.stateTable;
     let row = stateArray.getItem(state);
 
     // Skip predefined classes

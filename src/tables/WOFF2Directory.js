@@ -20,27 +20,86 @@ const Base128 = {
     }
 
     throw new Error('Bad base 128 number');
-  }
+  },
 };
 
 let knownTags = [
-  'cmap', 'head', 'hhea', 'hmtx', 'maxp', 'name', 'OS/2', 'post', 'cvt ',
-  'fpgm', 'glyf', 'loca', 'prep', 'CFF ', 'VORG', 'EBDT', 'EBLC', 'gasp',
-  'hdmx', 'kern', 'LTSH', 'PCLT', 'VDMX', 'vhea', 'vmtx', 'BASE', 'GDEF',
-  'GPOS', 'GSUB', 'EBSC', 'JSTF', 'MATH', 'CBDT', 'CBLC', 'COLR', 'CPAL',
-  'SVG ', 'sbix', 'acnt', 'avar', 'bdat', 'bloc', 'bsln', 'cvar', 'fdsc',
-  'feat', 'fmtx', 'fvar', 'gvar', 'hsty', 'just', 'lcar', 'mort', 'morx',
-  'opbd', 'prop', 'trak', 'Zapf', 'Silf', 'Glat', 'Gloc', 'Feat', 'Sill'
+  'cmap',
+  'head',
+  'hhea',
+  'hmtx',
+  'maxp',
+  'name',
+  'OS/2',
+  'post',
+  'cvt ',
+  'fpgm',
+  'glyf',
+  'loca',
+  'prep',
+  'CFF ',
+  'VORG',
+  'EBDT',
+  'EBLC',
+  'gasp',
+  'hdmx',
+  'kern',
+  'LTSH',
+  'PCLT',
+  'VDMX',
+  'vhea',
+  'vmtx',
+  'BASE',
+  'GDEF',
+  'GPOS',
+  'GSUB',
+  'EBSC',
+  'JSTF',
+  'MATH',
+  'CBDT',
+  'CBLC',
+  'COLR',
+  'CPAL',
+  'SVG ',
+  'sbix',
+  'acnt',
+  'avar',
+  'bdat',
+  'bloc',
+  'bsln',
+  'cvar',
+  'fdsc',
+  'feat',
+  'fmtx',
+  'fvar',
+  'gvar',
+  'hsty',
+  'just',
+  'lcar',
+  'mort',
+  'morx',
+  'opbd',
+  'prop',
+  'trak',
+  'Zapf',
+  'Silf',
+  'Glat',
+  'Gloc',
+  'Feat',
+  'Sill',
 ];
 
 let WOFF2DirectoryEntry = new r.Struct({
   flags: r.uint8,
-  customTag: new r.Optional(new r.String(4), t => (t.flags & 0x3f) === 0x3f),
-  tag: t => t.customTag || knownTags[t.flags & 0x3f],// || (() => { throw new Error(`Bad tag: ${flags & 0x3f}`); })(); },
+  customTag: new r.Optional(new r.String(4), (t) => (t.flags & 0x3f) === 0x3f),
+  tag: (t) => t.customTag || knownTags[t.flags & 0x3f], // || (() => { throw new Error(`Bad tag: ${flags & 0x3f}`); })(); },
   length: Base128,
-  transformVersion: t => (t.flags >>> 6) & 0x03,
-  transformed: t => (t.tag === 'glyf' || t.tag === 'loca') ? t.transformVersion === 0 : t.transformVersion !== 0,
-  transformLength: new r.Optional(Base128, t => t.transformed)
+  transformVersion: (t) => (t.flags >>> 6) & 0x03,
+  transformed: (t) =>
+    t.tag === 'glyf' || t.tag === 'loca'
+      ? t.transformVersion === 0
+      : t.transformVersion !== 0,
+  transformLength: new r.Optional(Base128, (t) => t.transformed),
 });
 
 let WOFF2Directory = new r.Struct({
@@ -58,17 +117,17 @@ let WOFF2Directory = new r.Struct({
   metaOrigLength: r.uint32,
   privOffset: r.uint32,
   privLength: r.uint32,
-  tables: new r.Array(WOFF2DirectoryEntry, 'numTables')
+  tables: new r.Array(WOFF2DirectoryEntry, 'numTables'),
 });
 
-WOFF2Directory.process = function() {
+WOFF2Directory.process = function () {
   let tables = {};
   for (let i = 0; i < this.tables.length; i++) {
     let table = this.tables[i];
     tables[table.tag] = table;
   }
 
-  return this.tables = tables;
+  return (this.tables = tables);
 };
 
 export default WOFF2Directory;

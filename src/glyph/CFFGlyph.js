@@ -32,13 +32,14 @@ export default class CFFGlyph extends Glyph {
     let end = str.offset + str.length;
     stream.pos = str.offset;
 
-    let path = new Path;
+    let path = new Path();
     let stack = [];
     let trans = [];
 
     let width = null;
     let nStems = 0;
-    let x = 0, y = 0;
+    let x = 0,
+      y = 0;
     let usedGsubrs;
     let usedSubrs;
     let open = false;
@@ -69,7 +70,7 @@ export default class CFFGlyph extends Glyph {
       }
 
       nStems += stack.length >> 1;
-      return stack.length = 0;
+      return (stack.length = 0);
     }
 
     function moveTo(x, y) {
@@ -91,8 +92,8 @@ export default class CFFGlyph extends Glyph {
           let pts;
 
           switch (op) {
-            case 1:  // hstem
-            case 3:  // vstem
+            case 1: // hstem
+            case 3: // vstem
             case 18: // hstemhm
             case 23: // vstemhm
               parseStems();
@@ -178,7 +179,8 @@ export default class CFFGlyph extends Glyph {
               }
               break;
 
-            case 15: { // vsindex
+            case 15: {
+              // vsindex
               if (cff.version < 2) {
                 throw new Error('vsindex operator not supported in CFF v1');
               }
@@ -187,7 +189,8 @@ export default class CFFGlyph extends Glyph {
               break;
             }
 
-            case 16: { // blend
+            case 16: {
+              // blend
               if (cff.version < 2) {
                 throw new Error('blend operator not supported in CFF v1');
               }
@@ -196,7 +199,10 @@ export default class CFFGlyph extends Glyph {
                 throw new Error('blend operator in non-variation font');
               }
 
-              let blendVector = variationProcessor.getBlendVector(vstore, vsindex);
+              let blendVector = variationProcessor.getBlendVector(
+                vstore,
+                vsindex,
+              );
               let numBlends = stack.pop();
               let numOperands = numBlends * blendVector.length;
               let delta = stack.length - numOperands;
@@ -557,7 +563,8 @@ export default class CFFGlyph extends Glyph {
                     pts.push(x, y);
                   }
 
-                  if (Math.abs(x - startx) > Math.abs(y - starty)) { // horizontal
+                  if (Math.abs(x - startx) > Math.abs(y - starty)) {
+                    // horizontal
                     x += stack.shift();
                     y = starty;
                   } else {
@@ -578,7 +585,6 @@ export default class CFFGlyph extends Glyph {
             default:
               throw new Error(`Unknown op: ${op}`);
           }
-
         } else if (op < 247) {
           stack.push(op - 139);
         } else if (op < 251) {

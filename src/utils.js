@@ -28,7 +28,8 @@ export function range(index, end) {
 export const asciiDecoder = new TextDecoder('ascii');
 
 // Based on https://github.com/niklasvh/base64-arraybuffer. MIT license.
-const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+const CHARS =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 const LOOKUP = new Uint8Array(256);
 for (let i = 0; i < CHARS.length; i++) {
   LOOKUP[CHARS.charCodeAt(i)] = i;

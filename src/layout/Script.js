@@ -1,4 +1,4 @@
-import {getScript} from 'unicode-properties';
+import { getScript } from 'unicode-properties';
 
 // This maps the Unicode Script property to an OpenType script tag
 // Data from http://www.microsoft.com/typography/otspec/scripttags.htm
@@ -130,7 +130,7 @@ const UNICODE_SCRIPTS = {
   Yi: 'yi  ',
   Inherited: 'zinh',
   Common: 'zyyy',
-  Unknown: 'zzzz'
+  Unknown: 'zzzz',
 };
 
 const OPENTYPE_SCRIPTS = {};
@@ -166,7 +166,7 @@ export function forString(string) {
       // Check if this is a low surrogate
       if (0xdc00 <= next && next <= 0xdfff) {
         idx++;
-        code = ((code & 0x3FF) << 10) + (next & 0x3FF) + 0x10000;
+        code = ((code & 0x3ff) << 10) + (next & 0x3ff) + 0x10000;
       }
     }
 
@@ -193,33 +193,33 @@ export function forCodePoints(codePoints) {
 
 // The scripts in this map are written from right to left
 const RTL = {
-  arab: true,   // Arabic
-  hebr: true,   // Hebrew
-  syrc: true,   // Syriac
-  thaa: true,   // Thaana
-  cprt: true,   // Cypriot Syllabary
-  khar: true,   // Kharosthi
-  phnx: true,   // Phoenician
+  arab: true, // Arabic
+  hebr: true, // Hebrew
+  syrc: true, // Syriac
+  thaa: true, // Thaana
+  cprt: true, // Cypriot Syllabary
+  khar: true, // Kharosthi
+  phnx: true, // Phoenician
   'nko ': true, // N'Ko
-  lydi: true,   // Lydian
-  avst: true,   // Avestan
-  armi: true,   // Imperial Aramaic
-  phli: true,   // Inscriptional Pahlavi
-  prti: true,   // Inscriptional Parthian
-  sarb: true,   // Old South Arabian
-  orkh: true,   // Old Turkic, Orkhon Runic
-  samr: true,   // Samaritan
-  mand: true,   // Mandaic, Mandaean
-  merc: true,   // Meroitic Cursive
-  mero: true,   // Meroitic Hieroglyphs
+  lydi: true, // Lydian
+  avst: true, // Avestan
+  armi: true, // Imperial Aramaic
+  phli: true, // Inscriptional Pahlavi
+  prti: true, // Inscriptional Parthian
+  sarb: true, // Old South Arabian
+  orkh: true, // Old Turkic, Orkhon Runic
+  samr: true, // Samaritan
+  mand: true, // Mandaic, Mandaean
+  merc: true, // Meroitic Cursive
+  mero: true, // Meroitic Hieroglyphs
 
   // Unicode 7.0 (not listed on http://www.microsoft.com/typography/otspec/scripttags.htm)
-  mani: true,   // Manichaean
-  mend: true,   // Mende Kikakui
-  nbat: true,   // Nabataean
-  narb: true,   // Old North Arabian
-  palm: true,   // Palmyrene
-  phlp: true    // Psalter Pahlavi
+  mani: true, // Manichaean
+  mend: true, // Mende Kikakui
+  nbat: true, // Nabataean
+  narb: true, // Old North Arabian
+  palm: true, // Palmyrene
+  phlp: true, // Psalter Pahlavi
 };
 
 export function direction(script) {

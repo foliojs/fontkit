@@ -5,7 +5,9 @@ describe('i18n', function () {
   describe('fontkit.setDefaultLanguage', function () {
     let font;
     before('load Amiri font', function () {
-      font = fontkit.openSync(new URL('data/amiri/amiri-regular.ttf', import.meta.url));
+      font = fontkit.openSync(
+        new URL('data/amiri/amiri-regular.ttf', import.meta.url),
+      );
     });
 
     after('reset default language', function () {
@@ -17,7 +19,10 @@ describe('i18n', function () {
       assert.equal(font.postscriptName, 'Amiri-Regular');
       assert.equal(font.familyName, 'Amiri');
       assert.equal(font.subfamilyName, 'Regular');
-      assert.equal(font.copyright, 'Copyright (c) 2010-2017, Khaled Hosny <khaledhosny@eglug.org>.\nPortions copyright (c) 2010, Sebastian Kosch <sebastian@aldusleaf.org>.');
+      assert.equal(
+        font.copyright,
+        'Copyright (c) 2010-2017, Khaled Hosny <khaledhosny@eglug.org>.\nPortions copyright (c) 2010, Sebastian Kosch <sebastian@aldusleaf.org>.',
+      );
       assert.equal(font.version, 'Version 000.110 ');
     });
 
@@ -31,20 +36,25 @@ describe('i18n', function () {
       assert.equal(font.postscriptName, 'Amiri-Regular');
       assert.equal(font.familyName, 'Amiri');
       assert.equal(font.subfamilyName, 'عادي');
-      assert.equal(font.copyright, 'حقوق النشر 2010-2017، خالد حسني <khaledhosny@eglug.org>.');
+      assert.equal(
+        font.copyright,
+        'حقوق النشر 2010-2017، خالد حسني <khaledhosny@eglug.org>.',
+      );
       assert.equal(font.version, 'إصدارة 000٫110');
     });
 
     it('can reset default language back to "en"', function () {
       fontkit.setDefaultLanguage();
-      assert.equal(fontkit.defaultLanguage, "en");
+      assert.equal(fontkit.defaultLanguage, 'en');
     });
   });
 
   describe('font.setDefaultLanguage', function () {
     let font;
     before('load Amiri font', function () {
-      font = fontkit.openSync(new URL('data/amiri/amiri-regular.ttf', import.meta.url));
+      font = fontkit.openSync(
+        new URL('data/amiri/amiri-regular.ttf', import.meta.url),
+      );
     });
 
     it('font has "en" metadata properties', function () {
@@ -52,7 +62,10 @@ describe('i18n', function () {
       assert.equal(font.postscriptName, 'Amiri-Regular');
       assert.equal(font.familyName, 'Amiri');
       assert.equal(font.subfamilyName, 'Regular');
-      assert.equal(font.copyright, 'Copyright (c) 2010-2017, Khaled Hosny <khaledhosny@eglug.org>.\nPortions copyright (c) 2010, Sebastian Kosch <sebastian@aldusleaf.org>.');
+      assert.equal(
+        font.copyright,
+        'Copyright (c) 2010-2017, Khaled Hosny <khaledhosny@eglug.org>.\nPortions copyright (c) 2010, Sebastian Kosch <sebastian@aldusleaf.org>.',
+      );
       assert.equal(font.version, 'Version 000.110 ');
     });
 
@@ -66,11 +79,14 @@ describe('i18n', function () {
       assert.equal(font.postscriptName, 'Amiri-Regular');
       assert.equal(font.familyName, 'Amiri');
       assert.equal(font.subfamilyName, 'عادي');
-      assert.equal(font.copyright, 'حقوق النشر 2010-2017، خالد حسني <khaledhosny@eglug.org>.');
+      assert.equal(
+        font.copyright,
+        'حقوق النشر 2010-2017، خالد حسني <khaledhosny@eglug.org>.',
+      );
       assert.equal(font.version, 'إصدارة 000٫110');
     });
 
-    it('the font\'s language should not change when the global changes', function () {
+    it("the font's language should not change when the global changes", function () {
       fontkit.setDefaultLanguage('en');
 
       assert.equal(font.defaultLanguage, 'ar');
@@ -87,14 +103,16 @@ describe('i18n', function () {
   describe('backup languages', function () {
     let font;
     before('load Amiri font', function () {
-      font = fontkit.openSync(new URL('data/amiri/amiri-regular.ttf', import.meta.url));
+      font = fontkit.openSync(
+        new URL('data/amiri/amiri-regular.ttf', import.meta.url),
+      );
     });
 
     after('reset default language', function () {
       fontkit.setDefaultLanguage();
     });
 
-    it('if the font\'s default language isn\'t found, use the global language', function () {
+    it("if the font's default language isn't found, use the global language", function () {
       font.setDefaultLanguage('piglatin');
       fontkit.setDefaultLanguage('ar');
 

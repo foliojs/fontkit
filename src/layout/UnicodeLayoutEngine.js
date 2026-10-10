@@ -1,4 +1,4 @@
-import {getCombiningClass} from 'unicode-properties';
+import { getCombiningClass } from 'unicode-properties';
 
 /**
  * This class is used when GPOS does not define 'mark' or 'mkmk' features
@@ -19,7 +19,8 @@ export default class UnicodeLayoutEngine {
     let clusterEnd = 0;
     for (let index = 0; index < glyphs.length; index++) {
       let glyph = glyphs[index];
-      if (glyph.isMark) { // TODO: handle ligatures
+      if (glyph.isMark) {
+        // TODO: handle ligatures
         clusterEnd = index;
       } else {
         if (clusterStart !== clusterEnd) {
@@ -44,7 +45,8 @@ export default class UnicodeLayoutEngine {
     // adjust bounding box for ligature glyphs
     if (base.codePoints.length > 1) {
       // LTR. TODO: RTL support.
-      baseBox.minX += ((base.codePoints.length - 1) * baseBox.width) / base.codePoints.length;
+      baseBox.minX +=
+        ((base.codePoints.length - 1) * baseBox.width) / base.codePoints.length;
     }
 
     let xOffset = -positions[clusterStart].xAdvance;
@@ -86,7 +88,8 @@ export default class UnicodeLayoutEngine {
 
           default: // Attached_Below, Attached_Above, Below, Above, other
             // center align
-            position.xOffset += baseBox.minX + (baseBox.width - markBox.width) / 2 - markBox.minX;
+            position.xOffset +=
+              baseBox.minX + (baseBox.width - markBox.width) / 2 - markBox.minX;
         }
 
         // y positioning
@@ -98,7 +101,10 @@ export default class UnicodeLayoutEngine {
           case 'Attached_Below_Left':
           case 'Attached_Below':
             // add a small gap between the glyphs if they are not attached
-            if (combiningClass === 'Attached_Below_Left' || combiningClass === 'Attached_Below') {
+            if (
+              combiningClass === 'Attached_Below_Left' ||
+              combiningClass === 'Attached_Below'
+            ) {
               baseBox.minY += yGap;
             }
 
@@ -113,7 +119,10 @@ export default class UnicodeLayoutEngine {
           case 'Attached_Above':
           case 'Attached_Above_Right':
             // add a small gap between the glyphs if they are not attached
-            if (combiningClass === 'Attached_Above' || combiningClass === 'Attached_Above_Right') {
+            if (
+              combiningClass === 'Attached_Above' ||
+              combiningClass === 'Attached_Above_Right'
+            ) {
               baseBox.maxY += yGap;
             }
 
@@ -125,7 +134,6 @@ export default class UnicodeLayoutEngine {
         position.xAdvance = position.yAdvance = 0;
         position.xOffset += xOffset;
         position.yOffset += yOffset;
-
       } else {
         xOffset -= position.xAdvance;
         yOffset -= position.yAdvance;
@@ -166,7 +174,8 @@ export default class UnicodeLayoutEngine {
           case 0x0ebc:
             return 'Below';
         }
-      } else if (codePoint === 0x0e3a) { // virama
+      } else if (codePoint === 0x0e3a) {
+        // virama
         return 'Below_Right';
       }
     }

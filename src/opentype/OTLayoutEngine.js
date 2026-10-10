@@ -25,16 +25,26 @@ export default class OTLayoutEngine {
   setup(glyphRun) {
     // Map glyphs to GlyphInfo objects so data can be passed between
     // GSUB and GPOS without mutating the real (shared) Glyph objects.
-    this.glyphInfos = glyphRun.glyphs.map(glyph => new GlyphInfo(this.font, glyph.id, [...glyph.codePoints]));
+    this.glyphInfos = glyphRun.glyphs.map(
+      (glyph) => new GlyphInfo(this.font, glyph.id, [...glyph.codePoints]),
+    );
 
     // Select a script based on what is available in GSUB/GPOS.
     let script = null;
     if (this.GPOSProcessor) {
-      script = this.GPOSProcessor.selectScript(glyphRun.script, glyphRun.language, glyphRun.direction);
+      script = this.GPOSProcessor.selectScript(
+        glyphRun.script,
+        glyphRun.language,
+        glyphRun.direction,
+      );
     }
 
     if (this.GSUBProcessor) {
-      script = this.GSUBProcessor.selectScript(glyphRun.script, glyphRun.language, glyphRun.direction);
+      script = this.GSUBProcessor.selectScript(
+        glyphRun.script,
+        glyphRun.language,
+        glyphRun.direction,
+      );
     }
 
     // Choose a shaper based on the script, and setup a shaping plan.
@@ -54,7 +64,9 @@ export default class OTLayoutEngine {
       this.plan.process(this.GSUBProcessor, this.glyphInfos);
 
       // Map glyph infos back to normal Glyph objects
-      glyphRun.glyphs = this.glyphInfos.map(glyphInfo => this.font.getGlyph(glyphInfo.id, glyphInfo.codePoints));
+      glyphRun.glyphs = this.glyphInfos.map((glyphInfo) =>
+        this.font.getGlyph(glyphInfo.id, glyphInfo.codePoints),
+      );
     }
   }
 
@@ -64,7 +76,11 @@ export default class OTLayoutEngine {
     }
 
     if (this.GPOSProcessor) {
-      this.plan.process(this.GPOSProcessor, this.glyphInfos, glyphRun.positions);
+      this.plan.process(
+        this.GPOSProcessor,
+        this.glyphInfos,
+        glyphRun.positions,
+      );
     }
 
     if (this.shaper.zeroMarkWidths === 'AFTER_GPOS') {

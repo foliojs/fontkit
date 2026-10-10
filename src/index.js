@@ -1,4 +1,9 @@
-import { registerFormat, create, defaultLanguage, setDefaultLanguage } from './base';
+import {
+  registerFormat,
+  create,
+  defaultLanguage,
+  setDefaultLanguage,
+} from './base';
 import TTFFont from './TTFFont';
 import WOFFFont from './WOFFFont';
 import WOFF2Font from './WOFF2Font';

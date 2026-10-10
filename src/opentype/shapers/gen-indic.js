@@ -40,56 +40,56 @@ const CATEGORY_MAP = {
   Visarga: 'SM',
   Vowel: 'V',
   Vowel_Dependent: 'M',
-  Vowel_Independent: 'V'
+  Vowel_Independent: 'V',
 };
 
 const OVERRIDES = {
   0x0953: 'SM',
   0x0954: 'SM',
-  0x0A72: 'C',
-  0x0A73: 'C',
-  0x1CF5: 'C',
-  0x1CF6: 'C',
-  0x1CE2: 'A',
-  0x1CE3: 'A',
-  0x1CE4: 'A',
-  0x1CE5: 'A',
-  0x1CE6: 'A',
-  0x1CE7: 'A',
-  0x1CE8: 'A',
-  0x1CED: 'A',
-  0xA8F2: 'Symbol',
-  0xA8F3: 'Symbol',
-  0xA8F4: 'Symbol',
-  0xA8F5: 'Symbol',
-  0xA8F6: 'Symbol',
-  0xA8F7: 'Symbol',
-  0x1CE9: 'Symbol',
-  0x1CEA: 'Symbol',
-  0x1CEB: 'Symbol',
-  0x1CEC: 'Symbol',
-  0x1CEE: 'Symbol',
-  0x1CEF: 'Symbol',
-  0x1CF0: 'Symbol',
-  0x1CF1: 'Symbol',
-  0x17C6: 'N',
+  0x0a72: 'C',
+  0x0a73: 'C',
+  0x1cf5: 'C',
+  0x1cf6: 'C',
+  0x1ce2: 'A',
+  0x1ce3: 'A',
+  0x1ce4: 'A',
+  0x1ce5: 'A',
+  0x1ce6: 'A',
+  0x1ce7: 'A',
+  0x1ce8: 'A',
+  0x1ced: 'A',
+  0xa8f2: 'Symbol',
+  0xa8f3: 'Symbol',
+  0xa8f4: 'Symbol',
+  0xa8f5: 'Symbol',
+  0xa8f6: 'Symbol',
+  0xa8f7: 'Symbol',
+  0x1ce9: 'Symbol',
+  0x1cea: 'Symbol',
+  0x1ceb: 'Symbol',
+  0x1cec: 'Symbol',
+  0x1cee: 'Symbol',
+  0x1cef: 'Symbol',
+  0x1cf0: 'Symbol',
+  0x1cf1: 'Symbol',
+  0x17c6: 'N',
   0x2010: 'Placeholder',
   0x2011: 'Placeholder',
-  0x25CC: 'Dotted_Circle',
+  0x25cc: 'Dotted_Circle',
 
   // Ra
   0x0930: 'Ra', // Devanagari
-  0x09B0: 'Ra', // Bengali
-  0x09F0: 'Ra', // Bengali
-  0x0A30: 'Ra', // Gurmukhi - No Reph
-  0x0AB0: 'Ra', // Gujarati
-  0x0B30: 'Ra', // Oriya
-  0x0BB0: 'Ra', // Tamil - No Reph
-  0x0C30: 'Ra', // Telugu - Reph formed only with ZWJ
-  0x0CB0: 'Ra', // Kannada
-  0x0D30: 'Ra', // Malayalam - No Reph, Logical Repha
-  0x0DBB: 'Ra', // Sinhala - Reph formed only with ZWJ
-  0x179A: 'Ra', // Khmer - No Reph, Visual Repha
+  0x09b0: 'Ra', // Bengali
+  0x09f0: 'Ra', // Bengali
+  0x0a30: 'Ra', // Gurmukhi - No Reph
+  0x0ab0: 'Ra', // Gujarati
+  0x0b30: 'Ra', // Oriya
+  0x0bb0: 'Ra', // Tamil - No Reph
+  0x0c30: 'Ra', // Telugu - Reph formed only with ZWJ
+  0x0cb0: 'Ra', // Kannada
+  0x0d30: 'Ra', // Malayalam - No Reph, Logical Repha
+  0x0dbb: 'Ra', // Sinhala - Reph formed only with ZWJ
+  0x179a: 'Ra', // Khmer - No Reph, Visual Repha
 };
 
 const POSITION_MAP = {
@@ -108,7 +108,7 @@ const POSITION_MAP = {
   Top_And_Right: 'Post_C',
 
   Overstruck: 'After_Main',
-  Visual_Order_Left: 'Pre_M'
+  Visual_Order_Left: 'Pre_M',
 };
 
 function matraPosition(c, pos) {
@@ -118,48 +118,82 @@ function matraPosition(c, pos) {
 
     case 'Post_C':
       switch (c.block) {
-        case 'Devanagari': return 'After_Sub';
-        case 'Bengali':    return 'After_Post';
-        case 'Gurmukhi':   return 'After_Post';
-        case 'Gujarati':   return 'After_Post';
-        case 'Oriya':      return 'After_Post';
-        case 'Tamil':      return 'After_Post';
-        case 'Telugu':     return c.code <= 0x0C42 ? 'Before_Sub' : 'After_Sub';
-        case 'Kannada':    return c.code < 0x0CC3 || c.code > 0xCD6 ? 'Before_Sub' : 'After_Sub';
-        case 'Malayalam':  return 'After_Post';
-        case 'Sinhala':    return 'After_Sub';
-        case 'Khmer':      return 'After_Post';
-        default:           return 'After_Sub';
+        case 'Devanagari':
+          return 'After_Sub';
+        case 'Bengali':
+          return 'After_Post';
+        case 'Gurmukhi':
+          return 'After_Post';
+        case 'Gujarati':
+          return 'After_Post';
+        case 'Oriya':
+          return 'After_Post';
+        case 'Tamil':
+          return 'After_Post';
+        case 'Telugu':
+          return c.code <= 0x0c42 ? 'Before_Sub' : 'After_Sub';
+        case 'Kannada':
+          return c.code < 0x0cc3 || c.code > 0xcd6 ? 'Before_Sub' : 'After_Sub';
+        case 'Malayalam':
+          return 'After_Post';
+        case 'Sinhala':
+          return 'After_Sub';
+        case 'Khmer':
+          return 'After_Post';
+        default:
+          return 'After_Sub';
       }
 
     case 'Above_C':
       switch (c.block) {
-        case 'Devanagari': return 'After_Sub';
-        case 'Gurmukhi':   return 'After_Post'; // Deviate from spec
-        case 'Gujarati':   return 'After_Sub';
-        case 'Oriya':      return 'After_Main';
-        case 'Tamil':      return 'After_Sub';
-        case 'Telugu':     return 'Before_Sub';
-        case 'Kannada':    return 'Before_Sub';
-        case 'Sinhala':    return 'After_Sub';
-        case 'Khmer':      return 'After_Post';
-        default:           return 'After_Sub';
+        case 'Devanagari':
+          return 'After_Sub';
+        case 'Gurmukhi':
+          return 'After_Post'; // Deviate from spec
+        case 'Gujarati':
+          return 'After_Sub';
+        case 'Oriya':
+          return 'After_Main';
+        case 'Tamil':
+          return 'After_Sub';
+        case 'Telugu':
+          return 'Before_Sub';
+        case 'Kannada':
+          return 'Before_Sub';
+        case 'Sinhala':
+          return 'After_Sub';
+        case 'Khmer':
+          return 'After_Post';
+        default:
+          return 'After_Sub';
       }
 
     case 'Below_C':
       switch (c.block) {
-        case 'Devanagari': return 'After_Sub';
-        case 'Bengali':    return 'After_Sub';
-        case 'Gurmukhi':   return 'After_Post';
-        case 'Gujarati':   return 'After_Post';
-        case 'Oriya':      return 'After_Sub';
-        case 'Tamil':      return 'After_Post';
-        case 'Telugu':     return 'Before_Sub';
-        case 'Kannada':    return 'Before_Sub';
-        case 'Malayalam':  return 'After_Post';
-        case 'Sinhala':    return 'After_Sub';
-        case 'Khmer':      return 'After_Post';
-        default:           return 'After_Sub';
+        case 'Devanagari':
+          return 'After_Sub';
+        case 'Bengali':
+          return 'After_Sub';
+        case 'Gurmukhi':
+          return 'After_Post';
+        case 'Gujarati':
+          return 'After_Post';
+        case 'Oriya':
+          return 'After_Sub';
+        case 'Tamil':
+          return 'After_Post';
+        case 'Telugu':
+          return 'Before_Sub';
+        case 'Kannada':
+          return 'Before_Sub';
+        case 'Malayalam':
+          return 'After_Post';
+        case 'Sinhala':
+          return 'After_Sub';
+        case 'Khmer':
+          return 'After_Post';
+        default:
+          return 'After_Sub';
       }
 
     default:
@@ -174,12 +208,17 @@ function getPosition(codepoint, category) {
     position = 'Base_C';
   } else if (category === 'M') {
     position = matraPosition(codepoint, position);
-  } else if (category === 'SM' || category === 'VD' || category === 'A' || category === 'Symbol') {
+  } else if (
+    category === 'SM' ||
+    category === 'VD' ||
+    category === 'A' ||
+    category === 'Symbol'
+  ) {
     position = 'SMVD';
   }
 
   // Oriya Bindu is Before_Sub in the spec.
-  if (codepoint.code === 0x0B01) {
+  if (codepoint.code === 0x0b01) {
     position = 'Before_Sub';
   }
 
@@ -191,11 +230,14 @@ for (let c in CATEGORIES) {
   symbols[c] = Math.log2(CATEGORIES[c]);
 }
 
-let trie = new UnicodeTrieBuilder;
+let trie = new UnicodeTrieBuilder();
 for (let i = 0; i < codepoints.length; i++) {
   let codepoint = codepoints[i];
   if (codepoint) {
-    let category = OVERRIDES[codepoint.code] || CATEGORY_MAP[codepoint.indicSyllabicCategory] || 'X';
+    let category =
+      OVERRIDES[codepoint.code] ||
+      CATEGORY_MAP[codepoint.indicSyllabicCategory] ||
+      'X';
     let position = getPosition(codepoint, category);
 
     trie.set(codepoint.code, (symbols[category] << 8) | position);
@@ -204,5 +246,11 @@ for (let i = 0; i < codepoints.length; i++) {
 
 fs.writeFileSync(new URL('indic.trie', import.meta.url), trie.toBuffer());
 
-let stateMachine = compile(fs.readFileSync(new URL('indic.machine', import.meta.url), 'utf8'), symbols);
-fs.writeFileSync(new URL('indic.json', import.meta.url), JSON.stringify(stateMachine));
+let stateMachine = compile(
+  fs.readFileSync(new URL('indic.machine', import.meta.url), 'utf8'),
+  symbols,
+);
+fs.writeFileSync(
+  new URL('indic.json', import.meta.url),
+  JSON.stringify(stateMachine),
+);

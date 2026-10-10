@@ -50,7 +50,7 @@ export default class CFFSubset extends Subset {
     topDict.FDArray = [];
     topDict.FDSelect = {
       version: 0,
-      fds: []
+      fds: [],
     };
 
     let used_fds = {};
@@ -83,7 +83,10 @@ export default class CFFSubset extends Subset {
       delete dict.FontName;
       if (dict.Private && dict.Private.Subrs) {
         dict.Private = Object.assign({}, dict.Private);
-        dict.Private.Subrs = this.subsetSubrs(dict.Private.Subrs, used_subrs[i]);
+        dict.Private.Subrs = this.subsetSubrs(
+          dict.Private.Subrs,
+          used_subrs[i],
+        );
       }
     }
 
@@ -103,16 +106,19 @@ export default class CFFSubset extends Subset {
 
     let privateDict = Object.assign({}, this.cff.topDict.Private);
     if (this.cff.topDict.Private && this.cff.topDict.Private.Subrs) {
-      privateDict.Subrs = this.subsetSubrs(this.cff.topDict.Private.Subrs, used_subrs);
+      privateDict.Subrs = this.subsetSubrs(
+        this.cff.topDict.Private.Subrs,
+        used_subrs,
+      );
     }
 
     topDict.FDArray = [{ Private: privateDict }];
-    return topDict.FDSelect = {
+    return (topDict.FDSelect = {
       version: 3,
       nRanges: 1,
       ranges: [{ first: 0, fd: 0 }],
-      sentinel: this.charstrings.length
-    };
+      sentinel: this.charstrings.length,
+    });
   }
 
   addString(string) {
@@ -133,7 +139,7 @@ export default class CFFSubset extends Subset {
 
     let charset = {
       version: this.charstrings.length > 255 ? 2 : 1,
-      ranges: [{ first: 1, nLeft: this.charstrings.length - 2 }]
+      ranges: [{ first: 1, nLeft: this.charstrings.length - 2 }],
     };
 
     let topDict = Object.assign({}, this.cff.topDict);
@@ -142,7 +148,17 @@ export default class CFFSubset extends Subset {
     topDict.Encoding = null;
     topDict.CharStrings = this.charstrings;
 
-    for (let key of ['version', 'Notice', 'Copyright', 'FullName', 'FamilyName', 'Weight', 'PostScript', 'BaseFontName', 'FontName']) {
+    for (let key of [
+      'version',
+      'Notice',
+      'Copyright',
+      'FullName',
+      'FamilyName',
+      'Weight',
+      'PostScript',
+      'BaseFontName',
+      'FontName',
+    ]) {
       topDict[key] = this.addString(this.cff.string(topDict[key]));
     }
 
@@ -163,7 +179,7 @@ export default class CFFSubset extends Subset {
       nameIndex: [this.cff.postscriptName],
       topDictIndex: [topDict],
       stringIndex: this.strings,
-      globalSubrIndex: this.gsubrs
+      globalSubrIndex: this.gsubrs,
     };
 
     return CFFTop.toBuffer(top);

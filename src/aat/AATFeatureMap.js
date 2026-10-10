@@ -4,7 +4,7 @@ const features = {
   allTypographicFeatures: {
     code: 0,
     exclusive: false,
-    allTypeFeatures: 0
+    allTypeFeatures: 0,
   },
   ligatures: {
     code: 1,
@@ -19,34 +19,34 @@ const features = {
     abbrevSquaredLigatures: 14,
     symbolLigatures: 16,
     contextualLigatures: 18,
-    historicalLigatures: 20
+    historicalLigatures: 20,
   },
   cursiveConnection: {
     code: 2,
     exclusive: true,
     unconnected: 0,
     partiallyConnected: 1,
-    cursive: 2
+    cursive: 2,
   },
   letterCase: {
     code: 3,
-    exclusive: true
+    exclusive: true,
   },
-    // upperAndLowerCase: 0          # deprecated
-    // allCaps: 1                    # deprecated
-    // allLowerCase: 2               # deprecated
-    // smallCaps: 3                  # deprecated
-    // initialCaps: 4                # deprecated
-    // initialCapsAndSmallCaps: 5    # deprecated
+  // upperAndLowerCase: 0          # deprecated
+  // allCaps: 1                    # deprecated
+  // allLowerCase: 2               # deprecated
+  // smallCaps: 3                  # deprecated
+  // initialCaps: 4                # deprecated
+  // initialCapsAndSmallCaps: 5    # deprecated
   verticalSubstitution: {
     code: 4,
     exclusive: false,
-    substituteVerticalForms: 0
+    substituteVerticalForms: 0,
   },
   linguisticRearrangement: {
     code: 5,
     exclusive: false,
-    linguisticRearrangement: 0
+    linguisticRearrangement: 0,
   },
   numberSpacing: {
     code: 6,
@@ -54,7 +54,7 @@ const features = {
     monospacedNumbers: 0,
     proportionalNumbers: 1,
     thirdWidthNumbers: 2,
-    quarterWidthNumbers: 3
+    quarterWidthNumbers: 3,
   },
   smartSwash: {
     code: 8,
@@ -63,14 +63,14 @@ const features = {
     wordFinalSwashes: 2,
     // lineInitialSwashes: 4
     // lineFinalSwashes: 6
-    nonFinalSwashes: 8
+    nonFinalSwashes: 8,
   },
   diacritics: {
     code: 9,
     exclusive: true,
     showDiacritics: 0,
     hideDiacritics: 1,
-    decomposeDiacritics: 2
+    decomposeDiacritics: 2,
   },
   verticalPosition: {
     code: 10,
@@ -79,30 +79,30 @@ const features = {
     superiors: 1,
     inferiors: 2,
     ordinals: 3,
-    scientificInferiors: 4
+    scientificInferiors: 4,
   },
   fractions: {
     code: 11,
     exclusive: true,
     noFractions: 0,
     verticalFractions: 1,
-    diagonalFractions: 2
+    diagonalFractions: 2,
   },
   overlappingCharacters: {
     code: 13,
     exclusive: false,
-    preventOverlap: 0
+    preventOverlap: 0,
   },
   typographicExtras: {
     code: 14,
     exclusive: false,
     // hyphensToEmDash: 0
     // hyphenToEnDash: 2
-    slashedZero: 4
+    slashedZero: 4,
   },
-    // formInterrobang: 6
-    // smartQuotes: 8
-    // periodsToEllipsis: 10
+  // formInterrobang: 6
+  // smartQuotes: 8
+  // periodsToEllipsis: 10
   mathematicalExtras: {
     code: 15,
     exclusive: false,
@@ -111,7 +111,7 @@ const features = {
     // slashToDivide: 4
     // inequalityLigatures: 6
     // exponents: 8
-    mathematicalGreek: 10
+    mathematicalGreek: 10,
   },
   ornamentSets: {
     code: 16,
@@ -122,14 +122,14 @@ const features = {
     fleurons: 3,
     decorativeBorders: 4,
     internationalSymbols: 5,
-    mathSymbols: 6
+    mathSymbols: 6,
   },
   characterAlternatives: {
     code: 17,
     exclusive: true,
-    noAlternates: 0
+    noAlternates: 0,
   },
-    // user defined options
+  // user defined options
   designComplexity: {
     code: 18,
     exclusive: true,
@@ -137,7 +137,7 @@ const features = {
     designLevel2: 1,
     designLevel3: 2,
     designLevel4: 3,
-    designLevel5: 4
+    designLevel5: 4,
   },
   styleOptions: {
     code: 19,
@@ -147,7 +147,7 @@ const features = {
     engravedText: 2,
     illuminatedCaps: 3,
     titlingCaps: 4,
-    tallCaps: 5
+    tallCaps: 5,
   },
   characterShape: {
     code: 20,
@@ -166,13 +166,13 @@ const features = {
     JIS2004Characters: 11,
     hojoCharacters: 12,
     NLCCharacters: 13,
-    traditionalNamesCharacters: 14
+    traditionalNamesCharacters: 14,
   },
   numberCase: {
     code: 21,
     exclusive: true,
     lowerCaseNumbers: 0,
-    upperCaseNumbers: 1
+    upperCaseNumbers: 1,
   },
   textSpacing: {
     code: 22,
@@ -183,22 +183,22 @@ const features = {
     thirdWidthText: 3,
     quarterWidthText: 4,
     altProportionalText: 5,
-    altHalfWidthText: 6
+    altHalfWidthText: 6,
   },
   transliteration: {
     code: 23,
     exclusive: true,
-    noTransliteration: 0
+    noTransliteration: 0,
   },
-    // hanjaToHangul: 1
-    // hiraganaToKatakana: 2
-    // katakanaToHiragana: 3
-    // kanaToRomanization: 4
-    // romanizationToHiragana: 5
-    // romanizationToKatakana: 6
-    // hanjaToHangulAltOne: 7
-    // hanjaToHangulAltTwo: 8
-    // hanjaToHangulAltThree: 9
+  // hanjaToHangul: 1
+  // hiraganaToKatakana: 2
+  // katakanaToHiragana: 3
+  // kanaToRomanization: 4
+  // romanizationToHiragana: 5
+  // romanizationToKatakana: 6
+  // hanjaToHangulAltOne: 7
+  // hanjaToHangulAltTwo: 8
+  // hanjaToHangulAltThree: 9
   annotation: {
     code: 24,
     exclusive: true,
@@ -212,34 +212,34 @@ const features = {
     romanNumeralAnnotation: 7,
     diamondAnnotation: 8,
     invertedBoxAnnotation: 9,
-    invertedRoundedBoxAnnotation: 10
+    invertedRoundedBoxAnnotation: 10,
   },
   kanaSpacing: {
     code: 25,
     exclusive: true,
     fullWidthKana: 0,
-    proportionalKana: 1
+    proportionalKana: 1,
   },
   ideographicSpacing: {
     code: 26,
     exclusive: true,
     fullWidthIdeographs: 0,
     proportionalIdeographs: 1,
-    halfWidthIdeographs: 2
+    halfWidthIdeographs: 2,
   },
   unicodeDecomposition: {
     code: 27,
     exclusive: false,
     canonicalComposition: 0,
     compatibilityComposition: 2,
-    transcodingComposition: 4
+    transcodingComposition: 4,
   },
   rubyKana: {
     code: 28,
     exclusive: false,
     // noRubyKana: 0     # deprecated - use rubyKanaOff instead
     // rubyKana: 1     # deprecated - use rubyKanaOn instead
-    rubyKana: 2
+    rubyKana: 2,
   },
   CJKSymbolAlternatives: {
     code: 29,
@@ -249,7 +249,7 @@ const features = {
     CJKSymbolAltTwo: 2,
     CJKSymbolAltThree: 3,
     CJKSymbolAltFour: 4,
-    CJKSymbolAltFive: 5
+    CJKSymbolAltFive: 5,
   },
   ideographicAlternatives: {
     code: 30,
@@ -259,32 +259,32 @@ const features = {
     ideographicAltTwo: 2,
     ideographicAltThree: 3,
     ideographicAltFour: 4,
-    ideographicAltFive: 5
+    ideographicAltFive: 5,
   },
   CJKVerticalRomanPlacement: {
     code: 31,
     exclusive: true,
     CJKVerticalRomanCentered: 0,
-    CJKVerticalRomanHBaseline: 1
+    CJKVerticalRomanHBaseline: 1,
   },
   italicCJKRoman: {
     code: 32,
     exclusive: false,
     // noCJKItalicRoman: 0     # deprecated - use CJKItalicRomanOff instead
     // CJKItalicRoman: 1     # deprecated - use CJKItalicRomanOn instead
-    CJKItalicRoman: 2
+    CJKItalicRoman: 2,
   },
   caseSensitiveLayout: {
     code: 33,
     exclusive: false,
     caseSensitiveLayout: 0,
-    caseSensitiveSpacing: 2
+    caseSensitiveSpacing: 2,
   },
   alternateKana: {
     code: 34,
     exclusive: false,
     alternateHorizKana: 0,
-    alternateVertKana: 2
+    alternateVertKana: 2,
   },
   stylisticAlternatives: {
     code: 35,
@@ -309,32 +309,33 @@ const features = {
     stylisticAltSeventeen: 34,
     stylisticAltEighteen: 36,
     stylisticAltNineteen: 38,
-    stylisticAltTwenty: 40
+    stylisticAltTwenty: 40,
   },
   contextualAlternates: {
     code: 36,
     exclusive: false,
     contextualAlternates: 0,
     swashAlternates: 2,
-    contextualSwashAlternates: 4
+    contextualSwashAlternates: 4,
   },
   lowerCase: {
     code: 37,
     exclusive: true,
     defaultLowerCase: 0,
     lowerCaseSmallCaps: 1,
-    lowerCasePetiteCaps: 2
+    lowerCasePetiteCaps: 2,
   },
   upperCase: {
     code: 38,
     exclusive: true,
     defaultUpperCase: 0,
     upperCaseSmallCaps: 1,
-    upperCasePetiteCaps: 2
+    upperCasePetiteCaps: 2,
   },
-  languageTag: { // indices into ltag table
+  languageTag: {
+    // indices into ltag table
     code: 39,
-    exclusive: true
+    exclusive: true,
   },
   CJKRomanSpacing: {
     code: 103,
@@ -342,11 +343,14 @@ const features = {
     halfWidthCJKRoman: 0,
     proportionalCJKRoman: 1,
     defaultCJKRoman: 2,
-    fullWidthCJKRoman: 3
-  }
+    fullWidthCJKRoman: 3,
+  },
 };
 
-const feature = (name, selector) => [features[name].code, features[name][selector]];
+const feature = (name, selector) => [
+  features[name].code,
+  features[name][selector],
+];
 
 const OTMapping = {
   rlig: feature('ligatures', 'requiredLigatures'),
@@ -453,14 +457,17 @@ const OTMapping = {
   ss17: feature('stylisticAlternatives', 'stylisticAltSeventeen'),
   ss18: feature('stylisticAlternatives', 'stylisticAltEighteen'),
   ss19: feature('stylisticAlternatives', 'stylisticAltNineteen'),
-  ss20: feature('stylisticAlternatives', 'stylisticAltTwenty')
+  ss20: feature('stylisticAlternatives', 'stylisticAltTwenty'),
 };
 
-  // salt: feature 'stylisticAlternatives', 'stylisticAltOne' # hmm, which one to choose
+// salt: feature 'stylisticAlternatives', 'stylisticAltOne' # hmm, which one to choose
 
 // Add cv01-cv99 features
 for (let i = 1; i <= 99; i++) {
-  OTMapping[`cv${`00${i}`.slice(-2)}`] = [features.characterAlternatives.code, i];
+  OTMapping[`cv${`00${i}`.slice(-2)}`] = [
+    features.characterAlternatives.code,
+    i,
+  ];
 }
 
 // create inverse mapping
@@ -480,7 +487,7 @@ export function mapOTToAAT(features) {
   let res = {};
   for (let k in features) {
     let r;
-    if (r = OTMapping[k]) {
+    if ((r = OTMapping[k])) {
       if (res[r[0]] == null) {
         res[r[0]] = {};
       }
@@ -521,18 +528,20 @@ export function mapAATToOT(features) {
     for (let k = 0; k < features.length; k++) {
       let r;
       let f = mapFeatureStrings(features[k]);
-      if (r = AATMapping[f[0]] && AATMapping[f[0]][f[1]]) {
+      if ((r = AATMapping[f[0]] && AATMapping[f[0]][f[1]])) {
         res[r] = true;
       }
     }
-
   } else if (typeof features === 'object') {
     for (let type in features) {
       let feature = features[type];
       for (let setting in feature) {
         let r;
         let f = mapFeatureStrings([type, setting]);
-        if (feature[setting] && (r = AATMapping[f[0]] && AATMapping[f[0]][f[1]])) {
+        if (
+          feature[setting] &&
+          (r = AATMapping[f[0]] && AATMapping[f[0]][f[1]])
+        ) {
           res[r] = true;
         }
       }

@@ -14,16 +14,18 @@ let ShapingClasses = {
   Join_Causing: 3,
   ALAPH: 4,
   'DALATH RISH': 5,
-  Transparent: 6
+  Transparent: 6,
 };
 
 let trie = new UnicodeTrieBuilder();
 for (let i = 0; i < codepoints.length; i++) {
   let codepoint = codepoints[i];
   if (codepoint) {
-    if (codepoint.joiningGroup === 'ALAPH' || codepoint.joiningGroup === 'DALATH RISH') {
+    if (
+      codepoint.joiningGroup === 'ALAPH' ||
+      codepoint.joiningGroup === 'DALATH RISH'
+    ) {
       trie.set(codepoint.code, ShapingClasses[codepoint.joiningGroup] + 1);
-
     } else if (codepoint.joiningType) {
       trie.set(codepoint.code, ShapingClasses[codepoint.joiningType] + 1);
     }

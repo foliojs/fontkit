@@ -5,7 +5,7 @@ const SVG_COMMANDS = {
   lineTo: 'L',
   quadraticCurveTo: 'Q',
   bezierCurveTo: 'C',
-  closePath: 'Z'
+  closePath: 'Z',
 };
 
 /**
@@ -27,10 +27,10 @@ export default class Path {
    * @return {string}
    */
   toFunction() {
-    return ctx => {
-      this.commands.forEach(c => {
-        return ctx[c.command].apply(ctx, c.args)
-      })
+    return (ctx) => {
+      this.commands.forEach((c) => {
+        return ctx[c.command].apply(ctx, c.args);
+      });
     };
   }
 
@@ -39,8 +39,8 @@ export default class Path {
    * @return {string}
    */
   toSVG() {
-    let cmds = this.commands.map(c => {
-      let args = c.args.map(arg => Math.round(arg * 100) / 100);
+    let cmds = this.commands.map((c) => {
+      let args = c.args.map((arg) => Math.round(arg * 100) / 100);
       return `${SVG_COMMANDS[c.command]}${args.join(' ')}`;
     });
 
@@ -56,7 +56,7 @@ export default class Path {
    */
   get cbox() {
     if (!this._cbox) {
-      let cbox = new BBox;
+      let cbox = new BBox();
       for (let command of this.commands) {
         for (let i = 0; i < command.args.length; i += 2) {
           cbox.addPoint(command.args[i], command.args[i + 1]);
@@ -79,15 +79,15 @@ export default class Path {
       return this._bbox;
     }
 
-    let bbox = new BBox;
-    let cx = 0, cy = 0;
+    let bbox = new BBox();
+    let cx = 0,
+      cy = 0;
 
-    let f = t => (
-      Math.pow(1 - t, 3) * p0[i]
-        + 3 * Math.pow(1 - t, 2) * t * p1[i]
-        + 3 * (1 - t) * Math.pow(t, 2) * p2[i]
-        + Math.pow(t, 3) * p3[i]
-    );
+    let f = (t) =>
+      Math.pow(1 - t, 3) * p0[i] +
+      3 * Math.pow(1 - t, 2) * t * p1[i] +
+      3 * (1 - t) * Math.pow(t, 2) * p2[i] +
+      Math.pow(t, 3) * p3[i];
 
     for (let c of this.commands) {
       switch (c.command) {
@@ -104,10 +104,10 @@ export default class Path {
           if (c.command === 'quadraticCurveTo') {
             // http://fontforge.org/bezier.html
             var [qp1x, qp1y, p3x, p3y] = c.args;
-            var cp1x = cx + 2 / 3 * (qp1x - cx);    // CP1 = QP0 + 2/3 * (QP1-QP0)
-            var cp1y = cy + 2 / 3 * (qp1y - cy);
-            var cp2x = p3x + 2 / 3 * (qp1x - p3x);  // CP2 = QP2 + 2/3 * (QP1-QP2)
-            var cp2y = p3y + 2 / 3 * (qp1y - p3y);
+            var cp1x = cx + (2 / 3) * (qp1x - cx); // CP1 = QP0 + 2/3 * (QP1-QP0)
+            var cp1y = cy + (2 / 3) * (qp1y - cy);
+            var cp2x = p3x + (2 / 3) * (qp1x - p3x); // CP2 = QP2 + 2/3 * (QP1-QP2)
+            var cp2y = p3y + (2 / 3) * (qp1y - p3y);
           } else {
             var [cp1x, cp1y, cp2x, cp2y, p3x, p3y] = c.args;
           }
@@ -172,7 +172,7 @@ export default class Path {
       }
     }
 
-    return this._bbox = Object.freeze(bbox);
+    return (this._bbox = Object.freeze(bbox));
   }
 
   /**
@@ -181,7 +181,7 @@ export default class Path {
    * @return {Path}
    */
   mapPoints(fn) {
-    let path = new Path;
+    let path = new Path();
 
     for (let c of this.commands) {
       let args = [];
@@ -231,12 +231,18 @@ export default class Path {
   }
 }
 
-for (let command of ['moveTo', 'lineTo', 'quadraticCurveTo', 'bezierCurveTo', 'closePath']) {
-  Path.prototype[command] = function(...args) {
+for (let command of [
+  'moveTo',
+  'lineTo',
+  'quadraticCurveTo',
+  'bezierCurveTo',
+  'closePath',
+]) {
+  Path.prototype[command] = function (...args) {
     this._bbox = this._cbox = null;
     this.commands.push({
       command,
-      args
+      args,
     });
 
     return this;

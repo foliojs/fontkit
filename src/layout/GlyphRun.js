@@ -69,10 +69,10 @@ export default class GlyphRun {
     return width;
   }
 
- /**
-  * The total advance height of the run.
-  * @type {number}
-  */
+  /**
+   * The total advance height of the run.
+   * @type {number}
+   */
   get advanceHeight() {
     let height = 0;
     for (let position of this.positions) {
@@ -82,12 +82,12 @@ export default class GlyphRun {
     return height;
   }
 
- /**
-  * The bounding box containing all glyphs in the run.
-  * @type {BBox}
-  */
+  /**
+   * The bounding box containing all glyphs in the run.
+   * @type {BBox}
+   */
   get bbox() {
-    let bbox = new BBox;
+    let bbox = new BBox();
 
     let x = 0;
     let y = 0;

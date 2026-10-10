@@ -6,16 +6,16 @@ import { asciiDecoder } from './utils';
 
 let TTCHeader = new r.VersionedStruct(r.uint32, {
   0x00010000: {
-    numFonts:   r.uint32,
-    offsets:    new r.Array(r.uint32, 'numFonts')
+    numFonts: r.uint32,
+    offsets: new r.Array(r.uint32, 'numFonts'),
   },
   0x00020000: {
-    numFonts:   r.uint32,
-    offsets:    new r.Array(r.uint32, 'numFonts'),
-    dsigTag:    r.uint32,
+    numFonts: r.uint32,
+    offsets: new r.Array(r.uint32, 'numFonts'),
+    dsigTag: r.uint32,
     dsigLength: r.uint32,
-    dsigOffset: r.uint32
-  }
+    dsigOffset: r.uint32,
+  },
 });
 
 export default class TrueTypeCollection {
@@ -41,11 +41,9 @@ export default class TrueTypeCollection {
       let font = new TTFFont(stream);
       if (
         font.postscriptName === name ||
-        (
-          font.postscriptName instanceof Uint8Array && 
-          name instanceof Uint8Array && 
-          font.postscriptName.every((v, i) => name[i] === v)
-        )
+        (font.postscriptName instanceof Uint8Array &&
+          name instanceof Uint8Array &&
+          font.postscriptName.every((v, i) => name[i] === v))
       ) {
         return font;
       }

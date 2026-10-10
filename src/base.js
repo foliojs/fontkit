@@ -1,11 +1,11 @@
-import {DecodeStream} from 'restructure';
+import { DecodeStream } from 'restructure';
 
 export let logErrors = false;
 
 let formats = [];
 export function registerFormat(format) {
   formats.push(format);
-};
+}
 
 export function create(buffer, postscriptName) {
   for (let i = 0; i < formats.length; i++) {
@@ -21,9 +21,9 @@ export function create(buffer, postscriptName) {
   }
 
   throw new Error('Unknown font format');
-};
+}
 
 export let defaultLanguage = 'en';
 export function setDefaultLanguage(lang = 'en') {
   defaultLanguage = lang;
-};
+}

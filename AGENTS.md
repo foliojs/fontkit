@@ -10,6 +10,8 @@ Tests live in `test/`, with font fixtures and their licenses in `test/data/`. `s
 
 - `npm install`: install dependencies and run the existing `prepublish` lifecycle to generate shaping data and build bundles.
 - `npm run build`: build Node/browser CommonJS and ES module bundles with Parcel.
+- `npm run format`: format files in `src/` and `test/` with Prettier.
+- `npm run format:check`: check formatting in `src/` and `test/` without modifying files.
 - `npm test`: rebuild bundles, then run the complete Mocha suite.
 - `npm run mocha -- test/glyph_mapping.js`: run one test file against the current build; rebuild after source changes.
 - `npm run coverage`: run Mocha through c8 against the current build.
@@ -18,7 +20,7 @@ Tests live in `test/`, with font fixtures and their licenses in `test/data/`. `s
 
 ## Coding Style & Naming Conventions
 
-Use JavaScript ES modules, two-space indentation, semicolons, and generally single-quoted strings. Match surrounding code where conventions differ. Use PascalCase for classes and class filenames (`TTFGlyph.js`), camelCase for methods and variables, and exact font-table tags for table modules (`cmap.js`, `GPOS.js`). No formatter or linter is configured; keep changes focused and avoid unrelated formatting.
+Use JavaScript ES modules. Coding style is enforced through Prettier via `npm run format`. Validate formatting with `npm run format:check`. Use PascalCase for classes and class filenames (`TTFGlyph.js`), camelCase for methods and variables, and exact font-table tags for table modules (`cmap.js`, `GPOS.js`). No linter is configured; keep changes focused and avoid unrelated formatting.
 
 ## Testing Guidelines
 

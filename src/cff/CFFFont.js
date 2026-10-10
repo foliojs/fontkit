@@ -24,7 +24,7 @@ class CFFFont {
 
     if (this.version < 2) {
       if (this.topDictIndex.length !== 1) {
-        throw new Error("Only a single font is allowed in CFF");
+        throw new Error('Only a single font is allowed in CFF');
       }
 
       this.topDict = this.topDictIndex[0];
@@ -134,7 +134,9 @@ class CFFFont {
           }
         }
       default:
-        throw new Error(`Unknown FDSelect version: ${this.topDict.FDSelect.version}`);
+        throw new Error(
+          `Unknown FDSelect version: ${this.topDict.FDSelect.version}`,
+        );
     }
   }
 

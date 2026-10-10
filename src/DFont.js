@@ -4,7 +4,7 @@ import TTFFont from './TTFFont';
 let DFontName = new r.String(r.uint8);
 let DFontData = new r.Struct({
   len: r.uint32,
-  buf: new r.Buffer('len')
+  buf: new r.Buffer('len'),
 });
 
 let Ref = new r.Struct({
@@ -12,31 +12,35 @@ let Ref = new r.Struct({
   nameOffset: r.int16,
   attr: r.uint8,
   dataOffset: r.uint24,
-  handle: r.uint32
+  handle: r.uint32,
 });
 
 let Type = new r.Struct({
   name: new r.String(4),
   maxTypeIndex: r.uint16,
-  refList: new r.Pointer(r.uint16, new r.Array(Ref, t => t.maxTypeIndex + 1), { type: 'parent' })
+  refList: new r.Pointer(
+    r.uint16,
+    new r.Array(Ref, (t) => t.maxTypeIndex + 1),
+    { type: 'parent' },
+  ),
 });
 
 let TypeList = new r.Struct({
   length: r.uint16,
-  types: new r.Array(Type, t => t.length + 1)
+  types: new r.Array(Type, (t) => t.length + 1),
 });
 
 let DFontMap = new r.Struct({
   reserved: new r.Reserved(r.uint8, 24),
   typeList: new r.Pointer(r.uint16, TypeList),
-  nameListOffset: new r.Pointer(r.uint16, 'void')
+  nameListOffset: new r.Pointer(r.uint16, 'void'),
 });
 
 let DFontHeader = new r.Struct({
   dataOffset: r.uint32,
   map: new r.Pointer(r.uint32, DFontMap),
   dataLength: r.uint32,
-  mapLength: r.uint32
+  mapLength: r.uint32,
 });
 
 export default class DFont {
@@ -91,11 +95,9 @@ export default class DFont {
       let font = new TTFFont(stream);
       if (
         font.postscriptName === name ||
-        (
-          font.postscriptName instanceof Uint8Array && 
-          name instanceof Uint8Array && 
-          font.postscriptName.every((v, i) => name[i] === v)
-        )
+        (font.postscriptName instanceof Uint8Array &&
+          name instanceof Uint8Array &&
+          font.postscriptName.every((v, i) => name[i] === v))
       ) {
         return font;
       }

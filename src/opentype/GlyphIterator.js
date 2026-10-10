@@ -16,15 +16,23 @@ export default class GlyphIterator {
   }
 
   shouldIgnore(glyph) {
-    return (this.flags.ignoreMarks && glyph.isMark) ||
-           (this.flags.ignoreBaseGlyphs && glyph.isBase) ||
-           (this.flags.ignoreLigatures && glyph.isLigature) ||
-           (this.markAttachmentType && glyph.isMark && glyph.markAttachmentType !== this.markAttachmentType);
+    return (
+      (this.flags.ignoreMarks && glyph.isMark) ||
+      (this.flags.ignoreBaseGlyphs && glyph.isBase) ||
+      (this.flags.ignoreLigatures && glyph.isLigature) ||
+      (this.markAttachmentType &&
+        glyph.isMark &&
+        glyph.markAttachmentType !== this.markAttachmentType)
+    );
   }
 
   move(dir) {
     this.index += dir;
-    while (0 <= this.index && this.index < this.glyphs.length && this.shouldIgnore(this.glyphs[this.index])) {
+    while (
+      0 <= this.index &&
+      this.index < this.glyphs.length &&
+      this.shouldIgnore(this.glyphs[this.index])
+    ) {
       this.index += dir;
     }
 

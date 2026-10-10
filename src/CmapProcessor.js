@@ -18,13 +18,17 @@ export default class CmapProcessor {
       [0, 3],
       [0, 2],
       [0, 1],
-      [0, 0]
+      [0, 0],
     ]);
 
     // If not unicode cmap was found, take the first table with a supported encoding.
     if (!this.cmap) {
       for (let cmap of cmapTable.tables) {
-        let encoding = getEncoding(cmap.platformID, cmap.encodingID, cmap.table.language - 1);
+        let encoding = getEncoding(
+          cmap.platformID,
+          cmap.encodingID,
+          cmap.table.language - 1,
+        );
         let mapping = getEncodingMapping(encoding);
         if (mapping) {
           this.cmap = cmap.table;
@@ -34,7 +38,7 @@ export default class CmapProcessor {
     }
 
     if (!this.cmap) {
-      throw new Error("Could not find a supported cmap table");
+      throw new Error('Could not find a supported cmap table');
     }
 
     this.uvs = this.findSubtable(cmapTable, [[0, 5]]);
@@ -103,7 +107,10 @@ export default class CmapProcessor {
             if (rangeOffset === 0) {
               gid = codepoint + cmap.idDelta.get(mid);
             } else {
-              let index = rangeOffset / 2 + (codepoint - cmap.startCode.get(mid)) - (cmap.segCount - mid);
+              let index =
+                rangeOffset / 2 +
+                (codepoint - cmap.startCode.get(mid)) -
+                (cmap.segCount - mid);
               gid = cmap.glyphIndexArray.get(index) || 0;
               if (gid !== 0) {
                 gid += cmap.idDelta.get(mid);
@@ -162,17 +169,21 @@ export default class CmapProcessor {
     }
 
     let selectors = this.uvs.varSelectors.toArray();
-    let i = binarySearch(selectors, x => variationSelector - x.varSelector);
+    let i = binarySearch(selectors, (x) => variationSelector - x.varSelector);
     let sel = selectors[i];
 
     if (i !== -1 && sel.defaultUVS) {
-      i = binarySearch(sel.defaultUVS, x =>
-        codepoint < x.startUnicodeValue ? -1 : codepoint > x.startUnicodeValue + x.additionalCount ? +1 : 0
+      i = binarySearch(sel.defaultUVS, (x) =>
+        codepoint < x.startUnicodeValue
+          ? -1
+          : codepoint > x.startUnicodeValue + x.additionalCount
+            ? +1
+            : 0,
       );
     }
 
     if (i !== -1 && sel.nonDefaultUVS) {
-      i = binarySearch(sel.nonDefaultUVS, x => codepoint - x.unicodeValue);
+      i = binarySearch(sel.nonDefaultUVS, (x) => codepoint - x.unicodeValue);
       if (i !== -1) {
         return sel.nonDefaultUVS[i].glyphID;
       }
@@ -183,7 +194,7 @@ export default class CmapProcessor {
 
   getCharacterSet() {
     // Codes that map to glyph 0 (.notdef) are not supported characters
-    return this._getCodes().filter(code => this._lookupCode(code) !== 0);
+    return this._getCodes().filter((code) => this._lookupCode(code) !== 0);
   }
 
   _getCodes() {
@@ -287,7 +298,10 @@ export default class CmapProcessor {
       case 12: {
         let res = [];
         for (let group of cmap.groups.toArray()) {
-          if (gid >= group.glyphID && gid <= group.glyphID + (group.endCharCode - group.startCharCode)) {
+          if (
+            gid >= group.glyphID &&
+            gid <= group.glyphID + (group.endCharCode - group.startCharCode)
+          ) {
             res.push(group.startCharCode + (gid - group.glyphID));
           }
         }
@@ -314,5 +328,5 @@ export default class CmapProcessor {
 
 cache(CmapProcessor, {
   getCharacterSet: 'once',
-  codePointsForGlyph: 'key'
+  codePointsForGlyph: 'key',
 });

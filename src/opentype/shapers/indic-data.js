@@ -14,12 +14,12 @@ export const CATEGORIES = {
   A: 1 << 10,
   Placeholder: 1 << 11,
   Dotted_Circle: 1 << 12,
-  RS: 1 << 13,    // Register Shifter, used in Khmer OT spec.
+  RS: 1 << 13, // Register Shifter, used in Khmer OT spec.
   Coeng: 1 << 14, // Khmer-style Virama.
   Repha: 1 << 15, // Atomically-encoded logical or visual repha.
   Ra: 1 << 16,
-  CM: 1 << 17,    // Consonant-Medial.
-  Symbol: 1 << 18 // Avagraha, etc that take marks (SM,A,VD).
+  CM: 1 << 17, // Consonant-Medial.
+  Symbol: 1 << 18, // Avagraha, etc that take marks (SM,A,VD).
 };
 
 // Visual positions in a syllable from left to right.
@@ -46,10 +46,16 @@ export const POSITIONS = {
   Final_C: 1 << 13,
   SMVD: 1 << 14,
 
-  End: 1 << 15
+  End: 1 << 15,
 };
 
-export const CONSONANT_FLAGS = CATEGORIES.C | CATEGORIES.Ra | CATEGORIES.CM | CATEGORIES.V | CATEGORIES.Placeholder | CATEGORIES.Dotted_Circle;
+export const CONSONANT_FLAGS =
+  CATEGORIES.C |
+  CATEGORIES.Ra |
+  CATEGORIES.CM |
+  CATEGORIES.V |
+  CATEGORIES.Placeholder |
+  CATEGORIES.Dotted_Circle;
 export const JOINER_FLAGS = CATEGORIES.ZWJ | CATEGORIES.ZWNJ;
 export const HALANT_OR_COENG_FLAGS = CATEGORIES.H | CATEGORIES.Coeng;
 
@@ -60,88 +66,88 @@ export const INDIC_CONFIGS = {
     basePos: 'Last',
     rephPos: POSITIONS.Before_Post,
     rephMode: 'Implicit',
-    blwfMode: 'Pre_And_Post'
+    blwfMode: 'Pre_And_Post',
   },
 
   Devanagari: {
     hasOldSpec: true,
-    virama: 0x094D,
+    virama: 0x094d,
     basePos: 'Last',
     rephPos: POSITIONS.Before_Post,
     rephMode: 'Implicit',
-    blwfMode: 'Pre_And_Post'
+    blwfMode: 'Pre_And_Post',
   },
 
   Bengali: {
     hasOldSpec: true,
-    virama: 0x09CD,
+    virama: 0x09cd,
     basePos: 'Last',
     rephPos: POSITIONS.After_Sub,
     rephMode: 'Implicit',
-    blwfMode: 'Pre_And_Post'
+    blwfMode: 'Pre_And_Post',
   },
 
   Gurmukhi: {
     hasOldSpec: true,
-    virama: 0x0A4D,
+    virama: 0x0a4d,
     basePos: 'Last',
     rephPos: POSITIONS.Before_Sub,
     rephMode: 'Implicit',
-    blwfMode: 'Pre_And_Post'
+    blwfMode: 'Pre_And_Post',
   },
 
   Gujarati: {
     hasOldSpec: true,
-    virama: 0x0ACD,
+    virama: 0x0acd,
     basePos: 'Last',
     rephPos: POSITIONS.Before_Post,
     rephMode: 'Implicit',
-    blwfMode: 'Pre_And_Post'
+    blwfMode: 'Pre_And_Post',
   },
 
   Oriya: {
     hasOldSpec: true,
-    virama: 0x0B4D,
+    virama: 0x0b4d,
     basePos: 'Last',
     rephPos: POSITIONS.After_Main,
     rephMode: 'Implicit',
-    blwfMode: 'Pre_And_Post'
+    blwfMode: 'Pre_And_Post',
   },
 
   Tamil: {
     hasOldSpec: true,
-    virama: 0x0BCD,
+    virama: 0x0bcd,
     basePos: 'Last',
     rephPos: POSITIONS.After_Post,
     rephMode: 'Implicit',
-    blwfMode: 'Pre_And_Post'
+    blwfMode: 'Pre_And_Post',
   },
 
   Telugu: {
     hasOldSpec: true,
-    virama: 0x0C4D,
+    virama: 0x0c4d,
     basePos: 'Last',
     rephPos: POSITIONS.After_Post,
     rephMode: 'Explicit',
-    blwfMode: 'Post_Only'
+    blwfMode: 'Post_Only',
   },
 
   Kannada: {
     hasOldSpec: true,
-    virama: 0x0CCD,
+    virama: 0x0ccd,
     basePos: 'Last',
     rephPos: POSITIONS.After_Post,
     rephMode: 'Implicit',
-    blwfMode: 'Post_Only'
+    blwfMode: 'Post_Only',
   },
 
   Malayalam: {
     hasOldSpec: true,
-    virama: 0x0D4D,
+    virama: 0x0d4d,
     basePos: 'Last',
     rephPos: POSITIONS.After_Main,
     rephMode: 'Log_Repha',
-    blwfMode: 'Pre_And_Post'
+    blwfMode: 'Pre_And_Post',
   },
 
   // Handled by UniversalShaper
@@ -156,20 +162,20 @@ export const INDIC_CONFIGS = {
 
   Khmer: {
     hasOldSpec: false,
-    virama: 0x17D2,
+    virama: 0x17d2,
     basePos: 'First',
     rephPos: POSITIONS.Ra_To_Become_Reph,
     rephMode: 'Vis_Repha',
-    blwfMode: 'Pre_And_Post'
-  }
+    blwfMode: 'Pre_And_Post',
+  },
 };
 
 // Additional decompositions that aren't in Unicode
 export const INDIC_DECOMPOSITIONS = {
   // Khmer
-  0x17BE: [0x17C1, 0x17BE],
-  0x17BF: [0x17C1, 0x17BF],
-  0x17C0: [0x17C1, 0x17C0],
-  0x17C4: [0x17C1, 0x17C4],
-  0x17C5: [0x17C1, 0x17C5]
+  0x17be: [0x17c1, 0x17be],
+  0x17bf: [0x17c1, 0x17bf],
+  0x17c0: [0x17c1, 0x17c0],
+  0x17c4: [0x17c1, 0x17c4],
+  0x17c5: [0x17c1, 0x17c5],
 };

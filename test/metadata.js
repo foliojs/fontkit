@@ -2,14 +2,20 @@ import * as fontkit from 'fontkit';
 import assert from 'assert';
 
 describe('metadata', function () {
-  let font = fontkit.openSync(new URL('data/NotoSans/NotoSans.ttc', import.meta.url), 'NotoSans');
+  let font = fontkit.openSync(
+    new URL('data/NotoSans/NotoSans.ttc', import.meta.url),
+    'NotoSans',
+  );
 
   it('has metadata properties', function () {
     assert.equal(font.fullName, 'Noto Sans');
     assert.equal(font.postscriptName, 'NotoSans');
     assert.equal(font.familyName, 'Noto Sans');
     assert.equal(font.subfamilyName, 'Regular');
-    assert.equal(font.copyright, 'Copyright 2012 Google Inc. All Rights Reserved.');
+    assert.equal(
+      font.copyright,
+      'Copyright 2012 Google Inc. All Rights Reserved.',
+    );
     return assert.equal(font.version, 'Version 1.05 uh');
   });
 

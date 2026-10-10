@@ -2,7 +2,9 @@ import * as fontkit from 'fontkit';
 import assert from 'assert';
 
 describe('metadata', function () {
-  let font = fontkit.openSync(new URL('data/OpenSans/OpenSans-Regular.ttf', import.meta.url));
+  let font = fontkit.openSync(
+    new URL('data/OpenSans/OpenSans-Regular.ttf', import.meta.url),
+  );
 
   it('decodes SFNT directory values correctly', function () {
     let dir = font.directory;
@@ -16,5 +18,4 @@ describe('metadata', function () {
     let dir = font.directory;
     assert.equal(Object.keys(dir.tables).length, dir.numTables);
   });
-
 });
