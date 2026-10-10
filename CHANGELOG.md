@@ -5,6 +5,7 @@
 - [BREAKING] Browser build is now ESM-only
 - [BREAKING] Node builds now targets Node 22+, Browser build targets Firefox 115+, Safari 16+, Chrome 120+
 - Replace cache decorators with specialized lazy caching
+- Fix crash when using TrueType font with empty glyphs (#353, #378, #303, #312). Based on #379
 - Map space and missing code points correctly with a legacy Mac cmap (#394)
 - Keep a glyph's variation metrics stable when several composites use it
 - Return the requested code points for glyphs shared by several code points (#342) (#395)
