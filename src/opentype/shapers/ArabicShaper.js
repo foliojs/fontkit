@@ -4,7 +4,9 @@ import { UnicodeTrie } from 'unicode-trie';
 import { decodeBase64 } from '../../utils';
 
 const trie = new UnicodeTrie(
-  decodeBase64(require('fs').readFileSync(__dirname + '/data.trie', 'base64')),
+  decodeBase64(
+    require('fs').readFileSync(__dirname + '/generated/data.trie', 'base64'),
+  ),
 );
 const FEATURES = ['isol', 'fina', 'fin2', 'fin3', 'medi', 'med2', 'init'];
 
@@ -105,7 +107,7 @@ const STATE_TABLE = [
 /**
  * This is a shaper for Arabic, and other cursive scripts.
  * It uses data from ArabicShaping.txt in the Unicode database,
- * compiled to a UnicodeTrie by generate-data.coffee.
+ * compiled to a UnicodeTrie by scripts/generate-data.js.
  *
  * The shaping state machine was ported from Harfbuzz.
  * https://github.com/behdad/harfbuzz/blob/master/src/hb-ot-shape-complex-arabic.cc

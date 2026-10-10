@@ -18,9 +18,9 @@
     "format": "prettier --write src test",
     "format:check": "prettier --check src test",
     "prepublish": "npm run clean && npm run trie:data && npm run trie:use && npm run trie:indic && npm run build",
-    "trie:data": "node src/opentype/shapers/generate-data.js",
-    "trie:use": "node src/opentype/shapers/gen-use.js",
-    "trie:indic": "node src/opentype/shapers/gen-indic.js",
+    "trie:data": "node scripts/generate-data.js",
+    "trie:use": "node scripts/gen-use.js",
+    "trie:indic": "node scripts/gen-indic.js",
     "clean": "node scripts/clean.js",
     "coverage": "c8 mocha"
   },

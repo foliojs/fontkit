@@ -5,6 +5,12 @@ import dfa from 'dfa/compile.js';
 
 const compile = dfa.default;
 
+const generatedDir = new URL(
+  '../src/opentype/shapers/generated/',
+  import.meta.url,
+);
+fs.mkdirSync(generatedDir, { recursive: true });
+
 const CATEGORIES = {
   B: [
     { UISC: 'Number' },
@@ -236,10 +242,13 @@ function decompose(code) {
   return decomposition;
 }
 
-fs.writeFileSync(new URL('use.trie', import.meta.url), trie.toBuffer());
+fs.writeFileSync(new URL('use.trie', generatedDir), trie.toBuffer());
 
 let stateMachine = compile(
-  fs.readFileSync(new URL('use.machine', import.meta.url), 'utf8'),
+  fs.readFileSync(
+    new URL('../src/opentype/shapers/use.machine', import.meta.url),
+    'utf8',
+  ),
   symbols,
 );
 let json = Object.assign(
@@ -250,4 +259,4 @@ let json = Object.assign(
   stateMachine,
 );
 
-fs.writeFileSync(new URL('use.json', import.meta.url), JSON.stringify(json));
+fs.writeFileSync(new URL('use.json', generatedDir), JSON.stringify(json));

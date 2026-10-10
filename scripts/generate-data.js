@@ -6,6 +6,12 @@ import codepoints from 'codepoints';
 import fs from 'fs';
 import { UnicodeTrieBuilder } from 'unicode-trie/builder.js';
 
+const generatedDir = new URL(
+  '../src/opentype/shapers/generated/',
+  import.meta.url,
+);
+fs.mkdirSync(generatedDir, { recursive: true });
+
 let ShapingClasses = {
   Non_Joining: 0,
   Left_Joining: 1,
@@ -32,4 +38,4 @@ for (let i = 0; i < codepoints.length; i++) {
   }
 }
 
-fs.writeFileSync(new URL('data.trie', import.meta.url), trie.toBuffer());
+fs.writeFileSync(new URL('data.trie', generatedDir), trie.toBuffer());

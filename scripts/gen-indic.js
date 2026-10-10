@@ -2,9 +2,19 @@ import codepoints from 'codepoints';
 import fs from 'fs';
 import { UnicodeTrieBuilder } from 'unicode-trie/builder.js';
 import dfa from 'dfa/compile.js';
-import { CATEGORIES, POSITIONS, CONSONANT_FLAGS } from './indic-data.js';
+import {
+  CATEGORIES,
+  POSITIONS,
+  CONSONANT_FLAGS,
+} from '../src/opentype/shapers/indic-data.js';
 
 const compile = dfa.default;
+
+const generatedDir = new URL(
+  '../src/opentype/shapers/generated/',
+  import.meta.url,
+);
+fs.mkdirSync(generatedDir, { recursive: true });
 
 const CATEGORY_MAP = {
   Avagraha: 'Symbol',
@@ -244,13 +254,16 @@ for (let i = 0; i < codepoints.length; i++) {
   }
 }
 
-fs.writeFileSync(new URL('indic.trie', import.meta.url), trie.toBuffer());
+fs.writeFileSync(new URL('indic.trie', generatedDir), trie.toBuffer());
 
 let stateMachine = compile(
-  fs.readFileSync(new URL('indic.machine', import.meta.url), 'utf8'),
+  fs.readFileSync(
+    new URL('../src/opentype/shapers/indic.machine', import.meta.url),
+    'utf8',
+  ),
   symbols,
 );
 fs.writeFileSync(
-  new URL('indic.json', import.meta.url),
+  new URL('indic.json', generatedDir),
   JSON.stringify(stateMachine),
 );

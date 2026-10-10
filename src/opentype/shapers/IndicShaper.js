@@ -4,8 +4,8 @@ import { UnicodeTrie } from 'unicode-trie';
 import { getCategory } from 'unicode-properties';
 import * as Script from '../../layout/Script';
 import GlyphInfo from '../GlyphInfo';
-import indicMachine from './indic.json';
-import useData from './use.json';
+import indicMachine from './generated/indic.json';
+import useData from './generated/use.json';
 import {
   CATEGORIES,
   POSITIONS,
@@ -19,7 +19,9 @@ import { decodeBase64 } from '../../utils';
 
 const { decompositions } = useData;
 const trie = new UnicodeTrie(
-  decodeBase64(require('fs').readFileSync(__dirname + '/indic.trie', 'base64')),
+  decodeBase64(
+    require('fs').readFileSync(__dirname + '/generated/indic.trie', 'base64'),
+  ),
 );
 const stateMachine = new StateMachine(indicMachine);
 
