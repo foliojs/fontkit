@@ -2695,5 +2695,29 @@ describe('shaping', function () {
         '23+2275|162+0|60@0,-1000+0',
       );
     });
+
+    describe('shapes text with joiners', function () {
+      // Expected results from HarfBuzz
+      test(
+        'should keep a ZWNJ between syllables',
+        'NotoSans/NotoSansBalinese-Regular.ttf',
+        'ᬅ‌ᬓ',
+        '9+2258|3+0|23+2275',
+      );
+
+      test(
+        'should keep a ZWJ between syllables',
+        'NotoSans/NotoSansBalinese-Regular.ttf',
+        'ᬅ‍ᬓ',
+        '9+2258|3+0|23+2275',
+      );
+
+      test(
+        'should not form a conjunct across a ZWNJ',
+        'NotoSans/NotoSansBalinese-Regular.ttf',
+        'ᬓ᭄‌ᬱ',
+        '23+2275|72+712|3+0|53+1653',
+      );
+    });
   });
 });

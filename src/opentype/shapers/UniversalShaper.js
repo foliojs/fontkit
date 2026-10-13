@@ -75,7 +75,15 @@ class USEInfo {
 
 function setupSyllables(font, glyphs) {
   let syllable = 0;
+  let last = 0;
   for (let [start, end, tags] of stateMachine.match(glyphs.map(useCategory))) {
+    if (start > last) {
+      ++syllable;
+      for (let i = last; i < start; i++) {
+        glyphs[i].shaperInfo = new USEInfo('O', 'non_cluster', syllable);
+      }
+    }
+
     ++syllable;
 
     // Create shaper info
@@ -92,6 +100,15 @@ function setupSyllables(font, glyphs) {
       glyphs[start].shaperInfo.category === 'R' ? 1 : Math.min(3, end - start);
     for (let i = start; i < start + limit; i++) {
       glyphs[i].features.rphf = true;
+    }
+
+    last = end + 1;
+  }
+
+  if (last < glyphs.length) {
+    ++syllable;
+    for (let i = last; i < glyphs.length; i++) {
+      glyphs[i].shaperInfo = new USEInfo('O', 'non_cluster', syllable);
     }
   }
 }
