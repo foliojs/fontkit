@@ -7,6 +7,7 @@
 - Replace cache decorators with specialized lazy caching
 - Fix crash when using TrueType font with empty glyphs (#353, #378, #303, #312). Based on #379
 - Read hdmx device records at their padded size
+- Encode subsets of fonts with set variations (#308)
 - Map space and missing code points correctly with a legacy Mac cmap (#394)
 - Keep a glyph's variation metrics stable when several composites use it
 - Return the requested code points for glyphs shared by several code points (#342) (#395)
