@@ -223,28 +223,39 @@ export default class OTProcessor {
     throw new Error('applyLookup must be implemented by subclasses');
   }
 
-  applyLookupList(lookupRecords) {
+  applyLookupList(lookupRecords, inputLength) {
     let options = this.glyphIterator.options;
     let glyphIndex = this.glyphIterator.index;
+
+    // Index just past the matched input sequence, moved as the
+    // lookups below insert or delete glyphs
+    let end = this.glyphIterator.peekIndex(inputLength - 1) + 1;
 
     for (let lookupRecord of lookupRecords) {
       // Reset flags and find glyph index for this lookup record
       this.glyphIterator.reset(options, glyphIndex);
       this.glyphIterator.increment(lookupRecord.sequenceIndex);
+      let index = this.glyphIterator.index;
 
       // Get the lookup and setup flags for subtables
       let lookup = this.table.lookupList.get(lookupRecord.lookupListIndex);
-      this.glyphIterator.reset(lookup.flags, this.glyphIterator.index);
+      this.glyphIterator.reset(lookup.flags, index);
 
       // Apply lookup subtables until one matches
+      let length = this.glyphs.length;
       for (let table of lookup.subTables) {
         if (this.applyLookup(lookup.lookupType, table)) {
           break;
         }
       }
+
+      // Like HarfBuzz, never move the end before the glyph this lookup applied to
+      end = Math.max(end + this.glyphs.length - length, index);
     }
 
-    this.glyphIterator.reset(options, glyphIndex);
+    // Continue after the input sequence, so this lookup is not applied
+    // again to glyphs it already matched or produced
+    this.glyphIterator.reset(options, end - 1);
     return true;
   }
 
@@ -367,7 +378,10 @@ export default class OTProcessor {
         set = table.ruleSets[index];
         for (let rule of set) {
           if (this.sequenceMatches(1, rule.input)) {
-            return this.applyLookupList(rule.lookupRecords);
+            return this.applyLookupList(
+              rule.lookupRecords,
+              rule.input.length + 1,
+            );
           }
         }
 
@@ -386,7 +400,10 @@ export default class OTProcessor {
         set = table.classSet[index];
         for (let rule of set) {
           if (this.classSequenceMatches(1, rule.classes, table.classDef)) {
-            return this.applyLookupList(rule.lookupRecords);
+            return this.applyLookupList(
+              rule.lookupRecords,
+              rule.classes.length + 1,
+            );
           }
         }
 
@@ -394,7 +411,10 @@ export default class OTProcessor {
 
       case 3:
         if (this.coverageSequenceMatches(0, table.coverages)) {
-          return this.applyLookupList(table.lookupRecords);
+          return this.applyLookupList(
+            table.lookupRecords,
+            table.coverages.length,
+          );
         }
 
         break;
@@ -419,7 +439,10 @@ export default class OTProcessor {
             this.sequenceMatches(1, rule.input) &&
             this.sequenceMatches(1 + rule.input.length, rule.lookahead)
           ) {
-            return this.applyLookupList(rule.lookupRecords);
+            return this.applyLookupList(
+              rule.lookupRecords,
+              rule.input.length + 1,
+            );
           }
         }
 
@@ -450,7 +473,10 @@ export default class OTProcessor {
               table.lookaheadClassDef,
             )
           ) {
-            return this.applyLookupList(rule.lookupRecords);
+            return this.applyLookupList(
+              rule.lookupRecords,
+              rule.input.length + 1,
+            );
           }
         }
 
@@ -468,7 +494,10 @@ export default class OTProcessor {
             table.lookaheadCoverage,
           )
         ) {
-          return this.applyLookupList(table.lookupRecords);
+          return this.applyLookupList(
+            table.lookupRecords,
+            table.inputGlyphCount,
+          );
         }
 
         break;

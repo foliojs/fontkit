@@ -15,5 +15,6 @@
 - Leave code points mapped to .notdef out of characterSet (#390)
 - Fix glyph code point cache after composite decomposition (#387)
 - Fix off-diagonal coefficients in composite glyph transforms (#388)
+- Continue after the glyphs a lookup matched or inserted instead of applying it to them again (#383)
 
 ### [v2.0.4] - 08-09-2024
