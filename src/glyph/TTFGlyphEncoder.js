@@ -143,7 +143,7 @@ export default class TTFGlyphEncoder {
     let size = Glyf.size(glyf);
     let tail = 4 - (size % 4);
 
-    let stream = new r.EncodeStream(size + tail);
+    let stream = new r.EncodeStream(new Uint8Array(size + tail));
     Glyf.encode(stream, glyf);
 
     // Align to 4-byte length
