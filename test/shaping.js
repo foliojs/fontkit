@@ -53,6 +53,60 @@ describe('shaping', function () {
     });
   });
 
+  describe('lookup application', function () {
+    // lookup-continuation.ttf was built with fontTools from this feature file,
+    // and the expected results are HarfBuzz's:
+    //
+    //   lookup SINGLE { sub d by x; } SINGLE;
+    //   lookup MULTIPLE { sub e by y e; } MULTIPLE;
+    //   lookup ADJUST { pos g 100; } ADJUST;
+    //
+    //   feature liga {
+    //     sub a by b a;
+    //     sub c by NULL;
+    //     sub d' lookup SINGLE d';
+    //     sub e' lookup MULTIPLE f;
+    //   } liga;
+    //
+    //   feature kern {
+    //     pos g' lookup ADJUST g';
+    //   } kern;
+    test(
+      'should not apply a multiple substitution to its own output',
+      'lookup-continuation.ttf',
+      'aa',
+      '2+500|1+500|2+500|1+500',
+    );
+
+    test(
+      'should not skip the glyph after a deleted glyph',
+      'lookup-continuation.ttf',
+      'ccb',
+      '2+500',
+    );
+
+    test(
+      'should continue after the input sequence of a contextual substitution',
+      'lookup-continuation.ttf',
+      'dddd',
+      '8+500|4+500|8+500|4+500',
+    );
+
+    test(
+      'should continue after glyphs inserted by a contextual substitution',
+      'lookup-continuation.ttf',
+      'eef',
+      '5+500|9+500|5+500|6+500',
+    );
+
+    test(
+      'should continue after the input sequence of a contextual positioning',
+      'lookup-continuation.ttf',
+      'gggg',
+      '7+600|7+500|7+600|7+500',
+    );
+  });
+
   describe('arabic shaper', function () {
     test(
       'should shape Arabic text',

@@ -35,6 +35,9 @@ export default class GSUBProcessor extends OTProcessor {
             // If the sequence length is zero, delete the glyph.
             // The OpenType spec disallows this, but seems like Harfbuzz and Uniscribe allow it.
             this.glyphs.splice(this.glyphIterator.index, 1);
+
+            // Continue with the glyph that followed the deleted one
+            this.glyphIterator.index--;
             return true;
           }
 
@@ -54,6 +57,9 @@ export default class GSUBProcessor extends OTProcessor {
           });
 
           this.glyphs.splice(this.glyphIterator.index + 1, 0, ...replacement);
+
+          // Continue after the inserted glyphs, so this lookup is not applied to its own output
+          this.glyphIterator.index += replacement.length;
           return true;
         }
 
