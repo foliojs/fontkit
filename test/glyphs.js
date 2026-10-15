@@ -23,6 +23,17 @@ describe('glyphs', function () {
       );
     });
 
+    it('should start contours with off-curve endpoints at their implied on-curve midpoint', function () {
+      let amiri = fontkit.openSync(
+        new URL('data/amiri/amiri-regular.ttf', import.meta.url),
+      );
+      let glyph = amiri.layout('.').glyphs[0];
+      assert.equal(
+        glyph.path.toSVG(),
+        'M129.5 11.5Q96 45 96 90Q96 135 129.5 166.5Q163 198 208 198Q253 198 284.5 166.5Q316 135 316 90Q316 45 284.5 11.5Q253 -22 208 -22Q163 -22 129.5 11.5Z',
+      );
+    });
+
     it('should get a path for the glyph as function', function () {
       let glyph = font.getGlyph(39);
       let results = [];
