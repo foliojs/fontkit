@@ -400,7 +400,7 @@ export default class TTFGlyph extends Glyph {
         } else {
           // Start at the middle if both the first and last points are off curve
           firstPt = new Point(
-            false,
+            true,
             false,
             (firstPt.x + lastPt.x) / 2,
             (firstPt.y + lastPt.y) / 2,
