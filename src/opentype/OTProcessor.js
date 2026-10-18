@@ -219,6 +219,10 @@ export default class OTProcessor {
     }
   }
 
+  // Return whether a subtable matched. On success, leave glyphIterator immediately
+  // before the continuation position: applyLookups calls next() after the lookup.
+  // Contextual lookups reset the cursor and flags before each nested lookup and
+  // determine their own continuation after the matched input sequence.
   applyLookup(lookup, table) {
     throw new Error('applyLookup must be implemented by subclasses');
   }
@@ -378,10 +382,7 @@ export default class OTProcessor {
         set = table.ruleSets[index];
         for (let rule of set) {
           if (this.sequenceMatches(1, rule.input)) {
-            return this.applyLookupList(
-              rule.lookupRecords,
-              rule.input.length + 1,
-            );
+            return this.applyLookupList(rule.lookupRecords, rule.glyphCount);
           }
         }
 
@@ -400,10 +401,7 @@ export default class OTProcessor {
         set = table.classSet[index];
         for (let rule of set) {
           if (this.classSequenceMatches(1, rule.classes, table.classDef)) {
-            return this.applyLookupList(
-              rule.lookupRecords,
-              rule.classes.length + 1,
-            );
+            return this.applyLookupList(rule.lookupRecords, rule.glyphCount);
           }
         }
 
@@ -411,10 +409,7 @@ export default class OTProcessor {
 
       case 3:
         if (this.coverageSequenceMatches(0, table.coverages)) {
-          return this.applyLookupList(
-            table.lookupRecords,
-            table.coverages.length,
-          );
+          return this.applyLookupList(table.lookupRecords, table.glyphCount);
         }
 
         break;
@@ -441,7 +436,7 @@ export default class OTProcessor {
           ) {
             return this.applyLookupList(
               rule.lookupRecords,
-              rule.input.length + 1,
+              rule.inputGlyphCount,
             );
           }
         }
@@ -475,7 +470,7 @@ export default class OTProcessor {
           ) {
             return this.applyLookupList(
               rule.lookupRecords,
-              rule.input.length + 1,
+              rule.inputGlyphCount,
             );
           }
         }

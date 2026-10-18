@@ -59,11 +59,15 @@ describe('shaping', function () {
     //
     //   lookup SINGLE { sub d by x; } SINGLE;
     //   lookup MULTIPLE { sub e by y e; } MULTIPLE;
+    //   lookup DELETE { sub h by NULL; } DELETE;
     //   lookup ADJUST { pos g 100; } ADJUST;
     //
     //   feature liga {
     //     sub a by b a;
     //     sub c by NULL;
+    //     sub h' lookup DELETE h';
+    //     lookupflag IgnoreMarks;
+    //     sub i by y acutecomb i;
     //     sub d' lookup SINGLE d';
     //     sub e' lookup MULTIPLE f;
     //   } liga;
@@ -71,6 +75,10 @@ describe('shaping', function () {
     //   feature kern {
     //     pos g' lookup ADJUST g';
     //   } kern;
+    //
+    //   table GDEF {
+    //     GlyphClassDef [a b c d e f g h i x y], [], [acutecomb], [];
+    //   } GDEF;
     test(
       'should not apply a multiple substitution to its own output',
       'lookup-continuation.ttf',
@@ -104,6 +112,27 @@ describe('shaping', function () {
       'lookup-continuation.ttf',
       'gggg',
       '7+600|7+500|7+600|7+500',
+    );
+
+    test(
+      'should adjust the end of a contextual match after deletion',
+      'lookup-continuation.ttf',
+      'hhhh',
+      '10+500|10+500',
+    );
+
+    test(
+      'should continue after a contextual match containing ignored marks',
+      'lookup-continuation.ttf',
+      'd\u0301dd\u0301d',
+      '8+500|12+0|4+500|8+500|12+0|4+500',
+    );
+
+    test(
+      'should count inserted marks when advancing after a multiple substitution',
+      'lookup-continuation.ttf',
+      'ii',
+      '9+500|12+0|11+500|9+500|12+0|11+500',
     );
   });
 
