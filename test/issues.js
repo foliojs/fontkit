@@ -148,4 +148,38 @@ describe('issues', function () {
       assert.deepEqual(glyphs[1].codePoints, [0x622]);
     });
   });
+
+  describe('#383 - running out of memory with Libre Barcode EAN13 Text', function () {
+    let font = fontkit.openSync(
+      new URL(
+        'data/LibreBarcodeEAN13Text/LibreBarcodeEAN13Text-Regular.ttf',
+        import.meta.url,
+      ),
+    );
+
+    it('should lay out an EAN-13 code', function () {
+      assert.equal(font.layout('123456789012').glyphs.length, 17);
+    });
+
+    it('should lay out an EAN-8 code', function () {
+      assert.deepEqual(
+        font.layout('12345670').glyphs.map((glyph) => glyph.name),
+        [
+          'lt.below.quiet',
+          'guard.normal.ean8',
+          'one.ean8.setA',
+          'two.ean8.setA',
+          'three.ean8.setA',
+          'four.ean8.setA',
+          'guard.centre.ean8',
+          'five.ean8.setC',
+          'six.ean8.setC',
+          'seven.ean8.setC',
+          'zero.ean8.setC',
+          'guard.normal.ean8',
+          'gt.below.quiet',
+        ],
+      );
+    });
+  });
 });
