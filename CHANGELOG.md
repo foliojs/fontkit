@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Fix extra quadratic segments in TrueType contours with off-curve endpoints
 - [BREAKING] Browser build is now ESM-only
 - [BREAKING] Node builds now targets Node 22+, Browser build targets Firefox 115+, Safari 16+, Chrome 120+
 - Replace cache decorators with specialized lazy caching
