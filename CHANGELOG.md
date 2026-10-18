@@ -10,6 +10,7 @@
 - Encode subsets of fonts with set variations (#308)
 - Map space and missing code points correctly with a legacy Mac cmap (#394)
 - Keep a glyph's variation metrics stable when several composites use it
+- Fix repha, pre-base vowel and dotted circle placement in the Universal Shaping Engine
 - Return the requested code points for glyphs shared by several code points (#342) (#395)
 - Map glyphs back to code points for cmap formats 6 and 10 (#392)
 - Fix crash in the Universal Shaping Engine on characters outside a syllable, such as ZWNJ and ZWJ

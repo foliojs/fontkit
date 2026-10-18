@@ -11,6 +11,26 @@ const { categories, decompositions } = useData;
 const trie = new UnicodeTrie(decodeBase64(useTrieBase64));
 const stateMachine = new StateMachine(useData);
 
+// Categories a repha is reordered in front of, as in HarfBuzz
+const POST_BASE_CATEGORIES = new Set([
+  'FAbv',
+  'FBlw',
+  'FPst',
+  'FM',
+  'MAbv',
+  'MBlw',
+  'MPst',
+  'MPre',
+  'VAbv',
+  'VBlw',
+  'VPst',
+  'VPre',
+  'VMAbv',
+  'VMBlw',
+  'VMPst',
+  'VMPre',
+]);
+
 /**
  * This shaper is an implementation of the Universal Shaping Engine, which
  * uses Unicode data to shape a number of scripts without a dedicated shaping engine.
@@ -161,32 +181,33 @@ function reorder(font, glyphs) {
     // Insert a dotted circle glyph in broken clusters.
     if (type === 'broken_cluster' && dottedCircle) {
       let g = new GlyphInfo(font, dottedCircle, [0x25cc]);
-      g.shaperInfo = info;
+      g.shaperInfo = new USEInfo('GB', info.syllableType, info.syllable);
 
       // Insert after possible Repha.
       for (i = start; i < end && glyphs[i].shaperInfo.category === 'R'; i++);
-      glyphs.splice(++i, 0, g);
+      glyphs.splice(i, 0, g);
       end++;
     }
 
     // Move things forward.
     if (info.category === 'R' && end - start > 1) {
-      // Got a repha. Reorder it to after first base, before first halant.
+      // Got a repha. Reorder it towards the end, but before the first post-base glyph.
       for (i = start + 1; i < end; i++) {
-        info = glyphs[i].shaperInfo;
-        if (isBase(info) || isHalant(glyphs[i])) {
-          // If we hit a halant, move before it; otherwise it's a base: move to it's
-          // place, and shift things in between backward.
-          if (isHalant(glyphs[i])) {
+        let isPostBase =
+          POST_BASE_CATEGORIES.has(glyphs[i].shaperInfo.category) ||
+          isHalant(glyphs[i]);
+        if (isPostBase || i === end - 1) {
+          // If we hit a post-base glyph, move before it; otherwise move to the
+          // end. Shift things in between backward.
+          if (isPostBase) {
             i--;
           }
 
-          glyphs.splice(
-            start,
-            0,
-            ...glyphs.splice(start + 1, i - start),
-            glyphs[i],
-          );
+          let repha = glyphs[start];
+          for (let k = start; k < i; k++) {
+            glyphs[k] = glyphs[k + 1];
+          }
+          glyphs[i] = repha;
           break;
         }
       }
@@ -201,6 +222,8 @@ function reorder(font, glyphs) {
         j = isHalant(glyphs[i]) ? i + 1 : i;
       } else if (
         (info.category === 'VPre' || info.category === 'VMPre') &&
+        // Only move the first component of a multiple substitution
+        !glyphs[i].isMultiplied &&
         j < i
       ) {
         glyphs.splice(j, 1, glyphs[i], ...glyphs.splice(j, i - j));

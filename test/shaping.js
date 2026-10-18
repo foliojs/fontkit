@@ -2570,6 +2570,51 @@ describe('shaping', function () {
   });
 
   describe('universal shaping engine', function () {
+    describe('reorders syllables', function () {
+      // Expected results from HarfBuzz
+      test(
+        'should insert a dotted circle before a lone vowel sign',
+        'NotoSans/NotoSansBalinese-Regular.ttf',
+        'ᬶ',
+        '128+1127|58+0',
+      );
+
+      test(
+        'should keep a lone pre-base vowel sign before the dotted circle',
+        'NotoSans/NotoSansBalinese-Regular.ttf',
+        'ᬾ',
+        '66+990|128+1127',
+      );
+
+      test(
+        'should move a repha after its base',
+        'NotoSans/NotoSansTirhuta-Regular.ttf',
+        '\u{114A9}\u{114C2}\u{1148F}',
+        '25+807|134@-367,-8+0',
+      );
+
+      test(
+        'should move a repha within a word',
+        'NotoSans/NotoSansTirhuta-Regular.ttf',
+        '\u{1148F}\u{114A9}\u{114C2}\u{114A7}',
+        '25+807|49+622|134@-355,-8+0',
+      );
+
+      test(
+        'should move a repha after a nukta',
+        'NotoSans/NotoSansTirhuta-Regular.ttf',
+        '\u{114A9}\u{114C2}\u{1148F}\u{114C3}\u{114B0}',
+        '25+807|77@-331,165+0|134@-367,-8+0|58+266',
+      );
+
+      test(
+        'should only move the first part of a split pre-base vowel sign',
+        'NotoSans/NotoSansSiddham-Regular.ttf',
+        '\u{1158E}\u{115B9}',
+        '61+80|25+739|260@-603,0+0',
+      );
+    });
+
     describe('shapes balinese text', function () {
       // Tests from https://github.com/unicode-org/text-rendering-tests
       test(
