@@ -193,6 +193,14 @@ describe('character to glyph mapping', function () {
       );
     });
 
+    it('should apply user-enabled fractions globally', function () {
+      let { glyphs } = font.layout('123 1/2', ['frac']);
+      return assert.deepEqual(
+        glyphs.map((g) => g.id),
+        [1617, 1618, 1619, 1936, 1617, 1726, 1604],
+      );
+    });
+
     it('should not break if can’t enable fractions when using fraction slash', function () {
       let { glyphs } = font.layout('a⁄b ⁄ 1⁄ ⁄2');
       return assert.deepEqual(
