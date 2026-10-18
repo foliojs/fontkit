@@ -42,9 +42,14 @@ export default class DefaultShaper {
     plan.setFeatureOverrides(userFeatures);
   }
 
+  // @overridable
+  static reorderMarks(characters, start, end) {
+    // To be overridden in shapers that need a script-specific mark order.
+  }
+
   static assignFeatures(plan, glyphs) {
     // Compose canonical equivalents supported by the font before GSUB.
-    composeGlyphs(plan.font, glyphs);
+    composeGlyphs(this, plan.font, glyphs);
 
     // Enable contextual fractions
     for (let i = 0; i < glyphs.length; i++) {
@@ -76,9 +81,9 @@ export default class DefaultShaper {
   }
 }
 
-// Normalize each base + combining-mark cluster using the font's coverage.
-// Preserve the order of surviving marks for downstream GSUB lookups.
-function composeGlyphs(font, glyphs) {
+// Normalize each base + combining-mark cluster using the font's coverage,
+// reordering its marks like HarfBuzz.
+function composeGlyphs(shaper, font, glyphs) {
   let i = 0;
   while (i < glyphs.length) {
     // A cluster starts at a non-mark base glyph...
@@ -97,7 +102,7 @@ function composeGlyphs(font, glyphs) {
     }
     let input = [];
     for (let j = i; j < end; j++) input.push(glyphs[j].codePoints[0]);
-    let composed = composeCodePoints(font, input);
+    let composed = composeCodePoints(shaper, font, input);
     if (
       composed.length !== input.length ||
       composed.some((cp, index) => cp !== input[index])
@@ -115,7 +120,7 @@ function composeGlyphs(font, glyphs) {
   }
 }
 
-function composeCodePoints(font, codePoints) {
+function composeCodePoints(shaper, font, codePoints) {
   // A supported singleton should retain its glyph, including characters
   // excluded from canonical composition whose NFC spelling is different.
   if (codePoints.length === 1 && font.hasGlyphForCodePoint(codePoints[0])) {
@@ -134,30 +139,28 @@ function composeCodePoints(font, codePoints) {
       parts = recompose(font, parts);
       if (!parts.every(hasGlyph)) parts = [normalizationChar(cp)];
     }
-    for (let part of parts) {
-      part.order = decomposed.length;
-      decomposed.push(part);
+    decomposed.push(...parts);
+  }
+
+  // Sort each run of marks by combining class, without moving marks across a
+  // starter (class zero, including CGJ). The sort is stable, so equal classes
+  // retain their relative order:
+  for (let start = 0; start < decomposed.length; start++) {
+    if (decomposed[start].combiningClass > 0) {
+      let end = start + 1;
+      while (end < decomposed.length && decomposed[end].combiningClass > 0) {
+        end++;
+      }
+      let marks = decomposed
+        .slice(start, end)
+        .sort((a, b) => a.combiningClass - b.combiningClass);
+      decomposed.splice(start, marks.length, ...marks);
+      shaper.reorderMarks(decomposed, start, end);
+      start = end;
     }
   }
 
-  // Canonical ordering for composition, without moving marks across a starter
-  // (class zero, including CGJ). Equal classes retain their relative order.
-  for (let i = 1; i < decomposed.length; i++) {
-    let current = decomposed[i];
-    if (current.combiningClass === 0) continue;
-    let j = i;
-    while (j > 0 && decomposed[j - 1].combiningClass > current.combiningClass) {
-      decomposed[j] = decomposed[j - 1];
-      j--;
-    }
-    decomposed[j] = current;
-  }
-
-  // Composition may consume marks, but must not reorder the remaining ones:
-  // for example, Amiri's calt expects shadda before a following vowel.
-  return recompose(font, decomposed)
-    .sort((a, b) => a.order - b.order)
-    .map((part) => part.codePoint);
+  return recompose(font, decomposed).map((part) => part.codePoint);
 }
 
 function recompose(font, characters) {
@@ -189,7 +192,8 @@ function recompose(font, characters) {
   return result;
 }
 
-// unicode-properties exposes names; composition blocking needs numeric classes.
+// unicode-properties exposes names; reordering and composition blocking need
+// numeric classes.
 const COMBINING_CLASSES = {
   Not_Reordered: 0,
   Overlay: 1,
@@ -213,10 +217,59 @@ const COMBINING_CLASSES = {
   Iota_Subscript: 240,
 };
 
+// HarfBuzz's modified combining classes, which order marks the way fonts
+// expect: Hebrew points as in the SBL Hebrew manual, Arabic shadda before the
+// vowels, Telugu length marks and Thai sara u / uu before the virama, and
+// Tibetan sign u before sign i.
+const MODIFIED_COMBINING_CLASSES = {
+  10: 22,
+  11: 15,
+  12: 16,
+  13: 17,
+  14: 23,
+  15: 18,
+  16: 19,
+  17: 20,
+  18: 21,
+  19: 14,
+  20: 24,
+  21: 12,
+  22: 25,
+  23: 13,
+  24: 10,
+  25: 11,
+  27: 28,
+  28: 29,
+  29: 30,
+  30: 31,
+  31: 32,
+  32: 33,
+  33: 27,
+  84: 4,
+  91: 5,
+  103: 3,
+  130: 132,
+  132: 131,
+};
+
+// Tai Tham sakot and Tibetan padma go after all other marks, Tibetan
+// tsa -phru before the vowel signs:
+const MODIFIED_COMBINING_CLASSES_BY_CODE_POINT = {
+  0x1a60: 254,
+  0x0fc6: 254,
+  0x0f39: 127,
+};
+
 function normalizationChar(codePoint) {
   let name = getCombiningClass(codePoint);
   let combiningClass = name.startsWith('CCC')
     ? Number(name.slice(3))
     : COMBINING_CLASSES[name];
-  return { codePoint, combiningClass };
+  return {
+    codePoint,
+    combiningClass:
+      MODIFIED_COMBINING_CLASSES_BY_CODE_POINT[codePoint] ??
+      MODIFIED_COMBINING_CLASSES[combiningClass] ??
+      combiningClass,
+  };
 }

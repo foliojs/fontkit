@@ -2951,6 +2951,26 @@ describe('shaping', function () {
       );
     });
 
+    it('reorders marks that do not compose by combining class', function () {
+      // q + dot above (ccc 230) + dot below (ccc 220), as HarfBuzz orders them:
+      assert.deepEqual(
+        font.layout('q\u0307\u0323').glyphs.map((g) => g.name),
+        ['q', 'dotbelowcomb', 'uni0307'],
+      );
+    });
+
+    it('moves Arabic modifier combining marks before other marks', function () {
+      // beh + fatha + hamza above: the hamza goes first (UTR #53), as in
+      // HarfBuzz. Glyphs are in visual order.
+      let amiri = fontkit.openSync(
+        new URL('data/amiri/amiri-regular.ttf', import.meta.url),
+      );
+      assert.deepEqual(
+        amiri.layout('\u0628\u064e\u0654').glyphs.map((g) => g.name),
+        ['uni064E', 'uni0654', 'uni0628'],
+      );
+    });
+
     it('does not compose across a blocking mark or combining grapheme joiner', function () {
       assert.deepEqual(
         shape(0x61, 0x305, 0x301),
@@ -3024,11 +3044,10 @@ describe('shaping', function () {
       assert.deepEqual(shapeAr(0x627, 0x64b, 0x654), shapeAr(0x623, 0x64b));
     });
 
-    it('leaves a non-composing mark cluster unreordered for GSUB', function () {
-      // alef + shadda + fathatan don't compose, so the cluster must stay in its
-      // original order: canonically reordering shadda (ccc 33) after fathatan
-      // (ccc 27) would break Amiri's calt, which keys on shadda-before-vowel and
-      // yields fathatan's small variant. Applying a pure NFC reorder regresses it.
+    it('orders shadda before Arabic vowels', function () {
+      // Like HarfBuzz, shadda (ccc 33) sorts before fathatan (ccc 27), as
+      // Amiri's calt keys on shadda-before-vowel and yields fathatan's small
+      // variant. Plain canonical ordering would put fathatan first.
       let amiri = fontkit.openSync(
         new URL('data/amiri/amiri-regular.ttf', import.meta.url),
       );

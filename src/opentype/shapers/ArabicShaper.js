@@ -7,6 +7,11 @@ import { decodeBase64 } from '../../utils';
 const trie = new UnicodeTrie(decodeBase64(dataTrieBase64));
 const FEATURES = ['isol', 'fina', 'fin2', 'fin3', 'medi', 'med2', 'init'];
 
+const MODIFIER_COMBINING_MARKS = new Set([
+  0x0654, 0x0655, 0x0658, 0x06dc, 0x06e3, 0x06e7, 0x06e8, 0x08ca, 0x08cb,
+  0x08cd, 0x08ce, 0x08cf, 0x08d3, 0x08f3,
+]);
+
 const ShapingClasses = {
   Non_Joining: 0,
   Left_Joining: 1,
@@ -118,6 +123,35 @@ export default class ArabicShaper extends DefaultShaper {
     }
 
     plan.addStage('mset');
+  }
+
+  // Move modifier combining marks (hamza above or below, small high letters)
+  // to the start of their mark run, as UTR #53 recommends. Like HarfBuzz, give
+  // them a class below all Arabic marks so the run stays sorted.
+  // @override
+  static reorderMarks(characters, start, end) {
+    let i = start;
+    for (let combiningClass of [220, 230]) {
+      while (i < end && characters[i].combiningClass < combiningClass) i++;
+      if (i === end) break;
+      if (characters[i].combiningClass === combiningClass) {
+        let j = i;
+        while (
+          j < end &&
+          characters[j].combiningClass === combiningClass &&
+          MODIFIER_COMBINING_MARKS.has(characters[j].codePoint)
+        ) {
+          j++;
+        }
+        let marks = characters.splice(i, j - i);
+        for (let mark of marks) {
+          mark.combiningClass = combiningClass === 220 ? 22 : 26;
+        }
+        characters.splice(start, 0, ...marks);
+        start += marks.length;
+        i = j;
+      }
+    }
   }
 
   static assignFeatures(plan, glyphs) {
