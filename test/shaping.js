@@ -2372,6 +2372,18 @@ describe('shaping', function () {
         'സ്റ്റ്',
         '214+2505|72+0',
       );
+
+      // Regression for null GPOS anchor crash (#367). The hinted Noto Sans
+      // Malayalam ships 189 NULL anchor offsets in mark-positioning lookups;
+      // applyAnchor used to dereference them and throw `TypeError: Cannot
+      // read properties of null (reading 'xCoordinate')`. Treat NULL anchors
+      // as no-op per the OT spec.
+      test(
+        'should not crash on null GPOS anchors',
+        'NotoSans/NotoSansMalayalam-Hinted.ttf',
+        'പുസ്തകം',
+        '44+896|67+332|58+1223|77+0|38+1014|23+1038|6+453',
+      );
     });
 
     describe('shapes Oriya text', function () {
