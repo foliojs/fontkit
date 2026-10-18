@@ -128,7 +128,14 @@ export default class LayoutEngine {
   hideDefaultIgnorables(glyphs, positions) {
     let space = this.font.glyphForCodePoint(0x20);
     for (let i = 0; i < glyphs.length; i++) {
-      if (this.isDefaultIgnorable(glyphs[i].codePoints[0])) {
+      let glyph = glyphs[i];
+      let codePoint = glyph.codePoints[0];
+      // Like HarfBuzz, keep the ones that GSUB substituted, e.g. a soft hyphen
+      // replaced by its `case` form:
+      if (
+        this.isDefaultIgnorable(codePoint) &&
+        glyph.id === this.font.glyphForCodePoint(codePoint).id
+      ) {
         glyphs[i] = space;
         positions[i].xAdvance = 0;
         positions[i].yAdvance = 0;
