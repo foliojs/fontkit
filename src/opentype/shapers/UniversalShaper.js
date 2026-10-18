@@ -164,11 +164,7 @@ function reorder(font, glyphs) {
     // Insert a dotted circle glyph in broken clusters.
     if (type === 'broken_cluster' && dottedCircle) {
       let g = new GlyphInfo(font, dottedCircle, [0x25cc]);
-      g.shaperInfo = new USEInfo(
-        categories[useCategory(g)],
-        info.syllableType,
-        info.syllable,
-      );
+      g.shaperInfo = new USEInfo('GB', info.syllableType, info.syllable);
 
       // Insert after possible Repha.
       for (i = start; i < end && glyphs[i].shaperInfo.category === 'R'; i++);
@@ -190,7 +186,11 @@ function reorder(font, glyphs) {
             i--;
           }
 
-          glyphs.splice(i, 0, glyphs.splice(start, 1)[0]);
+          let repha = glyphs[start];
+          for (let k = start; k < i; k++) {
+            glyphs[k] = glyphs[k + 1];
+          }
+          glyphs[i] = repha;
           break;
         }
       }
