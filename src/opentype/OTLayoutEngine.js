@@ -66,12 +66,13 @@ export default class OTLayoutEngine {
   substitute(glyphRun) {
     if (this.GSUBProcessor) {
       this.plan.process(this.GSUBProcessor, this.glyphInfos);
-
-      // Map glyph infos back to normal Glyph objects
-      glyphRun.glyphs = this.glyphInfos.map((glyphInfo) =>
-        this.font.getGlyph(glyphInfo.id, glyphInfo.codePoints),
-      );
     }
+
+    // Shaper normalization can change glyphs even without a GSUB table.
+    // Keep the output glyphs and the positions allocated from them in sync.
+    glyphRun.glyphs = this.glyphInfos.map((glyphInfo) =>
+      this.font.getGlyph(glyphInfo.id, glyphInfo.codePoints),
+    );
   }
 
   position(glyphRun) {

@@ -1,5 +1,6 @@
 import * as fontkit from 'fontkit';
 import assert from 'assert';
+import { readFileSync } from 'fs';
 
 describe('shaping', function () {
   let fontCache = {};
@@ -2982,6 +2983,224 @@ describe('shaping', function () {
         'ᬓ᭄‌ᬱ',
         '23+2275|72+712|3+0|53+1653',
       );
+    });
+  });
+
+  describe('canonical composition (NFC)', function () {
+    // HarfBuzz composes a base + combining-mark sequence into the font's
+    // precomposed glyph before GSUB/GPOS when the font has one. The default
+    // shaper does the same: decomposed input must shape identically to the
+    // precomposed character, not as a separate base + floating mark.
+    let font = fontkit.openSync(
+      new URL('data/FiraSans/FiraSans-Regular.ttf', import.meta.url),
+    );
+    let shape = (...cps) =>
+      font.layout(String.fromCodePoint(...cps)).glyphs.map((g) => g.id);
+
+    it('composes base + combining mark into the precomposed glyph', function () {
+      // "i" + U+0300 (combining grave) === precomposed U+00EC "ì" (igrave)
+      assert.deepEqual(shape(0x69, 0x300), shape(0x00ec));
+    });
+
+    it('composes a multi-mark sequence greedily', function () {
+      // "e" + U+0302 (circumflex) + U+0301 (acute) === precomposed U+1EBF "ế"
+      assert.deepEqual(shape(0x65, 0x302, 0x301), shape(0x1ebf));
+    });
+
+    it('leaves a sequence decomposed when no Unicode composite exists', function () {
+      // No precomposed "b-grave" exists, so the mark must stay separate.
+      assert.equal(shape(0x62, 0x300).length, 2);
+    });
+
+    for (let text of ['c\u0327\u0301', '\u00e7\u0301', '\u1e09']) {
+      it(`keeps the supported partial composition of ${JSON.stringify(text)}`, function () {
+        // FiraSans has ccedilla and acutecomb, but no U+1E09 composite.
+        assert.ok(font.hasGlyphForCodePoint(0x00e7));
+        assert.ok(!font.hasGlyphForCodePoint(0x1e09));
+        let { glyphs, positions } = font.layout(text);
+        assert.deepEqual(
+          glyphs.map((g) => g.name),
+          ['ccedilla', 'acutecomb'],
+        );
+        assert.deepEqual(
+          positions.map((p) => [p.xAdvance, p.yAdvance, p.xOffset, p.yOffset]),
+          [
+            [478, 0, 0, 0],
+            [0, 0, -39, 0],
+          ],
+        );
+      });
+    }
+
+    it('applies canonical replacements without changing the glyph count', function () {
+      assert.deepEqual(shape(0x00e9, 0x327), shape(0x229, 0x301));
+      assert.deepEqual(
+        font.layout('\u00e9\u0327').positions,
+        font.layout('\u0229\u0301').positions,
+      );
+    });
+
+    it('replaces an unsupported singleton with its canonical equivalent', function () {
+      assert.ok(!font.hasGlyphForCodePoint(0x212b));
+      assert.ok(font.hasGlyphForCodePoint(0x00c5));
+      assert.deepEqual(shape(0x212b), shape(0x00c5));
+    });
+
+    it('keeps a supported singleton even when its NFC spelling differs', function () {
+      assert.equal('\u2126'.normalize('NFC'), '\u03a9');
+      assert.ok(font.hasGlyphForCodePoint(0x2126));
+      assert.deepEqual(shape(0x2126), [font.glyphForCodePoint(0x2126).id]);
+    });
+
+    it('uses a supported partial decomposition when a component mark is missing', function () {
+      let partialFont = fontkit.openSync(
+        new URL('data/FiraSans/FiraSans-Regular.ttf', import.meta.url),
+      );
+      let lookup = partialFont._cmapProcessor.lookup.bind(
+        partialFont._cmapProcessor,
+      );
+      // Simulate a font with ccedilla but no standalone combining cedilla.
+      partialFont._cmapProcessor.lookup = (cp, ...args) =>
+        cp === 0x327 ? 0 : lookup(cp, ...args);
+      assert.ok(!partialFont.hasGlyphForCodePoint(0x327));
+      for (let text of ['\u00e7\u0301', '\u1e09']) {
+        assert.deepEqual(
+          partialFont.layout(text).glyphs.map((g) => g.name),
+          ['ccedilla', 'acutecomb'],
+        );
+      }
+    });
+
+    it('does not expand an unsupported character into missing components', function () {
+      let partialFont = fontkit.openSync(
+        new URL('data/FiraSans/FiraSans-Regular.ttf', import.meta.url),
+      );
+      let lookup = partialFont._cmapProcessor.lookup.bind(
+        partialFont._cmapProcessor,
+      );
+      partialFont._cmapProcessor.lookup = (cp, ...args) =>
+        cp === 0x301 ? 0 : lookup(cp, ...args);
+      assert.ok(!partialFont.hasGlyphForCodePoint(0x301));
+      assert.deepEqual(
+        partialFont.layout('\u1e09').glyphs.map((g) => g.id),
+        [0],
+      );
+    });
+
+    it('does not compose across a blocking mark or combining grapheme joiner', function () {
+      assert.deepEqual(
+        shape(0x61, 0x305, 0x301),
+        [0x61, 0x305, 0x301].map((cp) => font.glyphForCodePoint(cp).id),
+      );
+      assert.equal(
+        shape(0x61, 0x34f, 0x301)[0],
+        font.glyphForCodePoint(0x61).id,
+      );
+    });
+
+    describe('without GSUB', function () {
+      let data = readFileSync(
+        new URL('data/FiraSans/FiraSans-Regular.ttf', import.meta.url),
+      );
+      // Hide GSUB in the table directory while retaining the real GPOS table.
+      for (let i = 0; i < data.readUInt16BE(4); i++) {
+        let offset = 12 + i * 16;
+        if (data.toString('ascii', offset, offset + 4) === 'GSUB') {
+          data.write('NONE', offset);
+        }
+      }
+      let gposFont = fontkit.create(data);
+
+      it('positions the composed glyphs and the following cluster', function () {
+        assert.ok(!gposFont.GSUB);
+        assert.ok(gposFont.GPOS);
+        let actual = gposFont.layout('i\u0300b\u0300');
+        let expected = gposFont.layout('\u00ecb\u0300');
+        assert.deepEqual(
+          actual.glyphs.map((g) => g.id),
+          expected.glyphs.map((g) => g.id),
+        );
+        assert.deepEqual(actual.positions, expected.positions);
+        assert.equal(actual.glyphs.length, 3);
+        assert.equal(
+          actual.positions[1].xAdvance,
+          gposFont.glyphForCodePoint(0x62).advanceWidth,
+        );
+      });
+
+      it('allocates positions for decomposed fallback glyphs', function () {
+        let actual = gposFont.layout('\u1e09');
+        let expected = gposFont.layout('\u00e7\u0301');
+        assert.deepEqual(
+          actual.glyphs.map((g) => g.id),
+          expected.glyphs.map((g) => g.id),
+        );
+        assert.deepEqual(actual.positions, expected.positions);
+        assert.equal(actual.glyphs.length, 2);
+        assert.equal(actual.positions.length, 2);
+      });
+    });
+
+    it('does not interfere with GSUB ligatures', function () {
+      // "office": the fi ligature must still form (composition is mark-only).
+      assert.ok(shape(0x6f, 0x66, 0x66, 0x69, 0x63, 0x65).length < 6);
+    });
+
+    it('reorders and composes Arabic marks across combining classes', function () {
+      let amiri = fontkit.openSync(
+        new URL('data/amiri/amiri-regular.ttf', import.meta.url),
+      );
+      let shapeAr = (...cps) =>
+        amiri.layout(String.fromCodePoint(...cps)).glyphs.map((g) => g.id);
+      // alef + combining hamza-above === precomposed U+0623 (alef with hamza).
+      assert.deepEqual(shapeAr(0x627, 0x654), shapeAr(0x623));
+      // alef + fathatan + hamza-above: the hamza (ccc 230) composes onto the
+      // alef across the lower-class fathatan (ccc 27) per canonical reordering,
+      // leaving the fathatan — i.e. identical to precomposed U+0623 + fathatan.
+      assert.deepEqual(shapeAr(0x627, 0x64b, 0x654), shapeAr(0x623, 0x64b));
+    });
+
+    it('leaves a non-composing mark cluster unreordered for GSUB', function () {
+      // alef + shadda + fathatan don't compose, so the cluster must stay in its
+      // original order: canonically reordering shadda (ccc 33) after fathatan
+      // (ccc 27) would break Amiri's calt, which keys on shadda-before-vowel and
+      // yields fathatan's small variant. Applying a pure NFC reorder regresses it.
+      let amiri = fontkit.openSync(
+        new URL('data/amiri/amiri-regular.ttf', import.meta.url),
+      );
+      let { glyphs } = amiri.layout(
+        String.fromCodePoint(0x627, 0x651, 0x64b),
+        { calt: true },
+        undefined,
+        'ARA ',
+      );
+      assert.deepEqual(
+        glyphs.map((g) => g.name),
+        ['uni064B.small', 'uni0651', 'uni0627'],
+      );
+    });
+
+    it('preserves remaining Arabic mark order when the cluster also composes', function () {
+      let amiri = fontkit.openSync(
+        new URL('data/amiri/amiri-regular.ttf', import.meta.url),
+      );
+      let actual = amiri.layout(
+        '\u0627\u0651\u064b\u0654',
+        { calt: true },
+        'arab',
+        'ARA ',
+      );
+      let expected = amiri.layout(
+        '\u0623\u0651\u064b',
+        { calt: true },
+        'arab',
+        'ARA ',
+      );
+      assert.deepEqual(
+        actual.glyphs.map((g) => g.name),
+        ['uni064B.small', 'uni0651', 'uni0623'],
+      );
+      assert.deepEqual(actual.positions, expected.positions);
     });
   });
 });
