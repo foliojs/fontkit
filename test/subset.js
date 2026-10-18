@@ -42,6 +42,24 @@ describe('font subsetting', function () {
       );
     });
 
+    it('should re-encode glyphs of a font with set variations', function () {
+      let font = fontkit
+        .openSync(new URL('data/fonttest/TestGVAROne.ttf', import.meta.url))
+        .getVariation({ wght: 300 });
+
+      let subset = font.createSubset();
+      for (let glyph of font.glyphsForString('彌')) {
+        subset.includeGlyph(glyph);
+      }
+
+      let buf = subset.encode();
+      let f = fontkit.create(buf);
+      assert.equal(
+        f.getGlyph(1).path.toSVG(),
+        font.glyphsForString('彌')[0].path.toSVG(),
+      );
+    });
+
     it('should handle composite glyphs', function () {
       let subset = font.createSubset();
       subset.includeGlyph(font.glyphsForString('é')[0]);
