@@ -92,6 +92,12 @@ export default class OTLayoutEngine {
       this.zeroMarkAdvances(glyphRun.positions);
     }
 
+    // Like HarfBuzz, resolve attachments once all advances are final, so they
+    // don't count the advances of marks zeroed after GPOS:
+    if (this.GPOSProcessor) {
+      this.GPOSProcessor.fixAttachments(this.glyphInfos, glyphRun.positions);
+    }
+
     // Reverse the glyphs and positions if the script is right-to-left
     if (glyphRun.direction === 'rtl') {
       glyphRun.glyphs.reverse();

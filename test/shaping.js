@@ -3203,4 +3203,23 @@ describe('shaping', function () {
       assert.deepEqual(actual.positions, expected.positions);
     });
   });
+
+  describe('mark attachment', function () {
+    it('ignores the advances of marks zeroed after GPOS', function () {
+      // Roboto Serif's combining marks have an advance, which HarfBuzz zeroes
+      // before positioning the diaeresis on the acute:
+      let font = fontkit.openSync(
+        new URL('data/RobotoSerif/RobotoSerif-Subset.ttf', import.meta.url),
+      );
+      let { positions } = font.layout('x\u0301\u0308');
+      assert.deepEqual(
+        positions.map((p) => [p.xAdvance, p.xOffset, p.yOffset]),
+        [
+          [603, 0, 0],
+          [0, 70, -18],
+          [0, 5, -18],
+        ],
+      );
+    });
+  });
 });

@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Ignore the advances of marks zeroed after GPOS when positioning attached marks
 - Fix canonical composition fallback, Arabic mark ordering, and positioning in fonts without GSUB
 - Fix extra quadratic segments in TrueType contours with off-curve endpoints
 - [BREAKING] Browser build is now ESM-only
