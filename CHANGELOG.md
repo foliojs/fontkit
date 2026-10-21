@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Position marks like HarfBuzz in fonts without GPOS (#409)
 - Fix canonical composition fallback, Arabic mark ordering, and positioning in fonts without GSUB
 - Fix extra quadratic segments in TrueType contours with off-curve endpoints
 - [BREAKING] Browser build is now ESM-only
