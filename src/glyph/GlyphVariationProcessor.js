@@ -87,8 +87,10 @@ export default class GlyphVariationProcessor {
       return;
     }
 
-    // Read the gvar data for this glyph
-    let { stream } = this.font;
+    // Read the gvar data for this glyph, from the stream its table was
+    // decoded from, which the offsets are positions in. That is the font's
+    // own, unless the table is compressed by itself (WOFF).
+    let stream = this.font._getTableStream('gvar');
     stream.pos = offset;
     if (stream.pos >= stream.length) {
       return;
@@ -100,7 +102,7 @@ export default class GlyphVariationProcessor {
     if (tupleCount & TUPLES_SHARE_POINT_NUMBERS) {
       var here = stream.pos;
       stream.pos = offsetToData;
-      var sharedPoints = this.decodePoints();
+      var sharedPoints = decodePoints(stream);
       offsetToData = stream.pos;
       stream.pos = here;
     }
@@ -153,15 +155,15 @@ export default class GlyphVariationProcessor {
       stream.pos = offsetToData;
 
       if (tupleIndex & PRIVATE_POINT_NUMBERS) {
-        var points = this.decodePoints();
+        var points = decodePoints(stream);
       } else {
         var points = sharedPoints;
       }
 
       // points.length = 0 means there are deltas for all points
       let nPoints = points.length === 0 ? glyphPoints.length : points.length;
-      let xDeltas = this.decodeDeltas(nPoints);
-      let yDeltas = this.decodeDeltas(nPoints);
+      let xDeltas = decodeDeltas(stream, nPoints);
+      let yDeltas = decodeDeltas(stream, nPoints);
 
       if (points.length === 0) {
         // all points
@@ -199,53 +201,6 @@ export default class GlyphVariationProcessor {
       offsetToData += tupleDataSize;
       stream.pos = here;
     }
-  }
-
-  decodePoints() {
-    let stream = this.font.stream;
-    let count = stream.readUInt8();
-
-    if (count & POINTS_ARE_WORDS) {
-      count = ((count & POINT_RUN_COUNT_MASK) << 8) | stream.readUInt8();
-    }
-
-    let points = new Uint16Array(count);
-    let i = 0;
-    let point = 0;
-    while (i < count) {
-      let run = stream.readUInt8();
-      let runCount = (run & POINT_RUN_COUNT_MASK) + 1;
-      let fn = run & POINTS_ARE_WORDS ? stream.readUInt16 : stream.readUInt8;
-
-      for (let j = 0; j < runCount && i < count; j++) {
-        point += fn.call(stream);
-        points[i++] = point;
-      }
-    }
-
-    return points;
-  }
-
-  decodeDeltas(count) {
-    let stream = this.font.stream;
-    let i = 0;
-    let deltas = new Int16Array(count);
-
-    while (i < count) {
-      let run = stream.readUInt8();
-      let runCount = (run & DELTA_RUN_COUNT_MASK) + 1;
-
-      if (run & DELTAS_ARE_ZERO) {
-        i += runCount;
-      } else {
-        let fn = run & DELTAS_ARE_WORDS ? stream.readInt16BE : stream.readInt8;
-        for (let j = 0; j < runCount && i < count; j++) {
-          deltas[i++] = fn.call(stream);
-        }
-      }
-    }
-
-    return deltas;
   }
 
   tupleFactor(tupleIndex, tupleCoords, startCoords, endCoords) {
@@ -539,4 +494,49 @@ export default class GlyphVariationProcessor {
     this.blendVectors.set(varData, blendVector);
     return blendVector;
   }
+}
+
+function decodePoints(stream) {
+  let count = stream.readUInt8();
+
+  if (count & POINTS_ARE_WORDS) {
+    count = ((count & POINT_RUN_COUNT_MASK) << 8) | stream.readUInt8();
+  }
+
+  let points = new Uint16Array(count);
+  let i = 0;
+  let point = 0;
+  while (i < count) {
+    let run = stream.readUInt8();
+    let runCount = (run & POINT_RUN_COUNT_MASK) + 1;
+    let fn = run & POINTS_ARE_WORDS ? stream.readUInt16 : stream.readUInt8;
+
+    for (let j = 0; j < runCount && i < count; j++) {
+      point += fn.call(stream);
+      points[i++] = point;
+    }
+  }
+
+  return points;
+}
+
+function decodeDeltas(stream, count) {
+  let i = 0;
+  let deltas = new Int16Array(count);
+
+  while (i < count) {
+    let run = stream.readUInt8();
+    let runCount = (run & DELTA_RUN_COUNT_MASK) + 1;
+
+    if (run & DELTAS_ARE_ZERO) {
+      i += runCount;
+    } else {
+      let fn = run & DELTAS_ARE_WORDS ? stream.readInt16BE : stream.readInt8;
+      for (let j = 0; j < runCount && i < count; j++) {
+        deltas[i++] = fn.call(stream);
+      }
+    }
+  }
+
+  return deltas;
 }

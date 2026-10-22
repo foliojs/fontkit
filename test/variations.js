@@ -197,4 +197,140 @@ describe('variations', function () {
       );
     });
   });
+
+  describe('variations of a font in a container', function () {
+    // The same font as an sfnt, a WOFF and a WOFF2: a variation of it is the
+    // same font, whatever it came in.
+    let open = (file) =>
+      fontkit.openSync(new URL('data/' + file, import.meta.url));
+
+    let describeGlyphs = (font) => {
+      let glyphs = [];
+      for (let id = 0; id < font.numGlyphs; id++) {
+        let glyph = font.getGlyph(id);
+        let { minX, minY, maxX, maxY } = glyph.bbox;
+        glyphs.push({
+          path: glyph.path.toSVG(),
+          bbox: glyph.path.commands.length ? [minX, minY, maxX, maxY] : null,
+          advanceWidth: glyph.advanceWidth,
+          advanceHeight: glyph.advanceHeight,
+        });
+      }
+
+      return glyphs;
+    };
+
+    let cases = [
+      // simple glyphs, their advances in the phantom points
+      ['fonttest/TestGVAROne.ttf', 'fonttest/TestGVAROne.woff', { wght: 300 }],
+      ['fonttest/TestGVAROne.ttf', 'fonttest/TestGVAROne.woff2', { wght: 300 }],
+      ['fonttest/TestGVAROne.ttf', 'fonttest/TestGVAROne.woff2', { wght: 650 }],
+      // a WOFF2 whose glyf table is stored as it is in an sfnt
+      [
+        'fonttest/TestGVAROne.ttf',
+        'fonttest/TestGVAROne.untransformed.woff2',
+        { wght: 300 },
+      ],
+      // two axes, and the advances in an HVAR table
+      [
+        'fonttest/TestGVARFour.ttf',
+        'fonttest/TestGVARFour.woff',
+        { wght: 150, cntr: 50 },
+      ],
+      [
+        'fonttest/TestGVARFour.ttf',
+        'fonttest/TestGVARFour.woff2',
+        { wght: 150, cntr: 50 },
+      ],
+      // composite glyphs, whose components a variation moves
+      ['Mada/Mada-VF.ttf', 'Mada/Mada-VF.woff2', { wght: 900 }],
+      ['Mada/Mada-VF.ttf', 'Mada/Mada-VF.woff2', { wght: 200 }],
+      // CFF2 outlines
+      [
+        'fonttest/AdobeVFPrototype-Subset.otf',
+        'fonttest/AdobeVFPrototype-Subset.woff',
+        { wght: 100 },
+      ],
+      [
+        'fonttest/AdobeVFPrototype-Subset.otf',
+        'fonttest/AdobeVFPrototype-Subset.woff2',
+        { wght: 100 },
+      ],
+    ];
+
+    for (let [sfnt, container, settings] of cases) {
+      it(`varies ${container} as the font in it, at ${JSON.stringify(settings)}`, function () {
+        let font = open(container);
+        let expected = open(sfnt).getVariation(settings);
+        let variation = font.getVariation(settings);
+
+        assert.equal(variation.type, font.type);
+        assert.deepEqual(variation.variationCoords, expected.variationCoords);
+        assert.equal(variation.numGlyphs, expected.numGlyphs);
+        assert.deepEqual(describeGlyphs(variation), describeGlyphs(expected));
+
+        // and it is a variation: not the font's default glyphs again
+        assert.notDeepEqual(
+          describeGlyphs(variation),
+          describeGlyphs(open(sfnt)),
+        );
+      });
+    }
+
+    it('applies variations to WOFF2 glyphs', function () {
+      // the path TestGVAROne.ttf has at this weight: 'should support sharing all points'
+      let font = open('fonttest/TestGVAROne.woff2');
+      let glyph = font.getVariation({ wght: 300 }).glyphsForString('彌')[0];
+
+      assert.equal(glyph.type, 'WOFF2');
+      assert.ok(
+        glyph.path
+          .toSVG()
+          .startsWith(
+            'M371 -102L371 539L914 539L914 -27Q914 -102 840 -102Q796 -102 755 -98L742 -59',
+          ),
+      );
+    });
+
+    it('leaves a WOFF2 font, and its other variations, as they were', function () {
+      // the glyphs of a WOFF2 are decoded once, for the font and all of its variations
+      let font = open('Mada/Mada-VF.woff2');
+      let sfnt = open('Mada/Mada-VF.ttf');
+      let light = describeGlyphs(font.getVariation({ wght: 200 }));
+
+      describeGlyphs(font.getVariation({ wght: 900 }));
+
+      assert.deepEqual(describeGlyphs(font), describeGlyphs(sfnt));
+      assert.deepEqual(describeGlyphs(font.getVariation({ wght: 200 })), light);
+    });
+
+    it('varies a variation, and gets one by name', function () {
+      let font = open('fonttest/TestGVAROne.woff2');
+      let sfnt = open('fonttest/TestGVAROne.ttf');
+      let heavy = describeGlyphs(sfnt.getVariation({ wght: 700 }));
+
+      assert.deepEqual(
+        describeGlyphs(
+          font.getVariation({ wght: 300 }).getVariation({ wght: 700 }),
+        ),
+        heavy,
+      );
+
+      let name = Object.keys(sfnt.namedVariations)[0];
+      assert.ok(name);
+      assert.deepEqual(
+        describeGlyphs(font.getVariation(name)),
+        describeGlyphs(sfnt.getVariation(name)),
+      );
+    });
+
+    it('lays out text in a variation of a WOFF2', function () {
+      // as 'should support adjusting GPOS mark anchor points for variations' does in the sfnt
+      let run = open('Mada/Mada-VF.woff2')
+        .getVariation({ wght: 900 })
+        .layout('ف');
+      assert.equal(Math.floor(run.positions[0].xOffset), 639);
+      assert.equal(Math.floor(run.positions[0].yOffset), 542);
+    });
+  });
 });
