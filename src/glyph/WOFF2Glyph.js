@@ -23,7 +23,8 @@ export default class WOFF2Glyph extends TTFGlyph {
     let varied = Object.assign({}, glyph);
     if (glyph.numberOfContours > 0) {
       varied.points = glyph.points.map((point) => point.copy());
-    } else {
+    } else if (glyph.numberOfContours < 0) {
+      // composite glyph
       varied.components = glyph.components.map((component) =>
         Object.assign({}, component),
       );
