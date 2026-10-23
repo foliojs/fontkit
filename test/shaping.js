@@ -168,6 +168,18 @@ describe('shaping', function () {
         '3+532|33+1225|21+1470|3+532|96+1088|17+1496|96+1088|17+1496|32+1250|3+532|9+1904|95+1104|12+1781|39+1052',
     );
 
+    // Exercises chain context backtrack ordering: the Syriac `calt` chain rule
+    // requires backtrack[0] (mark uni0731) immediately before the input glyph
+    // (uni0713.Fina) and backtrack[1] (uni0712.Init) one position further
+    // back. Without reversing the backtrack array, fontkit matches in stored
+    // order and the rule fails to fire, leaving uni0713.Fina unsubstituted.
+    test(
+      'should match chain context backtrack in OpenType spec order',
+      'NotoSans/NotoSansSyriacEstrangela-Regular.ttf',
+      'ܒܱܓ',
+      '249+2485|141@606,-200+0|17+1496',
+    );
+
     test(
       "should shape N'Ko text",
       'NotoSans/NotoSansNKo-Regular.ttf',
