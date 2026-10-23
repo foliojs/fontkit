@@ -3281,4 +3281,28 @@ describe('shaping', function () {
       );
     });
   });
+
+  describe('FeatureVariations', function () {
+    // Archivo's rvrn feature swaps dollar and cent for their bracket-layer
+    // alternates from wght 500 up, a range covering the default (600).
+    let font = fontkit.openSync(
+      new URL('data/Archivo/Archivo-Subset.ttf', import.meta.url),
+    );
+
+    it('applies FeatureVariations at the default location', function () {
+      let { glyphs } = font.layout('$¢');
+      assert.deepEqual(
+        glyphs.map((g) => g.name),
+        ['dollar.BRACKET.110', 'cent.BRACKET.110'],
+      );
+    });
+
+    it('skips FeatureVariations outside their condition set', function () {
+      let { glyphs } = font.getVariation({ wght: 100 }).layout('$¢');
+      assert.deepEqual(
+        glyphs.map((g) => g.name),
+        ['dollar', 'cent'],
+      );
+    });
+  });
 });
