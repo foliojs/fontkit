@@ -3254,4 +3254,31 @@ describe('shaping', function () {
       assert.deepEqual(names('A\u00adB', ['case']), ['A', 'uni00AD.case', 'B']);
     });
   });
+
+  describe('alternate substitution (GSUB Type 3) honours user-supplied alternateNumber', function () {
+    // FiraSans's aalt lookup carries multiple alternates per coverage entry.
+    // For 'A' (glyph 3) the alternate set is [1078 'ordfeminine', 764 'a.sc'].
+    // Without honouring the user-supplied alternateNumber, every aalt request
+    // resolves to the first entry — matching HarfBuzz's `aalt=2` requires
+    // selecting the second.
+    let font = fontkit.openSync(
+      new URL('data/FiraSans/FiraSans-Regular.ttf', import.meta.url),
+    );
+
+    it('selects the first alternate when aalt is `true` (or 1)', function () {
+      let { glyphs } = font.layout('A', { aalt: true });
+      assert.deepEqual(
+        glyphs.map((g) => g.id),
+        [1078],
+      );
+    });
+
+    it('selects the second alternate when aalt is 2', function () {
+      let { glyphs } = font.layout('A', { aalt: 2 });
+      assert.deepEqual(
+        glyphs.map((g) => g.id),
+        [764],
+      );
+    });
+  });
 });

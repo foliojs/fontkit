@@ -17,6 +17,11 @@ export default class ShapingPlan {
     this.stages = [];
     this.globalFeatures = {};
     this.allFeatures = {};
+    // Snapshot of the user's original features object — preserved for
+    // Type 3 (Alternate Substitution) lookups that need the per-feature
+    // alternate index (1-based; e.g. `nalt: 2` selects the second
+    // alternate). Set in setFeatureOverrides.
+    this.userFeatures = null;
   }
 
   /**
@@ -77,6 +82,7 @@ export default class ShapingPlan {
     if (Array.isArray(features)) {
       this.add(features);
     } else if (typeof features === 'object') {
+      this.userFeatures = features;
       for (let tag in features) {
         if (features[tag]) {
           this.add(tag);
@@ -111,7 +117,7 @@ export default class ShapingPlan {
           stage(this.font, glyphs, this);
         }
       } else if (stage.length > 0) {
-        processor.applyFeatures(stage, glyphs, positions);
+        processor.applyFeatures(stage, glyphs, positions, this.userFeatures);
       }
     }
   }
