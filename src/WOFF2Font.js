@@ -1,5 +1,5 @@
 import * as r from 'restructure';
-import brotli from 'brotli/decompress.js';
+import { brotliDecompressSync } from '#compression';
 import TTFFont from './TTFFont';
 import TTFGlyph, { Point } from './glyph/TTFGlyph';
 import WOFF2Glyph from './glyph/WOFF2Glyph';
@@ -36,7 +36,7 @@ export default class WOFF2Font extends TTFFont {
           entry.transformLength != null ? entry.transformLength : entry.length;
       }
 
-      let decompressed = brotli(buffer, decompressedSize);
+      let decompressed = brotliDecompressSync(buffer, decompressedSize);
       if (!decompressed) {
         throw new Error('Error decoding compressed data in WOFF2');
       }

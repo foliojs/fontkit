@@ -24,5 +24,6 @@
 - Fix glyph code point cache after composite decomposition (#387)
 - Fix off-diagonal coefficients in composite glyph transforms (#388)
 - Continue after the glyphs a lookup matched or inserted instead of applying it to them again (#383)
+- Use native decompression lib in node. Replace tiny-inflate by fflate
 
 ### [v2.0.4] - 08-09-2024
