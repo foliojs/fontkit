@@ -2,6 +2,10 @@
 
 ### Unreleased
 
+- Reconstruct transformed WOFF2 TrueType glyphs when subsetting, preserving point indices, glyph instructions and component records
+- Use decoded variation coordinates and phantom-derived horizontal bearings for transformed WOFF2 subsets
+- Reject WOFF2 subsetting with transformed hmtx instead of emitting incorrect horizontal metrics
+- Reject truncated WOFF2 glyph instruction data while decoding transformed glyphs
 - Ignore the advances of marks zeroed after GPOS when positioning attached marks
 - Position marks like HarfBuzz in fonts without GPOS (#409)
 - Fix canonical composition fallback, Arabic mark ordering, and positioning in fonts without GSUB

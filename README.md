@@ -261,6 +261,11 @@ Includes the given glyph object or glyph ID in the subset.
 
 Returns a `Uint8Array` containing the encoded font file.
 
+Transformed WOFF2 TrueType glyphs are reconstructed when subsetting. Subsetting
+these fonts with WOFF2-transformed `hmtx` tables throws an unsupported-format
+error. Non-default variation subsets use Fontkit's existing variation engine;
+`cvar` adjustments are not instantiated.
+
 ## License
 
 MIT

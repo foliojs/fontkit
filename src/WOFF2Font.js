@@ -109,6 +109,10 @@ export default class WOFF2Font extends TTFFont {
     this.stream.pos = this.directory.tables.glyf.offset;
     let table = GlyfTable.decode(this.stream);
     let glyphs = [];
+    let overlapBitmap =
+      table.optionFlags & 1
+        ? this.stream.readBuffer((table.numGlyphs + 7) >> 3)
+        : null;
 
     // The bounding boxes stream starts with a bit for each glyph, set for
     // the ones whose box is stored. The rest are computed from the points.
@@ -120,6 +124,7 @@ export default class WOFF2Font extends TTFFont {
       let glyph = { xMin: 0, yMin: 0, xMax: 0, yMax: 0 };
       let nContours = table.nContours.readInt16BE();
       glyph.numberOfContours = nContours;
+      let instructionSize = 0;
 
       if (nContours > 0) {
         // simple glyph
@@ -133,24 +138,41 @@ export default class WOFF2Font extends TTFFont {
         }
 
         glyph.points = decodeTriplet(table.flags, table.glyphs, totalPoints);
+        glyph.endPtsOfContours = nPoints.map((count) => count - 1);
+        glyph.overlapSimple = !!(
+          overlapBitmap && overlapBitmap[index >> 3] & (0x80 >> (index & 7))
+        );
         for (let i = 0; i < nContours; i++) {
           glyph.points[nPoints[i] - 1].endContour = true;
         }
 
-        var instructionSize = read255UInt16(table.glyphs);
+        instructionSize = read255UInt16(table.glyphs);
       } else if (nContours < 0) {
         // composite glyph
         // Decoded as the file has it, whatever this font's coordinates:
         // the glyphs are shared with its variations.
-        let haveInstructions = TTFGlyph.prototype._decodeComposite.call(
+        glyph.compositeOffset = table.composites.pos;
+        glyph.haveInstructions = TTFGlyph.prototype._decodeComposite.call(
           { _font: {} },
           glyph,
           table.composites,
         );
-        if (haveInstructions) {
-          var instructionSize = read255UInt16(table.glyphs);
+        glyph.compositeData = table.composites.buffer.subarray(
+          glyph.compositeOffset,
+          table.composites.pos,
+        );
+        if (glyph.haveInstructions) {
+          instructionSize = read255UInt16(table.glyphs);
         }
       }
+
+      if (
+        table.instructions.pos + instructionSize >
+        table.instructions.buffer.length
+      ) {
+        throw new Error('Invalid WOFF2 glyph instruction length');
+      }
+      glyph.instructions = table.instructions.readBuffer(instructionSize);
 
       if (bboxBitmap[index >> 3] & (0x80 >> (index & 7))) {
         glyph.xMin = table.bboxes.readInt16BE();
@@ -182,7 +204,8 @@ class Substream {
 
 // This struct represents the entire glyf table
 let GlyfTable = new r.Struct({
-  version: r.uint32,
+  reserved: r.uint16,
+  optionFlags: r.uint16,
   numGlyphs: r.uint16,
   indexFormat: r.uint16,
   nContourStreamSize: r.uint32,

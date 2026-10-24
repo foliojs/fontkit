@@ -97,6 +97,212 @@ describe('font subsetting', function () {
     });
   });
 
+  describe('WOFF2 TrueType subsetting', function () {
+    function open(name) {
+      return fontkit.openSync(new URL(`data/${name}`, import.meta.url));
+    }
+
+    function checkSubset(font, reference, ids) {
+      let subset = font.createSubset();
+      for (let id of ids) subset.includeGlyph(id);
+      let result = fontkit.create(subset.encode());
+      assert.equal(result.numGlyphs, subset.glyphs.length);
+      for (let [index, id] of subset.glyphs.entries()) {
+        let actual = result.getGlyph(index);
+        let expected = reference.getGlyph(id);
+        assert.equal(actual.path.toSVG(), expected.path.toSVG());
+        assert.equal(actual.advanceWidth, expected.advanceWidth);
+        assert.equal(
+          actual._getMetrics().leftBearing,
+          expected._getMetrics().leftBearing,
+        );
+        let decoded = actual._decode();
+        let original = expected._decode();
+        if (original && original.numberOfContours > 0) {
+          assert.deepEqual(decoded.points, original.points);
+          assert.deepEqual(decoded.instructions, original.instructions);
+          for (let field of ['xMin', 'yMin', 'xMax', 'yMax']) {
+            assert.equal(decoded[field], original[field]);
+          }
+        } else if (original && original.numberOfContours < 0) {
+          // Components and their instructions are already in TrueType format.
+          let source = reference._getTableStream('glyf');
+          source.pos += reference.loca.offsets[id];
+          let bytes = new Uint8Array(
+            source.readBuffer(
+              reference.loca.offsets[id + 1] - reference.loca.offsets[id],
+            ),
+          );
+          let view = new DataView(bytes.buffer);
+          let hasInstructions = false;
+          for (let component of original.components) {
+            hasInstructions ||= !!(view.getUint16(component.pos - 2) & 0x100);
+            view.setUint16(component.pos, subset.mapping[component.glyphID]);
+          }
+          let last = original.components[original.components.length - 1];
+          let flags = view.getUint16(last.pos - 2);
+          let end = last.pos + 2 + (flags & 1 ? 4 : 2);
+          end += flags & 8 ? 2 : flags & 64 ? 4 : flags & 128 ? 8 : 0;
+          if (hasInstructions) end += 2 + view.getUint16(end);
+          bytes = bytes.subarray(0, end);
+          let output = result._getTableStream('glyf');
+          output.pos += result.loca.offsets[index];
+          assert.deepEqual(output.readBuffer(bytes.length), bytes);
+        } else {
+          assert.equal(
+            result.loca.offsets[index],
+            result.loca.offsets[index + 1],
+          );
+        }
+      }
+      assert.deepEqual(subset.encode(), result.stream.buffer);
+      return result;
+    }
+
+    it('preserves hinted glyphs, component arguments and overlapping contours', function () {
+      let font = open('FontkitSubsetTest/FontkitSubsetTest.woff2');
+      let reference = open('FontkitSubsetTest/FontkitSubsetTest.ttf');
+      assert.deepEqual(reference.getGlyph(1)._decode().instructions, [0, 1]);
+      assert.equal(reference.getGlyph(1)._decode().points[0].onCurve, false);
+      assert.equal(reference.getGlyph(2)._decode().points.length, 300);
+      let result = checkSubset(font, reference, [5, 2, 1, 4, 3]);
+      let data = result._getTableStream('glyf');
+      // Requested glyph 2 is subset index 2, after .notdef and the composite.
+      data.pos += result.loca.offsets[2] + 10 + 2 + 2 + 2;
+      assert.equal(data.readUInt8() & 0x40, 0x40);
+      assert.equal(result.head.indexToLocFormat, 1);
+    });
+
+    it('preserves the bearing of a varied composite with only empty components', function () {
+      let font = open(
+        'FontkitSubsetTest/FontkitSubsetTest.empty-composite.woff2',
+      ).getVariation({ wght: 900 });
+      let glyph = font.glyphForCodePoint(68);
+      assert.equal(glyph.path.commands.length, 0);
+      let subset = font.createSubset();
+      let id = subset.includeGlyph(glyph);
+      let output = fontkit.create(subset.encode()).getGlyph(id);
+      assert.equal(output.path.commands.length, 0);
+      assert.equal(output._decode().numberOfContours, -1);
+      assert.deepEqual(
+        ['xMin', 'yMin', 'xMax', 'yMax'].map((key) => output._decode()[key]),
+        [0, 0, 0, 0],
+      );
+      assert.equal(output.advanceWidth, 600);
+      assert.equal(output._getMetrics().leftBearing, 17);
+    });
+
+    it('preserves overlap flags and widens varied component arguments', function () {
+      let font = open('FontkitSubsetTest/FontkitSubsetTest.variable.woff2');
+      let variation = font.getVariation({ wght: 900 });
+      let subset = variation.createSubset();
+      let compositeId = subset.includeGlyph(5);
+      let repeatedId = subset.includeGlyph(2);
+      let result = fontkit.create(subset.encode());
+      let composite = result.getGlyph(compositeId)._decode();
+      assert.equal(composite.components[0].dx, 225);
+      assert.equal(composite.components[0].dy, 50);
+      assert.equal(composite.components[1].dx, 0);
+      assert.equal(composite.components[1].dy, 0);
+      let stream = result._getTableStream('glyf');
+      stream.pos += result.loca.offsets[compositeId] + 10;
+      assert.equal(stream.readUInt16BE() & 1, 1);
+      stream = result._getTableStream('glyf');
+      stream.pos += result.loca.offsets[repeatedId] + 16;
+      assert.equal(stream.readUInt8() & 0x40, 0x40);
+      assert.equal(font.getGlyph(5)._decode().components[0].dx, 25);
+    });
+
+    it('does not read transformed source loca offsets', function () {
+      let font = open('FontkitSubsetTest/FontkitSubsetTest.woff2');
+      let decode = font._decodeTable;
+      font._decodeTable = function (table) {
+        assert.notEqual(table.tag, 'loca');
+        return decode.call(this, table);
+      };
+      let subset = font.createSubset();
+      subset.includeGlyph(5);
+      assert.equal(fontkit.create(subset.encode()).head.indexToLocFormat, 1);
+    });
+
+    it('refuses unsupported transformed horizontal metrics', function () {
+      let font = open('FontkitSubsetTest/FontkitSubsetTest.hmtx.woff2');
+      assert.equal(font.directory.tables.hmtx.transformed, true);
+      let subset = font.createSubset();
+      subset.includeGlyph(1);
+      assert.throws(() => subset.encode(), /transformed hmtx/);
+    });
+
+    for (let text of ['Abcd', 'é', ' A ']) {
+      it(`preserves points, instructions and metrics for ${JSON.stringify(text)}`, function () {
+        let font = open('SourceSansPro/SourceSansPro-Regular.ttf.woff2');
+        let reference = open('SourceSansPro/SourceSansPro-Regular.ttf.woff');
+        assert.ok(font.glyphsForString('A')[0].path.commands.length > 0);
+        checkSubset(
+          font,
+          reference,
+          font.glyphsForString(text).map((g) => g.id),
+        );
+      });
+    }
+
+    it('preserves every glyph of a transformed font', function () {
+      let font = open('SourceSansPro/SourceSansPro-Regular.ttf.woff2');
+      let reference = open('SourceSansPro/SourceSansPro-Regular.ttf.woff');
+      checkSubset(
+        font,
+        reference,
+        Array.from({ length: font.numGlyphs }, (_, id) => id).reverse(),
+      );
+    });
+
+    for (let name of ['TestGVAROne', 'TestGVAROne.untransformed']) {
+      it(`subsets ${name} without changing its source`, function () {
+        let font = open(`fonttest/${name}.woff2`);
+        let reference = open('fonttest/TestGVAROne.ttf');
+        checkSubset(
+          font,
+          reference,
+          Array.from({ length: font.numGlyphs }, (_, id) => id),
+        );
+        assert.equal(
+          font.getGlyph(0).path.toSVG(),
+          reference.getGlyph(0).path.toSVG(),
+        );
+      });
+    }
+
+    it('subsets simple glyphs at non-default variation coordinates', function () {
+      let font = open('fonttest/TestGVAROne.woff2');
+      let variation = font.getVariation({ wght: 300 });
+      let glyph = variation.glyphsForString('彌')[0];
+      let subset = variation.createSubset();
+      let id = subset.includeGlyph(glyph);
+      let result = fontkit.create(subset.encode()).getGlyph(id);
+      assert.equal(result.path.toSVG(), glyph.path.toSVG());
+      assert.equal(result.advanceWidth, glyph.advanceWidth);
+      assert.equal(
+        font.getGlyph(glyph.id).path.toSVG(),
+        open('fonttest/TestGVAROne.ttf').getGlyph(glyph.id).path.toSVG(),
+      );
+    });
+
+    it('updates phantom-point advances before encoding a varied simple glyph', function () {
+      let font = open('fonttest/TestGVAROne.woff2').getVariation({ wght: 650 });
+      let subset = font.createSubset();
+      let result = fontkit.create(subset.encode());
+      assert.equal(result.getGlyph(0).advanceWidth, 517);
+    });
+
+    it('leaves varied empty glyph records empty', function () {
+      let font = open('fonttest/TestGVAROne.woff2').getVariation({ wght: 333 });
+      let subset = font.createSubset();
+      let id = subset.includeGlyph(font.glyphsForString(' ')[0]);
+      let result = fontkit.create(subset.encode());
+      assert.equal(result.loca.offsets[id], result.loca.offsets[id + 1]);
+    });
+  });
+
   describe('CFF subsetting', function () {
     let font = fontkit.openSync(
       new URL('data/SourceSansPro/SourceSansPro-Regular.otf', import.meta.url),
