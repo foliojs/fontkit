@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Remove the fast-deep-equal runtime dependency
 - Ignore the advances of marks zeroed after GPOS when positioning attached marks
 - Position marks like HarfBuzz in fonts without GPOS (#409)
 - Fix canonical composition fallback, Arabic mark ordering, and positioning in fonts without GSUB

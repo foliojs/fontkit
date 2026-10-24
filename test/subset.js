@@ -102,6 +102,73 @@ describe('font subsetting', function () {
       new URL('data/SourceSansPro/SourceSansPro-Regular.otf', import.meta.url),
     );
 
+    function encodeWithTopDict(values) {
+      let font = fontkit.openSync(
+        new URL(
+          'data/SourceSansPro/SourceSansPro-Regular.otf',
+          import.meta.url,
+        ),
+      );
+      Object.assign(font['CFF '].topDict, values);
+
+      let originalGlyph = font.glyphsForString('h')[0];
+      let subset = font.createSubset();
+      subset.includeGlyph(originalGlyph);
+      let buffer = subset.encode();
+
+      let stream = new r.DecodeStream(buffer);
+      let CFFFont = font._tables['CFF '].constructor;
+      let CFFGlyph = originalGlyph.constructor;
+      let cff = new CFFFont(stream);
+      let glyph = new CFFGlyph(1, [], { stream, 'CFF ': cff });
+      assert.strictEqual(glyph.path.toSVG(), originalGlyph.path.toSVG());
+
+      return { buffer, cff };
+    }
+
+    it('should omit scalar and array defaults from subsets', function () {
+      let defaults = {
+        FontMatrix: [0.001, -0, 0, 0.001, 0, -0],
+        FontBBox: [0, 0, -0, 0],
+        isFixedPitch: false,
+        ItalicAngle: -0,
+        UnderlinePosition: -100,
+        UnderlineThickness: 50,
+        UniqueID: null,
+      };
+      let omitted = Object.fromEntries(
+        Object.keys(defaults).map((key) => [key, undefined]),
+      );
+
+      assert.deepStrictEqual(
+        encodeWithTopDict(defaults).buffer,
+        encodeWithTopDict(omitted).buffer,
+      );
+    });
+
+    it('should preserve non-default array elements and scalar values', function () {
+      let values = {
+        FontMatrix: [0.001, 0, 0, 0.001, 10, 20],
+        FontBBox: [0, 0, 100, 200],
+        isFixedPitch: true,
+        ItalicAngle: -12,
+        UnderlinePosition: -90,
+        UniqueID: 42,
+      };
+      let { cff } = encodeWithTopDict(values);
+
+      for (let [key, value] of Object.entries(values)) {
+        assert.deepStrictEqual(cff.topDict[key], value, key);
+      }
+    });
+
+    it('should preserve arrays whose lengths differ from defaults', function () {
+      for (let FontBBox of [[], [0, 0, 0], [0, 0, 0, 0, 0]]) {
+        let { cff } = encodeWithTopDict({ FontBBox });
+        assert.deepStrictEqual(cff.topDict.FontBBox, FontBBox);
+      }
+    });
+
     it('should produce a subset', function () {
       let subset = font.createSubset();
       let iterable = font.glyphsForString('hello');

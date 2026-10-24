@@ -2,7 +2,6 @@ import { defineConfig } from 'rolldown';
 
 const external = [
   'fs',
-  'fast-deep-equal',
   'restructure',
   'dfa',
   'clone',
