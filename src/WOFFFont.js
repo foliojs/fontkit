@@ -1,10 +1,10 @@
-import TTFFont from './TTFFont';
+import { TTFFont } from './TTFFont';
 import WOFFDirectory from './tables/WOFFDirectory';
 import { inflateSync } from '#compression';
 import * as r from 'restructure';
 import { asciiDecoder } from './utils';
 
-export default class WOFFFont extends TTFFont {
+export class WOFFFont extends TTFFont {
   type = 'WOFF';
 
   static probe(buffer) {

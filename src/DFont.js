@@ -1,5 +1,5 @@
 import * as r from 'restructure';
-import TTFFont from './TTFFont';
+import { TTFFont } from './TTFFont';
 
 let DFontName = new r.String(r.uint8);
 let DFontData = new r.Struct({
@@ -43,7 +43,7 @@ let DFontHeader = new r.Struct({
   mapLength: r.uint32,
 });
 
-export default class DFont {
+export class DFont {
   type = 'DFont';
 
   static probe(buffer) {

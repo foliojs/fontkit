@@ -1,6 +1,6 @@
 import * as r from 'restructure';
 import { brotliDecompressSync } from '#compression';
-import TTFFont from './TTFFont';
+import { TTFFont } from './TTFFont';
 import TTFGlyph, { Point } from './glyph/TTFGlyph';
 import WOFF2Glyph from './glyph/WOFF2Glyph';
 import WOFF2Directory from './tables/WOFF2Directory';
@@ -10,7 +10,7 @@ import { asciiDecoder } from './utils';
  * Subclass of TTFFont that represents a TTF/OTF font compressed by WOFF2
  * See spec here: http://www.w3.org/TR/WOFF2/
  */
-export default class WOFF2Font extends TTFFont {
+export class WOFF2Font extends TTFFont {
   type = 'WOFF2';
 
   static probe(buffer) {

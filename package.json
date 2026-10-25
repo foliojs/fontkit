@@ -32,8 +32,12 @@
     }
   },
   "exports": {
-    "node": "./dist/fontkit.node.esm.js",
-    "default": "./dist/fontkit.browser.esm.js"
+    ".": {
+      "node": "./dist/fontkit.node.esm.js",
+      "default": "./dist/fontkit.browser.esm.js"
+    },
+    "./core": "./dist/fontkit.core.esm.js",
+    "./formats/*": "./dist/formats/*.js"
   },
   "files": [
     "src",

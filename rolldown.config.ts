@@ -4,37 +4,34 @@ const external = [
   'fs',
   'restructure',
   'dfa',
-  'clone',
-  'tiny-inflate',
+  'fflate',
   'unicode-properties',
   'unicode-trie',
   'brotli/decompress.js',
 ];
 
-const nodeTarget = ['node22'];
-const browserTarget = ['firefox115', 'safari16', 'chrome120'];
-
-export default defineConfig([
-  {
-    input: 'src/node.js',
-    external,
-    transform: {
-      target: nodeTarget,
-    },
-    output: {
-      format: 'esm',
-      file: 'dist/fontkit.node.esm.js',
-    },
+export default defineConfig({
+  input: {
+    'fontkit.node.esm': 'src/node.js',
+    'fontkit.browser.esm': 'src/index.js',
+    'fontkit.core.esm': 'src/core.js',
+    'formats/TTFFont': 'src/TTFFont.js',
+    'formats/WOFFFont': 'src/WOFFFont.js',
+    'formats/WOFF2Font': 'src/WOFF2Font.js',
+    'formats/TrueTypeCollection': 'src/TrueTypeCollection.js',
+    'formats/DFont': 'src/DFont.js',
   },
-  {
-    input: 'src/index.js',
-    external,
-    transform: {
-      target: browserTarget,
-    },
-    output: {
-      format: 'esm',
-      file: 'dist/fontkit.browser.esm.js',
-    },
+  external,
+  preserveEntrySignatures: 'allow-extension',
+  transform: {
+    target: ['node22', 'firefox115', 'safari16', 'chrome120'],
   },
-]);
+  output: {
+    format: 'esm',
+    dir: 'dist',
+    entryFileNames: '[name].js',
+    chunkFileNames: 'chunks/[name]-[hash].js',
+    minifyInternalExports: false,
+    cleanDir: true,
+  },
+});
