@@ -33,11 +33,17 @@
   },
   "exports": {
     ".": {
-      "node": "./dist/fontkit.node.esm.js",
-      "default": "./dist/fontkit.browser.esm.js"
+      "node": "./dist/node/index.js",
+      "default": "./dist/browser/index.js"
     },
-    "./core": "./dist/fontkit.core.esm.js",
-    "./formats/*": "./dist/formats/*.js"
+    "./core": {
+      "node": "./dist/node/core.js",
+      "default": "./dist/browser/core.js"
+    },
+    "./formats/*": {
+      "node": "./dist/node/formats/*.js",
+      "default": "./dist/browser/formats/*.js"
+    }
   },
   "files": [
     "src",

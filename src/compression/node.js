@@ -1,3 +1,7 @@
-import { inflateSync, brotliDecompressSync } from 'zlib';
+import { inflateRawSync, brotliDecompressSync } from 'node:zlib';
 
-export { inflateSync, brotliDecompressSync };
+export function inflateSync(buffer) {
+  return inflateRawSync(buffer);
+}
+
+export { brotliDecompressSync };

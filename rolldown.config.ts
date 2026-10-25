@@ -10,28 +10,35 @@ const external = [
   'brotli/decompress.js',
 ];
 
-export default defineConfig({
-  input: {
-    'fontkit.node.esm': 'src/node.js',
-    'fontkit.browser.esm': 'src/index.js',
-    'fontkit.core.esm': 'src/core.js',
-    'formats/TTFFont': 'src/TTFFont.js',
-    'formats/WOFFFont': 'src/WOFFFont.js',
-    'formats/WOFF2Font': 'src/WOFF2Font.js',
-    'formats/TrueTypeCollection': 'src/TrueTypeCollection.js',
-    'formats/DFont': 'src/DFont.js',
-  },
-  external,
-  preserveEntrySignatures: 'allow-extension',
-  transform: {
-    target: ['node22', 'firefox115', 'safari16', 'chrome120'],
-  },
-  output: {
-    format: 'esm',
-    dir: 'dist',
-    entryFileNames: '[name].js',
-    chunkFileNames: 'chunks/[name]-[hash].js',
-    minifyInternalExports: false,
-    cleanDir: true,
-  },
-});
+function createConfig(platform: 'node' | 'browser') {
+  return defineConfig({
+    platform,
+    input: {
+      index: platform === 'node' ? 'src/node.js' : 'src/index.js',
+      core: 'src/core.js',
+      'formats/TTFFont': 'src/TTFFont.js',
+      'formats/WOFFFont': 'src/WOFFFont.js',
+      'formats/WOFF2Font': 'src/WOFF2Font.js',
+      'formats/TrueTypeCollection': 'src/TrueTypeCollection.js',
+      'formats/DFont': 'src/DFont.js',
+    },
+    external,
+    preserveEntrySignatures: 'allow-extension',
+    transform: {
+      target:
+        platform === 'node'
+          ? ['node22']
+          : ['firefox115', 'safari16', 'chrome120'],
+    },
+    output: {
+      format: 'esm',
+      dir: `dist/${platform}`,
+      entryFileNames: '[name].js',
+      chunkFileNames: 'chunks/[name]-[hash].js',
+      minifyInternalExports: false,
+      cleanDir: true,
+    },
+  });
+}
+
+export default [createConfig('node'), createConfig('browser')];

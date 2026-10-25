@@ -59,7 +59,9 @@ The available format modules are `fontkit/formats/TTFFont` (TrueType and OpenTyp
 
 Additional exports in generated format modules are internal implementation details and are not part of the public API.
 
-`fontkit/core` provides `create`, `registerFormat`, `defaultLanguage`, `setDefaultLanguage`, and `logErrors`, without registering formats or including filesystem helpers. The core and default entries share the same format registry and language settings; importing `fontkit` also registers all built-in formats for users of `fontkit/core`.
+`fontkit/core` provides `create`, `registerFormat`, `defaultLanguage`, `setDefaultLanguage`, and `logErrors`, without registering formats or including filesystem helpers. Within each platform, the core and default entries share the same format registry and language settings; importing `fontkit` also registers all built-in formats for users of `fontkit/core`.
+
+The same import paths select separate Node and browser builds. Node uses native zlib decompression, while browsers use `fflate` and `brotli`. The two builds have independent format registries and language settings.
 
 ## API
 
