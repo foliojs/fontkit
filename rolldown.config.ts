@@ -22,17 +22,6 @@ export default defineConfig([
       target: nodeTarget,
     },
     output: {
-      format: 'cjs',
-      file: 'dist/fontkit.node.cjs',
-    },
-  },
-  {
-    input: 'src/node.js',
-    external,
-    transform: {
-      target: nodeTarget,
-    },
-    output: {
       format: 'esm',
       file: 'dist/fontkit.node.esm.js',
     },

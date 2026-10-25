@@ -9,6 +9,7 @@
 - Reorder combining marks like HarfBuzz, with its modified combining classes and Arabic modifier marks first
 - Fix extra quadratic segments in TrueType contours with off-curve endpoints
 - [BREAKING] Browser build is now ESM-only
+- [BREAKING] Node build is now ESM-only
 - [BREAKING] Node builds now targets Node 22+, Browser build targets Firefox 115+, Safari 16+, Chrome 120+
 - Replace cache decorators with specialized lazy caching
 - Fix crash when using TrueType font with empty glyphs (#353, #378, #303, #312). Based on #379
