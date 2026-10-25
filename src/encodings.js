@@ -149,7 +149,8 @@ export const ENCODINGS = [
   // windows
   // Docs here: http://msdn.microsoft.com/en-us/library/system.text.encoding(v=vs.110).aspx
   [
-    'symbol',
+    // Symbol fonts also store their names in UTF-16BE
+    'utf-16be',
     'utf-16be',
     'shift-jis',
     'gb18030',
