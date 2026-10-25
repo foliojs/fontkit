@@ -6,12 +6,17 @@
 - Use decoded variation coordinates and phantom-derived horizontal bearings for transformed WOFF2 subsets
 - Reject WOFF2 subsetting with transformed hmtx instead of emitting incorrect horizontal metrics
 - Reject truncated WOFF2 glyph instruction data while decoding transformed glyphs
+- Use non-default variation sequences when the variation selector also has default ones
+- Add `fontkit/core` and `fontkit/formats/{format}` entry points with named format exports for explicit format registration, sharing state with the default entries
+- Remove the fast-deep-equal runtime dependency
+- Decode the names of Windows symbol fonts (encoding ID 0) as UTF-16BE
 - Ignore the advances of marks zeroed after GPOS when positioning attached marks
 - Position marks like HarfBuzz in fonts without GPOS (#409)
 - Fix canonical composition fallback, Arabic mark ordering, and positioning in fonts without GSUB
 - Reorder combining marks like HarfBuzz, with its modified combining classes and Arabic modifier marks first
 - Fix extra quadratic segments in TrueType contours with off-curve endpoints
 - [BREAKING] Browser build is now ESM-only
+- [BREAKING] Node build is now ESM-only
 - [BREAKING] Node builds now targets Node 22+, Browser build targets Firefox 115+, Safari 16+, Chrome 120+
 - Replace cache decorators with specialized lazy caching
 - Fix crash when using TrueType font with empty glyphs (#353, #378, #303, #312). Based on #379
@@ -28,5 +33,6 @@
 - Fix glyph code point cache after composite decomposition (#387)
 - Fix off-diagonal coefficients in composite glyph transforms (#388)
 - Continue after the glyphs a lookup matched or inserted instead of applying it to them again (#383)
+- Use native decompression lib in node. Replace tiny-inflate by fflate
 
 ### [v2.0.4] - 08-09-2024

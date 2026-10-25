@@ -19,6 +19,16 @@ describe('metadata', function () {
     return assert.equal(font.version, 'Version 1.05 uh');
   });
 
+  it('decodes the names of Windows symbol fonts as UTF-16BE', function () {
+    let font = fontkit.openSync(
+      new URL('data/symbol-names.ttf', import.meta.url),
+    );
+    assert.equal(font.familyName, 'Symbol Test');
+    assert.equal(font.subfamilyName, 'Regular');
+    assert.equal(font.fullName, 'Symbol Test Regular');
+    assert.equal(font.postscriptName, 'SymbolTest-Regular');
+  });
+
   it('exposes some metrics', function () {
     assert.equal(font.unitsPerEm, 2048);
     assert.equal(font.ascent | 0, 2189);

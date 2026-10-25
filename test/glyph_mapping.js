@@ -100,6 +100,31 @@ describe('character to glyph mapping', function () {
       );
     });
 
+    it('should support non-default variation sequences when the selector also has default ones', function () {
+      // In Noto Sans CJK JP, U+FE00 has a default UVS entry for U+3001 and a non-default one for U+4FAE
+      let font = fontkit.openSync(
+        new URL(
+          'data/NotoSansCJK/NotoSansCJKjp-Regular-subset.otf',
+          import.meta.url,
+        ),
+      );
+      let glyphs = font.glyphsForString(
+        '\u{4FAE}\u{FE00}\u{3001}\u{FE00}\u{4FAE}',
+      );
+      assert.deepEqual(
+        glyphs.map((g) => g.id),
+        [
+          font.glyphForCodePoint(0xfa30).id,
+          font.glyphForCodePoint(0x3001).id,
+          font.glyphForCodePoint(0x4fae).id,
+        ],
+      );
+      assert.notEqual(
+        font.glyphForCodePoint(0xfa30).id,
+        font.glyphForCodePoint(0x4fae).id,
+      );
+    });
+
     it('should support cmap format 10', function () {
       let font = fontkit.openSync(
         new URL('data/aots/cmap10_font1.otf', import.meta.url),

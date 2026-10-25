@@ -1,7 +1,24 @@
-import isEqual from 'fast-deep-equal';
-import * as r from 'restructure';
 import CFFOperand from './CFFOperand';
 import { PropertyDescriptor } from 'restructure';
+
+// CFF defaults are primitives or flat arrays of numbers and strings.
+function equalsDefault(value, defaultValue) {
+  if (value === defaultValue) return true;
+
+  if (
+    !Array.isArray(value) ||
+    !Array.isArray(defaultValue) ||
+    value.length !== defaultValue.length
+  ) {
+    return false;
+  }
+
+  for (let i = 0; i < value.length; i++) {
+    if (value[i] !== defaultValue[i]) return false;
+  }
+
+  return true;
+}
 
 export default class CFFDict {
   constructor(ops = []) {
@@ -114,7 +131,7 @@ export default class CFFDict {
     for (let k in this.fields) {
       let field = this.fields[k];
       let val = dict[field[1]];
-      if (val == null || isEqual(val, field[3])) {
+      if (val == null || equalsDefault(val, field[3])) {
         continue;
       }
 
@@ -147,7 +164,7 @@ export default class CFFDict {
 
     for (let field of this.ops) {
       let val = dict[field[1]];
-      if (val == null || isEqual(val, field[3])) {
+      if (val == null || equalsDefault(val, field[3])) {
         continue;
       }
 

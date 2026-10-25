@@ -1,11 +1,10 @@
-import TTFFont from './TTFFont';
+import { TTFFont } from './TTFFont';
 import WOFFDirectory from './tables/WOFFDirectory';
-import tables from './tables';
-import inflate from 'tiny-inflate';
+import { inflateSync } from '#compression';
 import * as r from 'restructure';
 import { asciiDecoder } from './utils';
 
-export default class WOFFFont extends TTFFont {
+export class WOFFFont extends TTFFont {
   type = 'WOFF';
 
   static probe(buffer) {
@@ -27,7 +26,7 @@ export default class WOFFFont extends TTFFont {
         if (!buf) {
           this.stream.pos = table.offset + 2; // skip deflate header
           let outBuffer = new Uint8Array(table.length);
-          buf = inflated[tag] = inflate(
+          buf = inflated[tag] = inflateSync(
             this.stream.readBuffer(table.compLength - 2),
             outBuffer,
           );

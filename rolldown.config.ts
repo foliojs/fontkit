@@ -2,51 +2,43 @@ import { defineConfig } from 'rolldown';
 
 const external = [
   'fs',
-  'fast-deep-equal',
   'restructure',
   'dfa',
-  'clone',
-  'tiny-inflate',
+  'fflate',
   'unicode-properties',
   'unicode-trie',
   'brotli/decompress.js',
 ];
 
-const nodeTarget = ['node22'];
-const browserTarget = ['firefox115', 'safari16', 'chrome120'];
+function createConfig(platform: 'node' | 'browser') {
+  return defineConfig({
+    platform,
+    input: {
+      index: platform === 'node' ? 'src/node.js' : 'src/index.js',
+      core: 'src/core.js',
+      'formats/TTFFont': 'src/TTFFont.js',
+      'formats/WOFFFont': 'src/WOFFFont.js',
+      'formats/WOFF2Font': 'src/WOFF2Font.js',
+      'formats/TrueTypeCollection': 'src/TrueTypeCollection.js',
+      'formats/DFont': 'src/DFont.js',
+    },
+    external,
+    preserveEntrySignatures: 'allow-extension',
+    transform: {
+      target:
+        platform === 'node'
+          ? ['node22']
+          : ['firefox115', 'safari16', 'chrome120'],
+    },
+    output: {
+      format: 'esm',
+      dir: `dist/${platform}`,
+      entryFileNames: '[name].js',
+      chunkFileNames: 'chunks/[name]-[hash].js',
+      minifyInternalExports: false,
+      cleanDir: true,
+    },
+  });
+}
 
-export default defineConfig([
-  {
-    input: 'src/node.js',
-    external,
-    transform: {
-      target: nodeTarget,
-    },
-    output: {
-      format: 'cjs',
-      file: 'dist/fontkit.node.cjs',
-    },
-  },
-  {
-    input: 'src/node.js',
-    external,
-    transform: {
-      target: nodeTarget,
-    },
-    output: {
-      format: 'esm',
-      file: 'dist/fontkit.node.esm.js',
-    },
-  },
-  {
-    input: 'src/index.js',
-    external,
-    transform: {
-      target: browserTarget,
-    },
-    output: {
-      format: 'esm',
-      file: 'dist/fontkit.browser.esm.js',
-    },
-  },
-]);
+export default [createConfig('node'), createConfig('browser')];

@@ -1,7 +1,5 @@
-import cloneDeep from 'clone';
 import Subset from './Subset';
 import Directory from '../tables/directory';
-import Tables from '../tables';
 import TTFGlyphEncoder from '../glyph/TTFGlyphEncoder';
 
 export default class TTFSubset extends Subset {
@@ -131,15 +129,15 @@ export default class TTFSubset extends Subset {
       this._addGlyph(this.glyphs[i++]);
     }
 
-    let maxp = cloneDeep(this.font.maxp);
+    let maxp = { ...this.font.maxp };
     maxp.numGlyphs = this.glyf.length;
 
     this.loca.offsets.push(this.offset);
 
-    let head = cloneDeep(this.font.head);
+    let head = { ...this.font.head };
     head.indexToLocFormat = this.loca.version;
 
-    let hhea = cloneDeep(this.font.hhea);
+    let hhea = { ...this.font.hhea };
     hhea.numberOfMetrics = this.hmtx.metrics.length;
 
     // map = []

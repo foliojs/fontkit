@@ -1,6 +1,6 @@
 import * as r from 'restructure';
 import { cache } from './cache';
-import * as fontkit from './base';
+import { logErrors, defaultLanguage } from './core';
 import Directory from './tables/directory';
 import tables from './tables';
 import CmapProcessor from './CmapProcessor';
@@ -30,7 +30,7 @@ function hasCodePoints(glyph, characters) {
  * This is the base class for all SFNT-based font formats in fontkit.
  * It supports TrueType, and PostScript glyphs, and several color glyph formats.
  */
-export default class TTFFont {
+export class TTFFont {
   type = 'TTF';
 
   static probe(buffer) {
@@ -73,7 +73,7 @@ export default class TTFFont {
       try {
         this._tables[table.tag] = this._decodeTable(table);
       } catch (e) {
-        if (fontkit.logErrors) {
+        if (logErrors) {
           console.error(`Error decoding table ${table.tag}`);
           console.error(e.stack);
         }
@@ -114,14 +114,14 @@ export default class TTFFont {
    * `lang` is a BCP-47 language code.
    * @return {string}
    */
-  getName(key, lang = this.defaultLanguage || fontkit.defaultLanguage) {
+  getName(key, lang = this.defaultLanguage || defaultLanguage) {
     let record = this.name && this.name.records[key];
     if (record) {
       // Attempt to retrieve the entry, depending on which translation is available:
       return (
         record[lang] ||
         record[this.defaultLanguage] ||
-        record[fontkit.defaultLanguage] ||
+        record[defaultLanguage] ||
         record['en'] ||
         record[Object.keys(record)[0]] || // Seriously, ANY language would be fine
         null

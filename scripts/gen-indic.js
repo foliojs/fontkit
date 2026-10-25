@@ -1,14 +1,12 @@
 import codepoints from 'codepoints';
 import fs from 'fs';
 import { UnicodeTrieBuilder } from 'unicode-trie/builder.js';
-import dfa from 'dfa/compile.js';
+import { compile } from 'dfa/compile.js';
 import {
   CATEGORIES,
   POSITIONS,
   CONSONANT_FLAGS,
 } from '../src/opentype/shapers/indic-data.js';
-
-const compile = dfa.default;
 
 const generatedDir = new URL(
   '../src/opentype/shapers/generated/',

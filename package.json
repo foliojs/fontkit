@@ -25,12 +25,32 @@
     "coverage": "c8 mocha"
   },
   "type": "module",
+  "sideEffects": [
+    "./src/base.js",
+    "./src/index.js",
+    "./src/node.js",
+    "./dist/node/index.js",
+    "./dist/browser/index.js"
+  ],
+  "imports": {
+    "#compression": {
+      "node": "./src/compression/node.js",
+      "default": "./src/compression/browser.js"
+    }
+  },
   "exports": {
-    "node": {
-      "import": "./dist/fontkit.node.esm.js",
-      "require": "./dist/fontkit.node.cjs"
+    ".": {
+      "node": "./dist/node/index.js",
+      "default": "./dist/browser/index.js"
     },
-    "import": "./dist/fontkit.browser.esm.js"
+    "./core": {
+      "node": "./dist/node/core.js",
+      "default": "./dist/browser/core.js"
+    },
+    "./formats/*": {
+      "node": "./dist/node/formats/*.js",
+      "default": "./dist/browser/formats/*.js"
+    }
   },
   "files": [
     "src",
@@ -43,12 +63,10 @@
     "url": "git://github.com/foliojs/fontkit.git"
   },
   "dependencies": {
-    "brotli": "^1.3.3",
-    "clone": "^2.1.2",
-    "dfa": "^1.2.0",
-    "fast-deep-equal": "^3.1.3",
+    "brotli": "^2.1.0",
+    "dfa": "^2.0.0",
+    "fflate": "^0.8.3",
     "restructure": "^3.0.2",
-    "tiny-inflate": "^1.0.3",
     "unicode-properties": "^2.0.1",
     "unicode-trie": "^3.0.0"
   },
