@@ -1,13 +1,18 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { rolldown } from 'rolldown';
 
-async function bundleConsumer(platform, source) {
+async function bundleConsumer(
+  platform,
+  source,
+  { external, ...outputOptions } = {},
+) {
   const input = fileURLToPath(new URL('../consumer.js', import.meta.url));
   const build = await rolldown({
     platform,
     input,
-    external: [
+    external: external ?? [
       'fs',
       'node:zlib',
       'restructure',
@@ -31,11 +36,19 @@ async function bundleConsumer(platform, source) {
   });
 
   try {
-    const { output } = await build.generate({ format: 'esm' });
+    const { output } = await build.generate({
+      format: 'esm',
+      ...outputOptions,
+    });
     const chunks = output.filter((chunk) => chunk.type === 'chunk');
     return {
+      code: chunks.map((chunk) => chunk.code).join('\n'),
       imports: chunks.flatMap((chunk) => chunk.imports),
-      modules: chunks.flatMap((chunk) => Object.keys(chunk.modules)),
+      modules: chunks.flatMap((chunk) =>
+        Object.entries(chunk.modules)
+          .filter(([, module]) => module.renderedLength > 0)
+          .map(([id]) => id),
+      ),
     };
   } finally {
     await build.close();
@@ -64,6 +77,33 @@ describe('platform-specific bundles', function () {
         }
       });
 
+      it('should preserve default format registration after tree shaking', async function () {
+        const { code } = await bundleConsumer(
+          platform,
+          "export { create } from 'fontkit';",
+          { paths: (id) => import.meta.resolve(id) },
+        );
+        const fontkit = await import(
+          'data:text/javascript;base64,' + Buffer.from(code).toString('base64')
+        );
+        for (const [file, type] of [
+          ['OpenSans/OpenSans-Regular.ttf', 'TTF'],
+          ['SourceSansPro/SourceSansPro-Regular.woff', 'WOFF'],
+          ['SourceSansPro/SourceSansPro-Regular.woff2', 'WOFF2'],
+          ['NotoSans/NotoSans.ttc', 'TTC'],
+          ['NotoSans/NotoSans.dfont', 'DFont'],
+        ]) {
+          let font = fontkit.create(
+            readFileSync(new URL('data/' + file, import.meta.url)),
+          );
+          assert.equal(font.type, type);
+          if (type === 'TTC' || type === 'DFont') {
+            font = font.getFont('NotoSans');
+          }
+          assert.equal(typeof font.postscriptName, 'string');
+        }
+      });
+
       for (const [name, source, entry] of [
         ['core', "export * from 'fontkit/core';", 'core'],
         [
@@ -85,4 +125,27 @@ describe('platform-specific bundles', function () {
       }
     });
   }
+
+  it('should exclude Brotli from a fully bundled browser WOFF consumer', async function () {
+    const { code, modules } = await bundleConsumer(
+      'browser',
+      "import { registerFormat } from 'fontkit/core'; import { WOFFFont } from 'fontkit/formats/WOFFFont'; registerFormat(WOFFFont); export { create } from 'fontkit/core';",
+      { external: [] },
+    );
+    assert(modules.some((id) => /node_modules[\\/]fflate[\\/]/.test(id)));
+    assert(!modules.some((id) => /node_modules[\\/]brotli[\\/]/.test(id)));
+    const fontkit = await import(
+      'data:text/javascript;base64,' + Buffer.from(code).toString('base64')
+    );
+    const font = fontkit.create(
+      readFileSync(
+        new URL(
+          'data/SourceSansPro/SourceSansPro-Regular.woff',
+          import.meta.url,
+        ),
+      ),
+    );
+    assert.equal(font.postscriptName, 'SourceSansPro-Regular');
+    assert(font.glyphsForString('a')[0].path.toSVG().length > 0);
+  });
 });

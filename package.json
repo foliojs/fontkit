@@ -25,6 +25,13 @@
     "coverage": "c8 mocha"
   },
   "type": "module",
+  "sideEffects": [
+    "./src/base.js",
+    "./src/index.js",
+    "./src/node.js",
+    "./dist/node/index.js",
+    "./dist/browser/index.js"
+  ],
   "imports": {
     "#compression": {
       "node": "./src/compression/node.js",
