@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Use non-default variation sequences when the variation selector also has default ones
 - Add `fontkit/core` and `fontkit/formats/{format}` entry points with named format exports for explicit format registration, sharing state with the default entries
 - Remove the fast-deep-equal runtime dependency
 - Ignore the advances of marks zeroed after GPOS when positioning attached marks

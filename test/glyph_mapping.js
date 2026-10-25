@@ -100,6 +100,20 @@ describe('character to glyph mapping', function () {
       );
     });
 
+    it('should support non-default variation sequences when the selector also has default ones', function () {
+      // U+FE00 has a default UVS entry for U+0020 and a non-default one for U+2269
+      let font = fontkit.openSync(
+        new URL('data/uvs-default-and-non-default.ttf', import.meta.url),
+      );
+      let glyphs = font.glyphsForString(
+        '\u{2269}\u{FE00}\u{20}\u{FE00}\u{82a6}\u{E0100}\u{82a6}\u{E0101}',
+      );
+      assert.deepEqual(
+        glyphs.map((g) => g.id),
+        [3, 1, 4, 5],
+      );
+    });
+
     it('should support cmap format 10', function () {
       let font = fontkit.openSync(
         new URL('data/aots/cmap10_font1.otf', import.meta.url),
