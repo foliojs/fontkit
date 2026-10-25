@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "brotli": "^2.1.0",
-    "dfa": "^1.2.0",
+    "dfa": "^2.0.0",
     "fflate": "^0.8.3",
     "restructure": "^3.0.2",
     "unicode-properties": "^2.0.1",
