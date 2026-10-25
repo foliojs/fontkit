@@ -101,16 +101,27 @@ describe('character to glyph mapping', function () {
     });
 
     it('should support non-default variation sequences when the selector also has default ones', function () {
-      // U+FE00 has a default UVS entry for U+0020 and a non-default one for U+2269
+      // In Noto Sans CJK JP, U+FE00 has a default UVS entry for U+3001 and a non-default one for U+4FAE
       let font = fontkit.openSync(
-        new URL('data/uvs-default-and-non-default.ttf', import.meta.url),
+        new URL(
+          'data/NotoSansCJK/NotoSansCJKjp-Regular-subset.otf',
+          import.meta.url,
+        ),
       );
       let glyphs = font.glyphsForString(
-        '\u{2269}\u{FE00}\u{20}\u{FE00}\u{82a6}\u{E0100}\u{82a6}\u{E0101}',
+        '\u{4FAE}\u{FE00}\u{3001}\u{FE00}\u{4FAE}',
       );
       assert.deepEqual(
         glyphs.map((g) => g.id),
-        [3, 1, 4, 5],
+        [
+          font.glyphForCodePoint(0xfa30).id,
+          font.glyphForCodePoint(0x3001).id,
+          font.glyphForCodePoint(0x4fae).id,
+        ],
+      );
+      assert.notEqual(
+        font.glyphForCodePoint(0xfa30).id,
+        font.glyphForCodePoint(0x4fae).id,
       );
     });
 
