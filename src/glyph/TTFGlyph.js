@@ -312,7 +312,7 @@ export default class TTFGlyph extends Glyph {
       new Point(false, true, glyph.xMin - leftBearing, 0),
       new Point(false, true, glyph.xMin - leftBearing + advanceWidth, 0),
       new Point(false, true, 0, glyph.yMax + topBearing),
-      new Point(false, true, 0, glyph.yMax + topBearing + advanceHeight),
+      new Point(false, true, 0, glyph.yMax + topBearing - advanceHeight),
     ];
   }
 
@@ -354,7 +354,7 @@ export default class TTFGlyph extends Glyph {
       this._metrics.advanceWidth =
         glyph.phantomPoints[1].x - glyph.phantomPoints[0].x;
       this._metrics.advanceHeight =
-        glyph.phantomPoints[3].y - glyph.phantomPoints[2].y;
+        glyph.phantomPoints[2].y - glyph.phantomPoints[3].y;
       this._metrics.leftBearing = glyph.xMin - glyph.phantomPoints[0].x;
       this._metrics.topBearing = glyph.phantomPoints[2].y - glyph.yMax;
     }

@@ -49,9 +49,10 @@ describe('issues', function () {
       let font = openFont();
       let glyph = font.glyphForCodePoint(0x20);
       assert.strictEqual(glyph.advanceWidth, 532);
-      assert.strictEqual(glyph.advanceHeight, 2059);
+      // HarfBuzz's vertical advance, from the hhea ascent and descent:
+      assert.strictEqual(glyph.advanceHeight, 2789);
       let metrics = glyph._getMetrics();
-      assert.strictEqual(metrics.topBearing, 1567);
+      assert.strictEqual(metrics.topBearing, 2189);
       assert.ok(Object.values(metrics).every(Number.isFinite));
     });
 

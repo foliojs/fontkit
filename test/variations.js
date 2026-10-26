@@ -171,6 +171,20 @@ describe('variations', function () {
     });
   });
 
+  describe('phantom points', function () {
+    it('varies the vertical advance by the bottom phantom point', function () {
+      // HarfBuzz's SourceSansVariable-Roman.modcomp.ttf without HVAR, so the
+      // advances come from the gvar phantom points. HarfBuzz advances its C
+      // by 990 vertically at wght 900:
+      let font = fontkit.openSync(
+        new URL('data/PhantomTest/PhantomTest-VF.ttf', import.meta.url),
+      );
+      let glyph = font.getVariation({ wght: 900 }).getGlyph(1);
+      assert.equal(glyph.advanceWidth, 586);
+      assert.equal(glyph.advanceHeight, 990);
+    });
+  });
+
   describe('CFF2 variations', function () {
     let font = fontkit.openSync(
       new URL('data/fonttest/AdobeVFPrototype-Subset.otf', import.meta.url),
