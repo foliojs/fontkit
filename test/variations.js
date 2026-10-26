@@ -183,6 +183,17 @@ describe('variations', function () {
       assert.equal(glyph.advanceWidth, 586);
       assert.equal(glyph.advanceHeight, 990);
     });
+
+    it('takes the metrics of a component that uses its metrics', function () {
+      // Ç is a composite of C with useMyMetrics and the cedilla, whose own
+      // phantom points vary differently. HarfBuzz uses those of C:
+      let font = fontkit.openSync(
+        new URL('data/PhantomTest/PhantomTest-VF.ttf', import.meta.url),
+      );
+      let glyph = font.getVariation({ wght: 900 }).glyphsForString('Ç')[0];
+      assert.equal(glyph.advanceWidth, 586);
+      assert.equal(glyph.advanceHeight, 990);
+    });
   });
 
   describe('CFF2 variations', function () {

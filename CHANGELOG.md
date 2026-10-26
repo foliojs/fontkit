@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Take the varied metrics of composite glyphs from the component with useMyMetrics, like HarfBuzz
 - Place the bottom phantom point below the top one, so gvar varies vertical advances in the right direction (#421)
 - Take the ascent, descent and line gap from the typo metrics when the font sets useTypoMetrics, like HarfBuzz, and fix the vhea structure, 16.16 table versions, and boxes of empty glyphs (#305, #306)
 - Use non-default variation sequences when the variation selector also has default ones
