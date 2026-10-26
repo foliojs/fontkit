@@ -152,50 +152,67 @@ describe('issues', function () {
 
   describe('#39 - right-to-left text in fonts without GSUB, GPOS or morx', function () {
     // HarfBuzz gives the same glyphs, offsets and advances.
-    let font = fontkit.openSync(
-      new URL('data/NotoSans/NotoKufiArabic-NoLayout.ttf', import.meta.url),
-    );
-
-    let layout = (string, direction) => {
+    let layout = (font, string, direction) => {
       let run = font.layout(string, [], undefined, undefined, direction);
       return run.glyphs.map((glyph, i) => {
         let { xAdvance, xOffset, yOffset } = run.positions[i];
-        return [glyph.codePoints[0], xAdvance, xOffset, yOffset];
+        return [glyph.id, xAdvance, xOffset, yOffset];
       });
     };
 
-    it('should reverse the glyphs', function () {
-      assert.deepEqual(layout('بتم'), [
-        [0x645, 1329, 0, 0],
-        [0x62a, 1593, 0, 0],
-        [0x628, 1593, 0, 0],
-      ]);
+    describe('order and marks', function () {
+      // A subset of Noticia Text Italic, which has no GSUB or GPOS table
+      let font = fontkit.openSync(
+        new URL(
+          'data/FontkitMarkFallbackTest/FontkitMarkFallbackTest-Italic.ttf',
+          import.meta.url,
+        ),
+      );
+
+      it('should reverse the glyphs', function () {
+        assert.deepEqual(layout(font, 'abx', 'rtl'), [
+          [5, 1019, 0, 0],
+          [1, 1117, 0, 0],
+          [2, 1158, 0, 0],
+        ]);
+      });
+
+      it('should position marks from the origin of their base', function () {
+        assert.deepEqual(layout(font, 'q\u0323\u0307', 'rtl'), [
+          [18, 0, 899, -53],
+          [19, 0, 899, -375],
+          [3, 1099, 0, 0],
+        ]);
+      });
+
+      it('should keep left-to-right text in logical order', function () {
+        assert.deepEqual(layout(font, 'abx\u0301', 'ltr'), [
+          [2, 1158, 0, 0],
+          [1, 1117, 0, 0],
+          [5, 1019, 0, 0],
+          [6, 0, -75, -15],
+        ]);
+      });
     });
 
-    it('should kern the glyphs in visual order', function () {
-      // The font kerns lam + alef, which is drawn for alef then lam.
-      assert.deepEqual(layout('ال'), [
-        [0x644, 1257, 0, 0],
-        [0x627, 592, 0, 0],
-      ]);
-      assert.deepEqual(layout('لا'), [
-        [0x627, 592, 0, 0],
-        [0x644, 1407, 0, 0],
-      ]);
-    });
+    describe('kerning', function () {
+      // None of the other test fonts without layout tables has a kern table,
+      // so this is a subset of Noto Kufi Arabic with one kern pair added.
+      let font = fontkit.openSync(
+        new URL('data/NotoSans/NotoKufiArabic-NoLayout.ttf', import.meta.url),
+      );
 
-    it('should position marks from the origin of their base', function () {
-      assert.deepEqual(layout('بَ'), [
-        [0x64e, 0, 796, -234],
-        [0x628, 1593, 0, 0],
-      ]);
-    });
-
-    it('should keep left-to-right text in logical order', function () {
-      assert.deepEqual(layout('بَ', 'ltr'), [
-        [0x628, 1593, 0, 0],
-        [0x64e, 0, -797, -234],
-      ]);
+      it('should kern the glyphs in visual order', function () {
+        // The font kerns lam + alef, which is drawn for alef then lam.
+        assert.deepEqual(layout(font, 'ال'), [
+          [3, 1257, 0, 0],
+          [2, 592, 0, 0],
+        ]);
+        assert.deepEqual(layout(font, 'لا'), [
+          [2, 592, 0, 0],
+          [3, 1407, 0, 0],
+        ]);
+      });
     });
   });
 
