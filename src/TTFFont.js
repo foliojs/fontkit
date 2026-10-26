@@ -110,43 +110,16 @@ export class TTFFont {
   }
 
   _getMetrics() {
-    if (this._metrics) {
-      return this._metrics;
-    }
-
+    // Like HarfBuzz, use the typo metrics only when the font asks for them
     let { 'OS/2': os2, hhea } = this;
-    let useTypoMetrics = os2.fsSelection.useTypoMetrics;
-    let ascent, descent, lineGap, lineHeight;
-
-    // Use the same approach as FreeType
-    // https://gitlab.freedesktop.org/freetype/freetype/-/blob/4d8db130ea4342317581bab65fc96365ce806b77/src/sfnt/sfobjs.c#L1310
-
-    if (useTypoMetrics) {
-      ascent = os2.typoAscender;
-      descent = os2.typoDescender;
-      lineGap = os2.typoLineGap;
-      lineHeight = ascent - descent + lineGap;
-    } else {
-      ascent = hhea.ascent;
-      descent = hhea.descent;
-      lineGap = hhea.lineGap;
-      lineHeight = ascent - descent + lineGap;
-    }
-
-    if (!ascent || !descent) {
-      if (os2.typoAscender || os2.typoDescender) {
-        ascent = os2.typoAscender;
-        descent = os2.typoDescender;
-        lineGap = os2.typoLineGap;
-        lineHeight = ascent - descent + lineGap;
-      } else {
-        ascent = os2.winAscent;
-        descent = -os2.winDescent;
-        lineHeight = ascent - descent;
-      }
-    }
-
-    return (this._metrics = { ascent, descent, lineGap, lineHeight });
+    let { ascent, descent, lineGap } = os2?.fsSelection.useTypoMetrics
+      ? {
+          ascent: os2.typoAscender,
+          descent: os2.typoDescender,
+          lineGap: os2.typoLineGap,
+        }
+      : hhea;
+    return { ascent: Math.abs(ascent), descent: -Math.abs(descent), lineGap };
   }
 
   /**
@@ -265,15 +238,6 @@ export class TTFFont {
    */
   get italicAngle() {
     return this.post.italicAngle;
-  }
-
-  /**
-   * The vertical space between adjacent lines (their baselines) of text.
-   * See [here](https://en.wikipedia.org/wiki/Leading) for more details.
-   * @type {number}
-   */
-  get lineHeight() {
-    return this._getMetrics().lineHeight;
   }
 
   /**
@@ -681,4 +645,5 @@ cache(TTFFont, {
   variationAxes: 'once',
   namedVariations: 'once',
   _variationProcessor: 'once',
+  _getMetrics: 'once',
 });
