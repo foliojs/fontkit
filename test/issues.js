@@ -150,6 +150,55 @@ describe('issues', function () {
     });
   });
 
+  describe('#39 - right-to-left text in fonts without GSUB, GPOS or morx', function () {
+    // HarfBuzz gives the same glyphs, offsets and advances.
+    let font = fontkit.openSync(
+      new URL('data/NotoSans/NotoKufiArabic-NoLayout.ttf', import.meta.url),
+    );
+
+    let layout = (string, direction) => {
+      let run = font.layout(string, [], undefined, undefined, direction);
+      return run.glyphs.map((glyph, i) => {
+        let { xAdvance, xOffset, yOffset } = run.positions[i];
+        return [glyph.codePoints[0], xAdvance, xOffset, yOffset];
+      });
+    };
+
+    it('should reverse the glyphs', function () {
+      assert.deepEqual(layout('بتم'), [
+        [0x645, 1329, 0, 0],
+        [0x62a, 1593, 0, 0],
+        [0x628, 1593, 0, 0],
+      ]);
+    });
+
+    it('should kern the glyphs in visual order', function () {
+      // The font kerns lam + alef, which is drawn for alef then lam.
+      assert.deepEqual(layout('ال'), [
+        [0x644, 1257, 0, 0],
+        [0x627, 592, 0, 0],
+      ]);
+      assert.deepEqual(layout('لا'), [
+        [0x627, 592, 0, 0],
+        [0x644, 1407, 0, 0],
+      ]);
+    });
+
+    it('should position marks from the origin of their base', function () {
+      assert.deepEqual(layout('بَ'), [
+        [0x64e, 0, 796, -234],
+        [0x628, 1593, 0, 0],
+      ]);
+    });
+
+    it('should keep left-to-right text in logical order', function () {
+      assert.deepEqual(layout('بَ', 'ltr'), [
+        [0x628, 1593, 0, 0],
+        [0x64e, 0, -797, -234],
+      ]);
+    });
+  });
+
   describe('#383 - running out of memory with Libre Barcode EAN13 Text', function () {
     let font = fontkit.openSync(
       new URL(

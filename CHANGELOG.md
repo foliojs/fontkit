@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Reverse right-to-left text, kern it in visual order and position its marks like HarfBuzz in fonts without GSUB, GPOS or morx (#39)
 - Round HVAR advance deltas to whole units like HarfBuzz, so subsets of fonts with set variations no longer truncate advances such as 851.9999 to 851
 - Fix glyphs in subsets of fonts with set variations: write the count of repeated flags at the end of a glyph, flatten composite glyphs, and take the left side bearings from the varied outlines
 - Take the ascent, descent and line gap from the typo metrics when the font sets useTypoMetrics, like HarfBuzz, and fix the vhea structure, 16.16 table versions, and boxes of empty glyphs (#305, #306)
