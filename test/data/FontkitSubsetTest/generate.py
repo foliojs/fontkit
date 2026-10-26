@@ -2,6 +2,7 @@
 from array import array
 from pathlib import Path
 from fontTools.fontBuilder import FontBuilder
+from fontTools.ttLib import TTFont
 from fontTools.ttLib.tables._g_l_y_f import Glyph, GlyphCoordinates, GlyphComponent
 from fontTools.ttLib.tables.ttProgram import Program
 from fontTools.ttLib.woff2 import WOFF2FlavorData
@@ -75,3 +76,13 @@ builder.font['gvar'].variations['composite'] = [
 ]
 builder.save(destination / 'FontkitSubsetTest.empty-composite.woff2')
 print('generated original six-glyph fixture; hinted simple/composite, empty, off-curve first point, 300-point flag run, OVERLAP_SIMPLE')
+
+# Preserve an explicit nonzero header box on a composite with no outline points.
+font = TTFont(destination / 'FontkitSubsetTest.empty-composite.woff2', recalcBBoxes=False)
+font['glyf']['composite'].xMin = font['glyf']['composite'].xMax = 100
+font['glyf']['composite'].yMin = font['glyf']['composite'].yMax = 0
+font.recalcBBoxes = False
+font.recalcTimestamp = False
+font.flavor = 'woff2'
+font.flavorData = WOFF2FlavorData(transformedTables={'glyf', 'loca'})
+font.save(destination / 'FontkitSubsetTest.nonzero-empty-composite.woff2')

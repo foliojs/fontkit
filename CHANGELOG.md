@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Take the ascent, descent and line gap from the typo metrics when the font sets useTypoMetrics, like HarfBuzz, and fix the vhea structure, 16.16 table versions, and boxes of empty glyphs (#305, #306)
 - Reconstruct transformed WOFF2 TrueType glyphs when subsetting, preserving point indices, glyph instructions and component records
 - Use decoded variation coordinates and phantom-derived horizontal bearings for transformed WOFF2 subsets
 - Reject WOFF2 subsetting with transformed hmtx instead of emitting incorrect horizontal metrics

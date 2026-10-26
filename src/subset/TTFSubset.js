@@ -32,7 +32,11 @@ export default class TTFSubset extends Subset {
             box.maxY = Math.max(box.maxY, point.y);
           }
         }
-        if (!Number.isFinite(box.minX)) {
+        if (
+          !Number.isFinite(box.minX) ||
+          (glyf.numberOfContours < 0 && glyph.path.commands.length === 0)
+        ) {
+          // Empty composites have no contour box; preserve their stored bounds.
           box = {
             minX: glyf.xMin,
             minY: glyf.yMin,

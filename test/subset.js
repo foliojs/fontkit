@@ -192,6 +192,31 @@ describe('font subsetting', function () {
       assert.equal(output._getMetrics().leftBearing, 17);
     });
 
+    it('preserves stored bounds and bearing for a varied empty composite', function () {
+      let font = open(
+        'FontkitSubsetTest/FontkitSubsetTest.nonzero-empty-composite.woff2',
+      ).getVariation({ wght: 900 });
+      let glyph = font.glyphForCodePoint(68);
+      let fields = ['xMin', 'yMin', 'xMax', 'yMax'];
+      let bounds = fields.map((key) => glyph._decode()[key]);
+      assert.deepEqual(bounds, [100, 0, 100, 0]);
+      assert.equal(glyph.path.commands.length, 0);
+      assert.equal(glyph._getMetrics().leftBearing, 17);
+      let subset = font.createSubset();
+      let id = subset.includeGlyph(glyph);
+      let output = fontkit.create(subset.encode()).getGlyph(id);
+      assert.equal(output.path.commands.length, 0);
+      assert.deepEqual(
+        fields.map((key) => output._decode()[key]),
+        bounds,
+      );
+      assert.equal(output.advanceWidth, glyph.advanceWidth);
+      assert.equal(
+        output._getMetrics().leftBearing,
+        glyph._getMetrics().leftBearing,
+      );
+    });
+
     it('preserves overlap flags and widens varied component arguments', function () {
       let font = open('FontkitSubsetTest/FontkitSubsetTest.variable.woff2');
       let variation = font.getVariation({ wght: 900 });

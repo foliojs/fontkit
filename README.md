@@ -283,7 +283,8 @@ Returns a `Uint8Array` containing the encoded font file.
 
 Transformed WOFF2 TrueType glyphs are reconstructed when subsetting. Subsetting
 these fonts with WOFF2-transformed `hmtx` tables throws an unsupported-format
-error. Non-default variation subsets use Fontkit's existing variation engine;
+error. Non-default variation subsets can differ from a reference instancer in
+coordinates, bounding boxes, advance/bearing metrics and component offsets;
 `cvar` adjustments are not instantiated.
 
 ## License

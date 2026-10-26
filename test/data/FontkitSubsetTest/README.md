@@ -20,3 +20,7 @@ component, with a nonzero horizontal bearing.
 
 The variable variant moves the first composite component beyond signed-byte
 range at weight 900, exercising argument widening and shared overlap state.
+
+`FontkitSubsetTest.nonzero-empty-composite.woff2` retains an explicit nonzero
+header box on a varied composite whose component has no outline points. It
+checks that subsetting preserves the stored bounds and phantom-derived bearing.
