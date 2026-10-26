@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Round HVAR advance deltas to whole units like HarfBuzz, so subsets of fonts with set variations no longer truncate advances such as 851.9999 to 851
 - Fix glyphs in subsets of fonts with set variations: write the count of repeated flags at the end of a glyph, flatten composite glyphs, and take the left side bearings from the varied outlines
 - Take the ascent, descent and line gap from the typo metrics when the font sets useTypoMetrics, like HarfBuzz, and fix the vhea structure, 16.16 table versions, and boxes of empty glyphs (#305, #306)
 - Use non-default variation sequences when the variation selector also has default ones

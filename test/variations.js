@@ -125,9 +125,7 @@ describe('variations', function () {
       );
 
       assert.equal(
-        Math.round(
-          font.getVariation({ wght: 150 }).glyphsForString('O')[0].advanceWidth,
-        ),
+        font.getVariation({ wght: 150 }).glyphsForString('O')[0].advanceWidth,
         706,
       );
     });
@@ -138,9 +136,7 @@ describe('variations', function () {
       );
 
       assert.equal(
-        Math.round(
-          font.getVariation({ wght: 400 }).glyphsForString('A')[0].advanceWidth,
-        ),
+        font.getVariation({ wght: 400 }).glyphsForString('A')[0].advanceWidth,
         584,
       );
     });
