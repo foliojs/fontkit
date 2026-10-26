@@ -21,17 +21,21 @@ export default class TTFSubset extends Subset {
 
     let buffer = stream.readBuffer(nextOffset - curOffset);
 
-    // if it is a compound glyph, include its components
-    if (glyf && glyf.numberOfContours < 0) {
+    let bearing = glyph._getMetrics().leftBearing;
+    if (glyf && this.font._variationProcessor) {
+      // If this is a TrueType variation glyph, re-encode the path and take the
+      // left side bearing from it. Compound glyphs are flattened too, as the
+      // offsets of their components vary.
+      buffer = this.glyphEncoder.encodeSimple(glyph.path, glyf.instructions);
+      bearing = glyph.path.cbox.minX;
+    } else if (glyf && glyf.numberOfContours < 0) {
+      // if it is a compound glyph, include its components
       buffer = new Uint8Array(buffer);
       let view = new DataView(buffer.buffer);
       for (let component of glyf.components) {
         gid = this.includeGlyph(component.glyphID);
         view.setUint16(component.pos, gid);
       }
-    } else if (glyf && this.font._variationProcessor) {
-      // If this is a TrueType variation glyph, re-encode the path
-      buffer = this.glyphEncoder.encodeSimple(glyph.path, glyf.instructions);
     }
 
     this.glyf.push(buffer);
@@ -39,7 +43,7 @@ export default class TTFSubset extends Subset {
 
     this.hmtx.metrics.push({
       advance: glyph.advanceWidth,
-      bearing: glyph._getMetrics().leftBearing,
+      bearing,
     });
 
     this.offset += buffer.length;
