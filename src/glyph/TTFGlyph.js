@@ -225,6 +225,7 @@ export default class TTFGlyph extends Glyph {
 
       var component = new Component(glyphID, dx, dy);
       component.pos = gPos;
+      component.useMyMetrics = (flags & USE_MY_METRICS) !== 0;
 
       if (flags & WE_HAVE_A_SCALE) {
         // fixed number with 14 bits of fraction
@@ -328,7 +329,12 @@ export default class TTFGlyph extends Glyph {
     if (glyph.numberOfContours < 0) {
       // resolve composite glyphs
       for (let component of glyph.components) {
-        let contours = this._font.getGlyph(component.glyphID)._getContours();
+        let componentGlyph = this._font.getGlyph(component.glyphID);
+        let contours = componentGlyph._getContours();
+        // Like HarfBuzz, take the varied metrics from this component
+        if (component.useMyMetrics && glyph.phantomPoints) {
+          glyph.phantomPoints = componentGlyph._decode().phantomPoints;
+        }
         for (let i = 0; i < contours.length; i++) {
           let contour = contours[i];
           for (let j = 0; j < contour.length; j++) {
