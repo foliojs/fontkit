@@ -13,6 +13,7 @@ export default class TTFSubset extends Subset {
     let glyf = glyph._decode();
     let transformed = this.font.directory.tables.glyf.transformed;
     let buffer;
+    let bearing;
 
     if (transformed) {
       if (glyf.numberOfContours && this.font._variationProcessor) {
@@ -55,6 +56,9 @@ export default class TTFSubset extends Subset {
       buffer = this.glyphEncoder.encodeGlyph(glyf, (id) =>
         this.includeGlyph(id),
       );
+      bearing = glyf.phantomPoints
+        ? glyf.xMin - glyf.phantomPoints[0].x
+        : glyph._getMetrics().leftBearing;
     } else {
       // get the offset to the glyph from the loca table
       let curOffset = this.font.loca.offsets[gid];
@@ -65,17 +69,21 @@ export default class TTFSubset extends Subset {
 
       buffer = stream.readBuffer(nextOffset - curOffset);
 
-      // if it is a compound glyph, include its components
-      if (glyf && glyf.numberOfContours < 0) {
+      bearing = glyph._getMetrics().leftBearing;
+      if (glyf && this.font._variationProcessor) {
+        // If this is a TrueType variation glyph, re-encode the path and take the
+        // left side bearing from it. Compound glyphs are flattened too, as the
+        // offsets of their components vary.
+        buffer = this.glyphEncoder.encodeSimple(glyph.path, glyf.instructions);
+        bearing = glyph.path.cbox.minX;
+      } else if (glyf && glyf.numberOfContours < 0) {
+        // if it is a compound glyph, include its components
         buffer = new Uint8Array(buffer);
         let view = new DataView(buffer.buffer);
         for (let component of glyf.components) {
           gid = this.includeGlyph(component.glyphID);
           view.setUint16(component.pos, gid);
         }
-      } else if (glyf && this.font._variationProcessor) {
-        // If this is a TrueType variation glyph, re-encode the path
-        buffer = this.glyphEncoder.encodeSimple(glyph.path, glyf.instructions);
       }
     }
 
@@ -86,10 +94,7 @@ export default class TTFSubset extends Subset {
       advance: transformed
         ? Math.round(glyph.advanceWidth)
         : glyph.advanceWidth,
-      bearing:
-        transformed && glyf.phantomPoints
-          ? glyf.xMin - glyf.phantomPoints[0].x
-          : glyph._getMetrics().leftBearing,
+      bearing,
     });
 
     this.offset += buffer.length;

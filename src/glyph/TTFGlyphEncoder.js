@@ -222,6 +222,10 @@ export default class TTFGlyphEncoder {
       }
     }
 
+    if (same > 0) {
+      flags.push(same);
+    }
+
     // Close the path if the last command didn't already
     if (
       path.commands.length > 1 &&
@@ -230,7 +234,7 @@ export default class TTFGlyphEncoder {
       endPtsOfContours.push(pointCount - 1);
     }
 
-    let bbox = path.bbox;
+    let bbox = path.cbox;
     let glyf = {
       numberOfContours: endPtsOfContours.length,
       xMin: bbox.minX,
