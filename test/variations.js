@@ -169,6 +169,23 @@ describe('variations', function () {
         [483, 483, 483],
       );
     });
+
+    it('does not share glyphs requested with other code points', function () {
+      let font = fontkit.openSync(
+        new URL('data/fonttest/TestGVAROne.ttf', import.meta.url),
+      );
+      // Layout maps the text to glyphs, then requests ligatures and composed
+      // glyphs with their input code points, cached separately per font:
+      let { id } = font.glyphsForString('彌')[0];
+      let codePoints = [0x5f4c, 0x20];
+      let original = font.getGlyph(id, codePoints).path.toSVG();
+      let variation = font.getVariation({ wght: 300 });
+      variation.glyphsForString('彌');
+      assert.notEqual(
+        variation.getGlyph(id, codePoints).path.toSVG(),
+        original,
+      );
+    });
   });
 
   describe('CFF2 variations', function () {
@@ -331,6 +348,47 @@ describe('variations', function () {
         .layout('ف');
       assert.equal(Math.floor(run.positions[0].xOffset), 639);
       assert.equal(Math.floor(run.positions[0].yOffset), 542);
+    });
+  });
+
+  describe('MVAR', function () {
+    // HarfBuzz's metrics at each variation, rounded to whole units like hb-info:
+    let round = (metrics) =>
+      Object.fromEntries(
+        Object.entries(metrics).map(([key, value]) => [key, Math.round(value)]),
+      );
+
+    it('varies the typo ascent, descent and cap height', function () {
+      let font = fontkit.openSync(
+        new URL('data/Playwrite/Playwrite-MM-Subset.ttf', import.meta.url),
+      );
+      let { ascent, descent, capHeight } = font.getVariation({ YEXT: 1000 });
+      assert.deepEqual(round({ ascent, descent, capHeight }), {
+        ascent: 2040,
+        descent: -1020,
+        capHeight: 1500,
+      });
+    });
+
+    it('varies the underline and the x-height', function () {
+      let font = fontkit.openSync(
+        new URL('data/Recursive/Recursive-ABC.ttf', import.meta.url),
+      );
+      let { underlinePosition, underlineThickness, xHeight } =
+        font.getVariation({ wght: 1000 });
+      assert.deepEqual(
+        round({ underlinePosition, underlineThickness, xHeight }),
+        { underlinePosition: -145, underlineThickness: 150, xHeight: 550 },
+      );
+    });
+
+    it('applies its adjustments to variations of a font in use', function () {
+      let font = fontkit.openSync(
+        new URL('data/Mada/Mada-VF.ttf', import.meta.url),
+      );
+      // Read the default metrics first, which a variation must not reuse:
+      assert.equal(font.xHeight, 489);
+      assert.equal(Math.round(font.getVariation({ wght: 900 }).xHeight), 498);
     });
   });
 });

@@ -110,31 +110,27 @@ export class TTFFont {
   }
 
   _getMetrics() {
-    // Like HarfBuzz, use the typo metrics only when the font asks for them
-    let { 'OS/2': os2, hhea } = this;
-
-    let applyAdjustment = (value, valueTag) => {
-      let adjustment = this._metricsVariationAdjustments[valueTag];
-      return adjustment ? value + adjustment : value;
-    };
-
+    // Like HarfBuzz, use the typo metrics only when the font asks for them,
+    // and vary each metric by its MVAR delta, whichever table it comes from
+    let { 'OS/2': os2, hhea, post } = this;
+    let deltas = this._metricsVariationAdjustments;
+    let vary = (value, valueTag) => value + (deltas[valueTag] ?? 0);
     let { ascent, descent, lineGap } = os2?.fsSelection.useTypoMetrics
       ? {
-          ascent: applyAdjustment(os2.typoAscender, 'hasc'),
-          descent: applyAdjustment(os2.typoDescender, 'hdsc'),
-          lineGap: applyAdjustment(os2.typoLineGap, 'hlgp'),
+          ascent: os2.typoAscender,
+          descent: os2.typoDescender,
+          lineGap: os2.typoLineGap,
         }
       : hhea;
-
-    let capHeight = os2 ? applyAdjustment(os2.capHeight, 'cpht') : this.ascent;
-    let xHeight = os2 ? applyAdjustment(os2.xHeight, 'xhgt') : 0;
-
+    ascent = Math.abs(vary(ascent, 'hasc'));
     return {
-      ascent: Math.abs(ascent),
-      descent: -Math.abs(descent),
-      lineGap,
-      capHeight,
-      xHeight,
+      ascent,
+      descent: -Math.abs(vary(descent, 'hdsc')),
+      lineGap: vary(lineGap, 'hlgp'),
+      capHeight: os2 ? vary(os2.capHeight, 'cpht') : ascent,
+      xHeight: os2 ? vary(os2.xHeight, 'xhgt') : 0,
+      underlinePosition: vary(post.underlinePosition, 'undo'),
+      underlineThickness: vary(post.underlineThickness, 'unds'),
     };
   }
 
@@ -237,7 +233,7 @@ export class TTFFont {
    * @type {number}
    */
   get underlinePosition() {
-    return this.post.underlinePosition;
+    return this._getMetrics().underlinePosition;
   }
 
   /**
@@ -245,7 +241,7 @@ export class TTFFont {
    * @type {number}
    */
   get underlineThickness() {
-    return this.post.underlineThickness;
+    return this._getMetrics().underlineThickness;
   }
 
   /**
