@@ -350,6 +350,136 @@ describe('shaping', function () {
     );
   });
 
+  describe('myanmar shaper', function () {
+    // Pre-base reordering of MEDIAL RA (U+103C) across a multi-syllable
+    // word: MA + RA + NA + ASAT + MA + AA — the RA jumps to before its
+    // base in syllable 1, while the ASAT stays where it is in syllable 1.
+    // Without the shaper the RA stays after the MA and the output diverges.
+    test(
+      'should shape မြန်မာ (Myanmar)',
+      'NotoSans/NotoSansMyanmar-Regular.ttf',
+      'မြန်မာ',
+      '47+229|29+676|24+570|381@43,0+0|29+676|368+455',
+    );
+
+    // Kinzi prefix: NGA + ASAT + VIRAMA before a base consonant reorders to
+    // POS_AFTER_MAIN so the kinzi sits over the base. Without the shaper
+    // the four glyphs stay in input order.
+    test(
+      'should reorder kinzi (NGA+ASAT+VIRAMA+KA)',
+      'NotoSans/NotoSansMyanmar-Regular.ttf',
+      'င်္က',
+      '4+1124|189@-1,0+0',
+    );
+
+    // Left matra reorder: VOWEL SIGN E (U+1031) is encoded after the base
+    // but renders to its left, so the shaper sorts it to PRE_M (before
+    // the base). Without the shaper the matra would stay after the base.
+    test(
+      'should reorder left matra E before its base',
+      'NotoSans/NotoSansMyanmar-Regular.ttf',
+      'ကေ',
+      '372+618|4+1124',
+    );
+
+    // Position transitions inside the post-base loop: GA + MEDIAL YA +
+    // BELOW U + ANUSVARA. The ANUSVARA (categorised as A) lands at
+    // POS_BEFORE_SUB so it sorts before the below-base U (POS_BELOW_C).
+    // Without the shaper they stay in input order and ANUSVARA sorts last.
+    test(
+      'should position anusvara before below-base vowel',
+      'NotoSans/NotoSansMyanmar-Regular.ttf',
+      'ဂျုံ',
+      '6+668|382+257|377@176,0+0|210+261|610+0',
+    );
+
+    // Broken cluster: a leading DOTTED CIRCLE plus MEDIAL RA. The syllable
+    // parser tags it as a broken_cluster and the reordering pass keeps
+    // them in the order needed for the medial-RA pre-base substitution
+    // to fire on the dotted circle.
+    test(
+      'should shape a broken cluster (dotted circle + medial RA)',
+      'NotoSans/NotoSansMyanmar-Regular.ttf',
+      '◌ြ',
+      '47+229|388+594',
+    );
+
+    // Broken cluster with a leading kinzi (RA + ASAT + VIRAMA but no base
+    // consonant). HarfBuzz inserts the dotted circle at the START of the
+    // cluster — `hb_syllabic_insert_dotted_circles` is called for Myanmar
+    // without a repha category, so the kinzi-skipping path is not taken.
+    test(
+      'should insert dotted circle BEFORE a stray kinzi prefix',
+      'NotoSans/NotoSansMyanmar-Regular.ttf',
+      'ရ်္',
+      '388+594|193@48,-42+0',
+    );
+
+    // Same shape with a trailing left matra — exercises the position-loop
+    // path where the kinzi is reordered relative to a VPre that follows.
+    test(
+      'should shape a stray kinzi followed by a left matra',
+      'NotoSans/NotoSansMyanmar-Regular.ttf',
+      'ရ်္ေ',
+      '372+618|388+594|193@48,-42+0',
+    );
+
+    // Bare ZWJ — Ragel's main machine maps `j | SMPst` to
+    // `non_myanmar_cluster` (listed before `broken_cluster`), so a lone
+    // ZWJ should NOT pick up a dotted circle.
+    test(
+      'should leave a bare ZWJ alone (no dotted circle)',
+      'NotoSans/NotoSansMyanmar-Regular.ttf',
+      '‍',
+      '3+0',
+    );
+
+    // HarfBuzz treats SECTION like LITTLE SECTION, as a placeholder that
+    // takes marks without a dotted circle.
+    test(
+      'should attach a mark to SECTION',
+      'NotoSans/NotoSansMyanmar-Regular.ttf',
+      '။ု',
+      '61+462|209+0',
+    );
+
+    // DOT BELOW is a tone mark, which must follow AI in a syllable, so a
+    // DOT BELOW before AI starts two broken clusters.
+    test(
+      'should not let AI follow DOT BELOW',
+      'NotoSans/NotoSansMyanmar-Regular.ttf',
+      '့ဲ',
+      '388+594|378@30,0+0|388+594|373@9,-22+0',
+    );
+
+    // HarfBuzz applies the basic features to all glyphs: blwf ligates
+    // MEDIAL WA and MEDIAL HA.
+    test(
+      'should apply blwf to all glyphs',
+      'NotoSans/NotoSansMyanmar-Regular.ttf',
+      'ကွှ',
+      '4+1124|362@-2,0+0',
+    );
+
+    // An inserted dotted circle gets the features of the glyph it
+    // precedes, so kerning applies to it like to a typed one.
+    test(
+      'should kern an inserted dotted circle',
+      'NotoSans/NotoSansMyanmar-Regular.ttf',
+      'ါံ',
+      '388+769|377@-166,-42+0|367+267',
+    );
+
+    // A subset whose VOWEL SIGN U has an advance of 300: HarfBuzz zeroes
+    // the advances of marks before GPOS.
+    test(
+      'should zero mark advances before GPOS',
+      'NotoSans/NotoSansMyanmar-MarkAdvance.ttf',
+      'ကု',
+      '1+1124|2@-5,0+0',
+    );
+  });
+
   describe('hangul shaper', function () {
     let font = fontkit.openSync(
       new URL('data/NotoSansCJK/NotoSansCJKkr-Regular.otf', import.meta.url),
