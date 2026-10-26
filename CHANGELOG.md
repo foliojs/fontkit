@@ -2,6 +2,8 @@
 
 ### Unreleased
 
+- Apply MVAR deltas to the ascent, descent, line gap, cap height, x-height and underline metrics of variations
+- Take the ascent, descent and line gap from the typo metrics when the font sets useTypoMetrics, like HarfBuzz, and fix the vhea structure, 16.16 table versions, and boxes of empty glyphs (#305, #306)
 - Use non-default variation sequences when the variation selector also has default ones
 - Add `fontkit/core` and `fontkit/formats/{format}` entry points with named format exports for explicit format registration, sharing state with the default entries
 - Remove the fast-deep-equal runtime dependency

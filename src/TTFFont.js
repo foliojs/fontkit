@@ -109,6 +109,31 @@ export class TTFFont {
     return result;
   }
 
+  _getMetrics() {
+    // Like HarfBuzz, use the typo metrics only when the font asks for them,
+    // and vary each metric by its MVAR delta, whichever table it comes from
+    let { 'OS/2': os2, hhea, post } = this;
+    let deltas = this._metricsVariationAdjustments;
+    let vary = (value, valueTag) => value + (deltas[valueTag] ?? 0);
+    let { ascent, descent, lineGap } = os2?.fsSelection.useTypoMetrics
+      ? {
+          ascent: os2.typoAscender,
+          descent: os2.typoDescender,
+          lineGap: os2.typoLineGap,
+        }
+      : hhea;
+    ascent = Math.abs(vary(ascent, 'hasc'));
+    return {
+      ascent,
+      descent: -Math.abs(vary(descent, 'hdsc')),
+      lineGap: vary(lineGap, 'hlgp'),
+      capHeight: os2 ? vary(os2.capHeight, 'cpht') : ascent,
+      xHeight: os2 ? vary(os2.xHeight, 'xhgt') : 0,
+      underlinePosition: vary(post.underlinePosition, 'undo'),
+      underlineThickness: vary(post.underlineThickness, 'unds'),
+    };
+  }
+
   /**
    * Gets a string from the font's `name` table
    * `lang` is a BCP-47 language code.
@@ -184,7 +209,7 @@ export class TTFFont {
    * @type {number}
    */
   get ascent() {
-    return this.hhea.ascent;
+    return this._getMetrics().ascent;
   }
 
   /**
@@ -192,7 +217,7 @@ export class TTFFont {
    * @type {number}
    */
   get descent() {
-    return this.hhea.descent;
+    return this._getMetrics().descent;
   }
 
   /**
@@ -200,7 +225,7 @@ export class TTFFont {
    * @type {number}
    */
   get lineGap() {
-    return this.hhea.lineGap;
+    return this._getMetrics().lineGap;
   }
 
   /**
@@ -208,7 +233,7 @@ export class TTFFont {
    * @type {number}
    */
   get underlinePosition() {
-    return this.post.underlinePosition;
+    return this._getMetrics().underlinePosition;
   }
 
   /**
@@ -216,7 +241,7 @@ export class TTFFont {
    * @type {number}
    */
   get underlineThickness() {
-    return this.post.underlineThickness;
+    return this._getMetrics().underlineThickness;
   }
 
   /**
@@ -233,8 +258,7 @@ export class TTFFont {
    * @type {number}
    */
   get capHeight() {
-    let os2 = this['OS/2'];
-    return os2 ? os2.capHeight : this.ascent;
+    return this._getMetrics().capHeight;
   }
 
   /**
@@ -243,8 +267,7 @@ export class TTFFont {
    * @type {number}
    */
   get xHeight() {
-    let os2 = this['OS/2'];
-    return os2 ? os2.xHeight : 0;
+    return this._getMetrics().xHeight;
   }
 
   /**
@@ -618,6 +641,33 @@ export class TTFFont {
     return new GlyphVariationProcessor(this, variationCoords);
   }
 
+  /**
+   * Returns the metrics variation adjustments for this font.
+   *
+   * @see {@link https://learn.microsoft.com/en-us/typography/opentype/spec/mvar}
+   *
+   * @return {Object<string, number>} An object where the keys are value tags and the values are the corresponding adjustments.
+   */
+  get _metricsVariationAdjustments() {
+    if (!this.MVAR || !this._variationProcessor) {
+      return {};
+    }
+
+    let deltas = {};
+
+    for (let record of this.MVAR.valueRecords) {
+      let valueTag = record.valueTag;
+      let adjustment = this._variationProcessor.getDelta(
+        this.MVAR.itemVariationStore,
+        record.deltaSetOuterIndex,
+        record.deltaSetInnerIndex,
+      );
+      deltas[valueTag] = adjustment;
+    }
+
+    return deltas;
+  }
+
   // Standardized format plugin API
   getFont(name) {
     return this.getVariation(name);
@@ -632,4 +682,6 @@ cache(TTFFont, {
   variationAxes: 'once',
   namedVariations: 'once',
   _variationProcessor: 'once',
+  _metricsVariationAdjustments: 'once',
+  _getMetrics: 'once',
 });
