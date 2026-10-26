@@ -50,7 +50,7 @@ describe('STAT table', function () {
               value: 400,
             },
           ],
-          format: 4,
+          version: 4,
         },
         {
           axisIndex: 0,
@@ -59,7 +59,7 @@ describe('STAT table', function () {
           nominalValue: 11,
           rangeMinValue: 9,
           rangeMaxValue: 12,
-          format: 2,
+          version: 2,
         },
         {
           axisIndex: 0,
@@ -68,7 +68,7 @@ describe('STAT table', function () {
           nominalValue: 16.699996948242188,
           rangeMinValue: 12,
           rangeMaxValue: 24,
-          format: 2,
+          version: 2,
         },
         {
           axisIndex: 0,
@@ -77,7 +77,7 @@ describe('STAT table', function () {
           nominalValue: 72,
           rangeMinValue: 24,
           rangeMaxValue: 72,
-          format: 2,
+          version: 2,
         },
         {
           axisIndex: 1,
@@ -86,7 +86,7 @@ describe('STAT table', function () {
           nominalValue: 80,
           rangeMinValue: 80,
           rangeMaxValue: 89,
-          format: 2,
+          version: 2,
         },
         {
           axisIndex: 1,
@@ -95,7 +95,7 @@ describe('STAT table', function () {
           nominalValue: 90,
           rangeMinValue: 90,
           rangeMaxValue: 96,
-          format: 2,
+          version: 2,
         },
         {
           axisIndex: 1,
@@ -104,7 +104,7 @@ describe('STAT table', function () {
           nominalValue: 100,
           rangeMinValue: 97,
           rangeMaxValue: 101,
-          format: 2,
+          version: 2,
         },
         {
           axisIndex: 1,
@@ -113,7 +113,7 @@ describe('STAT table', function () {
           nominalValue: 125,
           rangeMinValue: 102,
           rangeMaxValue: 125,
-          format: 2,
+          version: 2,
         },
         {
           axisIndex: 2,
@@ -122,7 +122,7 @@ describe('STAT table', function () {
           nominalValue: 300,
           rangeMinValue: 300,
           rangeMaxValue: 349,
-          format: 2,
+          version: 2,
         },
         {
           axisIndex: 2,
@@ -131,7 +131,7 @@ describe('STAT table', function () {
           nominalValue: 400,
           rangeMinValue: 350,
           rangeMaxValue: 449,
-          format: 2,
+          version: 2,
         },
         {
           axisIndex: 2,
@@ -140,7 +140,7 @@ describe('STAT table', function () {
           nominalValue: 500,
           rangeMinValue: 450,
           rangeMaxValue: 549,
-          format: 2,
+          version: 2,
         },
         {
           axisIndex: 2,
@@ -149,7 +149,7 @@ describe('STAT table', function () {
           nominalValue: 600,
           rangeMinValue: 550,
           rangeMaxValue: 649,
-          format: 2,
+          version: 2,
         },
         {
           axisIndex: 2,
@@ -158,7 +158,7 @@ describe('STAT table', function () {
           nominalValue: 700,
           rangeMinValue: 650,
           rangeMaxValue: 749,
-          format: 2,
+          version: 2,
         },
         {
           axisIndex: 2,
@@ -167,14 +167,14 @@ describe('STAT table', function () {
           nominalValue: 900,
           rangeMinValue: 750,
           rangeMaxValue: 900,
-          format: 2,
+          version: 2,
         },
         {
           axisIndex: 3,
           flags: 2,
           valueNameID: 274,
           value: 0,
-          format: 1,
+          version: 1,
         },
       ],
     });

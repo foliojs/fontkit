@@ -53,28 +53,18 @@ let AxisValueArray = new r.Struct({
   ),
 });
 
-// Simplify the structure by moving axisValues to the top level. Also rename
-// the `version` field to `format` in the AxisValue structs.
-// There should be a better way to do this.
+// Simplify the structure by moving axisValues to the top level.
 class STATStruct extends r.VersionedStruct {
   decode(stream, parent) {
     let value = super.decode(stream, parent);
     value.axisValues = value.offsetToAxisValueOffsets.axisValues;
     delete value.offsetToAxisValueOffsets;
-    for (let axisValue of value.axisValues) {
-      axisValue.format = axisValue.version;
-      delete axisValue.version;
-    }
     return value;
   }
 
   encode(stream, value, parent) {
     value.offsetToAxisValueOffsets = { axisValues: value.axisValues };
     delete value.axisValues;
-    for (let axisValue of value.offsetToAxisValueOffsets.axisValues) {
-      axisValue.version = axisValue.format;
-      delete axisValue.format;
-    }
     return super.encode(stream, value, parent);
   }
 }
