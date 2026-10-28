@@ -172,6 +172,7 @@ function reorder(font, glyphs) {
     // Only a few syllable types need reordering.
     if (
       type !== 'virama_terminated_cluster' &&
+      type !== 'sakot_terminated_cluster' &&
       type !== 'standard_cluster' &&
       type !== 'broken_cluster'
     ) {

@@ -2988,6 +2988,55 @@ describe('shaping', function () {
       );
     });
 
+    describe('shapes tai tham text', function () {
+      // Tests from https://github.com/unicode-org/text-rendering-tests
+      test(
+        'SHLANA-1/39',
+        'fonttest/TestShapeLana.ttf',
+        'ᨩᩢ᩠ᨿ',
+        '179+1212|260+0|396+464',
+      );
+      test(
+        'SHLANA-2/11',
+        'fonttest/TestShapeLana.ttf',
+        'ᨲᩣ᩠ᨾ',
+        '195+1910|265+1212|395+0',
+      );
+      test(
+        'SHLANA-2/37',
+        'fonttest/TestShapeLana.ttf',
+        'ᩉ᩠ᩃᩣ᩠ᨿ',
+        '226+1910|400+464|265+1212|396+464',
+      );
+      test(
+        'SHLANA-6/3',
+        'fonttest/TestShapeLana.ttf',
+        'ᨶᩰᩫ᩠᩶ᨲ',
+        '281+1212|200+1212|275+0|307@0,732+0|377+0',
+      );
+      test(
+        'SHLANA-7/8',
+        'fonttest/TestShapeLana.ttf',
+        'ᩈᩮ᩠ᩓ᩠ᩅ',
+        '279+1212|225+1212|421+464|402@-204,-1120+0',
+      );
+
+      // Expected results from HarfBuzz
+      test(
+        'should end a syllable with a sakot after a vowel sign',
+        'fonttest/TestShapeLana.ttf',
+        'ᨠᩣ᩠',
+        '170+1910|265+1212|258+0',
+      );
+
+      test(
+        'should insert a dotted circle before a lone vowel sign and sakot',
+        'fonttest/TestShapeLana.ttf',
+        'ᩣ᩠ᨿ',
+        '143+1212|265+1212|396+464',
+      );
+    });
+
     describe('shapes text with joiners', function () {
       // Expected results from HarfBuzz
       test(
