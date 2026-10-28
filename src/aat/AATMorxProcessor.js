@@ -7,6 +7,9 @@ const MARK_FIRST = 0x8000;
 const MARK_LAST = 0x2000;
 const VERB = 0x000f;
 
+// number of glyphs each rearrangement verb moves, e.g. 3 for AxCD => CDxA
+const VERB_LENGTH = [0, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4];
+
 // contextual substitution and glyph insertion flag
 const SET_MARK = 0x8000;
 
@@ -148,15 +151,19 @@ export default class AATMorxProcessor {
     }
 
     if (entry.flags & MARK_LAST) {
-      this.lastGlyph = index;
+      this.lastGlyph = Math.min(index, this.glyphs.length - 1);
     }
 
-    reorderGlyphs(
-      this.glyphs,
-      entry.flags & VERB,
-      this.firstGlyph,
-      this.lastGlyph,
-    );
+    // Like CoreText and HarfBuzz, leave the glyphs alone unless the marked
+    // range holds every glyph the verb moves (#142, #143).
+    let verb = entry.flags & VERB;
+    let firstGlyph = this.firstGlyph === null ? 0 : this.firstGlyph;
+    if (
+      this.lastGlyph !== null &&
+      this.lastGlyph - firstGlyph + 1 >= VERB_LENGTH[verb]
+    ) {
+      reorderGlyphs(this.glyphs, verb, firstGlyph, this.lastGlyph);
+    }
   }
 
   processContextualSubstitution(glyph, entry, index) {
