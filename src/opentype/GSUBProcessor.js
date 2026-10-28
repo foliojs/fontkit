@@ -1,7 +1,19 @@
 import OTProcessor from './OTProcessor';
 import GlyphInfo from './GlyphInfo';
 
+// Limit on the length of a glyph run, as in HarfBuzz, so that malicious
+// fonts can't grow it without bound with multiple substitutions.
+const MAX_LEN_FACTOR = 256;
+const MAX_LEN_MIN = 65536;
+
 export default class GSUBProcessor extends OTProcessor {
+  maxLength = Infinity;
+
+  // Sets the length limit for a glyph run that starts with the given number of glyphs
+  resetLimits(length) {
+    this.maxLength = Math.max(length * MAX_LEN_FACTOR, MAX_LEN_MIN);
+  }
+
   // Reverse Chaining Contextual Single Substitution is applied right-to-left,
   // so substitutions never feed back into the lookahead context of an
   // earlier-in-text glyph
@@ -37,6 +49,9 @@ export default class GSUBProcessor extends OTProcessor {
         let index = this.coverageIndex(table.coverage);
         if (index !== -1) {
           let sequence = table.sequences.get(index);
+          if (this.glyphs.length + sequence.length - 1 > this.maxLength) {
+            return false;
+          }
 
           if (sequence.length === 0) {
             // If the sequence length is zero, delete the glyph.
