@@ -3,6 +3,7 @@
 ### Unreleased
 
 - End the second curve of CFF hflex and hflex1 operators at the starting y, so later points are no longer shifted (#437)
+- Limit the length of glyph runs that multiple substitutions can produce to 256 times the input or 65536 glyphs, like HarfBuzz, so fonts can no longer make layout hang with exponentially growing substitutions (#221)
 
 ### [3.0.0] - 11-11-2026
 
