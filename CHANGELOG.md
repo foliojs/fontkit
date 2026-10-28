@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Fix crashes in AAT morx contextual substitution without a mark and ligatures with too few components or components outside the font, like HarfBuzz (#150)
 - Fix AAT glyph insertion: insert the marked glyph count, set the mark after inserting, skip the inserted glyphs, and limit how many glyphs a font can insert, like HarfBuzz (#171, #172, #173, #174)
 - Stop AAT morx state machines that never advance after a bounded number of steps, like HarfBuzz (#175)
 - Shape Tai Tham sakot followed by a consonant after vowel signs like HarfBuzz, instead of inserting a dotted circle

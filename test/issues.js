@@ -355,4 +355,48 @@ describe('issues', function () {
       assert(glyphs.length <= 65536);
     });
   });
+
+  describe('#150 - TypeError with AAT contextual substitution without a mark', function () {
+    // MORX-19 from Unicode text-rendering-tests substitutes the marked glyph
+    // without setting a mark, so the first glyph is marked.
+    let font = fontkit.openSync(
+      new URL('data/fonttest/TestMORXEighteen.ttf', import.meta.url),
+    );
+    let layout = (text) =>
+      font
+        .layout(text)
+        .glyphs.map((glyph) => glyph.name)
+        .join(' ');
+
+    it('should substitute the first glyph', function () {
+      assert.equal(layout('ACDE'), 'A.alt C D.alt1 E');
+      assert.equal(layout('D'), 'D.alt');
+    });
+  });
+
+  describe('AAT ligature stack underflow and overflow', function () {
+    // MORX-41 from Unicode text-rendering-tests makes a ligature of the last
+    // two components when it sees c, whatever is on the stack.
+    let font = fontkit.openSync(
+      new URL('data/fonttest/TestMORXFourtyone.ttf', import.meta.url),
+    );
+    let layout = (text) =>
+      font
+        .layout(text)
+        .glyphs.map((glyph) => glyph.name)
+        .join(' ');
+
+    it('should make ligatures', function () {
+      assert.equal(layout('ac'), 'a_c');
+      assert.equal(layout('bc'), 'b_c');
+    });
+
+    it('should leave the glyphs when the stack has too few components', function () {
+      assert.equal(layout('cc'), 'c c');
+    });
+
+    it('should stop at components outside the font', function () {
+      assert.equal(layout('abcc'), 'a b_c c');
+    });
+  });
 });
