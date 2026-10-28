@@ -31,6 +31,11 @@ const MARKED_INSERT_BEFORE = 0x0400;
 const CURRENT_INSERT_COUNT = 0x03e0;
 const MARKED_INSERT_COUNT = 0x001f;
 
+// Limit on the work done for one glyph run, as in HarfBuzz, so that
+// malicious fonts can't keep a state machine from advancing forever.
+const MAX_OPS_FACTOR = 4096;
+const MAX_OPS_MIN = 65536;
+
 export default class AATMorxProcessor {
   constructor(font) {
     this.processIndicRearragement = this.processIndicRearragement.bind(this);
@@ -48,6 +53,10 @@ export default class AATMorxProcessor {
   // Processes an array of glyphs and applies the specified features
   // Features should be in the form of {featureType:{featureSetting:boolean}}
   process(glyphs, features = {}) {
+    this.limits = {
+      ops: Math.max(glyphs.length * MAX_OPS_FACTOR, MAX_OPS_MIN),
+    };
+
     for (let chain of this.morx.chains) {
       let flags = chain.defaultFlags;
 
@@ -103,7 +112,7 @@ export default class AATMorxProcessor {
     let process = this.getProcessor();
 
     let reverse = !!(this.subtable.coverage & REVERSE_DIRECTION);
-    return stateMachine.process(this.glyphs, reverse, process);
+    return stateMachine.process(this.glyphs, reverse, process, this.limits);
   }
 
   getStateMachine(subtable) {

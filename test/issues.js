@@ -249,4 +249,16 @@ describe('issues', function () {
       );
     });
   });
+
+  describe('#175 - infinite loop in a morx state machine', function () {
+    it('should stop a machine that never advances', function () {
+      // MORX-24 from Unicode text-rendering-tests substitutes A by B, B by C,
+      // and so on back to A, without ever advancing.
+      let font = fontkit.openSync(
+        new URL('data/fonttest/TestMORXTwentyfour.ttf', import.meta.url),
+      );
+
+      assert.equal(font.layout('ABCDE').glyphs.length, 5);
+    });
+  });
 });
