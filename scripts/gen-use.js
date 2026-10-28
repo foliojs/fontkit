@@ -32,6 +32,8 @@ const CATEGORIES = {
     { UISC: 'Consonant_Succeeding_Repha' },
   ],
   FM: ['Syllable_Modifier'],
+  // Split off of H, as in HarfBuzz: Tai Tham sakot can also follow vowels.
+  Sk: [0x1a60],
   GB: ['Consonant_Placeholder', 0x2015, 0x2022, 0x25fb, 0x25fc, 0x25fd, 0x25fe],
   H: ['Virama', 'Invisible_Stacker'],
   HN: ['Number_Joiner'],
