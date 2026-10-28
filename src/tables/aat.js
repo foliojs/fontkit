@@ -9,10 +9,18 @@ class UnboundedArrayAccessor {
     this._items = [];
   }
 
+  // Returns null for items outside the font, which malformed or malicious
+  // fonts can point to.
   getItem(index) {
+    let size = this.type.size(null, this.parent);
+    let offset = this.base + size * index;
+    if (index < 0 || offset + size > this.stream.length) {
+      return null;
+    }
+
     if (this._items[index] == null) {
       let pos = this.stream.pos;
-      this.stream.pos = this.base + this.type.size(null, this.parent) * index;
+      this.stream.pos = offset;
       this._items[index] = this.type.decode(this.stream, this.parent);
       this.stream.pos = pos;
     }
