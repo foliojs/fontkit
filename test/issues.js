@@ -261,4 +261,98 @@ describe('issues', function () {
       assert.equal(font.layout('ABCDE').glyphs.length, 5);
     });
   });
+
+  describe('#171, #172, #173 - AAT glyph insertion', function () {
+    let openFont = (file) =>
+      fontkit.openSync(new URL(`data/fonttest/${file}`, import.meta.url));
+
+    // MORX-29 to MORX-33 and MORX-35 from Unicode text-rendering-tests
+    let cases = [
+      [
+        'TestMORXTwentynine.ttf',
+        'PQRMMXXMMYYAZZ',
+        'P Q R M M X X M I N S M Y Y A Z Z',
+      ],
+      [
+        'TestMORXTwentynine.ttf',
+        'PQRMMXXMMYYBZZ',
+        'P Q R M M X X M M I N S Y Y B Z Z',
+      ],
+      [
+        'TestMORXTwentynine.ttf',
+        'PQRMMXXMMYYCZZ',
+        'P Q R M M X X M M Y Y I N S C Z Z',
+      ],
+      [
+        'TestMORXTwentynine.ttf',
+        'PQRMMXXMMYYDZZ',
+        'P Q R M M X X M M Y Y D I N S Z Z',
+      ],
+      [
+        'TestMORXTwentynine.ttf',
+        'PQRMMXXXAYYAZZ',
+        'P Q R M I N S I N S M X X X A Y Y A Z Z',
+      ],
+      [
+        'TestMORXTwentynine.ttf',
+        'PQRMMXXXAYYBZZ',
+        'P Q R M I I N S N S M X X X A Y Y B Z Z',
+      ],
+      [
+        'TestMORXTwentynine.ttf',
+        'PQRMMXXXBYYAZZ',
+        'P Q R M I N S M I N S X X X B Y Y A Z Z',
+      ],
+      [
+        'TestMORXTwentynine.ttf',
+        'PQRMMXXXBYYBZZ',
+        'P Q R M M I N S I N S X X X B Y Y B Z Z',
+      ],
+      ['TestMORXThirtyone.ttf', 'XXAYYAZZ', 'I N I N S S X X A Y Y A Z Z'],
+      ['TestMORXThirtyone.ttf', 'XXAYYBYY', 'I N S I N S X X A Y Y B Y Y'],
+      ['TestMORXThirtyone.ttf', 'XXBYYAZZ', 'X I I N S N S X B Y Y A Z Z'],
+      ['TestMORXThirtyone.ttf', 'XXBYYBZZ', 'X I N I N S S X B Y Y B Z Z'],
+      ['TestMORXThirtyone.ttf', 'MPQRAXYZA', 'I N S M I N S P Q R A X Y Z A'],
+      ['TestMORXThirtyone.ttf', 'MPQRAXYZB', 'I N S M P I N S Q R A X Y Z B'],
+      ['TestMORXThirtyone.ttf', 'MPQRBXYZA', 'M I N S I N S P Q R B X Y Z A'],
+      ['TestMORXThirtyone.ttf', 'MPQRBXYZB', 'M I N S P I N S Q R B X Y Z B'],
+      ['TestMORXThirtytwo.ttf', 'A', 'I N S A'],
+      ['TestMORXThirtytwo.ttf', 'XAY', 'I N S X A Y'],
+      ['TestMORXThirtytwo.ttf', 'B', 'B I N S'],
+      ['TestMORXThirtytwo.ttf', 'XBY', 'X I N S B Y'],
+      ['TestMORXThirtythree.ttf', 'ha', 'h a h a'],
+      ['TestMORXThirtythree.ttf', 'haha', 'h a h a h a h a'],
+      ['TestMORXThirtythree.ttf', 'ah', 'a h'],
+      ['TestMORXThirtyfive.ttf', 'A', 'A B C E'],
+      ['TestMORXThirtyfive.ttf', 'XAY', 'X A B C E Y'],
+    ];
+
+    for (let [file, text, expected] of cases) {
+      it(`should lay out ${text} with ${file}`, function () {
+        let glyphs = openFont(file).layout(text).glyphs;
+        assert.equal(glyphs.map((glyph) => glyph.name).join(' '), expected);
+      });
+    }
+  });
+
+  describe('#174 - running out of memory with AAT glyph insertion', function () {
+    this.timeout(10000);
+
+    let openFont = (file) =>
+      fontkit.openSync(new URL(`data/fonttest/${file}`, import.meta.url));
+
+    it('should limit the glyphs inserted by nine insertion subtables', function () {
+      // MORX-34 from Unicode text-rendering-tests inserts ten glyphs for
+      // every glyph in each of nine subtables.
+      let glyphs = openFont('TestMORXThirtyfour.ttf').layout('ha').glyphs;
+      assert(glyphs.length <= 65536);
+    });
+
+    it('should stop inserting glyphs without advancing', function () {
+      // MORX-36 from Unicode text-rendering-tests keeps inserting glyphs
+      // after the current one without advancing.
+      let glyphs = openFont('TestMORXThirtysix.ttf').layout('A').glyphs;
+      assert(glyphs.length <= 65536);
+    });
+  });
 });

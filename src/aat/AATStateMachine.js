@@ -17,8 +17,9 @@ export default class AATStateMachine {
   }
 
   /**
-   * Runs the state machine over the glyphs. Transitions that don't advance
-   * use up limits.ops; once it runs out, the machine advances anyway.
+   * Runs the state machine over the glyphs. processEntry may return a new
+   * index, e.g. after inserting glyphs. Transitions that don't advance use up
+   * limits.ops; once it runs out, the machine advances anyway.
    */
   process(glyphs, reverse, processEntry, limits = { ops: Infinity }) {
     let currentState = START_OF_TEXT_STATE; // START_OF_LINE_STATE is used for kashida glyph insertions sometimes I think?
@@ -56,7 +57,11 @@ export default class AATStateMachine {
         classCode !== END_OF_TEXT_CLASS &&
         classCode !== DELETED_GLYPH_CLASS
       ) {
-        processEntry(glyph, entry, index);
+        let newIndex = processEntry(glyph, entry, index);
+        if (newIndex != null) {
+          index = newIndex;
+        }
+
         shouldAdvance = !(entry.flags & DONT_ADVANCE) || limits.ops-- <= 0;
       }
 

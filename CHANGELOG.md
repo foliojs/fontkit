@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Fix AAT glyph insertion: insert the marked glyph count, set the mark after inserting, skip the inserted glyphs, and limit how many glyphs a font can insert, like HarfBuzz (#171, #172, #173, #174)
 - Stop AAT morx state machines that never advance after a bounded number of steps, like HarfBuzz (#175)
 - Reverse right-to-left text, kern it in visual order and position its marks like HarfBuzz in fonts without GSUB, GPOS or morx (#39)
 - Round HVAR advance deltas to whole units like HarfBuzz, so subsets of fonts with set variations no longer truncate advances such as 851.9999 to 851
