@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Take the end-of-text transition of AAT morx state machines, so rearrangement and contextual substitution can act on the last glyphs like CoreText and HarfBuzz (#144, #147, #151)
 - Rearrange glyphs in AAT morx tables only when the marked range holds every glyph the verb moves, like CoreText and HarfBuzz (#142, #143)
 - Fix AAT glyph insertion: insert the marked glyph count, set the mark after inserting, skip the inserted glyphs, and limit how many glyphs a font can insert, like HarfBuzz (#171, #172, #173, #174)
 - Stop AAT morx state machines that never advance after a bounded number of steps, like HarfBuzz (#175)

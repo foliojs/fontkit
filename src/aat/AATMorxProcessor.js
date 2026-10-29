@@ -116,6 +116,7 @@ export default class AATMorxProcessor {
     this.firstGlyph = null;
     this.lastGlyph = null;
     this.markedIndex = 0;
+    this.markSet = false;
 
     let stateMachine = this.getStateMachine(subtable);
     let process = this.getProcessor();
@@ -167,6 +168,16 @@ export default class AATMorxProcessor {
   }
 
   processContextualSubstitution(glyph, entry, index) {
+    if (glyph === null) {
+      // Like CoreText and HarfBuzz, substitute at the end of the text only
+      // once a glyph was marked, and only the glyphs before it (#151).
+      if (!this.markSet) {
+        return;
+      }
+
+      index = Math.max(0, Math.min(index, this.glyphs.length - 1));
+    }
+
     let subsitutions = this.subtable.table.substitutionTable.items;
     if (entry.markIndex !== 0xffff) {
       let lookup = subsitutions.getItem(entry.markIndex);
@@ -193,10 +204,16 @@ export default class AATMorxProcessor {
 
     if (entry.flags & SET_MARK) {
       this.markedGlyph = index;
+      this.markSet = true;
     }
   }
 
   processLigature(glyph, entry, index) {
+    // Like HarfBuzz, form no ligatures at the end of the text
+    if (glyph === null) {
+      return;
+    }
+
     if (entry.flags & SET_COMPONENT) {
       this.ligatureStack.push(index);
     }
@@ -288,6 +305,10 @@ export default class AATMorxProcessor {
   }
 
   processGlyphInsertion(glyph, entry, index) {
+    if (glyph === null) {
+      return;
+    }
+
     let reverse = !!(this.subtable.coverage & REVERSE_DIRECTION);
     let markLocation = index;
 
