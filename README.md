@@ -215,7 +215,7 @@ Renders the glyph to the given graphics context, at the specified font size.
 
 ### Color glyphs (e.g. emoji)
 
-Fontkit has support for several different color emoji font formats. Currently, these include Apple’s SBIX table (as used by the “Apple Color Emoji” font), and Microsoft’s COLR table (supported by Windows 8.1). [Here](http://blog.symbolset.com/multicolor-fonts) is an overview of the various color font formats out there.
+Fontkit has support for several different color emoji font formats. Currently, these include Apple’s SBIX table (as used by the “Apple Color Emoji” font), and Microsoft’s COLR table (supported by Windows 8.1). [Here](https://web.archive.org/web/20180718014648/http://blog.symbolset.com/multicolor-fonts) is an overview of the various color font formats out there.
 
 #### `glyph.getImageForSize(size)`
 
