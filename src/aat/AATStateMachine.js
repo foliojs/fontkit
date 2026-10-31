@@ -53,14 +53,21 @@ export default class AATStateMachine {
       let entryIndex = row[classCode];
       let entry = this.stateTable.entryTable.getItem(entryIndex);
 
-      if (classCode === END_OF_TEXT_CLASS) {
-        // The end-of-text transition can still act on the glyphs before it
-        // (#144, #147, #151). Never stay at the end of the text, though.
-        processEntry(null, entry, index);
-      } else if (classCode !== DELETED_GLYPH_CLASS) {
+      // The end-of-text transition (glyph is null) can still act on the
+      // glyphs before it (#144, #147, #151), and insert glyphs at the end.
+      if (classCode !== DELETED_GLYPH_CLASS) {
         let newIndex = processEntry(glyph, entry, index);
         if (newIndex != null) {
           index = newIndex;
+        }
+
+        // Like HarfBuzz, stop at the end of the text unless glyphs were
+        // inserted there that the machine doesn't skip
+        if (
+          classCode === END_OF_TEXT_CLASS &&
+          (index < 0 || index >= glyphs.length)
+        ) {
+          break;
         }
 
         shouldAdvance = !(entry.flags & DONT_ADVANCE) || limits.ops-- <= 0;

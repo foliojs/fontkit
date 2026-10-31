@@ -3422,4 +3422,32 @@ describe('shaping', function () {
       );
     });
   });
+
+  describe('AAT glyph insertion at the end of the text', function () {
+    // TestMORXEndOfTextInsertion.ttf is MORX-32 from Unicode text-rendering-tests
+    // with its insertion subtable rebuilt with fontTools, and the expected
+    // results are HarfBuzz's. Only the end-of-text transitions insert glyphs:
+    // after A, I N S at the end; after B, I N S after the marked B; after C,
+    // B at the end without advancing, so the B is processed too.
+    let font = fontkit.openSync(
+      new URL('data/fonttest/TestMORXEndOfTextInsertion.ttf', import.meta.url),
+    );
+
+    let cases = {
+      A: 'A I N S',
+      AYY: 'A Y Y I N S',
+      AX: 'A X',
+      BYY: 'B I N S Y Y',
+      BX: 'B X',
+      C: 'C B I N S',
+      AC: 'A C B I N S',
+    };
+
+    for (let [text, names] of Object.entries(cases)) {
+      it(`should lay out ${text}`, function () {
+        let { glyphs } = font.layout(text);
+        assert.equal(glyphs.map((g) => g.name).join(' '), names);
+      });
+    }
+  });
 });
