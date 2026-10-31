@@ -11,30 +11,79 @@ export default class TTFSubset extends Subset {
   _addGlyph(gid) {
     let glyph = this.font.getGlyph(gid);
     let glyf = glyph._decode();
+    let transformed = this.font.directory.tables.glyf.transformed;
+    let buffer;
+    let bearing;
 
-    // get the offset to the glyph from the loca table
-    let curOffset = this.font.loca.offsets[gid];
-    let nextOffset = this.font.loca.offsets[gid + 1];
+    if (transformed) {
+      if (glyf.numberOfContours && this.font._variationProcessor) {
+        // Resolving the path also updates varied phantom-point metrics.
+        let box = glyph.path.cbox;
+        if (glyf.numberOfContours > 0) {
+          box = {
+            minX: Infinity,
+            minY: Infinity,
+            maxX: -Infinity,
+            maxY: -Infinity,
+          };
+          for (let point of glyf.points) {
+            box.minX = Math.min(box.minX, point.x);
+            box.minY = Math.min(box.minY, point.y);
+            box.maxX = Math.max(box.maxX, point.x);
+            box.maxY = Math.max(box.maxY, point.y);
+          }
+        }
+        if (
+          !Number.isFinite(box.minX) ||
+          (glyf.numberOfContours < 0 && glyph.path.commands.length === 0)
+        ) {
+          // Empty composites have no contour box; preserve their stored bounds.
+          box = {
+            minX: glyf.xMin,
+            minY: glyf.yMin,
+            maxX: glyf.xMax,
+            maxY: glyf.yMax,
+          };
+        }
+        glyf = {
+          ...glyf,
+          xMin: Math.floor(box.minX),
+          yMin: Math.floor(box.minY),
+          xMax: Math.ceil(box.maxX),
+          yMax: Math.ceil(box.maxY),
+        };
+      }
+      buffer = this.glyphEncoder.encodeGlyph(glyf, (id) =>
+        this.includeGlyph(id),
+      );
+      bearing = glyf.phantomPoints
+        ? glyf.xMin - glyf.phantomPoints[0].x
+        : glyph._getMetrics().leftBearing;
+    } else {
+      // get the offset to the glyph from the loca table
+      let curOffset = this.font.loca.offsets[gid];
+      let nextOffset = this.font.loca.offsets[gid + 1];
 
-    let stream = this.font._getTableStream('glyf');
-    stream.pos += curOffset;
+      let stream = this.font._getTableStream('glyf');
+      stream.pos += curOffset;
 
-    let buffer = stream.readBuffer(nextOffset - curOffset);
+      buffer = stream.readBuffer(nextOffset - curOffset);
 
-    let bearing = glyph._getMetrics().leftBearing;
-    if (glyf && this.font._variationProcessor) {
-      // If this is a TrueType variation glyph, re-encode the path and take the
-      // left side bearing from it. Compound glyphs are flattened too, as the
-      // offsets of their components vary.
-      buffer = this.glyphEncoder.encodeSimple(glyph.path, glyf.instructions);
-      bearing = glyph.path.cbox.minX;
-    } else if (glyf && glyf.numberOfContours < 0) {
-      // if it is a compound glyph, include its components
-      buffer = new Uint8Array(buffer);
-      let view = new DataView(buffer.buffer);
-      for (let component of glyf.components) {
-        gid = this.includeGlyph(component.glyphID);
-        view.setUint16(component.pos, gid);
+      bearing = glyph._getMetrics().leftBearing;
+      if (glyf && this.font._variationProcessor) {
+        // If this is a TrueType variation glyph, re-encode the path and take the
+        // left side bearing from it. Compound glyphs are flattened too, as the
+        // offsets of their components vary.
+        buffer = this.glyphEncoder.encodeSimple(glyph.path, glyf.instructions);
+        bearing = glyph.path.cbox.minX;
+      } else if (glyf && glyf.numberOfContours < 0) {
+        // if it is a compound glyph, include its components
+        buffer = new Uint8Array(buffer);
+        let view = new DataView(buffer.buffer);
+        for (let component of glyf.components) {
+          gid = this.includeGlyph(component.glyphID);
+          view.setUint16(component.pos, gid);
+        }
       }
     }
 
@@ -42,7 +91,9 @@ export default class TTFSubset extends Subset {
     this.loca.offsets.push(this.offset);
 
     this.hmtx.metrics.push({
-      advance: glyph.advanceWidth,
+      advance: transformed
+        ? Math.round(glyph.advanceWidth)
+        : glyph.advanceWidth,
       bearing,
     });
 
@@ -51,6 +102,14 @@ export default class TTFSubset extends Subset {
   }
 
   encode() {
+    if (
+      this.font.directory.tables.glyf.transformed &&
+      this.font.directory.tables.hmtx.transformed
+    ) {
+      throw new Error(
+        'Subsetting WOFF2 fonts with transformed hmtx is not supported',
+      );
+    }
     // tables required by PDF spec:
     //   head, hhea, loca, maxp, cvt , prep, glyf, hmtx, fpgm
     //
@@ -61,7 +120,9 @@ export default class TTFSubset extends Subset {
     this.offset = 0;
     this.loca = {
       offsets: [],
-      version: this.font.loca.version,
+      version: this.font.directory.tables.glyf.transformed
+        ? 1
+        : this.font.loca.version,
     };
 
     this.hmtx = {
