@@ -305,11 +305,15 @@ export default class AATMorxProcessor {
   }
 
   processGlyphInsertion(glyph, entry, index) {
-    if (glyph === null) {
+    let reverse = !!(this.subtable.coverage & REVERSE_DIRECTION);
+
+    // Insert at the end of the text only in forward subtables. In reverse,
+    // HarfBuzz inserts on the other side of the glyphs and in reverse order,
+    // which fontkit doesn't do anywhere yet.
+    if (glyph === null && reverse) {
       return;
     }
 
-    let reverse = !!(this.subtable.coverage & REVERSE_DIRECTION);
     let markLocation = index;
 
     if (entry.markedInsertIndex !== 0xffff) {
