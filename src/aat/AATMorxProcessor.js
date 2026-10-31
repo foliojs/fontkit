@@ -7,6 +7,9 @@ const MARK_FIRST = 0x8000;
 const MARK_LAST = 0x2000;
 const VERB = 0x000f;
 
+// number of glyphs each rearrangement verb moves, e.g. 3 for AxCD => CDxA
+const VERB_LENGTH = [0, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4];
+
 // contextual substitution and glyph insertion flag
 const SET_MARK = 0x8000;
 
@@ -113,6 +116,7 @@ export default class AATMorxProcessor {
     this.firstGlyph = null;
     this.lastGlyph = null;
     this.markedIndex = 0;
+    this.markSet = false;
 
     let stateMachine = this.getStateMachine(subtable);
     let process = this.getProcessor();
@@ -148,18 +152,32 @@ export default class AATMorxProcessor {
     }
 
     if (entry.flags & MARK_LAST) {
-      this.lastGlyph = index;
+      this.lastGlyph = Math.min(index, this.glyphs.length - 1);
     }
 
-    reorderGlyphs(
-      this.glyphs,
-      entry.flags & VERB,
-      this.firstGlyph,
-      this.lastGlyph,
-    );
+    // Like CoreText and HarfBuzz, leave the glyphs alone unless the marked
+    // range holds every glyph the verb moves (#142, #143).
+    let verb = entry.flags & VERB;
+    let firstGlyph = this.firstGlyph === null ? 0 : this.firstGlyph;
+    if (
+      this.lastGlyph !== null &&
+      this.lastGlyph - firstGlyph + 1 >= VERB_LENGTH[verb]
+    ) {
+      reorderGlyphs(this.glyphs, verb, firstGlyph, this.lastGlyph);
+    }
   }
 
   processContextualSubstitution(glyph, entry, index) {
+    if (glyph === null) {
+      // Like CoreText and HarfBuzz, substitute at the end of the text only
+      // once a glyph was marked, and only the glyphs before it (#151).
+      if (!this.markSet) {
+        return;
+      }
+
+      index = Math.max(0, Math.min(index, this.glyphs.length - 1));
+    }
+
     let subsitutions = this.subtable.table.substitutionTable.items;
     if (entry.markIndex !== 0xffff) {
       let lookup = subsitutions.getItem(entry.markIndex);
@@ -186,10 +204,16 @@ export default class AATMorxProcessor {
 
     if (entry.flags & SET_MARK) {
       this.markedGlyph = index;
+      this.markSet = true;
     }
   }
 
   processLigature(glyph, entry, index) {
+    // Like HarfBuzz, form no ligatures at the end of the text
+    if (glyph === null) {
+      return;
+    }
+
     if (entry.flags & SET_COMPONENT) {
       this.ligatureStack.push(index);
     }
@@ -281,6 +305,10 @@ export default class AATMorxProcessor {
   }
 
   processGlyphInsertion(glyph, entry, index) {
+    if (glyph === null) {
+      return;
+    }
+
     let reverse = !!(this.subtable.coverage & REVERSE_DIRECTION);
     let markLocation = index;
 
