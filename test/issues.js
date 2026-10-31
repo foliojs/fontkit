@@ -355,4 +355,115 @@ describe('issues', function () {
       assert(glyphs.length <= 65536);
     });
   });
+
+  describe('#142 - morx rearrangement without a marked range', function () {
+    it('should leave the glyphs unchanged', function () {
+      // MORX-3 from Unicode text-rendering-tests runs every rearrangement
+      // verb before any glyph has been marked.
+      let font = fontkit.openSync(
+        new URL('data/fonttest/TestMORXThree.ttf', import.meta.url),
+      );
+
+      for (let digit of ['3', '4', '8', '⓯']) {
+        assert.deepEqual(
+          font
+            .layout(`ABXCD${digit}`)
+            .glyphs.slice(0, 5)
+            .map((glyph) => glyph.name),
+          ['A', 'B', 'X', 'C', 'D'],
+        );
+      }
+    });
+  });
+
+  describe('#143 - morx rearrangement underflow', function () {
+    it('should not move glyphs outside the marked range', function () {
+      // MORX-5 from Unicode text-rendering-tests marks a range shorter than
+      // the glyphs each rearrangement verb moves.
+      let font = fontkit.openSync(
+        new URL('data/fonttest/TestMORXFour.ttf', import.meta.url),
+      );
+
+      for (let text of ['PQRAXYZ3', 'PQRAXYZ⓬', 'PQRABXYZ⓬', 'PQRABCXYZ⓯']) {
+        assert.deepEqual(
+          font
+            .layout(text)
+            .glyphs.slice(0, -1)
+            .map((glyph) => glyph.name),
+          [...text.slice(0, -1)],
+        );
+      }
+    });
+  });
+
+  describe('#144 - morx rearrangement at the end of the text', function () {
+    it('should take the end-of-text transition', function () {
+      // MORX-10 and MORX-11 from Unicode text-rendering-tests rearrange the
+      // last glyphs in their end-of-text transitions.
+      let ten = fontkit.openSync(
+        new URL('data/fonttest/TestMORXTen.ttf', import.meta.url),
+      );
+      let eleven = fontkit.openSync(
+        new URL('data/fonttest/TestMORXEleven.ttf', import.meta.url),
+      );
+
+      assert.equal(
+        ten
+          .layout('ABABAB')
+          .glyphs.map((glyph) => glyph.name)
+          .join(''),
+        'ABABBA',
+      );
+      assert.equal(
+        eleven
+          .layout('BABBAABX')
+          .glyphs.map((glyph) => glyph.name)
+          .join(''),
+        'BABBAXAB',
+      );
+    });
+  });
+
+  describe('#147 - morx rearrangement with DontAdvance at the end of the text', function () {
+    it('should rearrange the glyphs once', function () {
+      // MORX-17 from Unicode text-rendering-tests sets DontAdvance in its
+      // end-of-text transition.
+      let font = fontkit.openSync(
+        new URL('data/fonttest/TestMORXSeventeen.ttf', import.meta.url),
+      );
+
+      assert.deepEqual(
+        font.layout('AB').glyphs.map((glyph) => glyph.name),
+        ['B', 'A'],
+      );
+    });
+  });
+
+  describe('#151 - morx contextual substitution at the end of the text', function () {
+    it('should substitute the marked and last glyphs', function () {
+      // MORX-20 from Unicode text-rendering-tests substitutes glyphs in its
+      // end-of-text transitions, but only once a glyph was marked.
+      let font = fontkit.openSync(
+        new URL('data/fonttest/TestMORXTwenty.ttf', import.meta.url),
+      );
+
+      let cases = {
+        ABCDE: ['A', 'B', 'C.alt', 'D', 'E.alt1'],
+        ABC: ['A', 'B', 'C.alt'],
+        ABE: ['A', 'B.alt', 'E.alt1'],
+        AE: ['A.alt', 'E.alt1'],
+        EE: ['E', 'E'],
+        A: ['A.alt'],
+        E: ['E'],
+      };
+
+      for (let [text, names] of Object.entries(cases)) {
+        assert.deepEqual(
+          font.layout(text).glyphs.map((glyph) => glyph.name),
+          names,
+          text,
+        );
+      }
+    });
+  });
 });
