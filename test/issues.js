@@ -355,4 +355,44 @@ describe('issues', function () {
       assert(glyphs.length <= 65536);
     });
   });
+
+  describe('#142 - morx rearrangement without a marked range', function () {
+    it('should leave the glyphs unchanged', function () {
+      // MORX-3 from Unicode text-rendering-tests runs every rearrangement
+      // verb before any glyph has been marked.
+      let font = fontkit.openSync(
+        new URL('data/fonttest/TestMORXThree.ttf', import.meta.url),
+      );
+
+      for (let digit of ['3', '4', '8', '⓯']) {
+        assert.deepEqual(
+          font
+            .layout(`ABXCD${digit}`)
+            .glyphs.slice(0, 5)
+            .map((glyph) => glyph.name),
+          ['A', 'B', 'X', 'C', 'D'],
+        );
+      }
+    });
+  });
+
+  describe('#143 - morx rearrangement underflow', function () {
+    it('should not move glyphs outside the marked range', function () {
+      // MORX-5 from Unicode text-rendering-tests marks a range shorter than
+      // the glyphs each rearrangement verb moves.
+      let font = fontkit.openSync(
+        new URL('data/fonttest/TestMORXFour.ttf', import.meta.url),
+      );
+
+      for (let text of ['PQRAXYZ3', 'PQRAXYZ⓬', 'PQRABXYZ⓬', 'PQRABCXYZ⓯']) {
+        assert.deepEqual(
+          font
+            .layout(text)
+            .glyphs.slice(0, -1)
+            .map((glyph) => glyph.name),
+          [...text.slice(0, -1)],
+        );
+      }
+    });
+  });
 });
