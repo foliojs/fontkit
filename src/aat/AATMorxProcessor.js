@@ -108,8 +108,11 @@ export default class AATMorxProcessor {
       return;
     }
 
+    let reverse = !!(this.subtable.coverage & REVERSE_DIRECTION);
+
     this.ligatureStack = [];
-    this.markedGlyph = null;
+    // Without SetMark, the first glyph processed is the marked one
+    this.markedGlyph = reverse ? glyphs.length - 1 : 0;
     this.firstGlyph = null;
     this.lastGlyph = null;
     this.markedIndex = 0;
@@ -117,7 +120,6 @@ export default class AATMorxProcessor {
     let stateMachine = this.getStateMachine(subtable);
     let process = this.getProcessor();
 
-    let reverse = !!(this.subtable.coverage & REVERSE_DIRECTION);
     return stateMachine.process(this.glyphs, reverse, process, this.limits);
   }
 
@@ -194,7 +196,7 @@ export default class AATMorxProcessor {
       this.ligatureStack.push(index);
     }
 
-    if (entry.flags & PERFORM_ACTION) {
+    if (entry.flags & PERFORM_ACTION && this.ligatureStack.length > 0) {
       let actions = this.subtable.table.ligatureActions;
       let components = this.subtable.table.components;
       let ligatureList = this.subtable.table.ligatureList;
@@ -204,22 +206,48 @@ export default class AATMorxProcessor {
       let ligatureIndex = 0;
       let codePoints = [];
       let ligatureGlyphs = [];
+      // Components popped since the last ligature, deleted once a ligature
+      // replaces them
+      let popped = [];
 
       while (!last) {
+        if (this.ligatureStack.length === 0) {
+          // The action uses more components than there are on the stack.
+          // Like HarfBuzz, clear the stack and stop.
+          return;
+        }
+
         let componentGlyph = this.ligatureStack.pop();
+        popped.push(componentGlyph);
         codePoints.unshift(...this.glyphs[componentGlyph].codePoints);
 
         let action = actions.getItem(actionIndex++);
+        if (action == null) {
+          break;
+        }
+
         last = !!(action & LAST_MASK);
         let store = !!(action & STORE_MASK);
         let offset = ((action & OFFSET_MASK) << 2) >> 2; // sign extend 30 to 32 bits
         offset += this.glyphs[componentGlyph].id;
 
         let component = components.getItem(offset);
+        if (component == null) {
+          break;
+        }
+
         ligatureIndex += component;
 
         if (last || store) {
           let ligatureEntry = ligatureList.getItem(ligatureIndex);
+          if (ligatureEntry == null) {
+            break;
+          }
+
+          for (let i = 0; i < popped.length - 1; i++) {
+            this.glyphs[popped[i]] = this.font.getGlyph(0xffff);
+          }
+
           this.glyphs[componentGlyph] = this.font.getGlyph(
             ligatureEntry,
             codePoints,
@@ -227,10 +255,13 @@ export default class AATMorxProcessor {
           ligatureGlyphs.push(componentGlyph);
           ligatureIndex = 0;
           codePoints = [];
-        } else {
-          this.glyphs[componentGlyph] = this.font.getGlyph(0xffff);
+          popped = [];
         }
       }
+
+      // If the action stopped at data outside the font, keep the components
+      // it didn't use on the stack.
+      this.ligatureStack.push(...popped.reverse());
 
       // Put ligature glyph indexes back on the stack
       this.ligatureStack.push(...ligatureGlyphs);
