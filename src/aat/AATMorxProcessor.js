@@ -31,6 +31,16 @@ const MARKED_INSERT_BEFORE = 0x0400;
 const CURRENT_INSERT_COUNT = 0x03e0;
 const MARKED_INSERT_COUNT = 0x001f;
 
+const DONT_ADVANCE = 0x4000;
+
+// Limits on the work done for one glyph run, as in HarfBuzz, so that
+// malicious fonts can't keep a state machine from advancing forever or
+// insert glyphs without bound.
+const MAX_OPS_FACTOR = 4096;
+const MAX_OPS_MIN = 65536;
+const MAX_LEN_FACTOR = 256;
+const MAX_LEN_MIN = 65536;
+
 export default class AATMorxProcessor {
   constructor(font) {
     this.processIndicRearragement = this.processIndicRearragement.bind(this);
@@ -48,6 +58,11 @@ export default class AATMorxProcessor {
   // Processes an array of glyphs and applies the specified features
   // Features should be in the form of {featureType:{featureSetting:boolean}}
   process(glyphs, features = {}) {
+    this.limits = {
+      ops: Math.max(glyphs.length * MAX_OPS_FACTOR, MAX_OPS_MIN),
+      len: Math.max(glyphs.length * MAX_LEN_FACTOR, MAX_LEN_MIN),
+    };
+
     for (let chain of this.morx.chains) {
       let flags = chain.defaultFlags;
 
@@ -97,13 +112,13 @@ export default class AATMorxProcessor {
     this.markedGlyph = null;
     this.firstGlyph = null;
     this.lastGlyph = null;
-    this.markedIndex = null;
+    this.markedIndex = 0;
 
     let stateMachine = this.getStateMachine(subtable);
     let process = this.getProcessor();
 
     let reverse = !!(this.subtable.coverage & REVERSE_DIRECTION);
-    return stateMachine.process(this.glyphs, reverse, process);
+    return stateMachine.process(this.glyphs, reverse, process, this.limits);
   }
 
   getStateMachine(subtable) {
@@ -237,7 +252,18 @@ export default class AATMorxProcessor {
     }
   }
 
+  // Inserts count glyphs before or after glyphIndex, and returns the
+  // position of the first inserted glyph, or -1 if nothing was inserted.
   _insertGlyphs(glyphIndex, insertionActionIndex, count, isBefore) {
+    let limits = this.limits;
+    if (
+      count === 0 ||
+      (limits.ops -= count) <= 0 ||
+      this.glyphs.length + count > limits.len
+    ) {
+      return -1;
+    }
+
     let insertions = [];
     while (count--) {
       let gid = this.subtable.table.insertionActions.getItem(
@@ -246,34 +272,56 @@ export default class AATMorxProcessor {
       insertions.push(this.font.getGlyph(gid));
     }
 
-    if (!isBefore) {
+    if (!isBefore && glyphIndex < this.glyphs.length) {
       glyphIndex++;
     }
 
     this.glyphs.splice(glyphIndex, 0, ...insertions);
+    return glyphIndex;
   }
 
   processGlyphInsertion(glyph, entry, index) {
-    if (entry.flags & SET_MARK) {
-      this.markedIndex = index;
-    }
+    let reverse = !!(this.subtable.coverage & REVERSE_DIRECTION);
+    let markLocation = index;
 
     if (entry.markedInsertIndex !== 0xffff) {
-      let count = (entry.flags & MARKED_INSERT_COUNT) >>> 5;
+      let count = entry.flags & MARKED_INSERT_COUNT;
       let isBefore = !!(entry.flags & MARKED_INSERT_BEFORE);
-      this._insertGlyphs(
+      let position = this._insertGlyphs(
         this.markedIndex,
         entry.markedInsertIndex,
         count,
         isBefore,
       );
+
+      if (position !== -1 && (!reverse || position <= index)) {
+        index += count;
+      }
+    }
+
+    if (entry.flags & SET_MARK) {
+      this.markedIndex = markLocation;
     }
 
     if (entry.currentInsertIndex !== 0xffff) {
       let count = (entry.flags & CURRENT_INSERT_COUNT) >>> 5;
       let isBefore = !!(entry.flags & CURRENT_INSERT_BEFORE);
-      this._insertGlyphs(index, entry.currentInsertIndex, count, isBefore);
+      let position = this._insertGlyphs(
+        index,
+        entry.currentInsertIndex,
+        count,
+        isBefore,
+      );
+
+      // Skip the inserted glyphs unless DontAdvance is set, so that they are
+      // not processed again. When processing in reverse, the next glyph
+      // is already past them.
+      if (position !== -1 && !reverse && !(entry.flags & DONT_ADVANCE)) {
+        index += count;
+      }
     }
+
+    return index;
   }
 
   getSupportedFeatures() {
