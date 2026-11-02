@@ -137,6 +137,8 @@ The following properties are strings (or null if the font does not contain strin
 * `copyright`
 * `version`
 
+`postscriptName` also returns null if the runtime cannot decode the name's encoding.
+
 ### Metrics
 
 The following properties describe the general metrics of the font. See [here](http://www.freetype.org/freetype2/docs/glyphs/glyphs-3.html) for a good overview of how all of these properties relate to one another.

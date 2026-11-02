@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Return null for undecodable PostScript names instead of raw bytes, preventing a crash in PDFKit ([foliojs/pdfkit#1687](https://github.com/foliojs/pdfkit/issues/1687))
 - Add `registerShaper` with an optional scripts array overriding static script declarations, and `fontkit/shapers/{ClassName}` entry points with named shaper exports; core uses only `DefaultShaper` until specialized shapers are registered
 - Add a Myanmar shaper, ported from HarfBuzz
 - Take the end-of-text transition of AAT morx state machines, so rearrangement and contextual substitution can act on the last glyphs like CoreText and HarfBuzz (#144, #147, #151)

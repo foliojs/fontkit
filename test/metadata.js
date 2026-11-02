@@ -29,6 +29,30 @@ describe('metadata', function () {
     assert.equal(font.postscriptName, 'SymbolTest-Regular');
   });
 
+  it('returns null for undecodable PostScript names (PDFKit #1687)', function () {
+    let NativeTextDecoder = globalThis.TextDecoder;
+    try {
+      globalThis.TextDecoder = class extends NativeTextDecoder {
+        constructor(encoding = 'utf-8', options) {
+          if (encoding === 'utf-16be' || encoding === 'x-mac-roman') {
+            throw new RangeError(`Unsupported encoding: ${encoding}`);
+          }
+
+          super(encoding, options);
+        }
+      };
+
+      let font = fontkit.openSync(
+        new URL('data/OpenSans/OpenSans-Regular.ttf', import.meta.url),
+      );
+      assert(font.getName('postscriptName') instanceof Uint8Array);
+      assert.strictEqual(font.postscriptName, null);
+      assert.doesNotThrow(() => font.postscriptName?.replaceAll(' ', '_'));
+    } finally {
+      globalThis.TextDecoder = NativeTextDecoder;
+    }
+  });
+
   it('exposes some metrics', function () {
     assert.equal(font.unitsPerEm, 2048);
     assert.equal(font.ascent | 0, 2189);

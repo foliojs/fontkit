@@ -146,10 +146,12 @@ export class TTFFont {
 
   /**
    * The unique PostScript name for this font, e.g. "Helvetica-Bold"
-   * @type {string}
+   * Returns null if the name is missing or cannot be decoded.
+   * @type {string|null}
    */
   get postscriptName() {
-    return this.getName('postscriptName');
+    let name = this.getName('postscriptName');
+    return typeof name === 'string' ? name : null;
   }
 
   /**
