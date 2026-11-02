@@ -3,6 +3,7 @@ import ArabicShaper from './ArabicShaper';
 import HangulShaper from './HangulShaper';
 import HebrewShaper from './HebrewShaper';
 import IndicShaper from './IndicShaper';
+import MyanmarShaper from './MyanmarShaper';
 import ThaiShaper from './ThaiShaper';
 import UniversalShaper from './UniversalShaper';
 
@@ -42,6 +43,9 @@ const SHAPERS = {
 
   thai: ThaiShaper, // Thai
   'lao ': ThaiShaper, // Lao (4-char OT tag with trailing space)
+
+  // Like HarfBuzz, fonts made for the older mymr tag use the default shaper
+  mym2: MyanmarShaper, // Myanmar
 
   bali: UniversalShaper, // Balinese
   batk: UniversalShaper, // Batak
