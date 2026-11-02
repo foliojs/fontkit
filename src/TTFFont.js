@@ -109,6 +109,19 @@ export class TTFFont {
     return result;
   }
 
+  _getMetrics() {
+    // Like HarfBuzz, use the typo metrics only when the font asks for them
+    let { 'OS/2': os2, hhea } = this;
+    let { ascent, descent, lineGap } = os2?.fsSelection.useTypoMetrics
+      ? {
+          ascent: os2.typoAscender,
+          descent: os2.typoDescender,
+          lineGap: os2.typoLineGap,
+        }
+      : hhea;
+    return { ascent: Math.abs(ascent), descent: -Math.abs(descent), lineGap };
+  }
+
   /**
    * Gets a string from the font's `name` table
    * `lang` is a BCP-47 language code.
@@ -184,7 +197,7 @@ export class TTFFont {
    * @type {number}
    */
   get ascent() {
-    return this.hhea.ascent;
+    return this._getMetrics().ascent;
   }
 
   /**
@@ -192,7 +205,7 @@ export class TTFFont {
    * @type {number}
    */
   get descent() {
-    return this.hhea.descent;
+    return this._getMetrics().descent;
   }
 
   /**
@@ -200,7 +213,7 @@ export class TTFFont {
    * @type {number}
    */
   get lineGap() {
-    return this.hhea.lineGap;
+    return this._getMetrics().lineGap;
   }
 
   /**
@@ -632,4 +645,5 @@ cache(TTFFont, {
   variationAxes: 'once',
   namedVariations: 'once',
   _variationProcessor: 'once',
+  _getMetrics: 'once',
 });

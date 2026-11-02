@@ -16,7 +16,12 @@ export default class AATStateMachine {
     this.lookupTable = new AATLookupTable(stateTable.classTable);
   }
 
-  process(glyphs, reverse, processEntry) {
+  /**
+   * Runs the state machine over the glyphs. processEntry may return a new
+   * index, e.g. after inserting glyphs. Transitions that don't advance use up
+   * limits.ops; once it runs out, the machine advances anyway.
+   */
+  process(glyphs, reverse, processEntry, limits = { ops: Infinity }) {
     let currentState = START_OF_TEXT_STATE; // START_OF_LINE_STATE is used for kashida glyph insertions sometimes I think?
     let index = reverse ? glyphs.length - 1 : 0;
     let dir = reverse ? -1 : 1;
@@ -48,12 +53,17 @@ export default class AATStateMachine {
       let entryIndex = row[classCode];
       let entry = this.stateTable.entryTable.getItem(entryIndex);
 
-      if (
-        classCode !== END_OF_TEXT_CLASS &&
-        classCode !== DELETED_GLYPH_CLASS
-      ) {
-        processEntry(glyph, entry, index);
-        shouldAdvance = !(entry.flags & DONT_ADVANCE);
+      if (classCode === END_OF_TEXT_CLASS) {
+        // The end-of-text transition can still act on the glyphs before it
+        // (#144, #147, #151). Never stay at the end of the text, though.
+        processEntry(null, entry, index);
+      } else if (classCode !== DELETED_GLYPH_CLASS) {
+        let newIndex = processEntry(glyph, entry, index);
+        if (newIndex != null) {
+          index = newIndex;
+        }
+
+        shouldAdvance = !(entry.flags & DONT_ADVANCE) || limits.ops-- <= 0;
       }
 
       currentState = entry.newState;

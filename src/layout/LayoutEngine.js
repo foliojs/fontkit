@@ -107,7 +107,16 @@ export default class LayoutEngine {
       this.unicodeLayoutEngine.positionGlyphs(
         glyphRun.glyphs,
         glyphRun.positions,
+        this.engine ? 'ltr' : glyphRun.direction,
       );
+    }
+
+    // The advanced layout engines reverse right-to-left glyphs themselves.
+    // Without one, reverse them here, before kerning, so that kerning pairs
+    // are visual like in HarfBuzz.
+    if (!this.engine && glyphRun.direction === 'rtl') {
+      glyphRun.glyphs.reverse();
+      glyphRun.positions.reverse();
     }
 
     // if kerning is not supported by GPOS, do kerning with the TrueType/AAT kern table

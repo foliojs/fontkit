@@ -95,6 +95,43 @@ describe('font subsetting', function () {
         font.glyphsForString('b')[0].path.toSVG(),
       );
     });
+
+    describe('with set variations', function () {
+      let font = fontkit
+        .openSync(new URL('data/Mada/Mada-VF.ttf', import.meta.url))
+        .getVariation({ wght: 900 });
+
+      function encodeSubset(string) {
+        let glyphs = font.glyphsForString(string);
+        let subset = font.createSubset();
+        for (let glyph of glyphs) {
+          subset.includeGlyph(glyph);
+        }
+
+        return { glyphs, f: fontkit.create(subset.encode()) };
+      }
+
+      it('should re-encode glyphs whose last points repeat a flag', function () {
+        let { glyphs, f } = encodeSubset('BDx');
+        for (let i = 0; i < glyphs.length; i++) {
+          assert.equal(f.getGlyph(i + 1).path.toSVG(), glyphs[i].path.toSVG());
+        }
+      });
+
+      it('should flatten composite glyphs', function () {
+        let { glyphs, f } = encodeSubset('é');
+        assert.equal(f.numGlyphs, 2);
+        assert.equal(f.getGlyph(1).path.toSVG(), glyphs[0].path.toSVG());
+      });
+
+      it('should write left side bearings of the varied outlines', function () {
+        let { glyphs, f } = encodeSubset('aé');
+        for (let i = 0; i < glyphs.length; i++) {
+          assert.equal(f.hmtx.metrics.get(i + 1).bearing, glyphs[i].cbox.minX);
+          assert.equal(f.getGlyph(i + 1).cbox.minX, glyphs[i].cbox.minX);
+        }
+      });
+    });
   });
 
   describe('CFF subsetting', function () {

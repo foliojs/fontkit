@@ -14,7 +14,12 @@ export default class UnicodeLayoutEngine {
     this.font = font;
   }
 
-  positionGlyphs(glyphs, positions) {
+  /**
+   * Positions marks on the glyphs in logical order. With `direction` 'rtl',
+   * the offsets are for the glyphs once they're reversed, when marks are
+   * drawn before their base.
+   */
+  positionGlyphs(glyphs, positions, direction = 'ltr') {
     // find each base + mark cluster, and position the marks relative to the base
     let clusterStart = 0;
     while (clusterStart < glyphs.length) {
@@ -25,7 +30,13 @@ export default class UnicodeLayoutEngine {
 
       // marks without a preceding base glyph are not positioned
       if (clusterEnd > clusterStart && !glyphs[clusterStart].isMark) {
-        this.positionCluster(glyphs, positions, clusterStart, clusterEnd);
+        this.positionCluster(
+          glyphs,
+          positions,
+          clusterStart,
+          clusterEnd,
+          direction,
+        );
       }
 
       clusterStart = clusterEnd + 1;
@@ -34,7 +45,7 @@ export default class UnicodeLayoutEngine {
     return positions;
   }
 
-  positionCluster(glyphs, positions, clusterStart, clusterEnd) {
+  positionCluster(glyphs, positions, clusterStart, clusterEnd, direction) {
     let base = glyphs[clusterStart];
     let { minY, maxY } = base.cbox;
     // Like HarfBuzz, use the advance width for horizontal positioning, which
@@ -51,7 +62,10 @@ export default class UnicodeLayoutEngine {
       baseBox.maxX = baseBox.minX + Math.trunc(width / components);
     }
 
-    let xOffset = -positions[clusterStart].xAdvance;
+    // Like HarfBuzz, offset the marks from the origin of the base, which is
+    // after the base in left-to-right text, and before it in right-to-left.
+    let forward = direction !== 'rtl';
+    let xOffset = forward ? -positions[clusterStart].xAdvance : 0;
     let yOffset = 0;
     let yGap = Math.trunc(this.font.unitsPerEm / 16);
     let clusterBox = null;
@@ -148,9 +162,12 @@ export default class UnicodeLayoutEngine {
         position.xAdvance = position.yAdvance = 0;
         position.xOffset += xOffset;
         position.yOffset += yOffset;
-      } else {
+      } else if (forward) {
         xOffset -= position.xAdvance;
         yOffset -= position.yAdvance;
+      } else {
+        xOffset += position.xAdvance;
+        yOffset += position.yAdvance;
       }
     }
   }

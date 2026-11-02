@@ -1,0 +1,31 @@
+NotoKufiArabic-NoLayout.ttf is derived from NotoKufiArabic-Regular.ttf in this
+directory, under the same license (LICENSE.txt). It was subset with fontTools
+to the space, ا ب ت ل م and U+064E FATHA, its GSUB, GPOS and GDEF tables were
+removed, and a kern table was added with one pair, lam + alef = -150, so that
+it tests layout without an advanced layout engine:
+
+    from fontTools.ttLib import TTFont, newTable
+    from fontTools.subset import Subsetter, Options
+    from fontTools.ttLib.tables._k_e_r_n import KernTable_format_0
+
+    font = TTFont('NotoKufiArabic-Regular.ttf')
+    options = Options()
+    options.layout_features = []
+    options.drop_tables += ['GSUB', 'GPOS', 'GDEF', 'DSIG']
+    options.name_IDs = ['*']
+    options.notdef_outline = True
+    options.hinting = False
+    subsetter = Subsetter(options)
+    subsetter.populate(text='ابتلم َ')
+    subsetter.subset(font)
+    cmap = font.getBestCmap()
+    kern = newTable('kern')
+    kern.version = 0
+    table = KernTable_format_0()
+    table.version = 0
+    table.coverage = 1
+    table.format = 0
+    table.kernTable = {(cmap[0x644], cmap[0x627]): -150}
+    kern.kernTables = [table]
+    font['kern'] = kern
+    font.save('NotoKufiArabic-NoLayout.ttf')

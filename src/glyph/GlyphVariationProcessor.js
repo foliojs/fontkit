@@ -398,7 +398,10 @@ export default class GlyphVariationProcessor {
       innerIndex = gid;
     }
 
-    return this.getDelta(table.itemVariationStore, outerIndex, innerIndex);
+    // Advances are whole units, so round the delta like HarfBuzz does.
+    return Math.round(
+      this.getDelta(table.itemVariationStore, outerIndex, innerIndex),
+    );
   }
 
   // See pseudo code from `Font Variations Overview'
