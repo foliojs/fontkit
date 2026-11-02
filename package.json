@@ -50,6 +50,10 @@
     "./formats/*": {
       "node": "./dist/node/formats/*.js",
       "default": "./dist/browser/formats/*.js"
+    },
+    "./shapers/*": {
+      "node": "./dist/node/shapers/*.js",
+      "default": "./dist/browser/shapers/*.js"
     }
   },
   "files": [

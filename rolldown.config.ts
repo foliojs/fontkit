@@ -21,6 +21,14 @@ function createConfig(platform: 'node' | 'browser') {
       'formats/WOFF2Font': 'src/WOFF2Font.js',
       'formats/TrueTypeCollection': 'src/TrueTypeCollection.js',
       'formats/DFont': 'src/DFont.js',
+      'shapers/DefaultShaper': 'src/opentype/shapers/DefaultShaper.js',
+      'shapers/UniversalShaper': 'src/opentype/shapers/UniversalShaper.js',
+      'shapers/ArabicShaper': 'src/opentype/shapers/ArabicShaper.js',
+      'shapers/IndicShaper': 'src/opentype/shapers/IndicShaper.js',
+      'shapers/HangulShaper': 'src/opentype/shapers/HangulShaper.js',
+      'shapers/HebrewShaper': 'src/opentype/shapers/HebrewShaper.js',
+      'shapers/MyanmarShaper': 'src/opentype/shapers/MyanmarShaper.js',
+      'shapers/ThaiShaper': 'src/opentype/shapers/ThaiShaper.js',
     },
     external,
     preserveEntrySignatures: 'allow-extension',
@@ -37,6 +45,15 @@ function createConfig(platform: 'node' | 'browser') {
       chunkFileNames: 'chunks/[name]-[hash].js',
       minifyInternalExports: false,
       cleanDir: true,
+      codeSplitting: {
+        groups: [
+          {
+            // Keep registry helpers out of core's exports without entry facades.
+            name: 'default-shaper',
+            test: /[\\/]opentype[\\/]shapers[\\/](DefaultShaper|index)\.js$/,
+          },
+        ],
+      },
     },
   });
 }

@@ -11,7 +11,8 @@ const DIRECTIONAL_FEATURES = {
   rtl: ['rtla', 'rtlm'],
 };
 
-export default class DefaultShaper {
+export class DefaultShaper {
+  static scripts = ['latn', 'DFLT'];
   static zeroMarkWidths = 'AFTER_GPOS';
   static plan(plan, glyphs, features) {
     // Plan the features we want to apply

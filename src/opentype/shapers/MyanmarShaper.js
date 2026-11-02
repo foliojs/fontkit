@@ -1,4 +1,4 @@
-import DefaultShaper from './DefaultShaper';
+import { DefaultShaper } from './DefaultShaper';
 import { StateMachine } from 'dfa';
 import GlyphInfo from '../GlyphInfo';
 import { CATEGORIES } from './myanmar-data';
@@ -167,7 +167,9 @@ function isConsonant(info) {
   return CONSONANT_FLAGS.has(info.category);
 }
 
-export default class MyanmarShaper extends DefaultShaper {
+export class MyanmarShaper extends DefaultShaper {
+  // Fonts made for the older mymr tag use the default shaper, like HarfBuzz.
+  static scripts = ['mym2'];
   static zeroMarkWidths = 'BEFORE_GPOS';
 
   static planFeatures(plan) {

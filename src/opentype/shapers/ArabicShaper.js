@@ -1,4 +1,4 @@
-import DefaultShaper from './DefaultShaper';
+import { DefaultShaper } from './DefaultShaper';
 import { getCategory } from 'unicode-properties';
 import { UnicodeTrie } from 'unicode-trie';
 import dataTrieBase64 from './generated/data.trie.base64.js';
@@ -114,7 +114,18 @@ const STATE_TABLE = [
  * The shaping state machine was ported from Harfbuzz.
  * https://github.com/behdad/harfbuzz/blob/master/src/hb-ot-shape-complex-arabic.cc
  */
-export default class ArabicShaper extends DefaultShaper {
+export class ArabicShaper extends DefaultShaper {
+  static scripts = [
+    'arab', // Arabic
+    'mong', // Mongolian
+    'syrc', // Syriac
+    'nko ', // N'Ko
+    'phag', // Phags Pa
+    'mand', // Mandaic
+    'mani', // Manichaean
+    'phlp', // Psalter Pahlavi
+  ];
+
   static planFeatures(plan) {
     plan.add(['ccmp', 'locl']);
     for (let i = 0; i < FEATURES.length; i++) {
