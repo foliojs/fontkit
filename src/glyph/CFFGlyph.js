@@ -508,7 +508,7 @@ export default class CFFGlyph extends Glyph {
                   c4x = c3x + stack.shift();
                   c4y = c3y;
                   c5x = c4x + stack.shift();
-                  c5y = c4y;
+                  c5y = y;
                   c6x = c5x + stack.shift();
                   c6y = c5y;
                   x = c6x;
@@ -544,7 +544,7 @@ export default class CFFGlyph extends Glyph {
                   c5x = c4x + stack.shift();
                   c5y = c4y + stack.shift();
                   c6x = c5x + stack.shift();
-                  c6y = c5y;
+                  c6y = y; // dy6 is implied: end at the starting y
                   x = c6x;
                   y = c6y;
 
