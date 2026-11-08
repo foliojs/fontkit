@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- End the second curve of CFF hflex and hflex1 operators at the starting y, so later points are no longer shifted (#437)
 - Return null for undecodable PostScript names instead of raw bytes, preventing a crash in PDFKit ([foliojs/pdfkit#1687](https://github.com/foliojs/pdfkit/issues/1687))
 - Add `registerShaper` with an optional scripts array overriding static script declarations, and `fontkit/shapers/{ClassName}` entry points with named shaper exports; core uses only `DefaultShaper` until specialized shapers are registered
 - Add a Myanmar shaper, ported from HarfBuzz

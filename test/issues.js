@@ -18,6 +18,35 @@ describe('issues', function () {
     });
   });
 
+  describe('#437 - CFF hflex and hflex1 operators', function () {
+    it('should end the second curve at the starting y', function () {
+      let font = fontkit.openSync(
+        new URL(
+          'data/PlayfairDisplay/PlayfairDisplay-Regular.otf',
+          import.meta.url,
+        ),
+      );
+
+      // Glyph 33 has a contour whose last curve comes from an hflex/hflex1
+      // operator, so the contour has to end where it started.
+      let closed = 0;
+      let start;
+      let last;
+      for (let { command, args } of font.getGlyph(33).path.commands) {
+        if (command === 'moveTo') {
+          start = args;
+          last = args;
+        } else if (command === 'closePath') {
+          if (last[0] === start[0] && last[1] === start[1]) closed++;
+        } else {
+          last = args.slice(-2);
+        }
+      }
+
+      assert.strictEqual(closed, 1);
+    });
+  });
+
   describe('#353 - reading the cbox of an empty glyph', function () {
     let openFont = () =>
       fontkit.openSync(
