@@ -1,6 +1,6 @@
 {
   "name": "fontkit",
-  "version": "2.0.4",
+  "version": "3.0.0",
   "description": "An advanced font engine for Node and the browser",
   "keywords": [
     "opentype",
@@ -57,7 +57,6 @@
     }
   },
   "files": [
-    "src",
     "dist"
   ],
   "author": "Devon Govett <devongovett@gmail.com>",
