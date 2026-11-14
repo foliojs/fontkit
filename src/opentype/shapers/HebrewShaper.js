@@ -1,5 +1,5 @@
 import { getCombiningClass } from 'unicode-properties';
-import DefaultShaper from './DefaultShaper';
+import { DefaultShaper } from './DefaultShaper';
 
 /**
  * Hebrew shaper, ported from HarfBuzz's hb-ot-shaper-hebrew.cc.
@@ -13,7 +13,9 @@ import DefaultShaper from './DefaultShaper';
  *     triplet so meteg / below marks settle next to the base, matching
  *     HarfBuzz's `reorder_marks_hebrew`.
  */
-export default class HebrewShaper extends DefaultShaper {
+export class HebrewShaper extends DefaultShaper {
+  static scripts = ['hebr'];
+
   static assignFeatures(plan, glyphs) {
     super.assignFeatures(plan, glyphs);
 

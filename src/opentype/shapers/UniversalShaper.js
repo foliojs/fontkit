@@ -1,4 +1,4 @@
-import DefaultShaper from './DefaultShaper';
+import { DefaultShaper } from './DefaultShaper';
 import { StateMachine } from 'dfa';
 import { UnicodeTrie } from 'unicode-trie';
 import GlyphInfo from '../GlyphInfo';
@@ -36,7 +36,48 @@ const POST_BASE_CATEGORIES = new Set([
  * uses Unicode data to shape a number of scripts without a dedicated shaping engine.
  * See https://www.microsoft.com/typography/OpenTypeDev/USE/intro.htm.
  */
-export default class UniversalShaper extends DefaultShaper {
+export class UniversalShaper extends DefaultShaper {
+  static scripts = [
+    'bali', // Balinese
+    'batk', // Batak
+    'brah', // Brahmi
+    'bugi', // Buginese
+    'buhd', // Buhid
+    'cakm', // Chakma
+    'cham', // Cham
+    'dupl', // Duployan
+    'egyp', // Egyptian Hieroglyphs
+    'gran', // Grantha
+    'hano', // Hanunoo
+    'java', // Javanese
+    'kthi', // Kaithi
+    'kali', // Kayah Li
+    'khar', // Kharoshthi
+    'khoj', // Khojki
+    'sind', // Khudawadi
+    'lepc', // Lepcha
+    'limb', // Limbu
+    'mahj', // Mahajani
+    'mtei', // Meitei Mayek
+    'modi', // Modi
+    'hmng', // Pahawh Hmong
+    'rjng', // Rejang
+    'saur', // Saurashtra
+    'shrd', // Sharada
+    'sidd', // Siddham
+    'sund', // Sundanese
+    'sylo', // Syloti Nagri
+    'tglg', // Tagalog
+    'tagb', // Tagbanwa
+    'tale', // Tai Le
+    'lana', // Tai Tham
+    'tavt', // Tai Viet
+    'takr', // Takri
+    'tibt', // Tibetan
+    'tfng', // Tifinagh
+    'tirh', // Tirhuta
+  ];
+
   static zeroMarkWidths = 'BEFORE_GPOS';
   static planFeatures(plan) {
     plan.addStage(setupSyllables);
@@ -172,6 +213,7 @@ function reorder(font, glyphs) {
     // Only a few syllable types need reordering.
     if (
       type !== 'virama_terminated_cluster' &&
+      type !== 'sakot_terminated_cluster' &&
       type !== 'standard_cluster' &&
       type !== 'broken_cluster'
     ) {

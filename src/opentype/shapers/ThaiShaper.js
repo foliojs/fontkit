@@ -1,4 +1,4 @@
-import DefaultShaper from './DefaultShaper';
+import { DefaultShaper } from './DefaultShaper';
 import GlyphInfo from '../GlyphInfo';
 
 /**
@@ -25,7 +25,9 @@ import GlyphInfo from '../GlyphInfo';
  * fonts). Modern fonts with GSUB don't need this; HarfBuzz gates it on
  * the absence of Thai GSUB and so do we.
  */
-export default class ThaiShaper extends DefaultShaper {
+export class ThaiShaper extends DefaultShaper {
+  static scripts = ['thai', 'lao '];
+
   static assignFeatures(plan, glyphs) {
     super.assignFeatures(plan, glyphs);
     preprocessThai(glyphs, plan.font);

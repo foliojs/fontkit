@@ -7,6 +7,9 @@ const MARK_FIRST = 0x8000;
 const MARK_LAST = 0x2000;
 const VERB = 0x000f;
 
+// number of glyphs each rearrangement verb moves, e.g. 3 for AxCD => CDxA
+const VERB_LENGTH = [0, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4];
+
 // contextual substitution and glyph insertion flag
 const SET_MARK = 0x8000;
 
@@ -31,6 +34,16 @@ const MARKED_INSERT_BEFORE = 0x0400;
 const CURRENT_INSERT_COUNT = 0x03e0;
 const MARKED_INSERT_COUNT = 0x001f;
 
+const DONT_ADVANCE = 0x4000;
+
+// Limits on the work done for one glyph run, as in HarfBuzz, so that
+// malicious fonts can't keep a state machine from advancing forever or
+// insert glyphs without bound.
+const MAX_OPS_FACTOR = 4096;
+const MAX_OPS_MIN = 65536;
+const MAX_LEN_FACTOR = 256;
+const MAX_LEN_MIN = 65536;
+
 export default class AATMorxProcessor {
   constructor(font) {
     this.processIndicRearragement = this.processIndicRearragement.bind(this);
@@ -48,6 +61,11 @@ export default class AATMorxProcessor {
   // Processes an array of glyphs and applies the specified features
   // Features should be in the form of {featureType:{featureSetting:boolean}}
   process(glyphs, features = {}) {
+    this.limits = {
+      ops: Math.max(glyphs.length * MAX_OPS_FACTOR, MAX_OPS_MIN),
+      len: Math.max(glyphs.length * MAX_LEN_FACTOR, MAX_LEN_MIN),
+    };
+
     for (let chain of this.morx.chains) {
       let flags = chain.defaultFlags;
 
@@ -97,13 +115,14 @@ export default class AATMorxProcessor {
     this.markedGlyph = null;
     this.firstGlyph = null;
     this.lastGlyph = null;
-    this.markedIndex = null;
+    this.markedIndex = 0;
+    this.markSet = false;
 
     let stateMachine = this.getStateMachine(subtable);
     let process = this.getProcessor();
 
     let reverse = !!(this.subtable.coverage & REVERSE_DIRECTION);
-    return stateMachine.process(this.glyphs, reverse, process);
+    return stateMachine.process(this.glyphs, reverse, process, this.limits);
   }
 
   getStateMachine(subtable) {
@@ -133,18 +152,32 @@ export default class AATMorxProcessor {
     }
 
     if (entry.flags & MARK_LAST) {
-      this.lastGlyph = index;
+      this.lastGlyph = Math.min(index, this.glyphs.length - 1);
     }
 
-    reorderGlyphs(
-      this.glyphs,
-      entry.flags & VERB,
-      this.firstGlyph,
-      this.lastGlyph,
-    );
+    // Like CoreText and HarfBuzz, leave the glyphs alone unless the marked
+    // range holds every glyph the verb moves (#142, #143).
+    let verb = entry.flags & VERB;
+    let firstGlyph = this.firstGlyph === null ? 0 : this.firstGlyph;
+    if (
+      this.lastGlyph !== null &&
+      this.lastGlyph - firstGlyph + 1 >= VERB_LENGTH[verb]
+    ) {
+      reorderGlyphs(this.glyphs, verb, firstGlyph, this.lastGlyph);
+    }
   }
 
   processContextualSubstitution(glyph, entry, index) {
+    if (glyph === null) {
+      // Like CoreText and HarfBuzz, substitute at the end of the text only
+      // once a glyph was marked, and only the glyphs before it (#151).
+      if (!this.markSet) {
+        return;
+      }
+
+      index = Math.max(0, Math.min(index, this.glyphs.length - 1));
+    }
+
     let subsitutions = this.subtable.table.substitutionTable.items;
     if (entry.markIndex !== 0xffff) {
       let lookup = subsitutions.getItem(entry.markIndex);
@@ -171,10 +204,16 @@ export default class AATMorxProcessor {
 
     if (entry.flags & SET_MARK) {
       this.markedGlyph = index;
+      this.markSet = true;
     }
   }
 
   processLigature(glyph, entry, index) {
+    // Like HarfBuzz, form no ligatures at the end of the text
+    if (glyph === null) {
+      return;
+    }
+
     if (entry.flags & SET_COMPONENT) {
       this.ligatureStack.push(index);
     }
@@ -237,7 +276,18 @@ export default class AATMorxProcessor {
     }
   }
 
+  // Inserts count glyphs before or after glyphIndex, and returns the
+  // position of the first inserted glyph, or -1 if nothing was inserted.
   _insertGlyphs(glyphIndex, insertionActionIndex, count, isBefore) {
+    let limits = this.limits;
+    if (
+      count === 0 ||
+      (limits.ops -= count) <= 0 ||
+      this.glyphs.length + count > limits.len
+    ) {
+      return -1;
+    }
+
     let insertions = [];
     while (count--) {
       let gid = this.subtable.table.insertionActions.getItem(
@@ -246,34 +296,60 @@ export default class AATMorxProcessor {
       insertions.push(this.font.getGlyph(gid));
     }
 
-    if (!isBefore) {
+    if (!isBefore && glyphIndex < this.glyphs.length) {
       glyphIndex++;
     }
 
     this.glyphs.splice(glyphIndex, 0, ...insertions);
+    return glyphIndex;
   }
 
   processGlyphInsertion(glyph, entry, index) {
-    if (entry.flags & SET_MARK) {
-      this.markedIndex = index;
+    if (glyph === null) {
+      return;
     }
 
+    let reverse = !!(this.subtable.coverage & REVERSE_DIRECTION);
+    let markLocation = index;
+
     if (entry.markedInsertIndex !== 0xffff) {
-      let count = (entry.flags & MARKED_INSERT_COUNT) >>> 5;
+      let count = entry.flags & MARKED_INSERT_COUNT;
       let isBefore = !!(entry.flags & MARKED_INSERT_BEFORE);
-      this._insertGlyphs(
+      let position = this._insertGlyphs(
         this.markedIndex,
         entry.markedInsertIndex,
         count,
         isBefore,
       );
+
+      if (position !== -1 && (!reverse || position <= index)) {
+        index += count;
+      }
+    }
+
+    if (entry.flags & SET_MARK) {
+      this.markedIndex = markLocation;
     }
 
     if (entry.currentInsertIndex !== 0xffff) {
       let count = (entry.flags & CURRENT_INSERT_COUNT) >>> 5;
       let isBefore = !!(entry.flags & CURRENT_INSERT_BEFORE);
-      this._insertGlyphs(index, entry.currentInsertIndex, count, isBefore);
+      let position = this._insertGlyphs(
+        index,
+        entry.currentInsertIndex,
+        count,
+        isBefore,
+      );
+
+      // Skip the inserted glyphs unless DontAdvance is set, so that they are
+      // not processed again. When processing in reverse, the next glyph
+      // is already past them.
+      if (position !== -1 && !reverse && !(entry.flags & DONT_ADVANCE)) {
+        index += count;
+      }
     }
+
+    return index;
   }
 
   getSupportedFeatures() {

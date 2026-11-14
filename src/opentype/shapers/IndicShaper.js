@@ -1,4 +1,4 @@
-import DefaultShaper from './DefaultShaper';
+import { DefaultShaper } from './DefaultShaper';
 import { StateMachine } from 'dfa';
 import { UnicodeTrie } from 'unicode-trie';
 import { getCategory } from 'unicode-properties';
@@ -26,7 +26,30 @@ const stateMachine = new StateMachine(indicMachine);
  * The IndicShaper supports indic scripts e.g. Devanagari, Kannada, etc.
  * Based on code from Harfbuzz: https://github.com/behdad/harfbuzz/blob/master/src/hb-ot-shape-complex-indic.cc
  */
-export default class IndicShaper extends DefaultShaper {
+export class IndicShaper extends DefaultShaper {
+  static scripts = [
+    'bng2', // Bengali
+    'beng', // Bengali
+    'dev2', // Devanagari
+    'deva', // Devanagari
+    'gjr2', // Gujarati
+    'gujr', // Gujarati
+    'guru', // Gurmukhi
+    'gur2', // Gurmukhi
+    'knda', // Kannada
+    'knd2', // Kannada
+    'mlm2', // Malayalam
+    'mlym', // Malayalam
+    'ory2', // Oriya
+    'orya', // Oriya
+    'taml', // Tamil
+    'tml2', // Tamil
+    'telu', // Telugu
+    'tel2', // Telugu
+    'khmr', // Khmer
+    'sinh', // Sinhala
+  ];
+
   static zeroMarkWidths = 'NONE';
   static planFeatures(plan) {
     plan.addStage(setupSyllables);

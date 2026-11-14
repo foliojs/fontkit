@@ -57,11 +57,56 @@ const font = fontkit.create(buffer);
 
 The available format modules are `fontkit/formats/TTFFont` (TrueType and OpenType), `fontkit/formats/WOFFFont`, `fontkit/formats/WOFF2Font`, `fontkit/formats/TrueTypeCollection`, and `fontkit/formats/DFont`. Each module exports its class as a named export and does not register any formats.
 
-Additional exports in generated format modules are internal implementation details and are not part of the public API.
+Additional exports in generated format and shaper modules are internal implementation details and are not part of the public API.
 
-`fontkit/core` provides `create`, `registerFormat`, `defaultLanguage`, `setDefaultLanguage`, and `logErrors`, without registering formats or including filesystem helpers. Within each platform, the core and default entries share the same format registry and language settings; importing `fontkit` also registers all built-in formats for users of `fontkit/core`.
+`fontkit/core` provides `create`, `registerFormat`, `registerShaper`, `defaultLanguage`, `setDefaultLanguage`, and `logErrors`, without registering formats or including filesystem helpers. Within each platform, the core and default entries share the same format and shaper registries and language settings; importing `fontkit` also registers its defaults for users of `fontkit/core`.
 
-The same import paths select separate Node and browser builds. Node uses native zlib decompression, while browsers use `fflate` and `brotli`. The two builds have independent format registries and language settings.
+The same import paths select separate Node and browser builds. Node uses native zlib decompression, while browsers use `fflate` and `brotli`. The two builds have independent format and shaper registries and language settings.
+
+## Choosing shapers
+
+`DefaultShaper` is always available as the fallback for scripts without a registered shaper. Importing `fontkit/core` registers no specialized shapers. Importing `fontkit` additionally registers all built-in specialized shapers.
+
+All eight shapers are available as named exports from `fontkit/shapers/{ClassName}`: `DefaultShaper`, `UniversalShaper`, `ArabicShaper`, `IndicShaper`, `HangulShaper`, `HebrewShaper`, `MyanmarShaper`, and `ThaiShaper`. Importing a shaper module does not register it.
+
+To include only the formats and specialized shapers you need:
+
+```javascript
+import * as fontkit from 'fontkit/core';
+import { TTFFont } from 'fontkit/formats/TTFFont';
+import { ArabicShaper } from 'fontkit/shapers/ArabicShaper';
+
+fontkit.registerFormat(TTFFont);
+fontkit.registerShaper(ArabicShaper);
+const run = fontkit.create(buffer).layout('مرحبا');
+```
+
+### `fontkit.registerShaper(Shaper, scripts = Shaper.scripts)`
+
+Registers a shaper class for every OpenType script tag in the supplied `scripts` array. If the argument is omitted or `undefined`, the class's static `scripts` array is used. An explicit array takes precedence for that call, without modifying the class or removing earlier registrations. An empty array registers nothing. For example, to register only Arabic from `ArabicShaper`:
+
+```javascript
+fontkit.registerShaper(ArabicShaper, ['arab']);
+```
+
+Tags are used exactly as provided, including trailing spaces such as `'nko '` and `'lao '`. Later registrations replace earlier mappings for the same tags, including registrations performed by importing the main entry. The function returns nothing. When selecting from an array of script tags, the first tag with a registered shaper wins; if none match, `DefaultShaper` is used.
+
+Custom shapers can extend a built-in class and declare the scripts they handle:
+
+```javascript
+import { registerShaper } from 'fontkit/core';
+import { DefaultShaper } from 'fontkit/shapers/DefaultShaper';
+
+class CustomShaper extends DefaultShaper {
+  static scripts = ['latn'];
+
+  static planFeatures(plan) {
+    plan.add('ss01');
+  }
+}
+
+registerShaper(CustomShaper);
+```
 
 ## API
 
@@ -91,6 +136,8 @@ The following properties are strings (or null if the font does not contain strin
 * `subfamilyName`
 * `copyright`
 * `version`
+
+`postscriptName` also returns null if the runtime cannot decode the name's encoding.
 
 ### Metrics
 
@@ -215,7 +262,7 @@ Renders the glyph to the given graphics context, at the specified font size.
 
 ### Color glyphs (e.g. emoji)
 
-Fontkit has support for several different color emoji font formats. Currently, these include Apple’s SBIX table (as used by the “Apple Color Emoji” font), and Microsoft’s COLR table (supported by Windows 8.1). [Here](http://blog.symbolset.com/multicolor-fonts) is an overview of the various color font formats out there.
+Fontkit has support for several different color emoji font formats. Currently, these include Apple’s SBIX table (as used by the “Apple Color Emoji” font), and Microsoft’s COLR table (supported by Windows 8.1). [Here](https://web.archive.org/web/20180718014648/http://blog.symbolset.com/multicolor-fonts) is an overview of the various color font formats out there.
 
 #### `glyph.getImageForSize(size)`
 

@@ -1,4 +1,4 @@
-import DefaultShaper from './DefaultShaper';
+import { DefaultShaper } from './DefaultShaper';
 import GlyphInfo from '../GlyphInfo';
 
 /**
@@ -23,7 +23,8 @@ import GlyphInfo from '../GlyphInfo';
  *   - http://www.microsoft.com/typography/OpenTypeDev/hangul/intro.htm
  *   - http://ktug.org/~nomos/harfbuzz-hangul/hangulshaper.pdf
  */
-export default class HangulShaper extends DefaultShaper {
+export class HangulShaper extends DefaultShaper {
+  static scripts = ['hang'];
   static zeroMarkWidths = 'NONE';
   static planFeatures(plan) {
     plan.add(['ljmo', 'vjmo', 'tjmo'], false);

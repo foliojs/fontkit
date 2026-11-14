@@ -8,6 +8,86 @@ const formats = [
   ['DFont', 'data/NotoSans/NotoSans.dfont', 'DFont'],
 ];
 
+const shapers = {
+  DefaultShaper: ['latn', 'DFLT'],
+  ArabicShaper: [
+    'arab',
+    'mong',
+    'syrc',
+    'nko ',
+    'phag',
+    'mand',
+    'mani',
+    'phlp',
+  ],
+  IndicShaper: [
+    'bng2',
+    'beng',
+    'dev2',
+    'deva',
+    'gjr2',
+    'gujr',
+    'guru',
+    'gur2',
+    'knda',
+    'knd2',
+    'mlm2',
+    'mlym',
+    'ory2',
+    'orya',
+    'taml',
+    'tml2',
+    'telu',
+    'tel2',
+    'khmr',
+    'sinh',
+  ],
+  UniversalShaper: [
+    'bali',
+    'batk',
+    'brah',
+    'bugi',
+    'buhd',
+    'cakm',
+    'cham',
+    'dupl',
+    'egyp',
+    'gran',
+    'hano',
+    'java',
+    'kthi',
+    'kali',
+    'khar',
+    'khoj',
+    'sind',
+    'lepc',
+    'limb',
+    'mahj',
+    'mtei',
+    'modi',
+    'hmng',
+    'rjng',
+    'saur',
+    'shrd',
+    'sidd',
+    'sund',
+    'sylo',
+    'tglg',
+    'tagb',
+    'tale',
+    'lana',
+    'tavt',
+    'takr',
+    'tibt',
+    'tfng',
+    'tirh',
+  ],
+  HangulShaper: ['hang'],
+  HebrewShaper: ['hebr'],
+  MyanmarShaper: ['mym2'],
+  ThaiShaper: ['thai', 'lao '],
+};
+
 // Each worker gets a fresh registry, independent of tests importing fontkit.
 function runModule(platform, code) {
   return new Promise((resolve, reject) => {
@@ -23,8 +103,28 @@ function runModule(platform, code) {
             ? (entry === 'index' ? 'fontkit' : 'fontkit/' + entry)
             : new URL('browser/' + entry + '.js', buildURL));
           const formats = ${JSON.stringify(formats)};
+          const shapers = ${JSON.stringify(shapers)};
           const readFont = (filename) => readFileSync(new URL(filename, ${JSON.stringify(import.meta.url)}));
           const buffers = formats.map(([, filename]) => readFont(filename));
+          const makeShaperProbe = (font, DefaultShaper) => {
+            // Keep the OT engine, but let the requested script reach the registry
+            // rather than falling back to the font's Latin script table.
+            font.GSUB.scriptList = [];
+            font.GPOS.scriptList = [];
+            let selected;
+            const plan = DefaultShaper.plan;
+            DefaultShaper.plan = function (...args) {
+              selected = this;
+              // Test selection independently of script-specific shaping algorithms.
+              return plan.apply(DefaultShaper, args);
+            };
+            return (script) => {
+              selected = null;
+              font.layout('a', {}, script);
+              assert(selected, 'layout should invoke a shaper');
+              return selected;
+            };
+          };
           ${code}
         })();
       `,
@@ -50,7 +150,7 @@ describe('package entry points', function () {
           `
       const core = await loadModule('core');
       assert.deepEqual(Object.keys(core), [
-        'create', 'defaultLanguage', 'logErrors', 'registerFormat', 'setDefaultLanguage'
+        'create', 'defaultLanguage', 'logErrors', 'registerFormat', 'registerShaper', 'setDefaultLanguage'
       ]);
       assert.equal(core.defaultLanguage, 'en');
       assert.equal(core.logErrors, false);
@@ -89,6 +189,153 @@ describe('package entry points', function () {
           );
         });
       }
+
+      it('should import named shapers without registering them and register every declared script explicitly', function () {
+        return runModule(
+          platform,
+          `
+      const core = await loadModule('core');
+      const { TTFFont } = await loadModule('formats/TTFFont');
+      const { DefaultShaper } = await loadModule('shapers/DefaultShaper');
+      core.registerFormat(TTFFont);
+      const selectShaper = makeShaperProbe(core.create(buffers[0]), DefaultShaper);
+      for (const [name, scripts] of Object.entries(shapers)) {
+        const shaperModule = await loadModule('shapers/' + name);
+        const Shaper = shaperModule[name];
+        assert.equal(typeof Shaper, 'function');
+        assert(!('default' in shaperModule));
+        assert(Object.hasOwn(Shaper, 'scripts'));
+        assert.deepEqual(Shaper.scripts, scripts);
+        for (const script of scripts) {
+          assert.strictEqual(selectShaper(script), DefaultShaper, name + ' imported without registration');
+        }
+        assert.equal(core.registerShaper(Shaper), undefined);
+        core.registerShaper(Shaper);
+        for (const script of scripts) {
+          assert.strictEqual(selectShaper(script), Shaper, script);
+        }
+      }
+      for (const script of ['zzzz', 'mymr', 'nko', 'lao', '__proto__', 'constructor']) {
+        assert.strictEqual(selectShaper(script), DefaultShaper);
+      }
+    `,
+        );
+      });
+
+      it('should override static scripts per registration without changing metadata or removing earlier mappings', function () {
+        return runModule(
+          platform,
+          `
+      const core = await loadModule('core');
+      const { TTFFont } = await loadModule('formats/TTFFont');
+      const { DefaultShaper } = await loadModule('shapers/DefaultShaper');
+      core.registerFormat(TTFFont);
+      const selectShaper = makeShaperProbe(core.create(buffers[0]), DefaultShaper);
+      const staticScripts = Object.freeze(['stat']);
+      class CustomShaper extends DefaultShaper {
+        static scripts = staticScripts;
+      }
+      const overrides = Object.freeze(['one ', 'two ']);
+      assert.equal(core.registerShaper(CustomShaper, overrides), undefined);
+      assert.strictEqual(selectShaper('one '), CustomShaper);
+      assert.strictEqual(selectShaper('two '), CustomShaper);
+      assert.strictEqual(selectShaper('one'), DefaultShaper);
+      assert.strictEqual(selectShaper('stat'), DefaultShaper);
+      assert.strictEqual(CustomShaper.scripts, staticScripts);
+      assert.deepEqual(CustomShaper.scripts, ['stat']);
+      assert.deepEqual(overrides, ['one ', 'two ']);
+
+      assert.equal(core.registerShaper(CustomShaper, []), undefined);
+      assert.strictEqual(selectShaper('stat'), DefaultShaper);
+      assert.strictEqual(selectShaper('one '), CustomShaper);
+      assert.strictEqual(selectShaper('two '), CustomShaper);
+
+      core.registerShaper(CustomShaper);
+      assert.strictEqual(selectShaper('stat'), CustomShaper);
+      core.registerShaper(DefaultShaper, ['stat']);
+      assert.strictEqual(selectShaper('stat'), DefaultShaper);
+      core.registerShaper(CustomShaper, undefined);
+      assert.strictEqual(selectShaper('stat'), CustomShaper);
+      assert.strictEqual(selectShaper('one '), CustomShaper);
+      assert.strictEqual(selectShaper('two '), CustomShaper);
+
+      class ReplacementShaper extends DefaultShaper {
+        static scripts = undefined;
+      }
+      core.registerShaper(ReplacementShaper, []);
+      core.registerShaper(ReplacementShaper, ['one ']);
+      assert.strictEqual(selectShaper('one '), ReplacementShaper);
+      assert.strictEqual(selectShaper('two '), CustomShaper);
+      assert.strictEqual(selectShaper('stat'), CustomShaper);
+    `,
+        );
+      });
+
+      it('should replace shapers by script and select script arrays in order', function () {
+        return runModule(
+          platform,
+          `
+      const core = await loadModule('core');
+      const { TTFFont } = await loadModule('formats/TTFFont');
+      const { DefaultShaper } = await loadModule('shapers/DefaultShaper');
+      core.registerFormat(TTFFont);
+      const font = core.create(buffers[0]);
+      // No matching OT script forces the buffer's requested script through to selection.
+      font.GSUB.scriptList = [];
+      font.GPOS.scriptList = [];
+      class FirstShaper extends DefaultShaper {
+        static scripts = ['one ', 'both'];
+        static planFeatures(plan) { plan.add('tst1'); }
+      }
+      class SecondShaper extends DefaultShaper {
+        static scripts = ['two ', 'both', 'latn', 'DFLT'];
+        static planFeatures(plan) { plan.add('tst2'); }
+      }
+      core.registerShaper(FirstShaper);
+      assert.equal(font.layout('a', {}, 'both').features.tst1, true);
+      core.registerShaper(SecondShaper);
+      core.registerShaper(SecondShaper);
+      for (const script of ['both', 'latn', 'DFLT', ['zzzz', 'two ', 'one ']]) {
+        const { features } = font.layout('a', {}, script);
+        assert.equal(features.tst2, true);
+        assert(!features.tst1);
+      }
+      const { features } = font.layout('a', {}, ['zzzz', 'one ', 'two ']);
+      assert.equal(features.tst1, true);
+      assert(!features.tst2);
+      for (const script of ['zzzz', 'one', ['zzzz', 'nope']]) {
+        const { features } = font.layout('a', {}, script);
+        assert(!features.tst1);
+        assert(!features.tst2);
+      }
+    `,
+        );
+      });
+
+      it('should register all built-in shapers in the main entry', function () {
+        return runModule(
+          platform,
+          `
+      const core = await loadModule('core');
+      const { TTFFont } = await loadModule('formats/TTFFont');
+      const { DefaultShaper } = await loadModule('shapers/DefaultShaper');
+      core.registerFormat(TTFFont);
+      const selectShaper = makeShaperProbe(core.create(buffers[0]), DefaultShaper);
+      for (const scripts of Object.values(shapers)) {
+        for (const script of scripts) {
+          assert.strictEqual(selectShaper(script), DefaultShaper);
+        }
+      }
+      await loadModule('index');
+      for (const [name, scripts] of Object.entries(shapers)) {
+        const { [name]: Shaper } = await loadModule('shapers/' + name);
+        for (const script of scripts) {
+          assert.strictEqual(selectShaper(script), Shaper, script);
+        }
+      }
+    `,
+        );
+      });
 
       it('should use core language settings without importing a default entry', function () {
         return runModule(
@@ -146,6 +393,14 @@ describe('package entry points', function () {
         }
         fontkit.registerFormat(CustomFont);
         assert(core.create(Uint8Array.of(42)) instanceof CustomFont);
+
+        const { DefaultShaper } = await loadModule('shapers/DefaultShaper');
+        const selectShaper = makeShaperProbe(core.create(buffers[0]), DefaultShaper);
+        class CustomShaper extends DefaultShaper { static scripts = ['latn']; }
+        fontkit.registerShaper(CustomShaper);
+        assert.strictEqual(selectShaper('latn'), CustomShaper);
+        core.registerShaper(DefaultShaper);
+        assert.strictEqual(selectShaper('latn'), DefaultShaper);
 
         const { TTFFont } = await loadModule('formats/TTFFont');
         let probes = 0;
@@ -206,8 +461,27 @@ describe('package entry points', function () {
         assert.throws(() => browser.create(buffer), /Unknown font format/);
       }
 
-      const fontkit = await import(new URL('browser/index.js', buildURL));
       const { TTFFont: BrowserTTFFont } = await import(new URL('browser/formats/TTFFont.js', buildURL));
+      const { DefaultShaper } = await loadModule('shapers/DefaultShaper');
+      const { DefaultShaper: BrowserDefaultShaper } = await import(new URL('browser/shapers/DefaultShaper.js', buildURL));
+      const { ArabicShaper } = await loadModule('shapers/ArabicShaper');
+      browser.registerFormat(BrowserTTFFont);
+      const selectNodeShaper = makeShaperProbe(core.create(buffers[0]), DefaultShaper);
+      const selectBrowserShaper = makeShaperProbe(browser.create(buffers[0]), BrowserDefaultShaper);
+      assert.strictEqual(selectNodeShaper('arab'), ArabicShaper);
+      assert.strictEqual(selectBrowserShaper('arab'), BrowserDefaultShaper);
+
+      const fontkit = await import(new URL('browser/index.js', buildURL));
+      const { ArabicShaper: BrowserArabicShaper } = await import(new URL('browser/shapers/ArabicShaper.js', buildURL));
+      assert.strictEqual(selectBrowserShaper('arab'), BrowserArabicShaper);
+      class NodeShaper extends DefaultShaper { static scripts = ['latn']; }
+      core.registerShaper(NodeShaper);
+      assert.strictEqual(selectNodeShaper('latn'), NodeShaper);
+      assert.strictEqual(selectBrowserShaper('latn'), BrowserDefaultShaper);
+      class BrowserShaper extends BrowserDefaultShaper { static scripts = ['latn']; }
+      browser.registerShaper(BrowserShaper);
+      assert.strictEqual(selectBrowserShaper('latn'), BrowserShaper);
+      assert.strictEqual(selectNodeShaper('latn'), NodeShaper);
       assert.strictEqual(fontkit.create, browser.create);
       assert.notStrictEqual(TTFFont, BrowserTTFFont);
       assert(browser.create(buffers[0]) instanceof BrowserTTFFont);
