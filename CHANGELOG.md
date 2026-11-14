@@ -2,6 +2,10 @@
 
 ### Unreleased
 
+- Reconstruct transformed WOFF2 TrueType glyphs when subsetting, preserving point indices, glyph instructions and component records
+- Use decoded variation coordinates and phantom-derived horizontal bearings for transformed WOFF2 subsets
+- Reject WOFF2 subsetting with transformed hmtx instead of emitting incorrect horizontal metrics
+- Reject truncated WOFF2 glyph instruction data while decoding transformed glyphs
 - End the second curve of CFF hflex and hflex1 operators at the starting y, so later points are no longer shifted (#437)
 
 ### [3.0.0] - 11-11-2026
@@ -18,10 +22,6 @@
 - Round HVAR advance deltas to whole units like HarfBuzz, so subsets of fonts with set variations no longer truncate advances such as 851.9999 to 851
 - Fix glyphs in subsets of fonts with set variations: write the count of repeated flags at the end of a glyph, flatten composite glyphs, and take the left side bearings from the varied outlines
 - Take the ascent, descent and line gap from the typo metrics when the font sets useTypoMetrics, like HarfBuzz, and fix the vhea structure, 16.16 table versions, and boxes of empty glyphs (#305, #306)
-- Reconstruct transformed WOFF2 TrueType glyphs when subsetting, preserving point indices, glyph instructions and component records
-- Use decoded variation coordinates and phantom-derived horizontal bearings for transformed WOFF2 subsets
-- Reject WOFF2 subsetting with transformed hmtx instead of emitting incorrect horizontal metrics
-- Reject truncated WOFF2 glyph instruction data while decoding transformed glyphs
 - Use non-default variation sequences when the variation selector also has default ones
 - Add `fontkit/core` and `fontkit/formats/{format}` entry points with named format exports for explicit format registration, sharing state with the default entries
 - Remove the fast-deep-equal runtime dependency
