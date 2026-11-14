@@ -59,12 +59,14 @@ import GDEF from './GDEF';
 import GPOS from './GPOS';
 import GSUB from './GSUB';
 import JSTF from './JSTF';
+import STAT from './STAT';
 
 tables.BASE = BASE;
 tables.GDEF = GDEF;
 tables.GPOS = GPOS;
 tables.GSUB = GSUB;
 tables.JSTF = JSTF;
+tables.STAT = STAT;
 
 // OpenType variations tables
 import HVAR from './HVAR';
