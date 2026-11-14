@@ -3,6 +3,7 @@
 ### Unreleased
 
 - End the second curve of CFF hflex and hflex1 operators at the starting y, so later points are no longer shifted (#437)
+- Expose the shaped glyph infos on the glyph run, with the features the shaper applied to each glyph
 
 ### [3.0.0] - 11-11-2026
 
