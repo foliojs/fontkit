@@ -1,4 +1,4 @@
-/// <reference types="node" />
+import type { DefaultShaper } from './shapers/DefaultShaper.js';
 
 /**
  * There are several different types of font objects that are returned by fontkit depending on the font format.
@@ -7,12 +7,13 @@
 export interface Font {
   type: 'TTF' | 'WOFF' | 'WOFF2';
 
-  postscriptName: string;
-  fullName: string;
-  familyName: string;
-  subfamilyName: string;
-  copyright: string;
-  version: number;
+  /** null if the font has no PostScript name, or the runtime cannot decode its encoding */
+  postscriptName: string | null;
+  fullName: string | null;
+  familyName: string | null;
+  subfamilyName: string | null;
+  copyright: string | null;
+  version: string | null;
 
   /** the size of the font’s internal coordinate grid */
   unitsPerEm: number;
@@ -55,6 +56,9 @@ export interface Font {
     Record<string, { name: string; min: number; default: number; max: number }>
   >;
 
+  /** The named variation instances in a variable font. Keys are instance names, and values are axis settings. */
+  namedVariations: Partial<Record<string, Record<string, number>>>;
+
   /**
    * Returns an array of strings that map to the given glyph id.
    */
@@ -86,13 +90,21 @@ export interface Font {
 
   /**
    * Returns a GlyphRun object, which includes an array of Glyphs and GlyphPositions for the given string.
+   * In a features object, a number selects that alternate (1-based) for alternate substitution features such as `aalt`.
    */
   layout(
     string: string,
-    features?: string[] | Record<string, boolean>,
-    script?: string,
-    language?: string,
-    direction?: string,
+    features?: string[] | Record<string, boolean | number>,
+    script?: string | null,
+    language?: string | null,
+    direction?: string | null,
+  ): GlyphRun;
+  /** Lays out the string with the default features */
+  layout(
+    string: string,
+    script: string,
+    language?: string | null,
+    direction?: string | null,
   ): GlyphRun;
 
   /**
@@ -127,9 +139,9 @@ export interface Font {
    * Gets a string from the font's `name` table
    * `lang` is a BCP-47 language code.
    */
-  getName(key: string, lang: string): string | null;
+  getName(key: string, lang?: string): string | null;
 
-  setDefaultLanguage(lang: string): void;
+  setDefaultLanguage(lang?: string | null): void;
 }
 
 export interface GlyphRun {
@@ -152,7 +164,7 @@ export interface GlyphRun {
    * The language requested for shaping, as passed in. If `null`, the default language for the
    * script was used.
    */
-  language: string;
+  language: string | null;
 
   /**
    * The direction requested for shaping, as passed in (either ltr or rtl).
@@ -164,7 +176,7 @@ export interface GlyphRun {
    * The features requested during shaping. This is a combination of user
    * specified features and features chosen by the shaper.
    */
-  features: Record<string, boolean>;
+  features: Record<string, boolean | number>;
 
   /**
    * The total advance width of the run.
@@ -208,6 +220,9 @@ export interface GlyphPosition {
  * on the font format, but they all inherit from this class.
  */
 export interface Glyph {
+  /** The glyph's outline or color format */
+  type: 'TTF' | 'CFF' | 'WOFF2' | 'SBIX' | 'COLR';
+
   /** the glyph id in the font */
   id: number;
 
@@ -220,6 +235,9 @@ export interface Glyph {
 
   /** a vector Path object representing the glyph */
   path: Path;
+
+  /** Returns the glyph's path scaled to the given font size */
+  getScaledPath(size: number): Path;
 
   /** the glyph’s bounding box, i.e. the rectangle that encloses the glyph outline as tightly as possible. */
   bbox: BBOX;
@@ -238,6 +256,9 @@ export interface Glyph {
   /** the glyph’s advance width */
   advanceWidth: number;
 
+  /** the glyph’s advance height */
+  advanceHeight: number;
+
   /** is a mark glyph (non-spacing combining glyph) */
   isMark: boolean;
 
@@ -245,10 +266,14 @@ export interface Glyph {
   isLigature: boolean;
 
   /** Renders the glyph to the given graphics context, at the specified font size. */
-  render(ctx: CanvasRenderingContext2D, size: number): void;
+  render(ctx: RenderContext, size: number): void;
 
-  /**  The glyph's name. Commonly the character, or 'space' or UTF**** */
-  name: string;
+  /**
+   * The glyph's name. Commonly the character, or 'space' or UTF****.
+   * undefined if the font's `post` table has no glyph names (version 3), and null if
+   * the font has no `post` table or is a CID-keyed CFF font.
+   */
+  name: string | null | undefined;
 
   /**
    * For COLR glyphs, an array of objects containing the glyph and color for each layer.
@@ -258,6 +283,21 @@ export interface Glyph {
     glyph: Glyph;
     color: { red: number; green: number; blue: number; alpha: number };
   }>;
+
+  /**
+   * For SBIX glyphs, which are bitmap based, the image for the given size (usually PNG data),
+   * or null if the glyph has no image.
+   */
+  getImageForSize?(size: number): SBIXImage | null;
+}
+
+/** A bitmap image of an SBIX glyph */
+export interface SBIXImage {
+  originX: number;
+  originY: number;
+  /** The image format, such as `png ` */
+  type: string;
+  data: Uint8Array;
 }
 
 /**
@@ -287,7 +327,7 @@ export interface Path {
    * Compiles the path to a JavaScript function that can be applied with
    * a graphics context in order to render the path.
    */
-  toFunction(): (ctx: CanvasRenderingContext2D) => void;
+  toFunction(): (ctx: PathContext) => void;
 
   /** Converts the path to an SVG path data string */
   toSVG(): string;
@@ -310,6 +350,52 @@ export interface Path {
 
   /** Scales the path */
   scale(scaleX: number, scaleY?: number): this;
+
+  /** Moves the virtual pen to the given x, y coordinates */
+  moveTo(x: number, y: number): this;
+
+  /** Adds a line to the path from the current point to the given x, y coordinates */
+  lineTo(x: number, y: number): this;
+
+  /** Adds a quadratic curve to the path from the current point to the given x, y coordinates */
+  quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): this;
+
+  /** Adds a bezier curve to the path from the current point to the given x, y coordinates */
+  bezierCurveTo(
+    cp1x: number,
+    cp1y: number,
+    cp2x: number,
+    cp2y: number,
+    x: number,
+    y: number,
+  ): this;
+
+  /** Closes the current sub-path by drawing a straight line back to the starting point */
+  closePath(): this;
+}
+
+/** The drawing methods a path calls, which canvas 2D contexts and PDFKit documents both have */
+export interface PathContext {
+  moveTo(x: number, y: number): void;
+  lineTo(x: number, y: number): void;
+  quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): void;
+  bezierCurveTo(
+    cp1x: number,
+    cp1y: number,
+    cp2x: number,
+    cp2y: number,
+    x: number,
+    y: number,
+  ): void;
+  closePath(): void;
+}
+
+/** The methods outline glyphs call to render themselves */
+export interface RenderContext extends PathContext {
+  save(): void;
+  scale(x: number, y: number): void;
+  fill(): void;
+  restore(): void;
 }
 
 export interface PathCommand {
@@ -432,29 +518,10 @@ export interface FontCollection {
 }
 
 export interface Subset {
-  includeGlyph(glyph: Glyph): boolean;
+  /** Includes the given glyph object or glyph ID in the subset, and returns its ID in the subset */
+  includeGlyph(glyph: Glyph | number): number;
   encode(): Uint8Array;
 }
-
-/**
- * Opens a font file asynchronously, returning a promise that resolves with a font object.
- * For collection fonts (such as TrueType collection files),
- * you can pass a postscriptName to get that font out of the collection instead of a collection object.
- */
-export function open(
-  filename: string,
-  postscriptName?: string,
-): Promise<Font | FontCollection>;
-
-/**
- * Opens a font file synchronously, and returns a font object.
- * For collection fonts (such as TrueType collection files),
- * you can pass a postscriptName to get that font out of the collection instead of a collection object.
- */
-export function openSync(
-  filename: string,
-  postscriptName?: string,
-): Font | FontCollection;
 
 /**
  * Returns a font object for the given buffer.
@@ -462,6 +529,38 @@ export function openSync(
  * you can pass a postscriptName to get that font out of the collection instead of a collection object.
  */
 export function create(
-  buffer: Buffer,
-  postscriptName?: string,
+  buffer: Uint8Array,
+  postscriptName?: null,
 ): Font | FontCollection;
+/** Returns the font with the given postscriptName, or null if the collection has none. */
+export function create(buffer: Uint8Array, postscriptName: string): Font | null;
+export function create(
+  buffer: Uint8Array,
+  postscriptName?: string | null,
+): Font | FontCollection | null;
+
+/**
+ * Registers a font format class, such as one from `fontkit/formats/*`.
+ * `create` uses the first registered format whose `probe` accepts the buffer.
+ */
+export function registerFormat(format: {
+  probe(buffer: Uint8Array): boolean;
+  new (stream: unknown): Font | FontCollection;
+}): void;
+
+/**
+ * Registers a shaper class, such as one from `fontkit/shapers/*`, for each OpenType script tag in `scripts`,
+ * which defaults to the class's static `scripts`. Later registrations replace earlier ones for the same tags.
+ */
+export function registerShaper(
+  shaper: typeof DefaultShaper,
+  scripts?: string[],
+): void;
+
+/** The BCP-47 language code that fonts use to look up names, unless they set their own */
+export let defaultLanguage: string;
+
+export function setDefaultLanguage(lang?: string): void;
+
+/** Whether errors decoding font tables are logged to the console */
+export let logErrors: boolean;
