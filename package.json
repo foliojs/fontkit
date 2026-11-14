@@ -15,8 +15,8 @@
     "test": "npm run build && npm run mocha",
     "mocha": "mocha",
     "build": "rolldown -c",
-    "format": "prettier --write src test",
-    "format:check": "prettier --check src test",
+    "format": "prettier --write src test types",
+    "format:check": "prettier --check src test types",
     "prepublish": "npm run clean && npm run trie:data && npm run trie:use && npm run trie:indic && npm run build",
     "trie:data": "node scripts/generate-data.js",
     "trie:use": "node scripts/gen-use.js",
@@ -40,24 +40,34 @@
   },
   "exports": {
     ".": {
-      "node": "./dist/node/index.js",
-      "default": "./dist/browser/index.js"
+      "node": {
+        "types": "./types/node.d.ts",
+        "default": "./dist/node/index.js"
+      },
+      "default": {
+        "types": "./types/index.d.ts",
+        "default": "./dist/browser/index.js"
+      }
     },
     "./core": {
+      "types": "./types/core.d.ts",
       "node": "./dist/node/core.js",
       "default": "./dist/browser/core.js"
     },
     "./formats/*": {
+      "types": "./types/formats/*.d.ts",
       "node": "./dist/node/formats/*.js",
       "default": "./dist/browser/formats/*.js"
     },
     "./shapers/*": {
+      "types": "./types/shapers/*.d.ts",
       "node": "./dist/node/shapers/*.js",
       "default": "./dist/browser/shapers/*.js"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "types"
   ],
   "author": "Devon Govett <devongovett@gmail.com>",
   "license": "MIT",
