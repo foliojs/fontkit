@@ -225,6 +225,7 @@ export default class TTFGlyph extends Glyph {
 
       var component = new Component(glyphID, dx, dy);
       component.pos = gPos;
+      component.useMyMetrics = (flags & USE_MY_METRICS) !== 0;
 
       if (flags & WE_HAVE_A_SCALE) {
         // fixed number with 14 bits of fraction
@@ -312,7 +313,7 @@ export default class TTFGlyph extends Glyph {
       new Point(false, true, glyph.xMin - leftBearing, 0),
       new Point(false, true, glyph.xMin - leftBearing + advanceWidth, 0),
       new Point(false, true, 0, glyph.yMax + topBearing),
-      new Point(false, true, 0, glyph.yMax + topBearing + advanceHeight),
+      new Point(false, true, 0, glyph.yMax + topBearing - advanceHeight),
     ];
   }
 
@@ -328,7 +329,12 @@ export default class TTFGlyph extends Glyph {
     if (glyph.numberOfContours < 0) {
       // resolve composite glyphs
       for (let component of glyph.components) {
-        let contours = this._font.getGlyph(component.glyphID)._getContours();
+        let componentGlyph = this._font.getGlyph(component.glyphID);
+        let contours = componentGlyph._getContours();
+        // Like HarfBuzz, take the varied metrics from this component
+        if (component.useMyMetrics && glyph.phantomPoints) {
+          glyph.phantomPoints = componentGlyph._decode().phantomPoints;
+        }
         for (let i = 0; i < contours.length; i++) {
           let contour = contours[i];
           for (let j = 0; j < contour.length; j++) {
@@ -354,7 +360,7 @@ export default class TTFGlyph extends Glyph {
       this._metrics.advanceWidth =
         glyph.phantomPoints[1].x - glyph.phantomPoints[0].x;
       this._metrics.advanceHeight =
-        glyph.phantomPoints[3].y - glyph.phantomPoints[2].y;
+        glyph.phantomPoints[2].y - glyph.phantomPoints[3].y;
       this._metrics.leftBearing = glyph.xMin - glyph.phantomPoints[0].x;
       this._metrics.topBearing = glyph.phantomPoints[2].y - glyph.yMax;
     }

@@ -3,6 +3,8 @@
 ### Unreleased
 
 - End the second curve of CFF hflex and hflex1 operators at the starting y, so later points are no longer shifted (#437)
+- Take the varied metrics of composite glyphs from the component with useMyMetrics, like HarfBuzz
+- Place the bottom phantom point below the top one, so gvar varies vertical advances in the right direction (#421)
 
 ### [3.0.0] - 11-11-2026
 
