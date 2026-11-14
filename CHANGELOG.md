@@ -3,6 +3,7 @@
 ### Unreleased
 
 - End the second curve of CFF hflex and hflex1 operators at the starting y, so later points are no longer shifted (#437)
+- Apply MVAR deltas to the ascent, descent, line gap, cap height, x-height and underline metrics of variations
 
 ### [3.0.0] - 11-11-2026
 
