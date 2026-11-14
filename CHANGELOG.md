@@ -2,6 +2,10 @@
 
 ### Unreleased
 
+- Reconstruct transformed WOFF2 TrueType glyphs when subsetting, preserving point indices, glyph instructions and component records
+- Use decoded variation coordinates and phantom-derived horizontal bearings for transformed WOFF2 subsets
+- Reject WOFF2 subsetting with transformed hmtx instead of emitting incorrect horizontal metrics
+- Reject truncated WOFF2 glyph instruction data while decoding transformed glyphs
 - End the second curve of CFF hflex and hflex1 operators at the starting y, so later points are no longer shifted (#437)
 
 ### [3.0.0] - 11-11-2026
