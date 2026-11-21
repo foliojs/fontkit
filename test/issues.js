@@ -507,6 +507,9 @@ describe('issues', function () {
       let { glyphs } = font.layout('lol');
       assert.ok(glyphs.length > 3);
       assert.ok(glyphs.length <= 65536);
+    });
+  });
+
   describe('#150 - TypeError with AAT contextual substitution without a mark', function () {
     // MORX-19 from Unicode text-rendering-tests substitutes the marked glyph
     // without setting a mark, so the first glyph is marked.
