@@ -496,6 +496,20 @@ describe('issues', function () {
     });
   });
 
+  describe('#221 - billion laughs attack with GSUB', function () {
+    it('should stop multiple substitutions at a length limit', function () {
+      // GSUB-3 from Unicode text-rendering-tests has nine lookups that each
+      // replace an o between two l's by olololololololololo.
+      let font = fontkit.openSync(
+        new URL('data/fonttest/TestGSUBThree.ttf', import.meta.url),
+      );
+
+      let { glyphs } = font.layout('lol');
+      assert.ok(glyphs.length > 3);
+      assert.ok(glyphs.length <= 65536);
+    });
+  });
+
   describe('#150 - TypeError with AAT contextual substitution without a mark', function () {
     // MORX-19 from Unicode text-rendering-tests substitutes the marked glyph
     // without setting a mark, so the first glyph is marked.
