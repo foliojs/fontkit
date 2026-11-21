@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Ship TypeScript declarations for every entry point, adapted from `@types/fontkit`, which is no longer needed (#439)
 - End the second curve of CFF hflex and hflex1 operators at the starting y, so later points are no longer shifted (#437)
 - Fix crashes in AAT morx contextual substitution without a mark and ligatures with too few components or components outside the font, like HarfBuzz (#150)
 
