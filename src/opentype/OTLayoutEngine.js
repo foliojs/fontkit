@@ -71,6 +71,7 @@ export default class OTLayoutEngine {
 
   substitute(glyphRun) {
     if (this.GSUBProcessor) {
+      this.GSUBProcessor.resetLimits(this.glyphInfos.length);
       this.plan.process(this.GSUBProcessor, this.glyphInfos);
     }
 
