@@ -275,6 +275,36 @@ describe('font subsetting', function () {
       assert.equal(font.getGlyph(5)._decode().components[0].dx, 25);
     });
 
+    it('preserves stored bounds and bearing at explicit default coordinates', function () {
+      let font = open('FontkitSubsetTest/FontkitSubsetTest.variable.woff2');
+      let original = font.getGlyph(5);
+      let variation = font.getVariation({ wght: 400 });
+      let subset = variation.createSubset();
+      let id = subset.includeGlyph(5);
+      let result = fontkit.create(subset.encode()).getGlyph(id);
+      let box = (glyph) => {
+        let { xMin, yMin, xMax, yMax } = glyph._decode();
+        return [xMin, yMin, xMax, yMax];
+      };
+      assert.deepEqual(box(original), [-275, -250, 25, 50]);
+      assert.deepEqual(box(result), box(original));
+      assert.equal(
+        result._getMetrics().leftBearing,
+        original._getMetrics().leftBearing,
+      );
+      assert.equal(result.advanceWidth, original.advanceWidth);
+    });
+
+    it('refuses transformed horizontal metrics with untransformed outlines', function () {
+      let font = open('FontkitSubsetTest/FontkitSubsetTest.hmtx-only.woff2');
+      assert.equal(font.directory.tables.hmtx.transformed, true);
+      assert.equal(font.directory.tables.glyf.transformed, false);
+      assert.equal(font.directory.tables.loca.transformed, false);
+      let subset = font.createSubset();
+      subset.includeGlyph(1);
+      assert.throws(() => subset.encode(), /transformed hmtx/);
+    });
+
     it('does not read transformed source loca offsets', function () {
       let font = open('FontkitSubsetTest/FontkitSubsetTest.woff2');
       let decode = font._decodeTable;

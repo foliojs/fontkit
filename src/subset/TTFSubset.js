@@ -16,7 +16,11 @@ export default class TTFSubset extends Subset {
     let bearing;
 
     if (transformed) {
-      if (glyf.numberOfContours && this.font._variationProcessor) {
+      let variation = this.font._variationProcessor;
+      if (
+        glyf.numberOfContours &&
+        variation?.normalizedCoords.some((coordinate) => coordinate !== 0)
+      ) {
         // Resolving the path also updates varied phantom-point metrics.
         let box = glyph.path.cbox;
         if (glyf.numberOfContours > 0) {
@@ -102,10 +106,7 @@ export default class TTFSubset extends Subset {
   }
 
   encode() {
-    if (
-      this.font.directory.tables.glyf.transformed &&
-      this.font.directory.tables.hmtx.transformed
-    ) {
+    if (this.font.directory.tables.hmtx.transformed) {
       throw new Error(
         'Subsetting WOFF2 fonts with transformed hmtx is not supported',
       );

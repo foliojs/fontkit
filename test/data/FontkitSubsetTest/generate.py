@@ -60,6 +60,8 @@ builder.font.flavorData = WOFF2FlavorData(transformedTables={'glyf','loca'})
 builder.save(destination / 'FontkitSubsetTest.woff2')
 builder.font.flavorData = WOFF2FlavorData(transformedTables={'glyf','loca','hmtx'})
 builder.save(destination / 'FontkitSubsetTest.hmtx.woff2')
+builder.font.flavorData = WOFF2FlavorData(transformedTables={'hmtx'})
+builder.save(destination / 'FontkitSubsetTest.hmtx-only.woff2')
 builder.setupFvar([('wght', 100, 400, 900, 'Weight')], [])
 builder.setupGvar({name: [] for name in order})
 builder.font['gvar'].variations['composite'] = [

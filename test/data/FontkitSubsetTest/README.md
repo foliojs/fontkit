@@ -13,7 +13,8 @@ The six glyphs cover instructions on simple and composite glyphs, an empty
 glyph, an uninstructed glyph after instructed glyphs, an off-curve first point,
 a 300-point repeated flag run, OVERLAP_SIMPLE, and mixed XY/point-index
 component arguments. The WOFF2 variants transform glyf/loca, with the `.hmtx`
-variant additionally transforming horizontal metrics.
+variant additionally transforming horizontal metrics. The hmtx-only variant
+transforms hmtx and keeps glyf/loca untransformed.
 
 The `.empty-composite` variant has a varied composite containing only an empty
 component, with a nonzero horizontal bearing.
