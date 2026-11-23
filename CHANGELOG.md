@@ -6,7 +6,12 @@
 - Use decoded variation coordinates and phantom-derived horizontal bearings for transformed WOFF2 subsets
 - Reject WOFF2 subsetting with transformed hmtx instead of emitting incorrect horizontal metrics
 - Reject truncated WOFF2 glyph instruction data while decoding transformed glyphs
+- Ship TypeScript declarations for every entry point, adapted from `@types/fontkit`, which is no longer needed (#439)
 - End the second curve of CFF hflex and hflex1 operators at the starting y, so later points are no longer shifted (#437)
+- Expose the shaped glyph infos on the glyph run, with the features the shaper applied to each glyph
+- Limit the length of glyph runs that multiple substitutions can produce to 256 times the input or 65536 glyphs, like HarfBuzz, so fonts can no longer make layout hang with exponentially growing substitutions (#221)
+- Apply MVAR deltas to the ascent, descent, line gap, cap height, x-height and underline metrics of variations
+- Fix crashes in AAT morx contextual substitution without a mark and ligatures with too few components or components outside the font, like HarfBuzz (#150)
 
 ### [3.0.0] - 11-11-2026
 
