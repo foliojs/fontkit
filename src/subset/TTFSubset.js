@@ -16,10 +16,13 @@ export default class TTFSubset extends Subset {
     let bearing;
 
     if (transformed) {
-      let variation = this.font._variationProcessor;
+      let { fvar, variationCoords } = this.font;
       if (
         glyf.numberOfContours &&
-        variation?.normalizedCoords.some((coordinate) => coordinate !== 0)
+        fvar &&
+        variationCoords?.some(
+          (coordinate, index) => coordinate !== fvar.axis[index].defaultValue,
+        )
       ) {
         // Resolving the path also updates varied phantom-point metrics.
         let box = glyph.path.cbox;
