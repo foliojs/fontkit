@@ -195,6 +195,27 @@ describe('shaping', function () {
       '86@273,-335+0|83@253,495+0|111@273,-95+0|8+568',
     );
 
+    it('should expose the joining feature applied to each glyph', function () {
+      let font = fontkit.openSync(
+        new URL('data/Mada/Mada-VF.ttf', import.meta.url),
+      );
+      let { glyphs, glyphInfos } = font.layout('بيت');
+      assert.deepEqual(
+        glyphInfos.map((info, i) => [
+          glyphs[i].name,
+          ['isol', 'init', 'medi', 'fina'].find((tag) => info.features[tag]),
+        ]),
+        [
+          ['ar2Dot.above', 'fina'],
+          ['arBeh.fina', 'fina'],
+          ['ar2Dot.below', 'medi'],
+          ['arBeh.medi', 'medi'],
+          ['ar1Dot.below', 'init'],
+          ['arBeh.init', 'init'],
+        ],
+      );
+    });
+
     test(
       "should shape N'Ko text",
       'NotoSans/NotoSansNKo-Regular.ttf',
@@ -3549,6 +3570,29 @@ describe('shaping', function () {
       assert.deepEqual(
         glyphs.map((g) => g.name),
         ['dollar', 'cent'],
+      );
+    });
+
+    it('matches conditions with coordinates rounded to F2DOT14', function () {
+      // wght 499.99 normalizes to just below the condition's minimum, but
+      // rounds to it, so HarfBuzz applies the alternates there too.
+      let { glyphs } = font.getVariation({ wght: 499.99 }).layout('$¢');
+      assert.deepEqual(
+        glyphs.map((g) => g.name),
+        ['dollar.BRACKET.110', 'cent.BRACKET.110'],
+      );
+    });
+
+    it('applies FeatureVariations at a default that is the axis maximum', function () {
+      // AdobeVFPrototype's wght default is its maximum (1000), and its rvrn
+      // swaps dollar for dollar.nostroke from 800 up.
+      let font = fontkit.openSync(
+        new URL('data/fonttest/AdobeVFPrototype-Subset.otf', import.meta.url),
+      );
+      let { glyphs } = font.layout('$');
+      assert.deepEqual(
+        glyphs.map((g) => g.name),
+        ['dollar.nostroke'],
       );
     });
   });

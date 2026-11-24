@@ -70,8 +70,10 @@ tables.STAT = STAT;
 
 // OpenType variations tables
 import HVAR from './HVAR';
+import MVAR from './MVAR';
 
 tables.HVAR = HVAR;
+tables.MVAR = MVAR;
 
 // Other OpenType Tables
 import DSIG from './DSIG';
