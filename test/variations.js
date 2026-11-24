@@ -119,6 +119,19 @@ describe('variations', function () {
       );
     });
 
+    it('should support point numbers stored as words', function () {
+      // The 1164 points of Zycon's 🏵  need words for the point numbers. These
+      // are HarfBuzz's extents of it at T1=1:
+      let font = fontkit.openSync(
+        new URL('data/Zycon/Zycon.ttf', import.meta.url),
+      );
+      let { cbox } = font.getVariation({ T1: 1 }).glyphsForString('🏵')[0];
+      assert.deepEqual(
+        [cbox.minX, cbox.maxY, cbox.maxX - cbox.minX, cbox.minY - cbox.maxY],
+        [-22, 2054, 2061, -2078],
+      );
+    });
+
     it('should use the HVAR table when available for variation metrics', function () {
       let font = fontkit.openSync(
         new URL('data/fonttest/TestGVARFour.ttf', import.meta.url),

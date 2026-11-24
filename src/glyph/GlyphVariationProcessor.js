@@ -521,7 +521,7 @@ function decodePoints(stream) {
   while (i < count) {
     let run = stream.readUInt8();
     let runCount = (run & POINT_RUN_COUNT_MASK) + 1;
-    let fn = run & POINTS_ARE_WORDS ? stream.readUInt16 : stream.readUInt8;
+    let fn = run & POINTS_ARE_WORDS ? stream.readUInt16BE : stream.readUInt8;
 
     for (let j = 0; j < runCount && i < count; j++) {
       point += fn.call(stream);
