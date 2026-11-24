@@ -339,7 +339,7 @@ describe('character to glyph mapping', function () {
           [32],
           [6084],
           [6026],
-          [6070],
+          [], // The second part of the split vowel ោ
           [6041],
           [6018],
           [6098, 6040],
