@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Return glyphs requested without code points without the code points of earlier requests, so layout no longer depends on what was laid out before (#441, #442)
 - Ship TypeScript declarations for every entry point, adapted from `@types/fontkit`, which is no longer needed (#439)
 - End the second curve of CFF hflex and hflex1 operators at the starting y, so later points are no longer shifted (#437)
 - Add support for the STAT table
