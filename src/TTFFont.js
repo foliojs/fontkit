@@ -129,8 +129,8 @@ export class TTFFont {
       lineGap: vary(lineGap, 'hlgp'),
       capHeight: os2 ? vary(os2.capHeight, 'cpht') : ascent,
       xHeight: os2 ? vary(os2.xHeight, 'xhgt') : 0,
-      underlinePosition: vary(post.underlinePosition, 'undo'),
-      underlineThickness: vary(post.underlineThickness, 'unds'),
+      underlinePosition: post ? vary(post.underlinePosition, 'undo') : 0,
+      underlineThickness: post ? vary(post.underlineThickness, 'unds') : 0,
     };
   }
 
