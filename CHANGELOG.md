@@ -11,6 +11,7 @@
 - Limit the length of glyph runs that multiple substitutions can produce to 256 times the input or 65536 glyphs, like HarfBuzz, so fonts can no longer make layout hang with exponentially growing substitutions (#221)
 - Apply MVAR deltas to the ascent, descent, line gap, cap height, x-height and underline metrics of variations
 - Fix crashes in AAT morx contextual substitution without a mark and ligatures with too few components or components outside the font, like HarfBuzz (#150)
+- Give a glyph requested without code points none, instead of the code points of an earlier request for the same glyph, so glyphs added by multiple substitutions and AAT insertions no longer depend on what was shaped before (#442)
 
 ### [3.0.0] - 11-11-2026
 

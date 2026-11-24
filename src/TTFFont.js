@@ -477,7 +477,8 @@ export class TTFFont {
     let cached = this._glyphs[glyph] || null;
 
     // Glyphs shared by several code points (e.g. space and no-break space) are cached with the first caller's.
-    if (cached && characters.length > 0 && !hasCodePoints(cached, characters)) {
+    // A request without code points (e.g. a glyph added by a multiple substitution) gets a glyph without them.
+    if (cached && !hasCodePoints(cached, characters)) {
       return this._getGlyphForCharacters(cached, characters);
     }
 

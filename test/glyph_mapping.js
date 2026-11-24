@@ -339,7 +339,7 @@ describe('character to glyph mapping', function () {
           [32],
           [6084],
           [6026],
-          [6070],
+          [], // inserted by the font for U+17C4, so it has no code point of its own
           [6041],
           [6018],
           [6098, 6040],

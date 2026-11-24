@@ -528,6 +528,21 @@ describe('issues', function () {
     });
   });
 
+  describe('#442 - Glyph requested without code points', function () {
+    it('should not take the code points of an earlier request', function () {
+      let font = fontkit.openSync(
+        new URL('data/FiraSans/FiraSans-Regular.ttf', import.meta.url),
+      );
+      let codePoints = (text) =>
+        font.layout(text).glyphs.map((glyph) => glyph.codePoints);
+
+      // U+0268 becomes two glyphs, and the second one is also the glyph of U+0335.
+      assert.deepEqual(codePoints('\u0268'), [[0x268], []]);
+      assert.deepEqual(codePoints('\u0335'), [[0x335]]);
+      assert.deepEqual(codePoints('\u0268'), [[0x268], []]);
+    });
+  });
+
   describe('AAT ligature stack underflow and overflow', function () {
     // MORX-41 from Unicode text-rendering-tests makes a ligature of the last
     // two components when it sees c, whatever is on the stack.
