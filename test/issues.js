@@ -179,6 +179,38 @@ describe('issues', function () {
     });
   });
 
+  describe('#441, #442 - Glyph cache issue with glyphs requested without code points', function () {
+    // Mada decomposes أ into an alef and the hamza mark, which is also the
+    // glyph of a standalone U+0654:
+    let openFont = () =>
+      fontkit.openSync(new URL('data/Mada/Mada-VF.ttf', import.meta.url));
+    let alef = 'أ';
+    let hamza = 'ٔ';
+    let getCodePoints = (font, string) =>
+      font.layout(string).glyphs.map((glyph) => glyph.codePoints);
+    let expected = getCodePoints(openFont(), alef);
+
+    it('should not take the code points of an earlier layout', function () {
+      let font = openFont();
+      font.layout(hamza);
+      assert.deepEqual(getCodePoints(font, alef), expected);
+    });
+
+    it('should not take the code points of a later layout', function () {
+      let font = openFont();
+      font.layout(alef);
+      font.layout(hamza);
+      assert.deepEqual(getCodePoints(font, alef), expected);
+    });
+
+    it('should return glyphs without code points when none are requested', function () {
+      let font = openFont();
+      let { id } = font.glyphForCodePoint(0x654);
+      assert.deepEqual(font.getGlyph(id).codePoints, []);
+      assert.deepEqual(font.getGlyph(id, [0x654]).codePoints, [0x654]);
+    });
+  });
+
   describe('#39 - right-to-left text in fonts without GSUB, GPOS or morx', function () {
     // HarfBuzz gives the same glyphs, offsets and advances.
     let layout = (font, string, direction) => {
