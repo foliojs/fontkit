@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Round the MVAR deltas of variations to whole units like HarfBuzz, so their ascent, descent and other metrics are whole numbers
 - Fix a crash when gvar stores point numbers as words
 - Return glyphs requested without code points without the code points of earlier requests, so layout no longer depends on what was laid out before (#441, #442)
 - Ship TypeScript declarations for every entry point, adapted from `@types/fontkit`, which is no longer needed (#439)
