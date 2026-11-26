@@ -97,3 +97,49 @@ export class Version16Dot16 {
 }
 
 export const version16Dot16 = new Version16Dot16();
+
+export function isDefaultIgnorable(ch) {
+  // From DerivedCoreProperties.txt in the Unicode database,
+  // minus U+115F, U+1160, U+3164 and U+FFA0, which is what
+  // Harfbuzz and Uniscribe do.
+  let plane = ch >> 16;
+  if (plane === 0) {
+    // BMP
+    switch (ch >> 8) {
+      case 0x00:
+        return ch === 0x00ad;
+      case 0x03:
+        return ch === 0x034f;
+      case 0x06:
+        return ch === 0x061c;
+      case 0x17:
+        return 0x17b4 <= ch && ch <= 0x17b5;
+      case 0x18:
+        return 0x180b <= ch && ch <= 0x180e;
+      case 0x20:
+        return (
+          (0x200b <= ch && ch <= 0x200f) ||
+          (0x202a <= ch && ch <= 0x202e) ||
+          (0x2060 <= ch && ch <= 0x206f)
+        );
+      case 0xfe:
+        return (0xfe00 <= ch && ch <= 0xfe0f) || ch === 0xfeff;
+      case 0xff:
+        return 0xfff0 <= ch && ch <= 0xfff8;
+      default:
+        return false;
+    }
+  } else {
+    // Other planes
+    switch (plane) {
+      case 0x01:
+        return (
+          (0x1bca0 <= ch && ch <= 0x1bca3) || (0x1d173 <= ch && ch <= 0x1d17a)
+        );
+      case 0x0e:
+        return 0xe0000 <= ch && ch <= 0xe0fff;
+      default:
+        return false;
+    }
+  }
+}

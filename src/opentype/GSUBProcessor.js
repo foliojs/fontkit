@@ -14,6 +14,20 @@ export default class GSUBProcessor extends OTProcessor {
     this.maxLength = Math.max(length * MAX_LEN_FACTOR, MAX_LEN_MIN);
   }
 
+  // Keep the joiners and the hidden ignorables (CGJ, Mongolian format
+  // controls, tags), which can block or select substitutions:
+  isSkippable(glyph) {
+    let codePoint = glyph.codePoints[0];
+    return (
+      super.isSkippable(glyph) &&
+      codePoint !== 0x200c &&
+      codePoint !== 0x200d &&
+      codePoint !== 0x034f &&
+      !(0x180b <= codePoint && codePoint <= 0x180f) &&
+      !(0xe0020 <= codePoint && codePoint <= 0xe007f)
+    );
+  }
+
   // Reverse Chaining Contextual Single Substitution is applied right-to-left,
   // so substitutions never feed back into the lookahead context of an
   // earlier-in-text glyph

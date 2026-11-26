@@ -206,7 +206,9 @@ export default class OTProcessor {
   applyLookups(lookups, glyphs, positions) {
     this.glyphs = glyphs;
     this.positions = positions;
-    this.glyphIterator = new GlyphIterator(glyphs);
+    this.glyphIterator = new GlyphIterator(glyphs, {}, (glyph) =>
+      this.isSkippable(glyph),
+    );
 
     for (let { feature, lookup } of lookups) {
       this.currentFeature = feature;
@@ -231,9 +233,15 @@ export default class OTProcessor {
             }
           }
         }
-        this.glyphIterator.move(direction);
+        // Apply lookups to default ignorables too, which only matching skips:
+        this.glyphIterator.move(direction, () => true);
       }
     }
+  }
+
+  // Skip default ignorables when matching, like HarfBuzz does in GPOS:
+  isSkippable(glyph) {
+    return glyph.isDefaultIgnorable;
   }
 
   // Return whether a subtable matched. On success, leave glyphIterator immediately
@@ -339,8 +347,10 @@ export default class OTProcessor {
 
   match(sequenceIndex, sequence, fn, matched) {
     let pos = this.glyphIterator.index;
-    let glyph = this.glyphIterator.increment(sequenceIndex);
     let idx = 0;
+    // A default ignorable that the sequence lists is matched, not skipped:
+    let accepts = (glyph) => idx < sequence.length && fn(sequence[idx], glyph);
+    let glyph = this.glyphIterator.increment(sequenceIndex, accepts);
 
     while (idx < sequence.length && glyph && fn(sequence[idx], glyph)) {
       if (matched) {
@@ -348,7 +358,7 @@ export default class OTProcessor {
       }
 
       idx++;
-      glyph = this.glyphIterator.next();
+      glyph = this.glyphIterator.next(accepts);
     }
 
     this.glyphIterator.index = pos;
