@@ -1,6 +1,7 @@
 export default class GlyphIterator {
-  constructor(glyphs, options) {
+  constructor(glyphs, options, isSkippable) {
     this.glyphs = glyphs;
+    this.isSkippable = isSkippable;
     this.reset(options);
   }
 
@@ -33,12 +34,20 @@ export default class GlyphIterator {
     );
   }
 
-  move(dir) {
+  // Like HarfBuzz, skip the default ignorables that the processor allows, e.g. a
+  // soft hyphen between a kerning pair, unless `accepts` takes them:
+  shouldSkip(glyph, accepts) {
+    return (
+      this.shouldIgnore(glyph) || (this.isSkippable(glyph) && !accepts?.(glyph))
+    );
+  }
+
+  move(dir, accepts) {
     this.index += dir;
     while (
       0 <= this.index &&
       this.index < this.glyphs.length &&
-      this.shouldIgnore(this.glyphs[this.index])
+      this.shouldSkip(this.glyphs[this.index], accepts)
     ) {
       this.index += dir;
     }
@@ -50,8 +59,8 @@ export default class GlyphIterator {
     return this.glyphs[this.index];
   }
 
-  next() {
-    return this.move(+1);
+  next(accepts) {
+    return this.move(+1, accepts);
   }
 
   prev() {
@@ -73,11 +82,12 @@ export default class GlyphIterator {
     return res;
   }
 
-  increment(count = 1) {
+  // Only the glyph moved to last is one that `accepts` may take:
+  increment(count = 1, accepts) {
     let dir = count < 0 ? -1 : 1;
     count = Math.abs(count);
     while (count--) {
-      this.move(dir);
+      this.move(dir, count === 0 ? accepts : null);
     }
 
     return this.glyphs[this.index];

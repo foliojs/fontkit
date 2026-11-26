@@ -137,6 +137,50 @@ describe('shaping', function () {
     );
   });
 
+  describe('default ignorables', function () {
+    // The expected results are HarfBuzz's, which skips default ignorables when
+    // matching, except for the joiners in GSUB:
+    test(
+      'should kern across a soft hyphen',
+      'FiraSans/FiraSans-Regular.ttf',
+      'T­o',
+      '254+462|2+0|566+584',
+    );
+
+    test(
+      'should form a ligature across a soft hyphen',
+      'FiraSans/FiraSans-Regular.ttf',
+      'f­i',
+      '746+575|2+0',
+    );
+
+    test(
+      'should not form a ligature across a zero width non-joiner',
+      'FiraSans/FiraSans-Regular.ttf',
+      'f‌i',
+      '457+335|2+0|491+282',
+    );
+
+    test(
+      'should kern across a zero width joiner',
+      'FiraSans/FiraSans-Regular.ttf',
+      'T‍o',
+      '254+462|2+0|566+584',
+    );
+
+    // default-ignorables.ttf was built with fontTools from this feature file:
+    //
+    //   feature liga {
+    //     sub a uni00AD b by c;
+    //   } liga;
+    test(
+      'should match a default ignorable that a ligature lists',
+      'default-ignorables.ttf',
+      'a­b',
+      '4+500',
+    );
+  });
+
   describe('arabic shaper', function () {
     test(
       'should shape Arabic text',

@@ -1,5 +1,6 @@
 import { isMark } from 'unicode-properties';
 import OTProcessor from './OTProcessor';
+import { isDefaultIgnorable } from '../utils';
 
 export default class GlyphInfo {
   constructor(font, id, codePoints = [], features) {
@@ -51,6 +52,12 @@ export default class GlyphInfo {
       this.isLigature = this.codePoints.length > 1;
       this.markAttachmentType = 0;
     }
+  }
+
+  get isDefaultIgnorable() {
+    // Like HarfBuzz, a default ignorable that GSUB substituted is a glyph like
+    // any other, e.g. a soft hyphen replaced by its `case` form:
+    return !this.substituted && isDefaultIgnorable(this.codePoints[0]);
   }
 
   copy() {
