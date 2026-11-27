@@ -129,6 +129,14 @@ describe('shaping', function () {
       '8+500|12+0|4+500|8+500|12+0|4+500',
     );
 
+    // Mada's latn kern feature lists its pair lookup twice:
+    test(
+      'should apply a lookup listed twice in a feature once',
+      'Mada/Mada-VF.ttf',
+      'A"',
+      '136+492|274+463',
+    );
+
     test(
       'should count inserted marks when advancing after a multiple substitution',
       'lookup-continuation.ttf',
