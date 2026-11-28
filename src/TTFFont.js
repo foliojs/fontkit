@@ -641,12 +641,14 @@ export class TTFFont {
 
     for (let record of this.MVAR.valueRecords) {
       let valueTag = record.valueTag;
-      let adjustment = this._variationProcessor.getDelta(
-        this.MVAR.itemVariationStore,
-        record.deltaSetOuterIndex,
-        record.deltaSetInnerIndex,
+      // Metrics are whole units, so round the delta like HarfBuzz does.
+      deltas[valueTag] = Math.round(
+        this._variationProcessor.getDelta(
+          this.MVAR.itemVariationStore,
+          record.deltaSetOuterIndex,
+          record.deltaSetInnerIndex,
+        ),
       );
-      deltas[valueTag] = adjustment;
     }
 
     return deltas;

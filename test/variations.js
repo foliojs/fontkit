@@ -375,22 +375,16 @@ describe('variations', function () {
   });
 
   describe('MVAR', function () {
-    // HarfBuzz's metrics at each variation, rounded to whole units like hb-info:
-    let round = (metrics) =>
-      Object.fromEntries(
-        Object.entries(metrics).map(([key, value]) => [key, Math.round(value)]),
-      );
-
+    // HarfBuzz's metrics at each variation, which it rounds to whole units:
     it('varies the typo ascent, descent and cap height', function () {
       let font = fontkit.openSync(
         new URL('data/Playwrite/Playwrite-MM-Subset.ttf', import.meta.url),
       );
-      let { ascent, descent, capHeight } = font.getVariation({ YEXT: 1000 });
-      assert.deepEqual(round({ ascent, descent, capHeight }), {
-        ascent: 2040,
-        descent: -1020,
-        capHeight: 1500,
-      });
+      let { ascent, descent, capHeight } = font.getVariation({ YEXT: 777 });
+      assert.deepEqual(
+        { ascent, descent, capHeight },
+        { ascent: 1767, descent: -790, capHeight: 1277 },
+      );
     });
 
     it('varies the underline and the x-height', function () {
@@ -398,10 +392,10 @@ describe('variations', function () {
         new URL('data/Recursive/Recursive-ABC.ttf', import.meta.url),
       );
       let { underlinePosition, underlineThickness, xHeight } =
-        font.getVariation({ wght: 1000 });
+        font.getVariation({ wght: 777 });
       assert.deepEqual(
-        round({ underlinePosition, underlineThickness, xHeight }),
-        { underlinePosition: -145, underlineThickness: 150, xHeight: 550 },
+        { underlinePosition, underlineThickness, xHeight },
+        { underlinePosition: -176, underlineThickness: 108, xHeight: 540 },
       );
     });
 
@@ -411,7 +405,7 @@ describe('variations', function () {
       );
       // Read the default metrics first, which a variation must not reuse:
       assert.equal(font.xHeight, 489);
-      assert.equal(Math.round(font.getVariation({ wght: 900 }).xHeight), 498);
+      assert.equal(font.getVariation({ wght: 900 }).xHeight, 498);
     });
   });
 });

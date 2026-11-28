@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Round the MVAR deltas of variations to whole units like HarfBuzz, so their ascent, descent and other metrics are whole numbers
 - Apply a lookup that a feature lists more than once only once, like HarfBuzz, so kerning is no longer doubled in such fonts
 - Fix a crash when gvar stores point numbers as words
 - Return glyphs requested without code points without the code points of earlier requests, so layout no longer depends on what was laid out before (#441, #442)
