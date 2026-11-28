@@ -221,6 +221,28 @@ describe('variations', function () {
       assert.equal(glyph.advanceWidth, 586);
       assert.equal(glyph.advanceHeight, 990);
     });
+
+    it('takes the metrics of a component that uses its metrics', function () {
+      // Ç is a composite of C with useMyMetrics and the cedilla, whose own
+      // phantom points vary differently. HarfBuzz uses those of C:
+      let font = fontkit.openSync(
+        new URL('data/PhantomTest/PhantomTest-VF.ttf', import.meta.url),
+      );
+      let glyph = font.getVariation({ wght: 900 }).glyphsForString('Ç')[0];
+      assert.equal(glyph.advanceWidth, 586);
+      assert.equal(glyph.advanceHeight, 990);
+    });
+
+    it('keeps the metrics of a composite that uses those of an empty component', function () {
+      // empty-use-my-metrics.ttf was built with fontTools: nbspace is a
+      // composite of the empty space with useMyMetrics, and gvar widens both
+      // by 100 at wght 900. HarfBuzz's advance of nbspace there is 350:
+      let font = fontkit.openSync(
+        new URL('data/empty-use-my-metrics.ttf', import.meta.url),
+      );
+      let glyph = font.getVariation({ wght: 900 }).glyphsForString('\u00A0')[0];
+      assert.equal(glyph.advanceWidth, 350);
+    });
   });
 
   describe('CFF2 variations', function () {
