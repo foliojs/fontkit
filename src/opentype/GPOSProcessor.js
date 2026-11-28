@@ -20,41 +20,10 @@ export default class GPOSProcessor extends OTProcessor {
     }
 
     // Adjustments for font variations
-    let variationProcessor = this.font._variationProcessor;
-    let variationStore = this.font.GDEF && this.font.GDEF.itemVariationStore;
-    if (variationProcessor && variationStore) {
-      if (value.xPlaDevice) {
-        position.xOffset += variationProcessor.getDelta(
-          variationStore,
-          value.xPlaDevice.a,
-          value.xPlaDevice.b,
-        );
-      }
-
-      if (value.yPlaDevice) {
-        position.yOffset += variationProcessor.getDelta(
-          variationStore,
-          value.yPlaDevice.a,
-          value.yPlaDevice.b,
-        );
-      }
-
-      if (value.xAdvDevice) {
-        position.xAdvance += variationProcessor.getDelta(
-          variationStore,
-          value.xAdvDevice.a,
-          value.xAdvDevice.b,
-        );
-      }
-
-      if (value.yAdvDevice) {
-        position.yAdvance += variationProcessor.getDelta(
-          variationStore,
-          value.yAdvDevice.a,
-          value.yAdvDevice.b,
-        );
-      }
-    }
+    position.xOffset += this.getVariationDelta(value.xPlaDevice);
+    position.yOffset += this.getVariationDelta(value.yPlaDevice);
+    position.xAdvance += this.getVariationDelta(value.xAdvDevice);
+    position.yAdvance += this.getVariationDelta(value.yAdvDevice);
 
     // TODO: device tables
   }
@@ -344,27 +313,21 @@ export default class GPOSProcessor extends OTProcessor {
     let y = anchor.yCoordinate;
 
     // Adjustments for font variations
-    let variationProcessor = this.font._variationProcessor;
-    let variationStore = this.font.GDEF && this.font.GDEF.itemVariationStore;
-    if (variationProcessor && variationStore) {
-      if (anchor.xDeviceTable) {
-        x += variationProcessor.getDelta(
-          variationStore,
-          anchor.xDeviceTable.a,
-          anchor.xDeviceTable.b,
-        );
-      }
-
-      if (anchor.yDeviceTable) {
-        y += variationProcessor.getDelta(
-          variationStore,
-          anchor.yDeviceTable.a,
-          anchor.yDeviceTable.b,
-        );
-      }
-    }
+    x += this.getVariationDelta(anchor.xDeviceTable);
+    y += this.getVariationDelta(anchor.yDeviceTable);
 
     return { x, y };
+  }
+
+  getVariationDelta(device) {
+    let variationProcessor = this.font._variationProcessor;
+    let variationStore = this.font.GDEF && this.font.GDEF.itemVariationStore;
+    // Positions are whole units, so round the delta like HarfBuzz does.
+    return device && variationProcessor && variationStore
+      ? Math.round(
+          variationProcessor.getDelta(variationStore, device.a, device.b),
+        )
+      : 0;
   }
 
   fixAttachments(glyphs, positions) {

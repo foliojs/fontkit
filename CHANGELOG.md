@@ -2,6 +2,7 @@
 
 ### Unreleased
 
+- Round the GPOS kerning and anchor deltas of variations to whole units like HarfBuzz
 - Round the MVAR deltas of variations to whole units like HarfBuzz, so their ascent, descent and other metrics are whole numbers
 - Apply a lookup that a feature lists more than once only once, like HarfBuzz, so kerning is no longer doubled in such fonts
 - Fix a crash when gvar stores point numbers as words

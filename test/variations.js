@@ -159,9 +159,21 @@ describe('variations', function () {
         new URL('data/Mada/Mada-VF.ttf', import.meta.url),
         { wght: 900 },
       );
-      let run = font.layout('ف');
-      assert.equal(Math.floor(run.positions[0].xOffset), 639);
-      assert.equal(Math.floor(run.positions[0].yOffset), 542);
+      // HarfBuzz rounds the varied anchor to whole units:
+      let { xOffset, yOffset } = font.layout('ف').positions[0];
+      assert.deepEqual([xOffset, yOffset], [640, 542]);
+    });
+
+    it('should round the GPOS kerning of variations like HarfBuzz', function () {
+      let font = fontkit.openSync(
+        new URL('data/PhantomTest/PhantomTest-VF.ttf', import.meta.url),
+        { wght: 500 },
+      );
+      let { positions } = font.layout('ÇÇ');
+      assert.deepEqual(
+        positions.map((position) => position.xAdvance),
+        [543, 574],
+      );
     });
 
     it('should not change variation metrics of glyphs used by several composites', function () {
@@ -366,11 +378,10 @@ describe('variations', function () {
 
     it('lays out text in a variation of a WOFF2', function () {
       // as 'should support adjusting GPOS mark anchor points for variations' does in the sfnt
-      let run = open('Mada/Mada-VF.woff2')
+      let { xOffset, yOffset } = open('Mada/Mada-VF.woff2')
         .getVariation({ wght: 900 })
-        .layout('ف');
-      assert.equal(Math.floor(run.positions[0].xOffset), 639);
-      assert.equal(Math.floor(run.positions[0].yOffset), 542);
+        .layout('ف').positions[0];
+      assert.deepEqual([xOffset, yOffset], [640, 542]);
     });
   });
 
