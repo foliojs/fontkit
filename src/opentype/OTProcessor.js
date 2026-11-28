@@ -133,7 +133,8 @@ export default class OTProcessor {
         continue;
       }
 
-      for (let lookupIndex of feature.lookupListIndexes) {
+      // A feature may list a lookup more than once, which HarfBuzz applies once:
+      for (let lookupIndex of new Set(feature.lookupListIndexes)) {
         if (exclude && exclude.indexOf(lookupIndex) !== -1) {
           continue;
         }
